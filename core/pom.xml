@@ -14,6 +14,28 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.brekka</groupId>
+			<artifactId>brekka-commons</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.brekka.phoenix</groupId>
+			<artifactId>phoenix-core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.brekka.paveway</groupId>
+			<artifactId>paveway-core</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+        <dependency>
+            <groupId>org.brekka.commons</groupId>
+            <artifactId>brekka-commons-persistence</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    
+    
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${spring-version}</version>
@@ -66,6 +88,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.brekka</groupId>
+		    <artifactId>stillingar-spring</artifactId>
+		    <version>0.1.2</version>
 		</dependency>
 	</dependencies>
 
