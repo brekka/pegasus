@@ -22,8 +22,8 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor
  *
  */
-@Entity
-@Table(name="\"FileDownloadEvent\"")
+//@Entity
+//@Table(name="\"FileDownloadEvent\"")
 public class FileDownloadEvent extends RemoteUserEvent {
 
     @Type(type="pg-uuid")

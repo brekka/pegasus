@@ -17,9 +17,9 @@ import org.hibernate.annotations.Type;
  * 
  * @author Andrew Taylor
  */
-@Entity
-@Table(name="\"Member\"")
-public class Member extends IdentifiableEntity{
+//@Entity
+//@Table(name="\"Member\"")
+public class Member extends IdentifiableEntity {
 
     /**
      * The principal Id of this member

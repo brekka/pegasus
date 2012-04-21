@@ -18,8 +18,8 @@ import javax.persistence.TemporalType;
  * 
  * @author Andrew Taylor
  */
-@Entity
-@Table(name="\"BundleUnlockEvent\"")
+//@Entity
+//@Table(name="\"BundleUnlockEvent\"")
 public class BundleUnlockEvent extends RemoteUserEvent {
 
     @ManyToOne

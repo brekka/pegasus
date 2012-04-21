@@ -1,0 +1,17 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+      
+      
+    <h1>Fetch</h1>
+    
+    <p>
+    	${bundle.comment}
+    </p>
+    
+    <ul>
+	<t:loop source="bundle.fileList" value="file">
+		<li><t:pagelink page="download" context="fileContext">${file.name} (${file.length} bytes)</t:pagelink></li>
+	</t:loop>
+    </ul>
+
+</html>

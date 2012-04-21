@@ -7,8 +7,8 @@
     
     <xsd:complexType name="BundleType">
 		<xsd:sequence>
-			<xsd:element name="Comment"     type="xsd:string"       minOccurs="1" maxOccurs="1" />
-			<xsd:element name="Agreement"   type="xsd:string"       minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Comment"     type="xsd:string"       minOccurs="0" maxOccurs="1" />
+			<xsd:element name="Agreement"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
 			<xsd:element name="File"        type="pgm:FileType"     minOccurs="1" maxOccurs="unbounded" />
 		</xsd:sequence>
 	</xsd:complexType>
@@ -17,6 +17,7 @@
 		<xsd:sequence>
 			<xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Length"      type="xsd:long"         minOccurs="1" maxOccurs="1" />
 			<xsd:element name="MimeType"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Key"         type="xsd:base64Binary" minOccurs="1" maxOccurs="1" />
 		</xsd:sequence>

@@ -14,8 +14,8 @@ import javax.persistence.Table;
  * @author Andrew Taylor
  *
  */
-@Entity
-@Table(name="\"DropTargetBundle\"")
+//@Entity
+//@Table(name="\"DropTargetBundle\"")
 public class DropTargetBundle {
 
     @ManyToOne

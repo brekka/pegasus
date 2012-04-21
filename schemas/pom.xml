@@ -64,5 +64,10 @@
     		<artifactId>xmlbeans</artifactId>
     		<version>${xmlbeans-version}</version>
     	</dependency>
+    	<dependency>
+    	    <groupId>org.brekka.phoenix</groupId>
+    	    <artifactId>phoenix-schemas</artifactId>
+    	    <version>1.0.0</version>
+    	</dependency>
     </dependencies>
 </project>
