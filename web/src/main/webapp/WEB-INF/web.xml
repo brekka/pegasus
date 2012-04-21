@@ -28,5 +28,15 @@
 		<filter-name>pegasus</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+    
+    <servlet>
+        <servlet-name>upload</servlet-name>
+        <servlet-class>org.brekka.pegasus.web.servlet.UploadServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>upload</servlet-name>
+        <url-pattern>/upload</url-pattern>
+    </servlet-mapping>
 </web-app>
       

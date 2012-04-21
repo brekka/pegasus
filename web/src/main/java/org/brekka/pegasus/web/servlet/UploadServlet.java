@@ -1,9 +1,11 @@
 package org.brekka.pegasus.web.servlet;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.web.servlet.AbstractUploadServlet;
+import org.brekka.pegasus.web.support.CompletedFileBuilders;
 
 public class UploadServlet extends AbstractUploadServlet {
 
@@ -17,6 +19,7 @@ public class UploadServlet extends AbstractUploadServlet {
      */
     @Override
     protected void handleCompletedFile(HttpServletRequest req, FileBuilder fileBuilder) {
-        
+        CompletedFileBuilders completedFileBuilders = CompletedFileBuilders.getCompletedFileBuilders(req, true);
+        completedFileBuilders.add(fileBuilder);
     }
 }

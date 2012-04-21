@@ -4,14 +4,29 @@
       
     <h1>Home</h1>
     
+    <div id="enhanced">
+    	<table id="files">
+    		<thead>
+	    		<tr>
+	    			<th>Filename</th>
+	    			<th>Size</th>
+	    			<th>Status</th>
+	    		</tr>
+    		</thead>
+    		<tbody>
+    		</tbody>
+    	</table>
+    </div>
+    
 	<t:form>
-		<t:label for="file">File</t:label>
-		<t:upload t:id="file" file="file" />
+		<div id="normal_filefield">
+			<t:label for="file">File</t:label>
+			<t:upload t:id="file" file="file" />
+		</div>
 		<br/>
-		<t:label for="comment">Summary</t:label>
+		<t:label for="comment">Comment</t:label>
 		<t:textarea t:id="comment" />
 		<br/>
-		<t:submit />
+		<t:submit value="Send" />
 	</t:form>
-
 </html>

@@ -100,7 +100,7 @@ public class PegasusModule {
 
 
     public void contributeIgnoredPathsFilter(Configuration<String> conf) {
-        
+        conf.add("/upload.*");
     }
     
     public RequestExceptionHandler buildAppExceptionHandler(
