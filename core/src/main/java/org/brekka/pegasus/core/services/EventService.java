@@ -15,11 +15,11 @@ import org.brekka.pegasus.core.model.FileDownloadEvent;
  */
 public interface EventService {
 
-    void bundleUnlocked(String remoteAddress, String onBehalfOfAddress, 
-            String userAgent, Bundle bundle, Date agreementAccepted);
+    void bundleCreated(Bundle bundle);
     
-    FileDownloadEvent beginFileDownloadEvent(String remoteAddress, 
-            String onBehalfOfAddress, String userAgent, UUID fileId);
+    void bundleUnlocked(Bundle bundle, Date agreementAccepted);
+    
+    FileDownloadEvent beginFileDownloadEvent(UUID fileId);
     
     void completeEvent(FileDownloadEvent event);
 }

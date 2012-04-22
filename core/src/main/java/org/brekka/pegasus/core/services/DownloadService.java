@@ -13,5 +13,5 @@ import org.brekka.xml.pegasus.v1.model.FileType;
  */
 public interface DownloadService {
 
-    InputStream download(FileType fileType, String remoteIP, String onBehalfOfAddress, String userAgent);
+    InputStream download(FileType fileType);
 }

@@ -146,6 +146,7 @@ public class AnonymousServiceImpl implements AnonymousService {
         anonTransfer.setBundle(bundleModel);
         anonTransfer.setSlug(slug);
         
+        eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
         return anonTransfer;
     }
@@ -173,7 +174,7 @@ public class AnonymousServiceImpl implements AnonymousService {
         try ( InputStream is = byteSequence.getInputStream(); ) {
             InputStream dis = resourceCryptoService.decryptor(bundle.getProfile(), Compression.GZIP, iv, secretKey, is);
             
-            eventService.bundleUnlocked(remoteAddress, onBehalfOfAddress, userAgent, bundle, agreementAccepted);
+            eventService.bundleUnlocked(bundle, agreementAccepted);
             
             BundleDocument bundleDocument = BundleDocument.Factory.parse(dis);
             return bundleDocument.getBundle();

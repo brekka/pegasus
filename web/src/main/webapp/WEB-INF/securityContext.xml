@@ -9,10 +9,31 @@
 <!-- 	<context:component-scan base-package="org.brekka.pegasus.security" /> -->
     
 
-<!-- 
-	<http disable-url-rewriting="true">
-        
+    
+
+	<http>
+        <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+        <logout/>
+        <openid-login login-page="/openidlogin.jsp" authentication-failure-url="/openidlogin.jsp?login_error=true">
+            <attribute-exchange>
+                <openid-attribute name="email" type="http://schema.openid.net/contact/email" required="true" count="2"/>
+                <openid-attribute name="name" type="http://schema.openid.net/namePerson/friendly" />
+            </attribute-exchange>
+        </openid-login>
+        <custom-filter ref="anonymousFilter" before="ANONYMOUS_FILTER"/>
 	</http>
-	 -->
+    
+    <authentication-manager alias="authenticationManager"/>
+    
+    <user-service id="userService">
+        <user name="http://luke.taylor.myopenid.com/" authorities="ROLE_SUPERVISOR,ROLE_USER" />
+    </user-service>
+    
+    <beans:bean id="anonymousFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+        <beans:constructor-arg value="notRequired" />
+        <beans:property name="authenticationDetailsSource" ref="authenticationDetailsSource" />
+    </beans:bean>
+    
+    <beans:bean id="authenticationDetailsSource" class="org.brekka.pegasus.web.security.WebAuthenticationDetailsSource" />
 
 </beans:beans>
