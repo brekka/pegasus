@@ -15,6 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.AllocatedFile;
+import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.services.PavewayService;
@@ -110,7 +111,8 @@ public class AnonymousServiceImpl implements AnonymousService {
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
         ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
-        OutputStream os = resourceStorageService.store(bundleModel.getId());
+        ByteSequence byteSequence = resourceStorageService.allocate(bundleModel.getId());
+        OutputStream os = byteSequence.getOutputStream();
         try ( OutputStream eos = encryptor.encrypt(os) ) {
             doc.save(eos);
         } catch (IOException e) {
@@ -159,8 +161,9 @@ public class AnonymousServiceImpl implements AnonymousService {
         SecretKey secretKey = new SecretKeySpec(secretKeyBytes, cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
         IvParameterSpec iv = new IvParameterSpec(bundle.getIv());
         
+        ByteSequence byteSequence = resourceStorageService.retrieve(bundleId);
         
-        try ( InputStream is = resourceStorageService.load(bundleId); ) {
+        try ( InputStream is = byteSequence.getInputStream(); ) {
             InputStream dis = resourceCryptoService.decryptor(bundle.getProfile(), Compression.GZIP, iv, secretKey, is);
             BundleDocument bundleDocument = BundleDocument.Factory.parse(dis);
             return bundleDocument.getBundle();

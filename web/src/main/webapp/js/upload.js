@@ -1,7 +1,8 @@
 $(function () {
 	if (window.File && window.FileReader && window.FileList && window.Blob) {
 		// Must have the api
-		$('#normal_filefield').hide();
+		$('#normal_filefield').remove();
+		
 		var multiple = (navigator.userAgent.indexOf("Firefox") == -1);
 		$('#enhanced').html('<input id="fileupload" type="file" name="files[]" multiple="' + multiple + '" />');
 	    $('#fileupload').fileupload({

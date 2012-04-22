@@ -4,15 +4,11 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -35,31 +31,29 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
     private URI root;
 
     /* (non-Javadoc)
-     * @see org.brekka.paveway.core.services.ResourceStorageService#store(java.util.UUID, java.io.InputStream)
+     * @see org.brekka.paveway.core.services.ResourceStorageService#allocate(java.util.UUID)
      */
     @Override
-    public OutputStream store(UUID id) {
+    public ByteSequence allocate(UUID id) {
         File file = toFile(id);
-        try {
-            return new FileOutputStream(file);
-        } catch (IOException e) {
+        if (file.exists()) {
             throw new PegasusException(PegasusErrorCode.PG100, 
-                    "Failed to copy data for resource id '%s'", id);
+                    "There is already a file with the id '%s'", id);
         }
+        return new FileSystemByteSequence(id, file, true);
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.paveway.core.services.ResourceStorageService#load(java.util.UUID, java.io.OutputStream)
+     * @see org.brekka.paveway.core.services.ResourceStorageService#retrieve(java.util.UUID)
      */
     @Override
-    public InputStream load(UUID id) {
+    public ByteSequence retrieve(UUID id) {
         File file = toFile(id);
-        try {
-            return new FileInputStream(file);
-        } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG101, 
-                    "Failed to read data for resource id '%s'", id);
+        if (!file.exists()) {
+            throw new PegasusException(PegasusErrorCode.PG100, 
+                    "No file found with the id '%s'", id);
         }
+        return new FileSystemByteSequence(id, file, false);
     }
 
     /* (non-Javadoc)
