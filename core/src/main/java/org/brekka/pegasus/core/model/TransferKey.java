@@ -12,4 +12,6 @@ public interface TransferKey {
 
     String getCode();
     
+    String getFileName();
+    
 }

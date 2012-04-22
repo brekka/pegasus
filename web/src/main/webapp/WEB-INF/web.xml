@@ -25,6 +25,15 @@
 	</filter-mapping>
  
 	<filter>
+		<filter-name>slug</filter-name>
+		<filter-class>org.brekka.pegasus.web.filter.SlugFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>slug</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+ 
+	<filter>
 		<filter-name>pegasus</filter-name>
 		<filter-class>org.apache.tapestry5.spring.TapestrySpringFilter</filter-class>
 	</filter>

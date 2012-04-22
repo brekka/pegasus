@@ -7,7 +7,7 @@
     <form>
     	<div class="field">
 	    	<label>Send via e-mail</label>
-	    	<input type="text" class="link" value="https://fetch.is/${transferKey.slug}" />
+	    	<input type="text" class="link" value="${unlockLink}" />
     	</div>
     	<div class="field">
     		<label>Communicate via SMS/Phone</label>
@@ -20,7 +20,7 @@
     <form>
     	<div class="field">
 	    	<label>Copy to remote system</label>
-	    	<input type="text" class="link direct" value="https://fetch.is/${transferKey.slug}/${transferKey.code}" />
+	    	<input type="text" class="link direct" value="${directLink}" />
     	</div>
     </form>
 

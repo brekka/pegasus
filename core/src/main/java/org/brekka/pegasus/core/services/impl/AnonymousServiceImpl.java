@@ -128,7 +128,7 @@ public class AnonymousServiceImpl implements AnonymousService {
         }
         
         // Allocate a code
-        final String code = RandomStringUtils.random(8, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
+        String code = RandomStringUtils.random(8, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
         
         /*
          * Use phalanx to store the secret key for the bundle XML, encrypted with the code.
@@ -146,23 +146,20 @@ public class AnonymousServiceImpl implements AnonymousService {
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
          * the third party.
          */
-        final Slug slug = slugService.allocateAnonymous();
+        Slug slug = slugService.allocateAnonymous();
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setBundle(bundleModel);
         anonTransfer.setSlug(slug);
         
         eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
-        return new TransferKey() {
-            @Override
-            public String getSlug() {
-                return slug.getPath();
-            }
-            @Override
-            public String getCode() {
-                return code;
-            }
-        };
+        
+        List<FileType> fileList = bundleXml.getFileList();
+        String fileName = null;
+        if (fileList.size() == 1) {
+            fileName = fileList.get(0).getName();
+        }
+        return new TransferKeyImpl(slug.getPath(), code, fileName);
     }
     
     /* (non-Javadoc)
