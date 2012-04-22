@@ -21,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SlugServiceImpl implements SlugService {
 
+    private static final char[] ALLOWED = 
+            "BCDFGHJKLMNPQRSTVWXYZ1234567890".toCharArray();
+    
     @Autowired
     private SlugDAO slugDAO;
     
@@ -32,7 +35,7 @@ public class SlugServiceImpl implements SlugService {
     public Slug allocateAnonymous() {
         Slug slug = new Slug();
         slug.setType(SlugType.ANON);
-        slug.setPath(RandomStringUtils.randomAlphanumeric(5));
+        slug.setPath(RandomStringUtils.random(5, 0, ALLOWED.length, false, false, ALLOWED));
         slugDAO.create(slug);
         return slug;
     }

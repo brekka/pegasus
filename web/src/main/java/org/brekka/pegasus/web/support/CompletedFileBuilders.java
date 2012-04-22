@@ -3,7 +3,10 @@
  */
 package org.brekka.pegasus.web.support;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,17 +46,43 @@ public class CompletedFileBuilders {
     
 
     /**
-     * @param req
-     * @return
+     * Discard any builders that have not been used
      */
-    public static CompletedFileBuilders getCompletedFileBuilders(HttpServletRequest req, boolean createIfNotExist) {
-        HttpSession session = req.getSession(createIfNotExist);
+    public synchronized void discard() {
+        Collection<FileBuilder> values = list();
+        for (FileBuilder fileBuilder : values) {
+            fileBuilder.discard();
+        }
+        this.fileBuilderList = null;
+    }
+    
+
+    public static CompletedFileBuilders get(HttpSession session) {
         CompletedFileBuilders completed = (CompletedFileBuilders) session.getAttribute(CompletedFileBuilders.SESSION_KEY);
         if (completed == null) {
             completed = new CompletedFileBuilders();
             session.setAttribute(CompletedFileBuilders.SESSION_KEY, completed);
         }
         return completed;
+    }
+    
+    /**
+     * @param req
+     * @return
+     */
+    public static CompletedFileBuilders get(HttpServletRequest req, boolean createIfNotExist) {
+        HttpSession session = req.getSession(createIfNotExist);
+        return get(session);
+    }
+    
+    /**
+     * An attempt is being made to serialize this object. Instead discard the files
+     * @param out
+     * @throws IOException
+     */
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        discard();
+        out.defaultWriteObject();
     }
     
 }

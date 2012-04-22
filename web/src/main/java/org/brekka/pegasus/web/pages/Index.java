@@ -54,7 +54,7 @@ public class Index {
         List<FileBuilder> fileBuilderList;
         if (file == null) {
             HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-            CompletedFileBuilders completedFileBuilders = CompletedFileBuilders.getCompletedFileBuilders(req, true);
+            CompletedFileBuilders completedFileBuilders = CompletedFileBuilders.get(req, true);
             fileBuilderList = completedFileBuilders.retrieveAll();
         } else {
             Field field = file.getClass().getDeclaredField("item");

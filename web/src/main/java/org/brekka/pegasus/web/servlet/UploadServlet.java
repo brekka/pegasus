@@ -19,7 +19,7 @@ public class UploadServlet extends AbstractUploadServlet {
      */
     @Override
     protected void handleCompletedFile(HttpServletRequest req, FileBuilder fileBuilder) {
-        CompletedFileBuilders completedFileBuilders = CompletedFileBuilders.getCompletedFileBuilders(req, true);
+        CompletedFileBuilders completedFileBuilders = CompletedFileBuilders.get(req, true);
         completedFileBuilders.add(fileBuilder);
     }
 }

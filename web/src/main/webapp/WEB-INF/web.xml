@@ -5,6 +5,10 @@
 
 	<display-name>Pegasus Web</display-name>
 
+    <session-config>
+        <session-timeout>3</session-timeout>
+    </session-config>
+
 	<context-param>
 		<param-name>tapestry.app-package</param-name>
 		<param-value>org.brekka.pegasus.web</param-value>
@@ -38,5 +42,9 @@
         <servlet-name>upload</servlet-name>
         <url-pattern>/upload</url-pattern>
     </servlet-mapping>
+    
+    <listener>
+        <listener-class>org.brekka.pegasus.web.session.FileBuilderSessionListener</listener-class>
+    </listener>
 </web-app>
       
