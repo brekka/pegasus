@@ -18,15 +18,37 @@ import javax.persistence.TemporalType;
  * 
  * @author Andrew Taylor
  */
-//@Entity
-//@Table(name="\"BundleUnlockEvent\"")
+@Entity
+@Table(name="\"BundleUnlockEvent\"")
 public class BundleUnlockEvent extends RemoteUserEvent {
 
+    /**
+     * Serial ID
+     */
+    private static final long serialVersionUID = 4307560513008867955L;
+
     @ManyToOne
-    @JoinColumn(name="BundleID")
+    @JoinColumn(name="BundleID", nullable=false)
     private Bundle bundle;
     
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Date agreementAccepted;
+
+    
+    public Bundle getBundle() {
+        return bundle;
+    }
+
+    public void setBundle(Bundle bundle) {
+        this.bundle = bundle;
+    }
+
+    public Date getAgreementAccepted() {
+        return agreementAccepted;
+    }
+
+    public void setAgreementAccepted(Date agreementAccepted) {
+        this.agreementAccepted = agreementAccepted;
+    }
 }

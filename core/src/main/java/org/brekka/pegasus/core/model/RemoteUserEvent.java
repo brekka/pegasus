@@ -25,7 +25,7 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
     private static final long serialVersionUID = 497882239907363162L;
 
     /**
-     * The moment the event occurred
+     * The moment the event begun
      */
     @Column(name="Initiated")
     @Temporal(TemporalType.TIMESTAMP)
@@ -49,4 +49,36 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
      */
     @Column(name="UserAgent")
     private String userAgent;
+
+    public Date getInitiated() {
+        return initiated;
+    }
+
+    public void setInitiated(Date initiated) {
+        this.initiated = initiated;
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public void setRemoteAddress(String remoteAddress) {
+        this.remoteAddress = remoteAddress;
+    }
+
+    public String getOnBehalfOfAddress() {
+        return onBehalfOfAddress;
+    }
+
+    public void setOnBehalfOfAddress(String onBehalfOfAddress) {
+        this.onBehalfOfAddress = onBehalfOfAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
 }

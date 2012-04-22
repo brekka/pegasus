@@ -12,7 +12,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
@@ -22,9 +21,14 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor
  *
  */
-//@Entity
-//@Table(name="\"FileDownloadEvent\"")
+@Entity
+@Table(name="\"FileDownloadEvent\"")
 public class FileDownloadEvent extends RemoteUserEvent {
+
+    /**
+     * Serial UID
+     */
+    private static final long serialVersionUID = -2521026919756337883L;
 
     @Type(type="pg-uuid")
     @Column(name="FileID")
@@ -36,5 +40,21 @@ public class FileDownloadEvent extends RemoteUserEvent {
      */
     @Column(name="Completed")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date completed; 
+    private Date completed;
+
+    public UUID getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(UUID fileId) {
+        this.fileId = fileId;
+    }
+
+    public Date getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Date completed) {
+        this.completed = completed;
+    } 
 }

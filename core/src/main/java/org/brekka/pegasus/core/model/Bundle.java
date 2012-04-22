@@ -60,7 +60,7 @@ public class Bundle extends IdentifiableEntity {
     @Column(name="Deleted")
     @Temporal(TemporalType.TIMESTAMP)
     private Date deleted;
-
+    
     public UUID getCryptedDataId() {
         return cryptedDataId;
     }

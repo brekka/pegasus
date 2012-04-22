@@ -35,7 +35,6 @@ public class Download {
     Object onActivate(String uuid, String filename) {
         
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        
         final String userAgent = req.getHeader("User-Agent");
         final String onBehalfOfAddress = req.getHeader("X-Forwarded-For");
         final String remoteAddr = req.getRemoteAddr();

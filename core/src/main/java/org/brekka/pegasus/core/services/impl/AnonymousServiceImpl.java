@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Slug;
 import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.SlugService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
@@ -74,6 +76,9 @@ public class AnonymousServiceImpl implements AnonymousService {
     
     @Autowired
     private SlugService slugService;
+    
+    @Autowired
+    private EventService eventService;
     
 
     /* (non-Javadoc)
@@ -149,7 +154,9 @@ public class AnonymousServiceImpl implements AnonymousService {
      * @see org.brekka.pegasus.core.services.AnonymousService#unlock(java.lang.String, java.lang.String)
      */
     @Override
-    public BundleType unlock(String slug, String code) {
+    @Transactional(propagation=Propagation.REQUIRED)
+    public BundleType unlock(String slug, String code, Date agreementAccepted, 
+            String remoteAddress, String onBehalfOfAddress, String userAgent) {
         
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveBySlug(slug);
         
@@ -165,6 +172,9 @@ public class AnonymousServiceImpl implements AnonymousService {
         
         try ( InputStream is = byteSequence.getInputStream(); ) {
             InputStream dis = resourceCryptoService.decryptor(bundle.getProfile(), Compression.GZIP, iv, secretKey, is);
+            
+            eventService.bundleUnlocked(remoteAddress, onBehalfOfAddress, userAgent, bundle, agreementAccepted);
+            
             BundleDocument bundleDocument = BundleDocument.Factory.parse(dis);
             return bundleDocument.getBundle();
         } catch (XmlException | IOException e) {

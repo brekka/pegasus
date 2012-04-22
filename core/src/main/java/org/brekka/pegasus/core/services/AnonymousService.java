@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.services;
 
+import java.util.Date;
 import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
@@ -17,5 +18,6 @@ public interface AnonymousService {
 
     AnonymousTransfer createBundle(String comment, String code, List<FileBuilder> fileBuilders);
     
-    BundleType unlock(String slug, String code);
+    BundleType unlock(String slug, String code, Date agreementAccepted, 
+            String remoteAddress, String onBehalfOfAddress, String userAgent);
 }
