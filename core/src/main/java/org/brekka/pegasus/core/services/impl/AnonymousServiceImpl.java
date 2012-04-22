@@ -14,6 +14,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.AllocatedFile;
 import org.brekka.paveway.core.model.ByteSequence;
@@ -30,6 +31,7 @@ import org.brekka.pegasus.core.dao.BundleDAO;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Slug;
+import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.SlugService;
@@ -86,7 +88,7 @@ public class AnonymousServiceImpl implements AnonymousService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createBundle(String comment, String code, List<FileBuilder> fileBuilders) {
+    public TransferKey createBundle(String comment, List<FileBuilder> fileBuilders) {
         Bundle bundleModel = new Bundle();
         bundleModel.setId(UUID.randomUUID());
         
@@ -125,6 +127,9 @@ public class AnonymousServiceImpl implements AnonymousService {
                     "Failed to store bundle XML");
         }
         
+        // Allocate a code
+        final String code = RandomStringUtils.random(8, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
+        
         /*
          * Use phalanx to store the secret key for the bundle XML, encrypted with the code.
          */
@@ -141,14 +146,23 @@ public class AnonymousServiceImpl implements AnonymousService {
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
          * the third party.
          */
-        Slug slug = slugService.allocateAnonymous();
+        final Slug slug = slugService.allocateAnonymous();
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setBundle(bundleModel);
         anonTransfer.setSlug(slug);
         
         eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
-        return anonTransfer;
+        return new TransferKey() {
+            @Override
+            public String getSlug() {
+                return slug.getPath();
+            }
+            @Override
+            public String getCode() {
+                return code;
+            }
+        };
     }
     
     /* (non-Javadoc)
@@ -156,8 +170,7 @@ public class AnonymousServiceImpl implements AnonymousService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public BundleType unlock(String slug, String code, Date agreementAccepted, 
-            String remoteAddress, String onBehalfOfAddress, String userAgent) {
+    public BundleType unlock(String slug, String code, Date agreementAccepted) {
         
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveBySlug(slug);
         

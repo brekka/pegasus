@@ -2,31 +2,48 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
       
       
-    <h1>Home</h1>
-    
-    <div id="enhanced">
-    	
-    </div>
-    <table id="files">
-   		<thead>
-    		<tr>
-    			<th>Filename</th>
-    			<th>Size</th>
-    			<th>Progress</th>
-    		</tr>
-   		</thead>
-   		<tbody>
-   		</tbody>
-   	</table>
-	<t:form>
-		<div id="normal_filefield">
-			<t:label for="file">File</t:label>
-			<t:upload t:id="file" file="file" />
+    <h3><em>1.</em> Files to send</h3>
+    <div id="enhanced" class="hidden">
+	    <div class="field">
+			<label for="comment">Select file(s)</label>
+			<span class="add_files"></span>
+		    <p>Click 'Browse...' above to add one or more files, or drag the files onto this window. The files will begin to upload
+		       immediately but will not become available for download until "Make available" is clicked in section 3.</p>
 		</div>
-		<br/>
-		<t:label for="comment">Comment</t:label>
-		<t:textarea t:id="comment" />
-		<br/>
-		<t:submit value="Send" t:id="send_button" />
+    </div>
+    <div id="files_outer">
+	    <table id="files" class="hidden">
+	   		<thead>
+	    		<tr>
+	    			<th>Filename</th>
+	    			<th>Size</th>
+	    			<th>Progress</th>
+	    		</tr>
+	   		</thead>
+	   		<tbody>
+	   		</tbody>
+	   	</table>
+    </div>
+   	
+	<t:form>
+		<div id="normal_filefield" class="field">
+			<t:label for="file">Select file</t:label>
+			<t:upload t:id="file" file="file" />
+			<p>Choose the file you wish to transfer using the selection box immediately above this text</p>
+		</div>
+		
+		<h3><em>2.</em> Optional additions</h3>
+		<div class="field">
+			<t:label for="comment">Comment</t:label>
+			<t:textarea t:id="comment" />
+			<p>You can leave a comment for the recipient by entering it in the field above.</p>
+		</div>
+		
+		<h3><em>3.</em> Make files available for secure download</h3>
+		<div class="field">
+			<label>Submit</label>
+			<t:submit value="Make available..." t:id="send_button" />
+			<p id="prepare_to_send">Please add one or more files in section 1 above.</p>
+		</div>
 	</t:form>
 </html>

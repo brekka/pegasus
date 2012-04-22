@@ -9,8 +9,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.tapestry5.Block;
 import org.apache.tapestry5.alerts.AlertManager;
 import org.apache.tapestry5.annotations.Import;
+import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
@@ -18,6 +20,7 @@ import org.apache.tapestry5.upload.services.UploadedFile;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.web.upload.EncryptedFileItem;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.web.support.CompletedFileBuilders;
 import org.got5.tapestry5.jquery.JQuerySymbolConstants;
@@ -35,6 +38,9 @@ import org.got5.tapestry5.jquery.JQuerySymbolConstants;
 })
 public class Index {
     
+    @InjectPage
+    private Allocated allocatedPage;
+    
     @Inject
     private RequestGlobals requestGlobals;
     
@@ -50,7 +56,7 @@ public class Index {
     @Property
     private String comment;
     
-    void onSuccess() throws Exception {
+    Object onSuccess() throws Exception {
         List<FileBuilder> fileBuilderList;
         if (file == null) {
             HttpServletRequest req = requestGlobals.getHTTPServletRequest();
@@ -68,8 +74,9 @@ public class Index {
                 throw new IllegalStateException();
             }
         }
-        
-        AnonymousTransfer transfer = anonymousService.createBundle(comment, "password", fileBuilderList);
-        alertManager.info("Allocated bundle as '" + transfer.getSlug().getPath() + "'");
+        TransferKey transferKey = anonymousService.createBundle(comment, fileBuilderList);
+        allocatedPage.init(transferKey);
+//        alertManager.info("Allocated bundle as '" + transfer.getSlug().getPath() + "'");
+        return allocatedPage;
     }
 }

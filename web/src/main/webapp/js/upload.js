@@ -6,8 +6,11 @@ $(function () {
 		
 		var multiple = (navigator.userAgent.indexOf("Firefox") == -1);
 		var cnt = 0;
-		$('#enhanced').html('<input id="fileupload" type="file" name="files[]" multiple="' + multiple + '" />');
+		$('#enhanced .field .add_files').html('<input id="fileupload" type="file" name="files[]" multiple="' + multiple + '" />');
+		$('#enhanced').removeClass("hidden");
 		$('#send_button').attr("disabled", "disabled");
+		$('#files').hide();
+		$('#files').removeClass("hidden");
 	    $('#fileupload').fileupload({
 	    	maxChunkSize: 1000000,
 	        dataType: 'json',
@@ -19,6 +22,7 @@ $(function () {
 	            });
 	        	if (cnt == 0) {
 	        		$('#send_button').removeAttr("disabled");
+	        		$('#prepare_to_send').html("Ready to make these files available.");
 	        	}
 	        },
 	        add: function (e, data) {

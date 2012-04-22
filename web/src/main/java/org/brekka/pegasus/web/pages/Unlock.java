@@ -4,12 +4,10 @@
 package org.brekka.pegasus.web.pages;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SessionAttribute;
-import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.web.support.Bundles;
 import org.brekka.xml.pegasus.v1.model.BundleType;
@@ -25,9 +23,6 @@ public class Unlock {
     
     @Inject
     private AnonymousService anonymousService;
-    
-    @Inject
-    private RequestGlobals requestGlobals;
     
     @SessionAttribute("bundles")
     private Bundles bundles;
@@ -50,12 +45,7 @@ public class Unlock {
     }
     
     Object onSuccess() {
-        HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        String userAgent = req.getHeader("User-Agent");
-        String onBehalfOfAddress = req.getHeader("X-Forwarded-For");
-        String remoteAddr = req.getRemoteAddr();
-        
-        BundleType bundle = anonymousService.unlock(slug, code, null, remoteAddr, onBehalfOfAddress, userAgent);
+        BundleType bundle = anonymousService.unlock(slug, code, null);
         bundles.add(slug, bundle);
         fetchPage.onActivate(slug);
         return fetchPage;
