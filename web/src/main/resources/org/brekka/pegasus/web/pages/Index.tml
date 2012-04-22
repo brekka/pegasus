@@ -5,19 +5,19 @@
     <h1>Home</h1>
     
     <div id="enhanced">
-    	<table id="files">
-    		<thead>
-	    		<tr>
-	    			<th>Filename</th>
-	    			<th>Size</th>
-	    			<th>Status</th>
-	    		</tr>
-    		</thead>
-    		<tbody>
-    		</tbody>
-    	</table>
+    	
     </div>
-    
+    <table id="files">
+   		<thead>
+    		<tr>
+    			<th>Filename</th>
+    			<th>Size</th>
+    			<th>Progress</th>
+    		</tr>
+   		</thead>
+   		<tbody>
+   		</tbody>
+   	</table>
 	<t:form>
 		<div id="normal_filefield">
 			<t:label for="file">File</t:label>
@@ -27,6 +27,6 @@
 		<t:label for="comment">Comment</t:label>
 		<t:textarea t:id="comment" />
 		<br/>
-		<t:submit value="Send" />
+		<t:submit value="Send" t:id="send_button" />
 	</t:form>
 </html>
