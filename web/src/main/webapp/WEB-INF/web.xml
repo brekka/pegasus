@@ -49,11 +49,11 @@
     
     <servlet-mapping>
         <servlet-name>upload</servlet-name>
-        <url-pattern>/upload</url-pattern>
+        <url-pattern>/upload/*</url-pattern>
     </servlet-mapping>
     
     <listener>
-        <listener-class>org.brekka.pegasus.web.session.FileBuilderSessionListener</listener-class>
+        <listener-class>org.brekka.pegasus.web.session.BundleMakerContextListener</listener-class>
     </listener>
 </web-app>
       

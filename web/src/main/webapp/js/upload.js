@@ -9,12 +9,14 @@ $(function () {
 		$('#enhanced .field .add_files').html('<input id="fileupload" type="file" name="files[]" multiple="' + multiple + '" />');
 		$('#enhanced').removeClass("hidden");
 		$('#send_button').attr("disabled", "disabled");
-		$('#files').hide();
+		if ($('#files tbody tr').size() == 0) {
+			$('#files').hide();
+		}
 		$('#files').removeClass("hidden");
 	    $('#fileupload').fileupload({
 	    	maxChunkSize: 1000000,
 	        dataType: 'json',
-	        url: 'upload',
+	        url: uploadLink,
 	        done: function (e, data) {
 	        	$.each(data.files, function (index, file) {
 	        		$(file.progress).text("100%");

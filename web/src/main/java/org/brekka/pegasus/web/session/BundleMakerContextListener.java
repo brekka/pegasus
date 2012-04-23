@@ -7,14 +7,11 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import org.brekka.paveway.web.servlet.MultipartFileBuilderCache;
-import org.brekka.pegasus.web.support.CompletedFileBuilders;
-
 /**
  * @author Andrew Taylor
  *
  */
-public class FileBuilderSessionListener implements HttpSessionListener {
+public class BundleMakerContextListener implements HttpSessionListener {
 
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpSessionListener#sessionCreated(javax.servlet.http.HttpSessionEvent)
@@ -29,15 +26,9 @@ public class FileBuilderSessionListener implements HttpSessionListener {
      */
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
-        System.out.println("Session destroyed");
         HttpSession session = se.getSession();
-        // 1
-        MultipartFileBuilderCache cache = MultipartFileBuilderCache.get(session);
-        cache.discard();
-        
-        // 2
-        CompletedFileBuilders builders = CompletedFileBuilders.get(session);
-        builders.discard();
+        BundleMakerContext bundleMakerContext = BundleMakerContext.get(session);
+        bundleMakerContext.discard();
     }
 
 }

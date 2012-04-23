@@ -21,6 +21,13 @@
 	    		</tr>
 	   		</thead>
 	   		<tbody>
+	   			<t:loop source="files" value="loopFile">
+	   				<tr>
+	    				<td>${loopFile.fileName}</td>
+	    				<td>${loopFile.length}</td>
+	    				<td>100%</td>
+	    			</tr>
+	   			</t:loop>
 	   		</tbody>
 	   	</table>
     </div>
@@ -46,4 +53,6 @@
 			<p id="prepare_to_send">Please add one or more files in section 1 above.</p>
 		</div>
 	</t:form>
+	
+	<t:outputRaw value="uploadLinkScript" />
 </html>
