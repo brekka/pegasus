@@ -17,6 +17,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.apache.tapestry5.upload.services.UploadedFile;
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.model.FileInfo;
 import org.brekka.paveway.web.upload.EncryptedFileItem;
 import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
@@ -59,14 +60,11 @@ public class Make {
     private String makeKey;
     
     @Property
-    private List<FileBuilder> files;
+    private List<FileInfo> files;
     
     @Property
-    private FileBuilder loopFile;
+    private FileInfo loopFile;
     
-    String onPassivate() {
-        return makeKey;
-    }
     
     Object onActivate(String makeKey) {
         this.makeKey = makeKey;
@@ -80,7 +78,11 @@ public class Make {
         
         return Boolean.TRUE;
     }
-    
+
+    String onPassivate() {
+        return makeKey;
+    }
+
     Object onSuccess() throws Exception {
         List<FileBuilder> fileBuilderList;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();

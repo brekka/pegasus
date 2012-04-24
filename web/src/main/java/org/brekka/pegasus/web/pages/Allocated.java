@@ -5,8 +5,9 @@ package org.brekka.pegasus.web.pages;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.tapestry5.PersistenceConstants;
-import org.apache.tapestry5.annotations.Persist;
+import org.apache.tapestry5.alerts.AlertManager;
+import org.apache.tapestry5.alerts.Duration;
+import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
@@ -33,14 +34,22 @@ public class Allocated {
     @Property
     private TransferKey transferKey;
     
+    @Inject
+    private AlertManager alertManager;
     
-    void onActivate(String makeKey) {
+    
+    Object onActivate(String makeKey) {
         this.makeKey = makeKey;
         
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
         BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
-        BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
-        transferKey = bundleMaker.getTransferKey();
+        if (bundleMakerContext.contains(makeKey)) {
+            BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
+            transferKey = bundleMaker.getTransferKey();
+            return Boolean.TRUE;
+        }
+        alertManager.alert(Duration.SINGLE, Severity.WARN, "Details of the requested upload are no longer available.");
+        return Index.class;
     }
     
     String onPassivate() {

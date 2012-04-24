@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.web.session;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +19,10 @@ public class BundleMakerContext {
 
     private transient Map<String, BundleMaker> makers;
     
+    public synchronized boolean contains(String makerKey) {
+        return map().containsKey(makerKey);
+    }
+    
     public synchronized BundleMaker get(String makerKey) {
         Map<String, BundleMaker> map = map();
         BundleMaker bundleMaker = map.get(makerKey);
@@ -28,8 +33,12 @@ public class BundleMakerContext {
         return bundleMaker;
     }
     
-    public void discard() {
-        // TODO
+    public synchronized void discard() {
+        Collection<BundleMaker> values = map().values();
+        for (BundleMaker bundleMaker : values) {
+            bundleMaker.discard();
+        }
+        makers.clear();
     }
     
     private synchronized Map<String, BundleMaker> map() {

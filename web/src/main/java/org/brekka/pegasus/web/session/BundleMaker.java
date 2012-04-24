@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.model.FileInfo;
 import org.brekka.pegasus.core.model.TransferKey;
 
 /**
@@ -52,8 +53,8 @@ public class BundleMaker {
         return done;
     }
     
-    public List<FileBuilder> previewCompleted() {
-        return new ArrayList<>(completed);
+    public List<FileInfo> previewCompleted() {
+        return new ArrayList<FileInfo>(completed);
     }
     
     public synchronized List<FileBuilder> complete() {
