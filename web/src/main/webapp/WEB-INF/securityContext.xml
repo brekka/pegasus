@@ -12,22 +12,33 @@
     
 
 	<http>
+        <intercept-url pattern="/member**" access="ROLE_USER"/>
+        <intercept-url pattern="/setup**" access="ROLE_USER"/>
         <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
-        <logout/>
-        <openid-login login-page="/openidlogin.jsp" authentication-failure-url="/openidlogin.jsp?login_error=true">
-            <attribute-exchange>
-                <openid-attribute name="email" type="http://schema.openid.net/contact/email" required="true" count="2"/>
-                <openid-attribute name="name" type="http://schema.openid.net/namePerson/friendly" />
+        <logout logout-url="/logout"/>
+        <openid-login login-page="/login" authentication-failure-url="/login?error=true" 
+                      authentication-details-source-ref="authenticationDetailsSource" >
+            <attribute-exchange identifier-match="https://www.google.com/.*">
+                <openid-attribute name="email" type="http://schema.openid.net/contact/email" required="true" />
+                <openid-attribute name="firstName" type="http://axschema.org/namePerson/first" required="true" />
+                <openid-attribute name="lastName" type="http://axschema.org/namePerson/last" required="true" />
+            </attribute-exchange>
+            <attribute-exchange identifier-match=".*yahoo.com.*">
+                <openid-attribute name="email" type="http://axschema.org/contact/email" required="true"/>
+                <openid-attribute name="fullname" type="http://axschema.org/namePerson" required="true" />
+            </attribute-exchange>
+            <attribute-exchange identifier-match=".*">
+                <openid-attribute name="email" type="http://schema.openid.net/contact/email" required="true" />
             </attribute-exchange>
         </openid-login>
+        <remember-me use-secure-cookie="true" data-source-ref="pegasusDataSource" />
         <custom-filter ref="anonymousFilter" before="ANONYMOUS_FILTER"/>
 	</http>
     
-    <authentication-manager alias="authenticationManager"/>
+    <beans:bean id="tokenRepo"
+            class="org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl" />
     
-    <user-service id="userService">
-        <user name="http://luke.taylor.myopenid.com/" authorities="ROLE_SUPERVISOR,ROLE_USER" />
-    </user-service>
+    <authentication-manager alias="authenticationManager"/>
     
     <beans:bean id="anonymousFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
         <beans:constructor-arg value="notRequired" />

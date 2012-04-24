@@ -3,13 +3,20 @@
  */
 package org.brekka.pegasus.core.security;
 
+import java.io.Serializable;
+
 
 /**
  * @author Andrew Taylor
  * 
  */
-public class WebAuthenticationDetails {
+public class WebAuthenticationDetails implements Serializable {
 
+    /**
+     * Serial UID
+     */
+    private static final long serialVersionUID = -3611150592320259896L;
+    
     private final String remoteAddress;
     private final String onBehalfOfAddress;
     private final String userAgent;
