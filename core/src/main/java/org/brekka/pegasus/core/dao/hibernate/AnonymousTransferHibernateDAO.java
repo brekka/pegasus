@@ -22,16 +22,16 @@ public class AnonymousTransferHibernateDAO extends AbstractPegasusHibernateDAO<A
     }
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.AnonymousTransferDAO#retrieveBySlug(java.lang.String)
+     * @see org.brekka.pegasus.core.dao.AnonymousTransferDAO#retrieveByToken(java.lang.String)
      */
     @Override
-    public AnonymousTransfer retrieveBySlug(String slug) {
+    public AnonymousTransfer retrieveByToken(String token) {
         return (AnonymousTransfer) getCurrentSession().createQuery(
                 "select anon " +
                 "  from AnonymousTransfer anon " +
-                " inner join anon.slug as slug " +
-                "  with slug.path=:slug")
-                .setString("slug", slug)
+                " inner join anon.token as token " +
+                "  with token.path=:token")
+                .setString("token", token)
                 .uniqueResult();
     }
 }

@@ -3,8 +3,8 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
-import org.brekka.pegasus.core.dao.SlugDAO;
-import org.brekka.pegasus.core.model.Slug;
+import org.brekka.pegasus.core.dao.TokenDAO;
+import org.brekka.pegasus.core.model.Token;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class SlugHibernateDAO extends AbstractPegasusHibernateDAO<Slug> implements SlugDAO {
+public class TokenHibernateDAO extends AbstractPegasusHibernateDAO<Token> implements TokenDAO {
 
     /* (non-Javadoc)
      * @see org.brekka.commons.persistence.dao.impl.AbstractIdentifiableEntityHibernateDAO#type()
      */
     @Override
-    protected Class<Slug> type() {
-        return Slug.class;
+    protected Class<Token> type() {
+        return Token.class;
     }
 
 }

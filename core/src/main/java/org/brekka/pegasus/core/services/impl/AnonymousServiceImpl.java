@@ -30,11 +30,11 @@ import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.dao.BundleDAO;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
-import org.brekka.pegasus.core.model.Slug;
+import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.EventService;
-import org.brekka.pegasus.core.services.SlugService;
+import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
@@ -58,6 +58,7 @@ public class AnonymousServiceImpl implements AnonymousService {
     
     @Autowired
     private BundleDAO bundleDAO;
+    
     @Autowired
     private AnonymousTransferDAO anonymousTransferDAO;
     
@@ -77,7 +78,7 @@ public class AnonymousServiceImpl implements AnonymousService {
     private PavewayService pavewayService;
     
     @Autowired
-    private SlugService slugService;
+    private TokenService tokenService;
     
     @Autowired
     private EventService eventService;
@@ -146,10 +147,10 @@ public class AnonymousServiceImpl implements AnonymousService {
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
          * the third party.
          */
-        Slug slug = slugService.allocateAnonymous();
+        Token token = tokenService.allocateAnonymous();
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setBundle(bundleModel);
-        anonTransfer.setSlug(slug);
+        anonTransfer.setToken(token);
         
         eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
@@ -159,7 +160,7 @@ public class AnonymousServiceImpl implements AnonymousService {
         if (fileList.size() == 1) {
             fileName = fileList.get(0).getName();
         }
-        return new TransferKeyImpl(slug.getPath(), code, fileName);
+        return new TransferKeyImpl(token.getPath(), code, fileName);
     }
     
     /* (non-Javadoc)
@@ -167,9 +168,9 @@ public class AnonymousServiceImpl implements AnonymousService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public BundleType unlock(String slug, String code, Date agreementAccepted) {
+    public BundleType unlock(String token, String code, Date agreementAccepted) {
         
-        AnonymousTransfer transfer = anonymousTransferDAO.retrieveBySlug(slug);
+        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         
         Bundle bundle = transfer.getBundle();
         UUID bundleId = bundle.getId();
@@ -190,7 +191,7 @@ public class AnonymousServiceImpl implements AnonymousService {
             return bundleDocument.getBundle();
         } catch (XmlException | IOException e) {
             throw new PegasusException(PegasusErrorCode.PG200, e, 
-                    "Failed to retrieve bundle XML for slug '%s'" , slug);
+                    "Failed to retrieve bundle XML for token '%s'" , token);
         }
     }
 

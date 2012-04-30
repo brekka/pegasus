@@ -10,12 +10,14 @@ import javax.persistence.Table;
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 
 /**
+ * A token is a URL-safe string fragment used to identify a resource at a moment in time to the outside world.
+ * As such tokens may be reused so long as the thing it was referencing is no longer available.
+ * 
  * @author Andrew Taylor
- *
  */
 @Entity
-@Table(name="\"Slug\"")
-public class Slug extends IdentifiableEntity {
+@Table(name="\"Token\"")
+public class Token extends IdentifiableEntity {
 
     /**
      * Serial UID
@@ -26,7 +28,7 @@ public class Slug extends IdentifiableEntity {
     private String path;
     
     @Column(name="\"Type\"")
-    private SlugType type;
+    private TokenType type;
 
 
     public String getPath() {
@@ -37,11 +39,11 @@ public class Slug extends IdentifiableEntity {
         this.path = path;
     }
 
-    public SlugType getType() {
+    public TokenType getType() {
         return type;
     }
 
-    public void setType(SlugType type) {
+    public void setType(TokenType type) {
         this.type = type;
     }
 

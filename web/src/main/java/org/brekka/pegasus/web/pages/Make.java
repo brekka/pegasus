@@ -108,7 +108,6 @@ public class Make {
             bundleMaker.setTransferKey(transferKey);
         }
         allocatedPage.onActivate(makeKey);
-//        alertManager.info("Allocated bundle as '" + transfer.getSlug().getPath() + "'");
         return allocatedPage;
     }
     

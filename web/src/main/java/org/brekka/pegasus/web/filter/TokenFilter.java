@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.xml.pegasus.v1.model.BundleType;
@@ -33,7 +32,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @author Andrew Taylor
  *
  */
-public class SlugFilter implements Filter {
+public class TokenFilter implements Filter {
     
     private static final Pattern ANON_PATTERN = Pattern.compile("^(?:/([0-9]+))?/([B-DF-HJ-NP-TV-Z0-9]{5})(?:\\.zip|/[^/]+)?$");
     
@@ -65,13 +64,13 @@ public class SlugFilter implements Filter {
         Matcher matcher = ANON_PATTERN.matcher(requestURI);
         if (matcher.matches()) {
             String code = matcher.group(1);
-            String slug = matcher.group(2);
+            String token = matcher.group(2);
             if (code == null) {
-                // Redirect slug to unlock.
-                resp.sendRedirect(req.getContextPath() + "/unlock/" + slug);
+                // Redirect token to unlock.
+                resp.sendRedirect(req.getContextPath() + "/unlock/" + token);
                 return;
             } else {
-                dispatchBundle(slug, code, resp);
+                dispatchBundle(token, code, resp);
             }
         } else {
             chain.doFilter(request, response);
@@ -80,12 +79,12 @@ public class SlugFilter implements Filter {
     }
 
     /**
-     * @param slug
+     * @param token
      * @param code
      * @param resp
      */
-    private void dispatchBundle(String slug, String code, HttpServletResponse resp) throws ServletException, IOException {
-        BundleType bundle = anonymousService.unlock(slug, code, null);
+    private void dispatchBundle(String token, String code, HttpServletResponse resp) throws ServletException, IOException {
+        BundleType bundle = anonymousService.unlock(token, code, null);
         List<FileType> fileList = bundle.getFileList();
         if (fileList.size() == 1) {
             // Just one file, return it.
@@ -99,7 +98,7 @@ public class SlugFilter implements Filter {
         } else {
             // Return a zip archive
             resp.setContentType("application/zip");
-            resp.setHeader("Content-Disposition", "attachment; filename=\"Bundle_" + slug + ".zip\"");
+            resp.setHeader("Content-Disposition", "attachment; filename=\"Bundle_" + token + ".zip\"");
             ZipOutputStream zos = new ZipOutputStream(resp.getOutputStream());
             zos.setLevel(ZipEntry.STORED);
             for (FileType fileType : fileList) {

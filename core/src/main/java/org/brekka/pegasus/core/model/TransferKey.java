@@ -8,7 +8,7 @@ package org.brekka.pegasus.core.model;
  *
  */
 public interface TransferKey {
-    String getSlug();
+    String getToken();
 
     String getCode();
     

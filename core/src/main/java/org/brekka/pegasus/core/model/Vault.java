@@ -21,7 +21,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="\"Vault\"", uniqueConstraints={ 
-        @UniqueConstraint(columnNames = {"OwnerID", "Slug"}) 
+        @UniqueConstraint(columnNames = {"OwnerID", "Token"}) 
     }
 )
 public class Vault extends IdentifiableEntity {
@@ -35,8 +35,8 @@ public class Vault extends IdentifiableEntity {
     @JoinColumn(name="OwnerID", nullable=false)
     private Member owner;
     
-    @Column(name="Slug", nullable=false)
-    private String slug;
+    @Column(name="Token", nullable=false)
+    private String token;
     
     @Column(name="Name")
     private String name;
@@ -56,12 +56,12 @@ public class Vault extends IdentifiableEntity {
         this.owner = owner;
     }
 
-    public String getSlug() {
-        return slug;
+    public String getToken() {
+        return token;
     }
 
-    public void setSlug(String slug) {
-        this.slug = slug;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getName() {

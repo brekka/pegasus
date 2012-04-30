@@ -12,7 +12,7 @@ import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
- * Bundles must be memory resisdent only
+ * Bundles must be memory resident only
  * 
  * @author Andrew Taylor
  */
@@ -21,12 +21,12 @@ public class Bundles {
     private transient Map<String, BundleType> map;
     
     
-    public void add(String slug, BundleType bundle) {
-        map().put(slug, bundle);
+    public void add(String token, BundleType bundle) {
+        map().put(token, bundle);
     }
     
-    public BundleType get(String slug) {
-        return map().get(slug);
+    public BundleType get(String token) {
+        return map().get(token);
     }
     
     /**

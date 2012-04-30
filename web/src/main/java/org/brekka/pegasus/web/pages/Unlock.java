@@ -28,26 +28,26 @@ public class Unlock {
     private Bundles bundles;
     
     @Property
-    private String slug;
+    private String token;
 
     @Property
     private String code;
     
-    void onActivate(String slug) {
-        this.slug = slug;
+    void onActivate(String token) {
+        this.token = token;
         if (bundles == null) {
             bundles = new Bundles();
         }
     }
     
     String onPassivate() {
-        return slug;
+        return token;
     }
     
     Object onSuccess() {
-        BundleType bundle = anonymousService.unlock(slug, code, null);
-        bundles.add(slug, bundle);
-        fetchPage.onActivate(slug);
+        BundleType bundle = anonymousService.unlock(token, code, null);
+        bundles.add(token, bundle);
+        fetchPage.onActivate(token);
         return fetchPage;
     }
 }

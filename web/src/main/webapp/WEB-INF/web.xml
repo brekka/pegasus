@@ -26,7 +26,7 @@
  
 	<filter>
 		<filter-name>slug</filter-name>
-		<filter-class>org.brekka.pegasus.web.filter.SlugFilter</filter-class>
+		<filter-class>org.brekka.pegasus.web.filter.TokenFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>slug</filter-name>

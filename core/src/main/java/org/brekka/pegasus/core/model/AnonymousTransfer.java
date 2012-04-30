@@ -27,20 +27,20 @@ public class AnonymousTransfer extends IdentifiableEntity {
     private static final long serialVersionUID = -4542707737980018991L;
 
     @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="Slug")
-    private Slug slug;
+    @JoinColumn(name="TokenID")
+    private Token token;
     
     @OneToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="BundleID")
     private Bundle bundle;
 
     
-    public Slug getSlug() {
-        return slug;
+    public Token getToken() {
+        return token;
     }
 
-    public void setSlug(Slug slug) {
-        this.slug = slug;
+    public void setToken(Token token) {
+        this.token = token;
     }
 
     public Bundle getBundle() {

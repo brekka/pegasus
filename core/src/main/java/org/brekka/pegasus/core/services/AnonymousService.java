@@ -18,5 +18,5 @@ public interface AnonymousService {
 
     TransferKey createBundle(String comment, List<FileBuilder> fileBuilders);
     
-    BundleType unlock(String slug, String code, Date agreementAccepted);
+    BundleType unlock(String token, String code, Date agreementAccepted);
 }

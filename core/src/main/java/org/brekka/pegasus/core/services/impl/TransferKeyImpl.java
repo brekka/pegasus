@@ -11,24 +11,24 @@ import org.brekka.pegasus.core.model.TransferKey;
  */
 public class TransferKeyImpl implements TransferKey {
 
-    private final String slug;
+    private final String token;
     private final String code;
     private final String fileName;
     
     
     
-    public TransferKeyImpl(String slug, String code, String fileName) {
-        this.slug = slug;
+    public TransferKeyImpl(String token, String code, String fileName) {
+        this.token = token;
         this.code = code;
         this.fileName = fileName;
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.TransferKey#getSlug()
+     * @see org.brekka.pegasus.core.model.TransferKey#getToken()
      */
     @Override
-    public String getSlug() {
-        return slug;
+    public String getToken() {
+        return token;
     }
 
     /* (non-Javadoc)

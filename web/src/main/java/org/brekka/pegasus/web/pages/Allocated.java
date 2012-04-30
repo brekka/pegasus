@@ -57,15 +57,15 @@ public class Allocated {
     }
     
     public String getUnlockLink() {
-        return configuration.getFetchBase() + "/" + transferKey.getSlug(); 
+        return configuration.getFetchBase() + "/" + transferKey.getToken(); 
     }
     
     public String getDirectLink() {
         String path;
         if (transferKey.getFileName() != null) {
-            path = transferKey.getCode() + "/" + transferKey.getSlug() + "/" + transferKey.getFileName();
+            path = transferKey.getCode() + "/" + transferKey.getToken() + "/" + transferKey.getFileName();
         } else {
-            path = transferKey.getCode() + "/" + transferKey.getSlug() + ".zip";
+            path = transferKey.getCode() + "/" + transferKey.getToken() + ".zip";
         }
         return configuration.getFetchBase() + "/" + path;
     }

@@ -23,7 +23,7 @@ public class Fetch {
     private Bundles bundles;
     
     @Property
-    private String slug;
+    private String token;
     
     @Property
     private BundleType bundle;
@@ -32,24 +32,24 @@ public class Fetch {
     private FileType file;
     
     
-    Object onActivate(String slug) {
-        this.slug = slug;
+    Object onActivate(String token) {
+        this.token = token;
         
         if (bundles == null) {
-            unlockPage.onActivate(slug);
+            unlockPage.onActivate(token);
             return unlockPage;
         }
         
-        bundle = bundles.get(slug);
+        bundle = bundles.get(token);
         if (bundle == null) {
-            unlockPage.onActivate(slug);
+            unlockPage.onActivate(token);
             return unlockPage;
         }
         return Boolean.TRUE;
     }
     
     String onPassivate() {
-        return slug;
+        return token;
     }
     
     public String[] getFileContext() {

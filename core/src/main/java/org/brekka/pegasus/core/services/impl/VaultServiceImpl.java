@@ -42,7 +42,7 @@ public class VaultServiceImpl implements VaultService {
         Vault vault = new Vault();
         vault.setOwner(owner);
         vault.setName(name);
-        vault.setSlug(sluggify(name));
+        vault.setToken(sluggify(name));
         
         Principal principal = phalanxService.createPrincipal(vaultPassword);
         vault.setPrincipalId(principal.getId());

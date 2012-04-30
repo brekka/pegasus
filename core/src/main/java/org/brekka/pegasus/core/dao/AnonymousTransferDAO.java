@@ -15,9 +15,9 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 public interface AnonymousTransferDAO extends EntityDAO<UUID, AnonymousTransfer> {
 
     /**
-     * @param slug
+     * @param token
      * @return
      */
-    AnonymousTransfer retrieveBySlug(String slug);
+    AnonymousTransfer retrieveByToken(String token);
 
 }
