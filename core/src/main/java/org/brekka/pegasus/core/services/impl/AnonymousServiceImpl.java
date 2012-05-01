@@ -92,7 +92,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         if (fileList.size() == 1) {
             fileName = fileList.get(0).getName();
         }
-        return new AnonymousTransferKeyImpl(token.getPath(), code, fileName);
+        return new AnonymousTransferKeyImpl(bundleModel.getId(), token.getPath(), code, fileName);
     }
     
     /* (non-Javadoc)

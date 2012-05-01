@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -47,6 +49,13 @@ public class Vault extends IdentifiableEntity {
     @Type(type="pg-uuid")
     @Column(name="PrincipalID", nullable=false)
     private UUID principalId;
+    
+    /**
+     * Records the current status of this vault
+     */
+    @Column(name="Status", length=8, nullable=false)
+    @Enumerated(EnumType.STRING)
+    private VaultStatus status;
 
     public Member getOwner() {
         return owner;
@@ -78,5 +87,13 @@ public class Vault extends IdentifiableEntity {
 
     public void setPrincipalId(UUID principalId) {
         this.principalId = principalId;
+    }
+
+    public VaultStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(VaultStatus status) {
+        this.status = status;
     }
 }

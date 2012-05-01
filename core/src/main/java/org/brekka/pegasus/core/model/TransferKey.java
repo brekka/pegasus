@@ -3,10 +3,14 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
 /**
- * @author Andrew Taylor
- *
+ * Marker interface used to abstractly identify a recently created bundle
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface TransferKey {
     
+    UUID getBundleId();
 }

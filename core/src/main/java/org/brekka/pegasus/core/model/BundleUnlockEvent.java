@@ -16,7 +16,7 @@ import javax.persistence.TemporalType;
 /**
  * When a bundle is unlocked.
  * 
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @Table(name="\"BundleUnlockEvent\"")

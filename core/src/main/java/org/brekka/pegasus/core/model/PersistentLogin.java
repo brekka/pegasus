@@ -10,6 +10,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+/**
+ * Recreates the table structure defined by the Spring Security remember-me functionality.
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
+ * @see http://static.springsource.org/spring-security/site/docs/3.0.x/reference/remember-me.html
+ */
 @Entity
 @Table(name="persistent_logins")
 public class PersistentLogin implements Serializable {
@@ -63,6 +69,4 @@ public class PersistentLogin implements Serializable {
 	public void setLastUsed(Date lastUsed) {
 		this.lastUsed = lastUsed;
 	}
-	
-	
 }

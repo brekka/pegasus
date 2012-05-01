@@ -13,8 +13,9 @@ import javax.persistence.TemporalType;
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 
 /**
- * @author Andrew Taylor
- *
+ * An event executed by a remote user.
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @MappedSuperclass
 public abstract class RemoteUserEvent extends IdentifiableEntity {

@@ -20,6 +20,7 @@ import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
+import org.brekka.pegasus.core.model.InboxStatus;
 import org.brekka.pegasus.core.model.InboxTransferKey;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
@@ -74,6 +75,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         inbox.setIntroduction(introduction);
         inbox.setVault(vault);
         inbox.setName(name);
+        inbox.setStatus(InboxStatus.ACTIVE);
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         Member member = authenticatedMember.getMember();
         inbox.setOwner(member);
@@ -118,7 +120,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         
         depositDAO.create(deposit);
         
-        return new InboxTransferKeyImp(inbox, fileBuilders.size());
+        return new InboxTransferKeyImp(bundleModel.getId(), inbox, fileBuilders.size());
     }
     
     /* (non-Javadoc)

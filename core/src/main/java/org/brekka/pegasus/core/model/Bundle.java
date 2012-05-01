@@ -11,8 +11,10 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.IdentifiableEntity;
+import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.hibernate.annotations.Type;
 
 /**
@@ -61,6 +63,12 @@ public class Bundle extends IdentifiableEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date deleted;
     
+    /**
+     * The XML that backs this bundle. Transient as it will be encrypted and stored separately
+     */
+    @Transient
+    private transient BundleType xml;
+    
     public UUID getCryptedDataId() {
         return cryptedDataId;
     }
@@ -99,5 +107,13 @@ public class Bundle extends IdentifiableEntity {
 
     public void setProfile(int profile) {
         this.profile = profile;
+    }
+
+    public BundleType getXml() {
+        return xml;
+    }
+
+    public void setXml(BundleType xml) {
+        this.xml = xml;
     }
 }

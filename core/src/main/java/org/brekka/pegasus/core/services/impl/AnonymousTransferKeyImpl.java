@@ -3,6 +3,8 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.UUID;
+
 import org.brekka.pegasus.core.model.AnonymousTransferKey;
 
 /**
@@ -11,16 +13,24 @@ import org.brekka.pegasus.core.model.AnonymousTransferKey;
  */
 public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
 
+    private final UUID bundleId;
     private final String token;
     private final String code;
     private final String fileName;
     
-    
-    
-    public AnonymousTransferKeyImpl(String token, String code, String fileName) {
+    public AnonymousTransferKeyImpl(UUID bundleId, String token, String code, String fileName) {
+        this.bundleId = bundleId;
         this.token = token;
         this.code = code;
         this.fileName = fileName;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.TransferKey#getBundleId()
+     */
+    @Override
+    public UUID getBundleId() {
+        return bundleId;
     }
 
     /* (non-Javadoc)

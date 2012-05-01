@@ -5,6 +5,8 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -57,6 +59,13 @@ public class Inbox extends IdentifiableEntity {
     private String introduction;
     
     /**
+     * Records the current status of this inbox
+     */
+    @Column(name="Status", length=8, nullable=false)
+    @Enumerated(EnumType.STRING)
+    private InboxStatus status;
+    
+    /**
      * Name will be stored separately
      */
     @Transient
@@ -101,5 +110,13 @@ public class Inbox extends IdentifiableEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public InboxStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(InboxStatus status) {
+        this.status = status;
     }
 }

@@ -9,9 +9,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- * When a bundle is unlocked.
+ * When a bundle is created.
  * 
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @Table(name="\"BundleCreatedEvent\"")
