@@ -3,7 +3,8 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TokenDAO;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
@@ -21,9 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TokenServiceImpl implements TokenService {
 
-    private static final char[] ALLOWED = 
-            "BCDFGHJKLMNPQRSTVWXYZ1234567890".toCharArray();
-    
     @Autowired
     private TokenDAO tokenDAO;
     
@@ -33,9 +31,8 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Token allocateAnonymous() {
-        Token token = new Token();
-        token.setType(TokenType.ANON);
-        token.setPath(RandomStringUtils.random(5, 0, ALLOWED.length, false, false, ALLOWED));
+        // For now just keep generating random tokens
+        Token token = chooseRandomToken(TokenType.ANON);
         tokenDAO.create(token);
         return token;
     }
@@ -44,11 +41,36 @@ public class TokenServiceImpl implements TokenService {
      * @see org.brekka.pegasus.core.services.TokenService#createForInbox(java.lang.String)
      */
     @Override
-    public Token createForInbox(String slug) {
-        Token token = new Token();
-        token.setType(TokenType.ANON);
-        token.setPath(slug);
+    public Token createForInbox(String chosen) {
+        Token token;
+        if (chosen != null) {
+            chosen = chosen.toUpperCase();
+            if (chosen.length() != TokenType.INBOX.getGenerateLength()) {
+                throw new PegasusException(PegasusErrorCode.PG300, 
+                        "The inbox token '%s' must be %d characters", chosen, 
+                        TokenType.INBOX.getGenerateLength());
+            }
+            if (tokenDAO.retrieveByPath(chosen) != null) {
+                throw new PegasusException(PegasusErrorCode.PG300, 
+                        "The inbox token '%s' is already taken", chosen);
+            } else {
+                token = new Token();
+                token.setType(TokenType.INBOX);
+                token.setPath(chosen);
+            }
+        } else {
+            // Use random token, make sure it is not already in use
+            token = chooseRandomToken(TokenType.INBOX);
+        }
         tokenDAO.create(token);
+        return token;
+    }
+    
+    private Token chooseRandomToken(TokenType type) {
+        Token token = type.generateRandom();
+        while (tokenDAO.retrieveByPath(token.getPath()) != null) {
+            token = type.generateRandom();
+        }
         return token;
     }
     

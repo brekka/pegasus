@@ -192,3 +192,23 @@ input.code {
 	padding: 1px 12px;
 	width: 120px;
 }
+
+.advanced {
+	border: 1px solid #E0E0E0;
+	background-color: #F8F8F8;
+	padding: 9px;
+}
+
+.advanced label {
+	width: 141px;
+	color: #606080;
+}
+
+.advanced p {
+	margin-left: 141px;
+}
+
+.advanced h3 {
+	margin: 0;
+	color: #808080;
+}

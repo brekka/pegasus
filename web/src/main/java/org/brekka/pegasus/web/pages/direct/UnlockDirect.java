@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.pages;
+package org.brekka.pegasus.web.pages.direct;
 
 import javax.inject.Inject;
 
@@ -16,10 +16,11 @@ import org.brekka.xml.pegasus.v1.model.BundleType;
  * @author Andrew Taylor
  *
  */
-public class Unlock {
+public class UnlockDirect {
+    public static final String PATH = "direct/unlock";
     
     @InjectPage
-    private Fetch fetchPage;
+    private FetchDirect fetchPage;
     
     @Inject
     private AnonymousService anonymousService;
@@ -47,7 +48,7 @@ public class Unlock {
     Object onSuccess() {
         BundleType bundle = anonymousService.unlock(token, code, null);
         bundles.add(token, bundle);
-        fetchPage.onActivate(token);
+        fetchPage.init(token);
         return fetchPage;
     }
 }

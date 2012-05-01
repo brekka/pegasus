@@ -8,7 +8,7 @@ import java.util.List;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.OpenVault;
+import org.brekka.pegasus.core.model.InboxTransferKey;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 
@@ -23,7 +23,7 @@ public interface InboxService {
      * @param vault
      * @return
      */
-    Inbox createInbox(String inboxToken, Vault vault);
+    Inbox createInbox(String name, String introduction, String inboxToken, Vault vault);
     
     /**
      * Create a deposit in the specified inbox. 
@@ -33,7 +33,8 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    void depositFiles(Inbox inbox, String comment, List<FileBuilder> fileBuilders);
+    InboxTransferKey depositFiles(Inbox inbox, String reference, 
+            String comment, List<FileBuilder> fileBuilders);
 
     /**
      * Retrieve the inboxes owned by this member.

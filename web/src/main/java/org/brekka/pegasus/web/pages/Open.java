@@ -7,6 +7,7 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.VaultService;
+import org.brekka.pegasus.web.pages.member.MemberIndex;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -26,7 +27,7 @@ public class Open {
         Object retVal;
         vault = vaultService.retrieveBySlug(vaultSlug);
         if (vaultService.isOpen(vault)) {
-            retVal = Member.class;
+            retVal = MemberIndex.class;
         } else {
             retVal = Boolean.TRUE;
         }
@@ -39,6 +40,6 @@ public class Open {
     
     Object onSuccess() {
         vaultService.openVault(vault, vaultPassword);
-        return Member.class;
+        return MemberIndex.class;
     }
 }

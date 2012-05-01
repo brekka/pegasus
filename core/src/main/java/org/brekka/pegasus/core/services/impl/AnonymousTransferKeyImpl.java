@@ -3,13 +3,13 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import org.brekka.pegasus.core.model.TransferKey;
+import org.brekka.pegasus.core.model.AnonymousTransferKey;
 
 /**
  * @author Andrew Taylor
  *
  */
-public class TransferKeyImpl implements TransferKey {
+public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
 
     private final String token;
     private final String code;
@@ -17,7 +17,7 @@ public class TransferKeyImpl implements TransferKey {
     
     
     
-    public TransferKeyImpl(String token, String code, String fileName) {
+    public AnonymousTransferKeyImpl(String token, String code, String fileName) {
         this.token = token;
         this.code = code;
         this.fileName = fileName;

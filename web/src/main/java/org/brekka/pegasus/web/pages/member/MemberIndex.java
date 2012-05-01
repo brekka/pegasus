@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.pages;
+package org.brekka.pegasus.web.pages.member;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.support.Bundles;
+import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
@@ -29,7 +30,10 @@ import org.brekka.xml.pegasus.v1.model.FileType;
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public class Member {
+public class MemberIndex {
+    
+    @Inject
+    private Configuration configuration;
     
     @Inject
     private MemberService memberService;
@@ -52,32 +56,15 @@ public class Member {
     @Property
     private FileType loopFile;
     
-    @Property
-    private Vault selectedVault;
-    
-    @Property
-    private String inboxToken;
-    
     @SessionAttribute("bundles")
     private Bundles bundles;
     
-    @SuppressWarnings("unused")
-    @Property
-    private ValueEncoder<Vault> vaultEncoder = new ValueEncoder<Vault>() {
-        @Override
-        public String toClient(Vault vault) {
-            return vault.getId().toString();
-        }
-        @Override
-        public Vault toValue(String clientValue) {
-            return vaultService.retrieveById(UUID.fromString(clientValue));
-        }
-    };
+
     
     Object onActivate() {
         Object retVal = Boolean.TRUE;
         if (memberService.isNewMember()) {
-            retVal = Setup.class;
+            retVal = SetupMember.class;
         }
         if (bundles == null) {
             bundles = new Bundles();
@@ -85,22 +72,10 @@ public class Member {
         return retVal;
     }
     
-    Object onSuccessFromInbox() {
-        inboxService.createInbox(inboxToken, selectedVault);
-        return Boolean.TRUE;
-    }
+
     
     public List<Inbox> getInboxList() {
         return inboxService.retrieveForMember();
-    }
-    
-    public SelectModel getVaultSelectModel() {
-        List<Vault> vaultList = vaultService.retrieveForUser();
-        List<OptionModel> options = new ArrayList<>(vaultList.size());
-        for (Vault vault : vaultList) {
-            options.add(new OptionModelImpl(vault.getName(), vault));
-        }
-        return new SelectModelImpl(null, options);
     }
     
     public List<Deposit> getDepositList() {
@@ -130,5 +105,9 @@ public class Member {
     
     public String[] getFileContext() {
         return new String[]{ loopFile.getUUID(), loopFile.getName() };
+    }
+    
+    public String getInboxLink() {
+        return configuration.getFetchBase() + "/" + loopInbox.getToken().getPath(); 
     }
 }

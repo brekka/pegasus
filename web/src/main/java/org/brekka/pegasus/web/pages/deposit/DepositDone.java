@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.pages;
+package org.brekka.pegasus.web.pages.deposit;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,19 +11,16 @@ import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
-import org.brekka.pegasus.core.model.TransferKey;
+import org.brekka.pegasus.core.model.InboxTransferKey;
+import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
-import org.brekka.pegasus.web.support.Configuration;
 
 /**
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public class Allocated {
-    
-    @Inject
-    private Configuration configuration;
+public class DepositDone {
     
     @Property
     private String makeKey;
@@ -31,8 +28,9 @@ public class Allocated {
     @Inject
     private RequestGlobals requestGlobals;
     
+    @SuppressWarnings("unused")
     @Property
-    private TransferKey transferKey;
+    private InboxTransferKey transferKey;
     
     @Inject
     private AlertManager alertManager;
@@ -45,28 +43,18 @@ public class Allocated {
         BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
         if (bundleMakerContext.contains(makeKey)) {
             BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
-            transferKey = bundleMaker.getTransferKey();
+            transferKey = (InboxTransferKey) bundleMaker.getTransferKey();
             return Boolean.TRUE;
         }
         alertManager.alert(Duration.SINGLE, Severity.WARN, "Details of the requested upload are no longer available.");
         return Index.class;
     }
     
+    public void init(String makeKey) {
+        this.makeKey = makeKey;
+    }
+    
     String onPassivate() {
         return makeKey;
-    }
-    
-    public String getUnlockLink() {
-        return configuration.getFetchBase() + "/" + transferKey.getToken(); 
-    }
-    
-    public String getDirectLink() {
-        String path;
-        if (transferKey.getFileName() != null) {
-            path = transferKey.getCode() + "/" + transferKey.getToken() + "/" + transferKey.getFileName();
-        } else {
-            path = transferKey.getCode() + "/" + transferKey.getToken() + ".zip";
-        }
-        return configuration.getFetchBase() + "/" + path;
     }
 }

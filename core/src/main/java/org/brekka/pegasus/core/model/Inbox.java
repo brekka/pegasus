@@ -3,11 +3,13 @@
  */
 package org.brekka.pegasus.core.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 
@@ -47,6 +49,18 @@ public class Inbox extends IdentifiableEntity {
     @ManyToOne
     @JoinColumn(name="OwnerID", nullable = false)
     private Member owner;
+    
+    /**
+     * Text to be displayed to the person when depositing a file.
+     */
+    @Column(name="Introduction", length=2000)
+    private String introduction;
+    
+    /**
+     * Name will be stored separately
+     */
+    @Transient
+    private transient String name;
 
     
     public Vault getVault() {
@@ -71,5 +85,21 @@ public class Inbox extends IdentifiableEntity {
 
     public void setOwner(Member owner) {
         this.owner = owner;
+    }
+
+    public String getIntroduction() {
+        return introduction;
+    }
+
+    public void setIntroduction(String introduction) {
+        this.introduction = introduction;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

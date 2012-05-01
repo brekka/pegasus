@@ -21,8 +21,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.brekka.pegasus.core.model.Token;
+import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.DownloadService;
+import org.brekka.pegasus.core.services.TokenService;
+import org.brekka.pegasus.web.pages.deposit.MakeDeposit;
+import org.brekka.pegasus.web.pages.direct.UnlockDirect;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 import org.springframework.web.context.WebApplicationContext;
@@ -34,11 +39,15 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  */
 public class TokenFilter implements Filter {
     
-    private static final Pattern ANON_PATTERN = Pattern.compile("^(?:/([0-9]+))?/([B-DF-HJ-NP-TV-Z0-9]{5})(?:\\.zip|/[^/]+)?$");
+    private static final Pattern TOKEN_PATTERN = Pattern.compile(String.format(
+            "^(?:/([0-9]+))?/([A-Z0-9]{%d,%d})(?:\\.zip|/[^/]+)?$",
+            TokenType.MIN_LENGTH, TokenType.MAX_LENGTH));
     
     private AnonymousService anonymousService;
     
     private DownloadService downloadService;
+    
+    private TokenService tokenService;
 
     /* (non-Javadoc)
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
@@ -48,6 +57,7 @@ public class TokenFilter implements Filter {
         WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
         downloadService = applicationContext.getBean(DownloadService.class);
         anonymousService = applicationContext.getBean(AnonymousService.class);
+        tokenService = applicationContext.getBean(TokenService.class);
     }
 
     /* (non-Javadoc)
@@ -61,13 +71,31 @@ public class TokenFilter implements Filter {
         
         String requestURI = req.getRequestURI();
         requestURI = requestURI.substring(req.getContextPath().length());
-        Matcher matcher = ANON_PATTERN.matcher(requestURI);
+        Matcher matcher = TOKEN_PATTERN.matcher(requestURI);
         if (matcher.matches()) {
             String code = matcher.group(1);
             String token = matcher.group(2);
             if (code == null) {
+                Token tokenObj = tokenService.retrieveByPath(token);
+                if (tokenObj == null) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                } else {
+                    TokenType tokenType = tokenObj.getType();
+                    switch (tokenType) {
+                        case ANON:
+                            resp.sendRedirect(String.format("%s/%s/%s", 
+                                    req.getContextPath(), UnlockDirect.PATH, token));
+                            break;
+                        case INBOX:
+                            resp.sendRedirect(String.format("%s/%s/%s", 
+                                    req.getContextPath(), MakeDeposit.PATH, token));
+                            break;
+                        default:
+                            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                            break;
+                    }
+                }
                 // Redirect token to unlock.
-                resp.sendRedirect(req.getContextPath() + "/unlock/" + token);
                 return;
             } else {
                 dispatchBundle(token, code, resp);
@@ -119,8 +147,7 @@ public class TokenFilter implements Filter {
      */
     @Override
     public void destroy() {
-        // TODO Auto-generated method stub
-
+        // Not needed
     }
 
 }

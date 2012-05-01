@@ -1,9 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.pages;
-
-import java.util.List;
+package org.brekka.pegasus.web.pages.member;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tapestry5.annotations.InjectComponent;
@@ -12,17 +10,12 @@ import org.apache.tapestry5.corelib.components.Form;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.web.support.OpenIDUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.openid.OpenIDAttribute;
-import org.springframework.security.openid.OpenIDAuthenticationToken;
 
 /**
  * @author Andrew Taylor
  *
  */
-public class Setup {
+public class SetupMember {
     
     @InjectComponent
     private Form setup;
@@ -43,7 +36,7 @@ public class Setup {
         name = OpenIDUtils.identifyName();
         Object retVal = Boolean.TRUE;
         if (!memberService.isNewMember()) {
-            retVal = Member.class;
+            retVal = MemberIndex.class;
         }
         return retVal;
     }
@@ -57,6 +50,6 @@ public class Setup {
     Object onSuccess() {
         String email = OpenIDUtils.identifyEmail();
         memberService.setupMember(name, email, vaultPassword);
-        return Member.class;
+        return MemberIndex.class;
     }
 }

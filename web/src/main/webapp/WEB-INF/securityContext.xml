@@ -13,7 +13,7 @@
 
 	<http>
         <intercept-url pattern="/member**" access="ROLE_USER"/>
-        <intercept-url pattern="/setup**" access="ROLE_USER"/>
+        <intercept-url pattern="/inbox**" access="ROLE_USER"/>
         <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
         <logout logout-url="/logout"/>
         <openid-login login-page="/login" authentication-failure-url="/login?error=true" 

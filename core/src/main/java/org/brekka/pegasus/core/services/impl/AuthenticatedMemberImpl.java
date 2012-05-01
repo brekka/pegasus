@@ -33,7 +33,7 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     
     private Member member;
     
-    private OpenVault activeVault;
+    private transient OpenVault activeVault;
     
     private transient Map<UUID, OpenVault> vaults;
     

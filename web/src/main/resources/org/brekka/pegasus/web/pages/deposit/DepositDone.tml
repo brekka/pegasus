@@ -1,0 +1,9 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+    
+    
+    <h2>Files deposited</h2>
+    
+    <t:pagelink page="deposit/make" context="transferKey.inbox.token.path">Deposit more files.</t:pagelink>
+
+</html>

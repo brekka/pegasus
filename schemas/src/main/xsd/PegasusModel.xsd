@@ -7,6 +7,7 @@
     
     <xsd:complexType name="BundleType">
 		<xsd:sequence>
+			<xsd:element name="Reference"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
 			<xsd:element name="Comment"     type="xsd:string"       minOccurs="0" maxOccurs="1" />
 			<xsd:element name="Agreement"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
 			<xsd:element name="File"        type="pgm:FileType"     minOccurs="1" maxOccurs="unbounded" />

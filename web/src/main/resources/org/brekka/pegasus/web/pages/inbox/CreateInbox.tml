@@ -1,0 +1,39 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+
+    
+    <h2>Create a new inbox</h2>
+    
+    <t:form t:id="inbox">
+        <div class="field">
+            <t:label for="name">Name</t:label>
+            <t:textfield t:id="name" />
+            <p>The name you want to give this inbox. It will be visible only to you and only once you have unlocked the 
+               corresponding vault.</p>
+        </div>
+        <div class="field">
+            <t:label for="introduction">Welcome text</t:label>
+            <t:textarea t:id="introduction" />
+            <p>If specified, this text will be displayed on the 'deposit' page. Use it to provide additional information
+               to the sender.</p>
+        </div>
+        <div class="advanced">
+            <h3>Advanced options</h3>
+            <div class="field">
+                <t:label for="inboxToken">Token</t:label>
+                <t:textfield t:id="inboxToken" validate="required,regexp"/>
+                <p>The token that will identify this inbox to the rest of the world. In most situations you 
+                   should just use the auto-generated value as that is hard to guess.</p>
+            </div>
+            <div class="field">
+                <t:label for="selectedVault">Vault</t:label>
+                <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
+            </div>
+        </div>
+		<div class="field">
+			<label>Submit</label>
+			<t:submit value="Create inbox..." />
+		</div>
+    </t:form>
+
+</html>

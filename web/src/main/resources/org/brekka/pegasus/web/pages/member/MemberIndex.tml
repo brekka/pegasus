@@ -23,7 +23,7 @@
     <ul>
     <t:loop source="inboxList" value="loopInbox">
         <li>
-            <p>${loopInbox.token.path}</p>
+            <p>${loopInbox.token.path} - ${inboxLink}</p>
             <ul>
                 <t:loop source="depositList" value="loopDeposit">
                     <li>
@@ -42,18 +42,6 @@
         </li>        
     </t:loop>
     </ul>
-    
-    <h3>Create a new inbox</h3>
-    <t:form t:id="inbox">
-        <div class="field">
-            <t:label for="inboxToken">Token</t:label>
-            <t:textfield t:id="inboxToken" />
-        </div>
-        <div class="field">
-            <t:label for="selectedVault">Vault</t:label>
-            <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
-        </div>
-        <t:submit/>
-    </t:form>
+    <t:pagelink page="inbox/create">Create a new inbox</t:pagelink>
 
 </html>

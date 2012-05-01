@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.pages;
+package org.brekka.pegasus.web.pages.direct;
 
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
@@ -14,10 +14,10 @@ import org.brekka.xml.pegasus.v1.model.FileType;
  * @author Andrew Taylor
  *
  */
-public class Fetch {
+public class FetchDirect {
     
     @InjectPage
-    private Unlock unlockPage;
+    private UnlockDirect unlockPage;
 
     @SessionAttribute("bundles")
     private Bundles bundles;
@@ -46,6 +46,10 @@ public class Fetch {
             return unlockPage;
         }
         return Boolean.TRUE;
+    }
+    
+    void init(String token) {
+        this.token = token;
     }
     
     String onPassivate() {

@@ -20,6 +20,7 @@ import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
+import org.brekka.pegasus.core.model.InboxTransferKey;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Token;
@@ -66,11 +67,13 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Inbox createInbox(String inboxToken, Vault vault) {
+    public Inbox createInbox(String name, String introduction, String inboxToken, Vault vault) {
         Inbox inbox = new Inbox();
         Token token = tokenService.createForInbox(inboxToken);
         inbox.setToken(token);
+        inbox.setIntroduction(introduction);
         inbox.setVault(vault);
+        inbox.setName(name);
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         Member member = authenticatedMember.getMember();
         inbox.setOwner(member);
@@ -83,7 +86,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void depositFiles(Inbox inbox, String comment, List<FileBuilder> fileBuilders) {
+    public InboxTransferKey depositFiles(Inbox inbox, String reference, String comment, List<FileBuilder> fileBuilders) {
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
         Vault vault = inbox.getVault();
@@ -93,6 +96,8 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         bundleModel.setId(UUID.randomUUID());
         
         BundleDocument bundleDocument = prepareBundleDocument(comment, fileBuilders);
+        BundleType bundleType = bundleDocument.getBundle();
+        bundleType.setReference(reference);
         
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
@@ -112,6 +117,8 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         deposit.setVault(inbox.getVault());
         
         depositDAO.create(deposit);
+        
+        return new InboxTransferKeyImp(inbox, fileBuilders.size());
     }
     
     /* (non-Javadoc)
