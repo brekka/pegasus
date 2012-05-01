@@ -40,4 +40,23 @@ public class TokenServiceImpl implements TokenService {
         return token;
     }
 
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TokenService#createForInbox(java.lang.String)
+     */
+    @Override
+    public Token createForInbox(String slug) {
+        Token token = new Token();
+        token.setType(TokenType.ANON);
+        token.setPath(slug);
+        tokenDAO.create(token);
+        return token;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TokenService#retrieveByPath(java.lang.String)
+     */
+    @Override
+    public Token retrieveByPath(String path) {
+        return tokenDAO.retrieveByPath(path);
+    }
 }

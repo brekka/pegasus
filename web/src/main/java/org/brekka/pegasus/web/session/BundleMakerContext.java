@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.brekka.pegasus.core.model.Inbox;
+
 /**
  * @author Andrew Taylor
  *
@@ -24,10 +26,14 @@ public class BundleMakerContext {
     }
     
     public synchronized BundleMaker get(String makerKey) {
+        return get(makerKey, null);
+    }
+    
+    public synchronized BundleMaker get(String makerKey, Inbox inbox) {
         Map<String, BundleMaker> map = map();
         BundleMaker bundleMaker = map.get(makerKey);
         if (bundleMaker == null) {
-            bundleMaker = new BundleMaker(makerKey);
+            bundleMaker = new BundleMaker(makerKey, inbox);
             map.put(makerKey, bundleMaker);
         }
         return bundleMaker;

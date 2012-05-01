@@ -14,4 +14,5 @@ import org.brekka.pegasus.core.model.Token;
  */
 public interface TokenDAO extends EntityDAO<UUID, Token> {
 
+    Token retrieveByPath(String path);
 }

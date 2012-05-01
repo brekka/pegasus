@@ -21,6 +21,7 @@ import org.brekka.paveway.core.model.FileInfo;
 import org.brekka.paveway.web.upload.EncryptedFileItem;
 import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
 import org.got5.tapestry5.jquery.JQuerySymbolConstants;
@@ -49,6 +50,9 @@ public class Make {
     
     @Inject
     private AnonymousService anonymousService;
+    
+    @Inject
+    private InboxService inboxService;
     
     @Property
     private UploadedFile file;
@@ -104,8 +108,12 @@ public class Make {
                     throw new IllegalStateException();
                 }
             }
-            TransferKey transferKey = anonymousService.createBundle(comment, fileBuilderList);
-            bundleMaker.setTransferKey(transferKey);
+            if (bundleMaker.getInbox() != null) {
+                inboxService.depositFiles(bundleMaker.getInbox(), comment, fileBuilderList);
+            } else {
+                TransferKey transferKey = anonymousService.createBundle(comment, fileBuilderList);
+                bundleMaker.setTransferKey(transferKey);
+            }
         }
         allocatedPage.onActivate(makeKey);
         return allocatedPage;

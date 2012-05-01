@@ -12,4 +12,12 @@ import org.brekka.pegasus.core.model.Token;
 public interface TokenService {
 
     Token allocateAnonymous();
+    
+    Token createForInbox(String slug);
+
+    /**
+     * @param inboxToken
+     * @return
+     */
+    Token retrieveByPath(String path);
 }

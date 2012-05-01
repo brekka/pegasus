@@ -6,9 +6,11 @@ package org.brekka.pegasus.core.model;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -20,6 +22,8 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
+@Entity
+@Table(name="\"Deposit\"")
 public class Deposit extends IdentifiableEntity {
 
     /**

@@ -2,6 +2,27 @@
 	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
 
 
-    Member
+    <h2>Member</h2>
+    
+
+    <h3>Your inboxes</h3>
+    <ul>
+    <t:loop source="inboxList" value="loopInbox">
+        <li>${loopInbox.token.path}</li>        
+    </t:loop>
+    </ul>
+    
+    <h3>Create a new inbox</h3>
+    <t:form t:id="inbox">
+        <div class="field">
+            <t:label for="inboxToken">Token</t:label>
+            <t:textfield t:id="inboxToken" />
+        </div>
+        <div class="field">
+            <t:label for="selectedVault">Vault</t:label>
+            <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
+        </div>
+        <t:submit/>
+    </t:form>
 
 </html>

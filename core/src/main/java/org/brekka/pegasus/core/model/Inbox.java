@@ -3,9 +3,11 @@
  */
 package org.brekka.pegasus.core.model;
 
+import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 
@@ -15,6 +17,8 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
+@Entity
+@Table(name="\"Inbox\"")
 public class Inbox extends IdentifiableEntity {
 
     /**
@@ -36,6 +40,13 @@ public class Inbox extends IdentifiableEntity {
     @ManyToOne
     @JoinColumn(name = "VaultID", nullable = false)
     private Vault vault;
+    
+    /**
+     * The owner of this inbox
+     */
+    @ManyToOne
+    @JoinColumn(name="OwnerID", nullable = false)
+    private Member owner;
 
     
     public Vault getVault() {
@@ -52,5 +63,13 @@ public class Inbox extends IdentifiableEntity {
 
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    public Member getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Member owner) {
+        this.owner = owner;
     }
 }

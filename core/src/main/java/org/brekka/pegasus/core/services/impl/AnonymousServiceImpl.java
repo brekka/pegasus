@@ -4,42 +4,27 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.xmlbeans.XmlException;
-import org.brekka.paveway.core.model.AllocatedFile;
-import org.brekka.paveway.core.model.ByteSequence;
-import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.paveway.core.services.PavewayService;
-import org.brekka.paveway.core.services.ResourceCryptoService;
-import org.brekka.paveway.core.services.ResourceEncryptor;
-import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
-import org.brekka.pegasus.core.dao.BundleDAO;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
-import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
-import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.CryptoFactory;
-import org.brekka.phoenix.CryptoFactoryRegistry;
 import org.brekka.xml.pegasus.v1.model.BundleDocument;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
@@ -54,36 +39,14 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AnonymousServiceImpl implements AnonymousService {
-    
-    @Autowired
-    private BundleDAO bundleDAO;
+public class AnonymousServiceImpl extends PegasusServiceSupport implements AnonymousService {
     
     @Autowired
     private AnonymousTransferDAO anonymousTransferDAO;
     
     @Autowired
-    private ResourceStorageService resourceStorageService;
-    
-    @Autowired
-    private ResourceCryptoService resourceCryptoService;
-    
-    @Autowired
-    private CryptoFactoryRegistry cryptoFactoryRegistry;
-    
-    @Autowired
-    private PhalanxService phalanxService;
-    
-    @Autowired
-    private PavewayService pavewayService;
-    
-    @Autowired
     private TokenService tokenService;
     
-    @Autowired
-    private EventService eventService;
-    
-
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.AnonymousService#createBundle(java.util.List)
      */
@@ -93,40 +56,14 @@ public class AnonymousServiceImpl implements AnonymousService {
         Bundle bundleModel = new Bundle();
         bundleModel.setId(UUID.randomUUID());
         
-        /*
-         * Prepare the XML based structure that will contain the details for this bundle,
-         * while will be subsequently encrypted.
-         */
-        BundleDocument doc = BundleDocument.Factory.newInstance();
-        BundleType bundleXml = doc.addNewBundle();
-        for (FileBuilder fileBuilder : fileBuilders) {
-            AllocatedFile allocatedFile = pavewayService.complete(fileBuilder);
-            FileType fileXml = bundleXml.addNewFile();
-            fileXml.setName(allocatedFile.getFileName());
-            fileXml.setMimeType(allocatedFile.getMimeType());
-            fileXml.setUUID(allocatedFile.getCryptedFile().getId().toString());
-            fileXml.setKey(allocatedFile.getSecretKey().getEncoded());
-            fileXml.setLength(allocatedFile.getCryptedFile().getOriginalLength());
-        }
-        bundleXml.setComment(comment);
+        BundleDocument doc = prepareBundleDocument(comment, fileBuilders);
         
-        // Store the bundle XML blob
-        ;
-        
-        /*
-         * Encrypt the bundle XML 
-         */
+        // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
-        ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
-        ByteSequence byteSequence = resourceStorageService.allocate(bundleModel.getId());
-        OutputStream os = byteSequence.getOutputStream();
-        try ( OutputStream eos = encryptor.encrypt(os) ) {
-            doc.save(eos);
-        } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG200, e, 
-                    "Failed to store bundle XML");
-        }
+        bundleModel.setProfile(defaultCryptoFactory.getProfileId());
+        
+        encryptBundleDocument(doc, bundleModel, secretKey);
         
         // Allocate a code
         String code = RandomStringUtils.random(8, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
@@ -136,12 +73,7 @@ public class AnonymousServiceImpl implements AnonymousService {
          */
         CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), code);
         bundleModel.setCryptedDataId(pbeEncryptedData.getId());
-        
-        bundleModel.setIv(encryptor.getIV().getIV());
-        bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         bundleDAO.create(bundleModel);
-        
-        
         
         /*
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
@@ -155,7 +87,7 @@ public class AnonymousServiceImpl implements AnonymousService {
         eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
         
-        List<FileType> fileList = bundleXml.getFileList();
+        List<FileType> fileList = doc.getBundle().getFileList();
         String fileName = null;
         if (fileList.size() == 1) {
             fileName = fileList.get(0).getName();
@@ -173,26 +105,13 @@ public class AnonymousServiceImpl implements AnonymousService {
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         
         Bundle bundle = transfer.getBundle();
-        UUID bundleId = bundle.getId();
-        
         byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(bundle.getCryptedDataId()), code);
-        CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(bundle.getProfile());
-        SecretKey secretKey = new SecretKeySpec(secretKeyBytes, cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
-        IvParameterSpec iv = new IvParameterSpec(bundle.getIv());
         
-        ByteSequence byteSequence = resourceStorageService.retrieve(bundleId);
-        
-        try ( InputStream is = byteSequence.getInputStream(); ) {
-            InputStream dis = resourceCryptoService.decryptor(bundle.getProfile(), Compression.GZIP, iv, secretKey, is);
-            
-            eventService.bundleUnlocked(bundle, agreementAccepted);
-            
-            BundleDocument bundleDocument = BundleDocument.Factory.parse(dis);
-            return bundleDocument.getBundle();
+        try {
+            return decryptBundle(agreementAccepted, bundle, secretKeyBytes);
         } catch (XmlException | IOException e) {
             throw new PegasusException(PegasusErrorCode.PG200, e, 
                     "Failed to retrieve bundle XML for token '%s'" , token);
         }
     }
-
 }

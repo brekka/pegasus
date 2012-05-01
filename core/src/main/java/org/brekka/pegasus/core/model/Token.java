@@ -30,6 +30,16 @@ public class Token extends IdentifiableEntity {
     @Column(name="\"Type\"")
     private TokenType type;
 
+    
+    /**
+     * 
+     */
+    public Token() {
+    }
+
+    public Token(String path) {
+        this.path = path;
+    }
 
     public String getPath() {
         return path;

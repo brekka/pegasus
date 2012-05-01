@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.FileInfo;
+import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.TransferKey;
 
 /**
@@ -29,11 +30,21 @@ public class BundleMaker {
     
     private boolean done = false;
     
+    private final Inbox inbox;
+    
     /**
      * @param makerKey
      */
     public BundleMaker(String makerKey) {
+        this(makerKey, null);
+    }
+    
+    /**
+     * @param makerKey
+     */
+    public BundleMaker(String makerKey, Inbox inbox) {
         this.makerKey = makerKey;
+        this.inbox = inbox;
     }
     
     public void retainInProgress(String fileName, FileBuilder fileBuilder) {
@@ -51,6 +62,13 @@ public class BundleMaker {
     
     public boolean isDone() {
         return done;
+    }
+    
+    /**
+     * @return the inbox
+     */
+    public Inbox getInbox() {
+        return inbox;
     }
     
     public List<FileInfo> previewCompleted() {

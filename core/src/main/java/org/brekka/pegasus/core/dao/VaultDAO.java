@@ -3,9 +3,11 @@
  */
 package org.brekka.pegasus.core.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Vault;
 
 /**
@@ -13,6 +15,13 @@ import org.brekka.pegasus.core.model.Vault;
  *
  */
 public interface VaultDAO extends EntityDAO<UUID, Vault> {
+
+    
+    /**
+     * @param member
+     * @return
+     */
+    List<Vault> retrieveForMember(Member member);
 
 
 }

@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.dao.hibernate;
 
 import org.brekka.pegasus.core.dao.TokenDAO;
 import org.brekka.pegasus.core.model.Token;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -22,4 +23,13 @@ public class TokenHibernateDAO extends AbstractPegasusHibernateDAO<Token> implem
         return Token.class;
     }
 
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.TokenDAO#retrieveByPath(java.lang.String)
+     */
+    @Override
+    public Token retrieveByPath(String path) {
+        return (Token) getCurrentSession().createCriteria(Token.class)
+                .add(Restrictions.eq("path", path))
+                .uniqueResult();
+    }
 }
