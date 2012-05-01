@@ -13,8 +13,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
-
 /**
  * An inbox allows an individual on the internet to send a file to a {@link Member}. The public key of the vault will be
  * used to store the key of the uploaded file.
@@ -23,7 +21,7 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  */
 @Entity
 @Table(name="\"Inbox\"")
-public class Inbox extends IdentifiableEntity {
+public class Inbox extends LongevousEntity {
 
     /**
      * Serial UID
@@ -63,14 +61,13 @@ public class Inbox extends IdentifiableEntity {
      */
     @Column(name="Status", length=8, nullable=false)
     @Enumerated(EnumType.STRING)
-    private InboxStatus status;
+    private InboxStatus status = InboxStatus.ACTIVE;
     
     /**
      * Name will be stored separately
      */
     @Transient
     private transient String name;
-
     
     public Vault getVault() {
         return vault;

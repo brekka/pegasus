@@ -13,7 +13,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.hibernate.annotations.Type;
 
@@ -23,7 +22,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="\"Bundle\"")
-public class Bundle extends IdentifiableEntity {
+public class Bundle extends SnapshotEntity {
 
     /**
      * Serial UID

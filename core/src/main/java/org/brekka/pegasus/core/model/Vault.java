@@ -14,7 +14,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.hibernate.annotations.Type;
 
 /**
@@ -26,7 +25,7 @@ import org.hibernate.annotations.Type;
         @UniqueConstraint(columnNames = {"OwnerID", "Slug"}) 
     }
 )
-public class Vault extends IdentifiableEntity {
+public class Vault extends LongevousEntity {
     
     /**
      * Serial UID
@@ -44,7 +43,7 @@ public class Vault extends IdentifiableEntity {
     private String name;
     
     /**
-     * The principal Id of this membe
+     * The principal Id of this member
      */
     @Type(type="pg-uuid")
     @Column(name="PrincipalID", nullable=false)
@@ -55,8 +54,9 @@ public class Vault extends IdentifiableEntity {
      */
     @Column(name="Status", length=8, nullable=false)
     @Enumerated(EnumType.STRING)
-    private VaultStatus status;
-
+    private VaultStatus status = VaultStatus.ACTIVE;
+    
+    
     public Member getOwner() {
         return owner;
     }

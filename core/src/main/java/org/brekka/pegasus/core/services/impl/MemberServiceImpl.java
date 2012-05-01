@@ -47,7 +47,6 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
             // Not a member yet, create a new entry
             member = new Member();
             member.setOpenId(openId);
-            member.setStatus(MemberStatus.NEW);
             memberDAO.create(member);
         }
         return new AuthenticatedMemberImpl(member);

@@ -11,8 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
-
 /**
  * A member of the site
  * 
@@ -20,7 +18,7 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  */
 @Entity
 @Table(name = "\"Member\"")
-public class Member extends IdentifiableEntity {
+public class Member extends LongevousEntity {
 
     /**
      * Serial UID
@@ -34,8 +32,8 @@ public class Member extends IdentifiableEntity {
     private String openId;
     
     @Enumerated(EnumType.STRING)
-    @Column(name="Status")
-    private MemberStatus status;
+    @Column(name="Status", nullable=false)
+    private MemberStatus status = MemberStatus.NEW;
 
     @Column(name = "Name")
     private String name;
@@ -47,7 +45,7 @@ public class Member extends IdentifiableEntity {
     @OneToOne
     @JoinColumn(name="DefaultVaultID")
     private Vault defaultVault;
-
+    
     public String getOpenId() {
         return openId;
     }

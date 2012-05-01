@@ -10,8 +10,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
-
 /**
  * Enables an anonymous transfer
  * 
@@ -19,7 +17,7 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  */
 @Entity
 @Table(name="\"AnonymousTransfer\"")
-public class AnonymousTransfer extends IdentifiableEntity {
+public class AnonymousTransfer extends SnapshotEntity {
 
     /**
      * Serial UID

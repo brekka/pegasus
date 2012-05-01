@@ -3,18 +3,11 @@
  */
 package org.brekka.pegasus.core.model;
 
-import java.util.Date;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.brekka.commons.persistence.model.IdentifiableEntity;
 
 /**
  * Represents a file which has been deposited with a member via their public key. Essentially it links
@@ -24,7 +17,7 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  */
 @Entity
 @Table(name="\"Deposit\"")
-public class Deposit extends IdentifiableEntity {
+public class Deposit extends SnapshotEntity {
 
     /**
      * Serial UID
@@ -52,13 +45,7 @@ public class Deposit extends IdentifiableEntity {
     @JoinColumn(name="VaultID", updatable=false, nullable=false)
     private Vault vault;
     
-    /**
-     * When created
-     */
-    @Column(name="Created", updatable=false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date created;
-
+    
     public Bundle getBundle() {
         return bundle;
     }
@@ -81,13 +68,5 @@ public class Deposit extends IdentifiableEntity {
 
     public void setVault(Vault vault) {
         this.vault = vault;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
     }
 }
