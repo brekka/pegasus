@@ -7,7 +7,6 @@ import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.MemberStatus;
-import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -79,10 +78,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         AuthenticatedMember current = getCurrent();
         
         AuthenticatedMemberImpl authenticatedMemberImpl = (AuthenticatedMemberImpl) current;
-        
-        OpenVault openVault = (OpenVault) vaultService.openVault(defaultVault, vaultPassword);
-        authenticatedMemberImpl.setActiveVault(openVault);
         authenticatedMemberImpl.setMember(managed);
+        
+        vaultService.openVault(defaultVault, vaultPassword);
     }
     
     protected Member getManaged() {

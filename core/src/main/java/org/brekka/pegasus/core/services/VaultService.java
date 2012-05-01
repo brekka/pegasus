@@ -11,8 +11,8 @@ import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Vault;
 
 /**
- * @author Andrew Taylor
- *
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface VaultService {
 
@@ -30,4 +30,23 @@ public interface VaultService {
      * @return
      */
     List<Vault> retrieveForUser();
+
+    /**
+     * @param cryptedDataId
+     * @param openVault
+     * @return
+     */
+    byte[] releaseKey(UUID cryptedDataId, OpenVault openVault);
+
+    /**
+     * @param vaultSlug
+     * @return
+     */
+    Vault retrieveBySlug(String vaultSlug);
+
+    /**
+     * @param vault
+     * @return
+     */
+    boolean isOpen(Vault vault);
 }

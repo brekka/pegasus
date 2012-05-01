@@ -36,5 +36,16 @@ public class VaultHibernateDAO extends AbstractPegasusHibernateDAO<Vault> implem
                 .add(Restrictions.eq("owner", member))
                 .list();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.VaultDAO#retrieveBySlug(java.lang.String, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    public Vault retrieveBySlug(String vaultSlug, Member member) {
+        return (Vault) getCurrentSession().createCriteria(Vault.class)
+                .add(Restrictions.eq("slug", vaultSlug))
+                .add(Restrictions.eq("owner", member))
+                .uniqueResult();
+    }
 
 }

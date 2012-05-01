@@ -3,8 +3,12 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.Inbox;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -20,5 +24,16 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
     @Override
     protected Class<Deposit> type() {
         return Deposit.class;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DepositDAO#retrieveByInbox(org.brekka.pegasus.core.model.Inbox)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Deposit> retrieveByInbox(Inbox inbox) {
+        return getCurrentSession().createCriteria(Deposit.class)
+                .add(Restrictions.eq("inbox", inbox))
+                .list();
     }
 }

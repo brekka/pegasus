@@ -3,13 +3,17 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
+import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
@@ -17,15 +21,18 @@ import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.TokenService;
+import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.xml.pegasus.v1.model.BundleDocument;
+import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -49,6 +56,9 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+    private VaultService vaultService;
     
     
     /* (non-Javadoc)
@@ -115,6 +125,27 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)
+     */
+    @Override
+    public BundleType unlock(Deposit deposit) {
+        Bundle bundle = deposit.getBundle();
+        UUID cryptedDataId = bundle.getCryptedDataId();
+        
+        AuthenticatedMember current = memberService.getCurrent();
+        OpenVault activeVault = current.getActiveVault();
+        
+        byte[] secretKeyBytes = vaultService.releaseKey(cryptedDataId, activeVault);
+        
+        try {
+            return decryptBundle(null, bundle, secretKeyBytes);
+        } catch (XmlException | IOException e) {
+            throw new PegasusException(PegasusErrorCode.PG200, e, 
+                    "Failed to retrieve bundle XML for deposit '%s'" , deposit.getId());
+        }
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForMember()
      */
     @Override
@@ -122,5 +153,14 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     public List<Inbox> retrieveForMember() {
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         return inboxDAO.retrieveForMember(authenticatedMember.getMember());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Inbox)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Deposit> retrieveDeposits(Inbox inbox) {
+        return depositDAO.retrieveByInbox(inbox);
     }
 }

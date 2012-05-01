@@ -4,7 +4,10 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
@@ -31,6 +34,8 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     private Member member;
     
     private OpenVault activeVault;
+    
+    private transient Map<UUID, OpenVault> vaults;
     
     
 
@@ -67,5 +72,29 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     @Override
     public OpenVault getActiveVault() {
         return activeVault;
+    }
+
+    /**
+     * @param openVault
+     */
+    public void retainVault(OpenVault openVault) {
+        UUID vaultId = openVault.getVault().getId();
+        vaultMap().put(vaultId, openVault);
+        if (member.getDefaultVault().getId().equals(vaultId)) {
+            // This is the active vault
+            this.activeVault = openVault;
+        }
+    }
+    
+    public OpenVault retrieveVault(UUID vaultId) {
+        return vaultMap().get(vaultId);
+    }
+    
+    private synchronized Map<UUID, OpenVault> vaultMap() {
+        Map<UUID, OpenVault> map = this.vaults;
+        if (map == null) {
+            this.vaults = new HashMap<>();
+        }
+        return this.vaults;
     }
 }

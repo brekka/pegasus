@@ -23,5 +23,12 @@ public interface VaultDAO extends EntityDAO<UUID, Vault> {
      */
     List<Vault> retrieveForMember(Member member);
 
+    /**
+     * @param vaultSlug
+     * @param member
+     * @return
+     */
+    Vault retrieveBySlug(String vaultSlug, Member member);
+
 
 }

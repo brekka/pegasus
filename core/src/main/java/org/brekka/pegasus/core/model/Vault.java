@@ -16,12 +16,12 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.hibernate.annotations.Type;
 
 /**
- * @author Andrew Taylor
- *
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @Table(name="\"Vault\"", uniqueConstraints={ 
-        @UniqueConstraint(columnNames = {"OwnerID", "Token"}) 
+        @UniqueConstraint(columnNames = {"OwnerID", "Slug"}) 
     }
 )
 public class Vault extends IdentifiableEntity {
@@ -35,8 +35,8 @@ public class Vault extends IdentifiableEntity {
     @JoinColumn(name="OwnerID", nullable=false)
     private Member owner;
     
-    @Column(name="Token", nullable=false)
-    private String token;
+    @Column(name="Slug", nullable=false)
+    private String slug;
     
     @Column(name="Name")
     private String name;
@@ -56,12 +56,12 @@ public class Vault extends IdentifiableEntity {
         this.owner = owner;
     }
 
-    public String getToken() {
-        return token;
+    public String getSlug() {
+        return slug;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     public String getName() {

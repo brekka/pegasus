@@ -29,6 +29,15 @@ public class Bundles {
         return map().get(token);
     }
     
+
+    /**
+     * @param bundleId
+     * @return
+     */
+    public boolean contains(String token) {
+        return map().containsKey(token);
+    }
+    
     /**
      * Ensures that a map is always available.
      * @return

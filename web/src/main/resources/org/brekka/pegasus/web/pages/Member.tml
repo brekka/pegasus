@@ -4,11 +4,42 @@
 
     <h2>Member</h2>
     
+    <h3>Vaults</h3>
+    <ul>
+    <t:loop source="vaultList" value="loopVault">
+        <li>
+            <t:if test="vaultOpen">
+                <span>${loopVault.name} (open)</span>
+                <p:else>
+                    <t:pagelink page="open" context="loopVault.slug">${loopVault.name}</t:pagelink>
+                </p:else>
+            </t:if>
+        </li>        
+    </t:loop>
+    </ul>
+    
 
     <h3>Your inboxes</h3>
     <ul>
     <t:loop source="inboxList" value="loopInbox">
-        <li>${loopInbox.token.path}</li>        
+        <li>
+            <p>${loopInbox.token.path}</p>
+            <ul>
+                <t:loop source="depositList" value="loopDeposit">
+                    <li>
+                        <p>Uploaded: ${loopDeposit.created}</p>
+                        <t:if test="depositVaultOpen">
+                            <ul>
+                                <t:loop source="bundle.fileList" value="loopFile">
+                                    <li><t:pagelink page="download" context="fileContext">
+                                        ${loopFile.name} (${loopFile.length} bytes)</t:pagelink></li>
+                                </t:loop>
+                            </ul>
+                        </t:if>
+                    </li>
+                </t:loop>
+            </ul>
+        </li>        
     </t:loop>
     </ul>
     

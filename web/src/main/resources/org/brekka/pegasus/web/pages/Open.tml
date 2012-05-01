@@ -1,0 +1,15 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+      
+      
+    <h1>Open vault</h1>
+    
+    <t:form>
+        <div class="field">
+            <t:label for="vaultPassword">Vault password</t:label>
+            <t:passwordfield t:id="vaultPassword" />
+        </div>
+        <t:submit />
+    </t:form>
+
+</html>
