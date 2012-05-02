@@ -3,17 +3,10 @@
  */
 package org.brekka.pegasus.web.pages.member;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import org.apache.tapestry5.OptionModel;
-import org.apache.tapestry5.SelectModel;
-import org.apache.tapestry5.ValueEncoder;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SessionAttribute;
-import org.apache.tapestry5.internal.OptionModelImpl;
-import org.apache.tapestry5.internal.SelectModelImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
@@ -91,7 +84,7 @@ public class MemberIndex {
     }
     
     public boolean isDepositVaultOpen() {
-        return vaultService.isOpen(loopDeposit.getVault());
+        return vaultService.isOpen((Vault) loopDeposit.getCryptoStore());
     }
     
     public BundleType getBundle() {

@@ -22,7 +22,7 @@ import org.hibernate.annotations.Type;
  *
  */
 @Entity
-@Table(name="\"FileDownloadEvent\"")
+@Table(name="`FileDownloadEvent`")
 public class FileDownloadEvent extends RemoteUserEvent {
 
     /**
@@ -31,14 +31,14 @@ public class FileDownloadEvent extends RemoteUserEvent {
     private static final long serialVersionUID = -2521026919756337883L;
 
     @Type(type="pg-uuid")
-    @Column(name="FileID")
-    @Index(name="IDX_FileDownloadId")
+    @Column(name="`FileID`")
+    @Index(name="`IDX_FileDownloadId`")
     private UUID fileId;
     
     /**
      * The moment the last byte was sent
      */
-    @Column(name="Completed")
+    @Column(name="`Completed`")
     @Temporal(TemporalType.TIMESTAMP)
     private Date completed;
 

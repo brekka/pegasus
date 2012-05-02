@@ -19,7 +19,7 @@ import javax.persistence.TemporalType;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="\"BundleUnlockEvent\"")
+@Table(name="`BundleUnlockEvent`")
 public class BundleUnlockEvent extends RemoteUserEvent {
 
     /**
@@ -28,7 +28,7 @@ public class BundleUnlockEvent extends RemoteUserEvent {
     private static final long serialVersionUID = 4307560513008867955L;
 
     @ManyToOne
-    @JoinColumn(name="BundleID", nullable=false)
+    @JoinColumn(name="`BundleID`", nullable=false)
     private Bundle bundle;
     
     @Column

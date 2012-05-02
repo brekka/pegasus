@@ -16,7 +16,7 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  * @author Andrew Taylor
  */
 @Entity
-@Table(name="\"Token\"")
+@Table(name="`Token`")
 public class Token extends IdentifiableEntity {
 
     /**
@@ -24,10 +24,10 @@ public class Token extends IdentifiableEntity {
      */
     private static final long serialVersionUID = -2345199614401295313L;
     
-    @Column(name="Path", unique=true)
+    @Column(name="`Path`", unique=true)
     private String path;
     
-    @Column(name="\"Type\"")
+    @Column(name="`Type`")
     private TokenType type;
 
     

@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="\"BundleCreatedEvent\"")
+@Table(name="`BundleCreatedEvent`")
 public class BundleCreatedEvent extends RemoteUserEvent {
 
     /**
@@ -23,7 +23,7 @@ public class BundleCreatedEvent extends RemoteUserEvent {
     private static final long serialVersionUID = 4307560513008867955L;
 
     @ManyToOne
-    @JoinColumn(name="BundleID", nullable=false)
+    @JoinColumn(name="`BundleID`", nullable=false)
     private Bundle bundle;
     
     

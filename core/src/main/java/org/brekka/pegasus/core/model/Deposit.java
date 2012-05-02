@@ -16,7 +16,7 @@ import javax.persistence.Table;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="\"Deposit\"")
+@Table(name="`Deposit`")
 public class Deposit extends SnapshotEntity {
 
     /**
@@ -28,22 +28,22 @@ public class Deposit extends SnapshotEntity {
      * The bundle represented by this deposit
      */
     @OneToOne
-    @JoinColumn(name="BundleID", unique=true, updatable=false, nullable=false)
+    @JoinColumn(name="`BundleID`", unique=true, updatable=false, nullable=false)
     private Bundle bundle;
     
     /**
      * Identifies the origin of the bundle.
      */
     @ManyToOne
-    @JoinColumn(name="InboxID", updatable=false, nullable=false)
+    @JoinColumn(name="`InboxID`", updatable=false, nullable=false)
     private Inbox inbox;
     
     /**
      * The vault that will contain the encryption key for the bundle
      */
     @ManyToOne
-    @JoinColumn(name="VaultID", updatable=false, nullable=false)
-    private Vault vault;
+    @JoinColumn(name="`CryptoStoreID`", updatable=false, nullable=false)
+    private CryptoStore cryptoStore;
     
     
     public Bundle getBundle() {
@@ -62,11 +62,11 @@ public class Deposit extends SnapshotEntity {
         this.inbox = inbox;
     }
 
-    public Vault getVault() {
-        return vault;
+    public CryptoStore getCryptoStore() {
+        return cryptoStore;
     }
 
-    public void setVault(Vault vault) {
-        this.vault = vault;
+    public void setCryptoStore(CryptoStore cryptoStore) {
+        this.cryptoStore = cryptoStore;
     }
 }

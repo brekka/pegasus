@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.model;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -21,11 +22,13 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="\"Vault\"", uniqueConstraints={ 
+@Table(
+    uniqueConstraints={ 
         @UniqueConstraint(columnNames = {"OwnerID", "Slug"}) 
     }
 )
-public class Vault extends LongevousEntity {
+@DiscriminatorValue("Vault")
+public class Vault extends CryptoStore {
     
     /**
      * Serial UID
@@ -33,26 +36,26 @@ public class Vault extends LongevousEntity {
     private static final long serialVersionUID = -5208658520688698466L;
 
     @ManyToOne
-    @JoinColumn(name="OwnerID", nullable=false)
+    @JoinColumn(name="`OwnerID`", nullable=false)
     private Member owner;
     
-    @Column(name="Slug", nullable=false)
+    @Column(name="`Slug`", nullable=false)
     private String slug;
     
-    @Column(name="Name")
+    @Column(name="`Name`")
     private String name;
     
     /**
      * The principal Id of this member
      */
     @Type(type="pg-uuid")
-    @Column(name="PrincipalID", nullable=false)
+    @Column(name="`PrincipalID`", nullable=false)
     private UUID principalId;
     
     /**
      * Records the current status of this vault
      */
-    @Column(name="Status", length=8, nullable=false)
+    @Column(name="`Status`", length=8, nullable=false)
     @Enumerated(EnumType.STRING)
     private VaultStatus status = VaultStatus.ACTIVE;
     

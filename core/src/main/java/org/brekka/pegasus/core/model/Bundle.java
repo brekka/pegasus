@@ -21,7 +21,7 @@ import org.hibernate.annotations.Type;
  *
  */
 @Entity
-@Table(name="\"Bundle\"")
+@Table(name="`Bundle`")
 public class Bundle extends SnapshotEntity {
 
     /**
@@ -33,32 +33,32 @@ public class Bundle extends SnapshotEntity {
      * Id of the crypted data that contains the key used to encrypt this file's parts.
      */
     @Type(type="pg-uuid")
-    @Column(name="CryptedDataID")
+    @Column(name="`CryptedDataID`")
     private UUID cryptedDataId;
     
     /**
      * Crypto profile used for this file
      */
-    @Column(name="Profile")
+    @Column(name="`Profile`")
     private int profile;
     
     /**
      * The encryption initialisation vector use for the bundle XML
      */
-    @Column(name="IV", nullable=false)
+    @Column(name="`IV`", nullable=false)
     private byte[] iv;
     
     /**
      * When does this bundle expire?
      */
-    @Column(name="Expires")
+    @Column(name="`Expires`")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expires;
     
     /**
      * When was this bundle actually deleted.
      */
-    @Column(name="Deleted")
+    @Column(name="`Deleted`")
     @Temporal(TemporalType.TIMESTAMP)
     private Date deleted;
     

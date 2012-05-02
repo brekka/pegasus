@@ -71,7 +71,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         Token token = tokenService.createForInbox(inboxToken);
         inbox.setToken(token);
         inbox.setIntroduction(introduction);
-        inbox.setVault(vault);
+        inbox.setCryptoStore(vault);
         inbox.setName(name);
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         Member member = authenticatedMember.getMember();
@@ -88,7 +88,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     public InboxTransferKey depositFiles(Inbox inbox, String reference, String comment, List<FileBuilder> fileBuilders) {
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
-        Vault vault = inbox.getVault();
+        Vault vault = (Vault) inbox.getCryptoStore();
         UUID principalId = vault.getPrincipalId();
         
         Bundle bundleModel = new Bundle();
@@ -112,7 +112,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         Deposit deposit = new Deposit();
         deposit.setBundle(bundleModel);
         deposit.setInbox(inbox);
-        deposit.setVault(inbox.getVault());
+        deposit.setCryptoStore(inbox.getCryptoStore());
         
         depositDAO.create(deposit);
         

@@ -26,11 +26,11 @@ public abstract class LongevousEntity extends IdentifiableEntity {
      */
     private static final long serialVersionUID = 4541242370565729473L;
 
-    @Column(name = "Created", nullable = false, updatable = false)
+    @Column(name="`Created`", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
-    @Column(name = "Modified", nullable = false)
+    @Column(name="`Modified`", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modified;
 

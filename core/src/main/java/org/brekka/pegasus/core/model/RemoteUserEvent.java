@@ -28,27 +28,27 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
     /**
      * The moment the event begun
      */
-    @Column(name="Initiated")
+    @Column(name="`Initiated`")
     @Temporal(TemporalType.TIMESTAMP)
     private Date initiated; 
     
     /**
      * IP address of the system this web server talked to.
      */
-    @Column(name="RemoteAddress")
+    @Column(name="`RemoteAddress`")
     private String remoteAddress;
     
     /**
      * If the remote party was behind a proxy and it reported the internal IP,
      * this will record that IP.
      */
-    @Column(name="OnBehalfOfAddress")
+    @Column(name="`OnBehalfOfAddress`")
     private String onBehalfOfAddress;
 
     /**
      * The user agent reported by the remote server
      */
-    @Column(name="UserAgent")
+    @Column(name="`UserAgent`")
     private String userAgent;
 
     public Date getInitiated() {

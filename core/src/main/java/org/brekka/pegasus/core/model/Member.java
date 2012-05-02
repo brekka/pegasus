@@ -4,12 +4,12 @@
 package org.brekka.pegasus.core.model;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 
 /**
  * A member of the site
@@ -17,8 +17,8 @@ import javax.persistence.Table;
  * @author Andrew Taylor
  */
 @Entity
-@Table(name = "\"Member\"")
-public class Member extends LongevousEntity {
+@DiscriminatorValue("Member")
+public class Member extends Actor {
 
     /**
      * Serial UID
@@ -28,22 +28,22 @@ public class Member extends LongevousEntity {
     /**
      * The open ID of this member
      */
-    @Column(name = "OpenID", unique = true, nullable=false)
+    @Column(name="`OpenID`", unique = true, nullable=false)
     private String openId;
     
     @Enumerated(EnumType.STRING)
-    @Column(name="Status", nullable=false)
+    @Column(name="`Status`", nullable=false)
     private MemberStatus status = MemberStatus.NEW;
 
-    @Column(name = "Name")
+    @Column(name="`Name`")
     private String name;
 
     // TODO consider a separate table
-    @Column(name = "Email")
+    @Column(name="`Email`")
     private String email;
     
     @OneToOne
-    @JoinColumn(name="DefaultVaultID")
+    @JoinColumn(name="`DefaultVaultID`")
     private Vault defaultVault;
     
     public String getOpenId() {

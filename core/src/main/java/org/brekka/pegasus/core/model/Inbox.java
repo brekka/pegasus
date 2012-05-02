@@ -20,7 +20,7 @@ import javax.persistence.Transient;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="\"Inbox\"")
+@Table(name="`Inbox`")
 public class Inbox extends LongevousEntity {
 
     /**
@@ -32,7 +32,7 @@ public class Inbox extends LongevousEntity {
      * The token that identifies this inbox to the outside world.
      */
     @OneToOne
-    @JoinColumn(name = "TokenID", nullable = false)
+    @JoinColumn(name="`TokenID`", nullable = false)
     private Token token;
 
     /**
@@ -40,26 +40,26 @@ public class Inbox extends LongevousEntity {
      * however the associated {@link Deposit} will become unavailable.
      */
     @ManyToOne
-    @JoinColumn(name = "VaultID", nullable = false)
-    private Vault vault;
+    @JoinColumn(name="`CryptoStoreID`", nullable = false)
+    private CryptoStore cryptoStore;
     
     /**
      * The owner of this inbox
      */
     @ManyToOne
-    @JoinColumn(name="OwnerID", nullable = false)
-    private Member owner;
+    @JoinColumn(name="`OwnerID`", nullable = false)
+    private Actor owner;
     
     /**
      * Text to be displayed to the person when depositing a file.
      */
-    @Column(name="Introduction", length=2000)
+    @Column(name="`Introduction`", length=2000)
     private String introduction;
     
     /**
      * Records the current status of this inbox
      */
-    @Column(name="Status", length=8, nullable=false)
+    @Column(name="`Status`", length=8, nullable=false)
     @Enumerated(EnumType.STRING)
     private InboxStatus status = InboxStatus.ACTIVE;
     
@@ -69,12 +69,12 @@ public class Inbox extends LongevousEntity {
     @Transient
     private transient String name;
     
-    public Vault getVault() {
-        return vault;
+    public CryptoStore getCryptoStore() {
+        return cryptoStore;
     }
 
-    public void setVault(Vault vault) {
-        this.vault = vault;
+    public void setCryptoStore(CryptoStore cryptoStore) {
+        this.cryptoStore = cryptoStore;
     }
 
     public Token getToken() {
@@ -85,11 +85,11 @@ public class Inbox extends LongevousEntity {
         this.token = token;
     }
 
-    public Member getOwner() {
+    public Actor getOwner() {
         return owner;
     }
 
-    public void setOwner(Member owner) {
+    public void setOwner(Actor owner) {
         this.owner = owner;
     }
 

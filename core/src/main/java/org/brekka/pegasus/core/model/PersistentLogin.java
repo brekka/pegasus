@@ -17,7 +17,7 @@ import javax.persistence.TemporalType;
  * @see http://static.springsource.org/spring-security/site/docs/3.0.x/reference/remember-me.html
  */
 @Entity
-@Table(name="persistent_logins")
+@Table(name="`persistent_logins`")
 public class PersistentLogin implements Serializable {
 	/**
 	 * Serial UID
@@ -35,7 +35,7 @@ public class PersistentLogin implements Serializable {
 	private String token;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="last_used", nullable=false)
+	@Column(name="`last_used`", nullable=false)
 	private Date lastUsed;
 
 	public String getSeries() {

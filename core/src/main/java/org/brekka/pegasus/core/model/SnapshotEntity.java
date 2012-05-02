@@ -26,7 +26,7 @@ public class SnapshotEntity extends IdentifiableEntity {
     private static final long serialVersionUID = 310200006809589397L;
 
 
-    @Column(name = "Created", nullable=false, updatable = false)
+    @Column(name = "`Created`", nullable=false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
     
