@@ -9,7 +9,7 @@ import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.InboxTransferKey;
-import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 
 /**
@@ -20,10 +20,10 @@ public interface InboxService {
     /**
      * Create a new inbox for the current user, using the specified vault.
      * @param token
-     * @param vault
+     * @param keySafe
      * @return
      */
-    Inbox createInbox(String name, String introduction, String inboxToken, Vault vault);
+    Inbox createInbox(String name, String introduction, String inboxToken, KeySafe keySafe);
     
     /**
      * Create a deposit in the specified inbox. 

@@ -28,6 +28,7 @@ import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.BundleDAO;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.services.EventService;
+import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.phoenix.CryptoFactoryRegistry;
@@ -63,6 +64,9 @@ abstract class PegasusServiceSupport {
     
     @Autowired
     protected EventService eventService;
+    
+    @Autowired
+    protected KeySafeService keySafeService;
     
     /**
      * Prepare the XML based structure that will contain the details for this bundle,

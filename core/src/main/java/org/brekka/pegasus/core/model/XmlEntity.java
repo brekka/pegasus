@@ -31,23 +31,29 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
     private static final long serialVersionUID = 1708978401887395862L;
 
     /**
-     * If the XML should be encrypted, then this field should be set to the id of the vault.
+     * If the XML should be encrypted, then this field should be set to the id of the key store.
      */
     @ManyToOne
-    @JoinColumn(name="`VaultID`", nullable=false, updatable=false)
-    private Vault vault;
+    @JoinColumn(name="`KeySafeID`", updatable=false)
+    private KeySafe keySafe;
+    
+    /**
+     * Crypto profile used for this file
+     */
+    @Column(name="`Profile`")
+    private int profile;
     
     /**
      * The encryption initialisation vector used for the profile encryption (if encrypted).
      */
-    @Column(name="`IV`", nullable=false, updatable=false)
+    @Column(name="`IV`", updatable=false)
     private byte[] iv;
     
     /**
      * Id of the crypted data that contains the key used to encrypt the profile (if encrypted).
      */
     @Type(type="pg-uuid")
-    @Column(name="`CryptedDataID`", nullable=false, updatable=false)
+    @Column(name="`CryptedDataID`", updatable=false)
     private UUID cryptedDataId;
     
     /**
@@ -65,12 +71,13 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
     
     
 
-    public Vault getVault() {
-        return vault;
+
+    public KeySafe getKeySafe() {
+        return keySafe;
     }
 
-    public void setVault(Vault vault) {
-        this.vault = vault;
+    public void setKeySafe(KeySafe keySafe) {
+        this.keySafe = keySafe;
     }
 
     public byte[] getIv() {
@@ -104,5 +111,14 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
     public void setBean(T bean) {
         this.bean = bean;
     }
+
+    public int getProfile() {
+        return profile;
+    }
+
+    public void setProfile(int profile) {
+        this.profile = profile;
+    }
+    
 
 }

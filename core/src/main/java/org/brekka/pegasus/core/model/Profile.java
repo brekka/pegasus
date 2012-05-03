@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.brekka.xml.pegasus.v1.model.ProfileType;
+import org.brekka.xml.pegasus.v1.model.ProfileDocument;
 
 /**
  * Contains the profile information for a user. Depending on what the user selects, this data may be stored encrypted
@@ -35,7 +35,7 @@ public class Profile extends LongevousEntity {
     
     @OneToOne
     @JoinColumn(name="`XmlEntityID`", nullable=false)
-    private XmlEntity<ProfileType> xml;
+    private XmlEntity<ProfileDocument> xml;
     
 
     public Member getOwner() {
@@ -46,11 +46,11 @@ public class Profile extends LongevousEntity {
         this.owner = owner;
     }
 
-    public XmlEntity<ProfileType> getXml() {
+    public XmlEntity<ProfileDocument> getXml() {
         return xml;
     }
 
-    public void setXml(XmlEntity<ProfileType> xml) {
+    public void setXml(XmlEntity<ProfileDocument> xml) {
         this.xml = xml;
     }
 }

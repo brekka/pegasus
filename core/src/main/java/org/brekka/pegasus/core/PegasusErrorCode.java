@@ -18,6 +18,10 @@ public enum PegasusErrorCode implements ErrorCode {
      * Token already in use
      */
     PG300,
+    
+    PG400,
+    
+    PG401,
     ;
     
     private static final Area AREA = ErrorCode.Utils.createArea("PG");

@@ -42,8 +42,8 @@ public class Deposit extends SnapshotEntity {
      * The vault that will contain the encryption key for the bundle
      */
     @ManyToOne
-    @JoinColumn(name="`CryptoStoreID`", updatable=false, nullable=false)
-    private CryptoStore cryptoStore;
+    @JoinColumn(name="`KeySafeID`", updatable=false, nullable=false)
+    private KeySafe keySafe;
     
     
     public Bundle getBundle() {
@@ -62,11 +62,11 @@ public class Deposit extends SnapshotEntity {
         this.inbox = inbox;
     }
 
-    public CryptoStore getCryptoStore() {
-        return cryptoStore;
+    public KeySafe getKeySafe() {
+        return keySafe;
     }
 
-    public void setCryptoStore(CryptoStore cryptoStore) {
-        this.cryptoStore = cryptoStore;
+    public void setKeySafe(KeySafe keySafe) {
+        this.keySafe = keySafe;
     }
 }

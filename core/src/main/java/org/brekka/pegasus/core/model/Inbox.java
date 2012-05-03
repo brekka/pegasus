@@ -40,8 +40,8 @@ public class Inbox extends LongevousEntity {
      * however the associated {@link Deposit} will become unavailable.
      */
     @ManyToOne
-    @JoinColumn(name="`CryptoStoreID`", nullable = false)
-    private CryptoStore cryptoStore;
+    @JoinColumn(name="`KeySafeID`", nullable = false)
+    private KeySafe keySafe;
     
     /**
      * The owner of this inbox
@@ -69,12 +69,12 @@ public class Inbox extends LongevousEntity {
     @Transient
     private transient String name;
     
-    public CryptoStore getCryptoStore() {
-        return cryptoStore;
+    public KeySafe getKeySafe() {
+        return keySafe;
     }
 
-    public void setCryptoStore(CryptoStore cryptoStore) {
-        this.cryptoStore = cryptoStore;
+    public void setKeySafe(KeySafe keySafe) {
+        this.keySafe = keySafe;
     }
 
     public Token getToken() {

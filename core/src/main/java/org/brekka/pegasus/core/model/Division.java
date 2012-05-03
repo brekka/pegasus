@@ -20,7 +20,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @DiscriminatorValue("Division")
-public class Division extends CryptoStore {
+public class Division extends KeySafe {
 
     /**
      * Serial UID

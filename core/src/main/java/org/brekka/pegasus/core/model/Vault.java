@@ -28,7 +28,7 @@ import org.hibernate.annotations.Type;
     }
 )
 @DiscriminatorValue("Vault")
-public class Vault extends CryptoStore {
+public class Vault extends KeySafe {
     
     /**
      * Serial UID

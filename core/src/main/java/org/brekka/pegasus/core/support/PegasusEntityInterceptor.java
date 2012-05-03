@@ -4,14 +4,7 @@
 package org.brekka.pegasus.core.support;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.channels.IllegalSelectorException;
 import java.util.Date;
-
-import javax.persistence.EntityListeners;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 
 import org.brekka.pegasus.core.model.LongevousEntity;
 import org.brekka.pegasus.core.model.SnapshotEntity;

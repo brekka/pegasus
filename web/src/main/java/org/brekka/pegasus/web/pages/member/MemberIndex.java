@@ -84,7 +84,7 @@ public class MemberIndex {
     }
     
     public boolean isDepositVaultOpen() {
-        return vaultService.isOpen((Vault) loopDeposit.getCryptoStore());
+        return vaultService.isOpen((Vault) loopDeposit.getKeySafe());
     }
     
     public BundleType getBundle() {
