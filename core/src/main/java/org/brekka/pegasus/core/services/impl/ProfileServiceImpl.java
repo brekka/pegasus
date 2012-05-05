@@ -6,13 +6,17 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.ProfileDAO;
+import org.brekka.pegasus.core.model.AuthenticatedMember;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.xml.pegasus.v1.model.ProfileDocument;
+import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,6 +35,9 @@ public class ProfileServiceImpl implements ProfileService {
     
     @Autowired
     private XmlEntityService xmlEntityService;
+    
+    @Autowired
+    private MemberService memberService;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ProfileService#createPlainProfile(org.brekka.pegasus.core.model.Member)
@@ -106,6 +113,32 @@ public class ProfileServiceImpl implements ProfileService {
         XmlEntity<ProfileDocument> managedXmlEntity = xmlEntityService.retrieveEntity(xmlEntity.getId(), ProfileDocument.class);
         xmlEntity.setBean(managedXmlEntity.getBean());
         return true;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.ProfileService#currentUserProfileUpdated()
+     */
+    @Override
+    public void currentUserProfileUpdated() {
+        /*
+         * TODO bind the update as a single operation to the transaction so that
+         * multiple changes can be made to the profile but only persisted once.
+         */
+        AuthenticatedMemberImpl current = (AuthenticatedMemberImpl) memberService.getCurrent();
+        Profile activeProfile = current.getActiveProfile();
+        ProfileDocument profileDocument = activeProfile.getXml().getBean();
+        XmlEntity<ProfileDocument> currentXml = activeProfile.getXml();
+        XmlEntity<ProfileDocument> replacementXml;
+        if (currentXml.getCryptedDataId() == null) {
+            // Plain
+            replacementXml = xmlEntityService.persistPlainEntity(profileDocument);
+        } else {
+            KeySafe keySafe = currentXml.getKeySafe();
+            replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
+        }
+        xmlEntityService.delete(currentXml.getId());
+        activeProfile.setXml(replacementXml);
+        profileDAO.update(activeProfile);
     }
 
 }

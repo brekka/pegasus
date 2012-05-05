@@ -34,7 +34,6 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Autowired
     private MemberDAO memberDAO;
 
-    
     @Autowired
     private VaultService vaultService; 
     
@@ -55,12 +54,6 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
             memberDAO.create(member);
         }
         AuthenticatedMemberImpl authMember = new AuthenticatedMemberImpl(member);
-        
-        // Attempt to locate the user profile
-        if (member.getStatus() == MemberStatus.ACTIVE) {
-            Profile profile = profileService.retrieveProfile(member);
-            authMember.setActiveProfile(profile);
-        }
         return authMember;
     }
     
@@ -113,9 +106,18 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Object principal = authentication.getPrincipal();
-        if (principal instanceof AuthenticatedMember) {
-            return (AuthenticatedMember) principal;
+        AuthenticatedMemberImpl authMember = null;
+        if (principal instanceof AuthenticatedMemberImpl) {
+            authMember = (AuthenticatedMemberImpl) principal;
+            Member member = authMember.getMember();
+            // Attempt to locate the user profile
+            if (member.getStatus() == MemberStatus.ACTIVE
+                    && authMember.getActiveProfile() == null) {
+                Profile profile = profileService.retrieveProfile(member);
+                authMember.setActiveProfile(profile);
+            }
         }
-        return null;
+        
+        return authMember;
     }
 }

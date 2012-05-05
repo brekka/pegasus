@@ -23,7 +23,7 @@
     <ul>
     <t:loop source="inboxList" value="loopInbox">
         <li>
-            <p>${loopInbox.token.path} - ${inboxLink}</p>
+            <p>${inboxName} - ${inboxLink}</p>
             <ul>
                 <t:loop source="depositList" value="loopDeposit">
                     <li>

@@ -33,4 +33,10 @@ public interface ProfileService {
      * @return true if the profile was unlocked
      */
     boolean releaseProfile(Profile profile, Vault vault);
+    
+    /**
+     * Indicate that the profile for the current user has been updated
+     * @param profile
+     */
+    void currentUserProfileUpdated();
 }

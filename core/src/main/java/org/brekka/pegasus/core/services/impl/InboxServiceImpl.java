@@ -27,6 +27,7 @@ import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
+import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
@@ -34,6 +35,7 @@ import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.xml.pegasus.v1.model.BundleDocument;
 import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,6 +63,9 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Autowired
     private VaultService vaultService;
     
+    @Autowired
+    private ProfileService profileService;
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#createInbox(java.lang.String, org.brekka.pegasus.core.model.Vault)
@@ -78,6 +83,12 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         Member member = authenticatedMember.getMember();
         inbox.setOwner(member);
         inboxDAO.create(inbox);
+        
+        ProfileType.Inbox newXmlInbox = authenticatedMember.getProfile().addNewInbox();
+        newXmlInbox.setUUID(inbox.getId().toString());
+        newXmlInbox.setName(name);
+        profileService.currentUserProfileUpdated();
+        
         return inbox;
     }
     
@@ -127,7 +138,19 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Transactional(propagation=Propagation.REQUIRED)
     public Inbox retrieveForToken(String inboxToken) {
         Token token = tokenService.retrieveByPath(inboxToken);
-        return inboxDAO.retrieveByToken(token);
+        Inbox inbox = inboxDAO.retrieveByToken(token);
+        
+        AuthenticatedMember authenticatedMember = memberService.getCurrent();
+        ProfileType profile = authenticatedMember.getProfile();
+        for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
+            ProfileType.Inbox inboxXml = profile.getInboxArray(i);
+            if (inboxXml.getUUID().equals(inbox.getId().toString())) {
+                String name = inboxXml.getName();
+                inbox.setName(name);
+                break;
+            }
+        }
+        return inbox;
     }
     
     /* (non-Javadoc)
@@ -158,7 +181,23 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Transactional(propagation=Propagation.REQUIRED)
     public List<Inbox> retrieveForMember() {
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
-        return inboxDAO.retrieveForMember(authenticatedMember.getMember());
+        List<Inbox> inboxList = inboxDAO.retrieveForMember(authenticatedMember.getMember());
+
+        ProfileType profile = authenticatedMember.getProfile();
+        if (profile != null) {
+            for (Inbox inbox : inboxList) {
+                for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
+                    ProfileType.Inbox inboxXml = profile.getInboxArray(i);
+                    if (inboxXml.getUUID().equals(inbox.getId().toString())) {
+                        String name = inboxXml.getName();
+                        inbox.setName(name);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return inboxList;
     }
     
     /* (non-Javadoc)

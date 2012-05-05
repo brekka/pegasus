@@ -103,4 +103,11 @@ public class MemberIndex {
     public String getInboxLink() {
         return configuration.getFetchBase() + "/" + loopInbox.getToken().getPath(); 
     }
+    
+    public String getInboxName() {
+        if (loopInbox.getName() != null) {
+            return loopInbox.getName();
+        }
+        return loopInbox.getToken().getPath();
+    }
 }
