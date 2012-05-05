@@ -7,8 +7,10 @@ import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.MemberStatus;
+import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
+import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -36,6 +38,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Autowired
     private VaultService vaultService; 
     
+    @Autowired
+    private ProfileService profileService;
+    
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
      */
@@ -49,7 +54,14 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
             member.setOpenId(openId);
             memberDAO.create(member);
         }
-        return new AuthenticatedMemberImpl(member);
+        AuthenticatedMemberImpl authMember = new AuthenticatedMemberImpl(member);
+        
+        // Attempt to locate the user profile
+        if (member.getStatus() == MemberStatus.ACTIVE) {
+            Profile profile = profileService.retrieveProfile(member);
+            authMember.setActiveProfile(profile);
+        }
+        return authMember;
     }
     
     /* (non-Javadoc)
@@ -63,7 +75,7 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void setupMember(String name, String email, String vaultPassword) {
+    public void setupMember(String name, String email, String vaultPassword, boolean encryptedProfile) {
         Member managed = getManaged();
         managed.setName(name);
         managed.setEmail(email);
@@ -76,8 +88,16 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         
         AuthenticatedMember current = getCurrent();
         
+        Profile profile;
+        if (encryptedProfile) {
+            profile = profileService.createEncryptedProfile(managed, defaultVault);
+        } else {
+            profile = profileService.createPlainProfile(managed);
+        }
+        
         AuthenticatedMemberImpl authenticatedMemberImpl = (AuthenticatedMemberImpl) current;
         authenticatedMemberImpl.setMember(managed);
+        authenticatedMemberImpl.setActiveProfile(profile);
         
         vaultService.openVault(defaultVault, vaultPassword);
     }
@@ -92,6 +112,10 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     public AuthenticatedMember getCurrent() {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        return (AuthenticatedMember) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof AuthenticatedMember) {
+            return (AuthenticatedMember) principal;
+        }
+        return null;
     }
 }

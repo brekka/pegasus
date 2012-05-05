@@ -16,7 +16,7 @@ public interface MemberService {
      */
     boolean isNewMember();
 
-    void setupMember(String name, String email, String vaultPassword);
+    void setupMember(String name, String email, String vaultPassword, boolean encryptedProfile);
     
     AuthenticatedMember getCurrent();
 }

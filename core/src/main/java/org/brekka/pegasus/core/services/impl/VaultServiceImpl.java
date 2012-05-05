@@ -10,8 +10,10 @@ import org.brekka.pegasus.core.dao.VaultDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
+import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
+import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.core.utils.SlugUtils;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
@@ -41,6 +43,9 @@ public class VaultServiceImpl implements VaultService {
     
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+    private ProfileService profileService;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.VaultService#createVault(org.brekka.pegasus.core.model.Member, java.lang.String)
@@ -87,6 +92,11 @@ public class VaultServiceImpl implements VaultService {
         AuthenticatedMember current = memberService.getCurrent();
         AuthenticatedMemberImpl currentMemberImpl = (AuthenticatedMemberImpl) current;
         currentMemberImpl.retainVault(openVault);
+        
+        // Check the profile, release it if necessary
+        Profile activeProfile = currentMemberImpl.getActiveProfile();
+        profileService.releaseProfile(activeProfile, vault);
+        
         return openVault;
     }
 

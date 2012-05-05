@@ -29,10 +29,10 @@ public class XmlEntityHibernateDAO extends AbstractPegasusHibernateDAO<XmlEntity
     }
     
     @Override
-    public void create(XmlEntity<?> xmlEntity, InputStream inputStream) {
+    public void create(XmlEntity<?> xmlEntity, InputStream inputStream, long length) {
         Session session = getCurrentSession();
         LobCreator lobCreator = Hibernate.getLobCreator(session);
-        Blob blob = lobCreator.createBlob(inputStream, 0); // Doesn't even use the length
+        Blob blob = lobCreator.createBlob(inputStream, length);
         xmlEntity.setData(blob);
         create(xmlEntity);
     }

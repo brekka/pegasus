@@ -18,6 +18,7 @@ body {
 #header {
 	border-bottom: 1px solid #000000;
 	margin-bottom: 10px;
+	position: relative;
 }
 
 #header a {
@@ -31,6 +32,12 @@ body {
 #header em {
 	color: #000000;
 	font-style: normal;
+}
+
+#header .user {
+	position: absolute;
+	right: 0;
+	bottom: 8px;
 }
 
 h3 em {
@@ -212,3 +219,4 @@ input.code {
 	margin: 0;
 	color: #808080;
 }
+

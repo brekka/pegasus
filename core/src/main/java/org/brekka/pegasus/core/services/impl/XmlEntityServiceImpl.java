@@ -5,6 +5,8 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,6 +19,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.SchemaType;
 import org.apache.xmlbeans.XmlBeans;
@@ -60,10 +63,12 @@ public class XmlEntityServiceImpl extends PegasusServiceSupport implements XmlEn
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try ( GZIPOutputStream gos = new GZIPOutputStream(baos) ) {
             xml.save(gos);
+            gos.close();
         } catch (IOException e) {
             throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
         }
-        xmlEntityDAO.create(entity, new ByteArrayInputStream(baos.toByteArray()));
+        byte[] data = baos.toByteArray();
+        xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
         return entity;
     }
 
@@ -90,11 +95,13 @@ public class XmlEntityServiceImpl extends PegasusServiceSupport implements XmlEn
         
         try {
             xml.save(saveOs);
+            saveOs.close();
         } catch (IOException e) {
             throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
         }
-        xmlEntityDAO.create(entity, new ByteArrayInputStream(baos.toByteArray()));
-        return null;
+        byte[] data = baos.toByteArray();
+        xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+        return entity;
     }
 
     /* (non-Javadoc)
@@ -143,7 +150,7 @@ public class XmlEntityServiceImpl extends PegasusServiceSupport implements XmlEn
             }
             
         } catch (IOException | SQLException | XmlException e) {
-            throw new PegasusException(PegasusErrorCode.PG401, 
+            throw new PegasusException(PegasusErrorCode.PG401, e, 
                     "Failed to extract Xml Entity '%s'", xmlEntityId);
         } finally {
             IOUtils.closeQuietly(is);

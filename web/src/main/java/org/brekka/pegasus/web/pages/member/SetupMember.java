@@ -31,6 +31,9 @@ public class SetupMember {
     
     @Property
     private String vaultPasswordRepeat;
+    
+    @Property
+    private boolean encryptProfile = true;
 
     Object onActivate() {
         name = OpenIDUtils.identifyName();
@@ -49,7 +52,7 @@ public class SetupMember {
     
     Object onSuccess() {
         String email = OpenIDUtils.identifyEmail();
-        memberService.setupMember(name, email, vaultPassword);
+        memberService.setupMember(name, email, vaultPassword, encryptProfile);
         return MemberIndex.class;
     }
 }

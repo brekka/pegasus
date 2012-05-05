@@ -33,7 +33,10 @@ public class Profile extends LongevousEntity {
     @JoinColumn(name="`OwnerID`", nullable=false)
     private Member owner;
     
-    @OneToOne
+    /**
+     * The profile XML
+     */
+    @OneToOne()
     @JoinColumn(name="`XmlEntityID`", nullable=false)
     private XmlEntity<ProfileDocument> xml;
     

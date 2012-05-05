@@ -15,5 +15,5 @@ import org.brekka.pegasus.core.model.XmlEntity;
  */
 public interface XmlEntityDAO extends EntityDAO<UUID, XmlEntity<?>> {
 
-    void create(XmlEntity<?> xmlEntity, InputStream inputStream);
+    void create(XmlEntity<?> xmlEntity, InputStream inputStream, long length);
 }

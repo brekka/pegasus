@@ -12,6 +12,10 @@ import java.util.UUID;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
+import org.brekka.pegasus.core.model.Profile;
+import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.xml.pegasus.v1.model.ProfileDocument;
+import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -37,7 +41,7 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     
     private transient Map<UUID, OpenVault> vaults;
     
-    
+    private transient Profile activeProfile;
 
     public AuthenticatedMemberImpl(Member member) {
         super(member.getOpenId(), "notused", USER_AUTHORITIES);
@@ -60,6 +64,36 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     }
     
     /**
+     * @param activeProfile the activeProfile to set
+     */
+    void setActiveProfile(Profile activeProfile) {
+        this.activeProfile = activeProfile;
+    }
+    
+    /**
+     * @return the activeProfile
+     */
+    Profile getActiveProfile() {
+        return activeProfile;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.AuthenticatedMember#getProfile()
+     */
+    @Override
+    public ProfileType getProfile() {
+        if (activeProfile == null) {
+            return null;
+        }
+        XmlEntity<ProfileDocument> xmlEntity = activeProfile.getXml();
+        ProfileDocument bean = xmlEntity.getBean();
+        if (bean == null) {
+            return null;
+        }
+        return bean.getProfile();
+    }
+    
+    /**
      * @param member the member to set
      */
     void setMember(Member member) {
@@ -72,6 +106,14 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     @Override
     public OpenVault getActiveVault() {
         return activeVault;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.AuthenticatedMember#getVault(java.util.UUID)
+     */
+    @Override
+    public OpenVault getVault(UUID vaultId) {
+        return vaults.get(vaultId);
     }
 
     /**

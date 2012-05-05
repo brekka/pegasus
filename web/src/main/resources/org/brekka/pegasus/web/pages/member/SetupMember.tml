@@ -21,6 +21,11 @@
             <t:label for="vaultPasswordRepeat">Vault password (repeat)</t:label>
             <t:passwordfield t:id="vaultPasswordRepeat" />
         </div>
+        
+        <div class="field">
+            <t:label for="encryptProfile">Encrypt profile</t:label>
+            <t:checkbox t:id="encryptProfile" />
+        </div>
 		
 		<div class="field">
 			<label>Complete</label>

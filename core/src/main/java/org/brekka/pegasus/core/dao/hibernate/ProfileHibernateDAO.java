@@ -3,8 +3,12 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+
 import org.brekka.pegasus.core.dao.ProfileDAO;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -19,5 +23,16 @@ public class ProfileHibernateDAO  extends AbstractPegasusHibernateDAO<Profile> i
     @Override
     protected Class<Profile> type() {
         return Profile.class;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.ProfileDAO#retrieveByMember(org.brekka.pegasus.core.model.Member)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Profile> retrieveByMember(Member member) {
+        return getCurrentSession().createCriteria(Profile.class)
+                .add(Restrictions.eq("owner", member))
+                .list();
     }
 }

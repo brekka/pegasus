@@ -10,6 +10,7 @@
     	<div id="body">
 	    	<div id="header">
 	    		<t:pagelink page="index"><em>Send</em>&nbsp;<em>i</em>t&nbsp;<em>s</em>ecure</t:pagelink>
+                <span class="user">${memberName}</span>
 	    	</div>
 	    	<div id="content">
 		    	<t:alerts/>
