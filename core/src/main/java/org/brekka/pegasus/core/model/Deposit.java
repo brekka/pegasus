@@ -3,11 +3,16 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
 
 /**
  * Represents a file which has been deposited with a member via their public key. Essentially it links
@@ -30,6 +35,13 @@ public class Deposit extends SnapshotEntity {
     @OneToOne
     @JoinColumn(name="`BundleID`", unique=true, updatable=false, nullable=false)
     private Bundle bundle;
+    
+    /**
+     * Id of the crypted data that contains the key used to encrypt this file's parts.
+     */
+    @Type(type="pg-uuid")
+    @Column(name="`CryptedDataID`")
+    private UUID cryptedDataId;
     
     /**
      * Identifies the origin of the bundle.
@@ -68,5 +80,13 @@ public class Deposit extends SnapshotEntity {
 
     public void setKeySafe(KeySafe keySafe) {
         this.keySafe = keySafe;
+    }
+    
+    public UUID getCryptedDataId() {
+        return cryptedDataId;
+    }
+
+    public void setCryptedDataId(UUID cryptedDataId) {
+        this.cryptedDataId = cryptedDataId;
     }
 }

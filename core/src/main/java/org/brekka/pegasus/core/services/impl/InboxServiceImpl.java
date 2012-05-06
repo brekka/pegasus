@@ -116,15 +116,15 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         
         encryptBundleDocument(bundleDocument, bundleModel, secretKey);
+        bundleDAO.create(bundleModel);
         
         CryptedData cryptedData = phalanxService.asymEncrypt(secretKey.getEncoded(), new IdentityPrincipal(principalId));
-        bundleModel.setCryptedDataId(cryptedData.getId());
-        bundleDAO.create(bundleModel);
         
         Deposit deposit = new Deposit();
         deposit.setBundle(bundleModel);
         deposit.setInbox(inbox);
         deposit.setKeySafe(inbox.getKeySafe());
+        deposit.setCryptedDataId(cryptedData.getId());
         
         depositDAO.create(deposit);
         
@@ -159,7 +159,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Override
     public BundleType unlock(Deposit deposit) {
         Bundle bundle = deposit.getBundle();
-        UUID cryptedDataId = bundle.getCryptedDataId();
+        UUID cryptedDataId = deposit.getCryptedDataId();
         
         AuthenticatedMember current = memberService.getCurrent();
         OpenVault activeVault = current.getActiveVault();

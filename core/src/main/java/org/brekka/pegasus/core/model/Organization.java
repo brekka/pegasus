@@ -28,7 +28,7 @@ public class Organization extends LongevousEntity {
     private String name;
     
     /**
-     * The root division. 
+     * The root division, every organization must have one.
      */
     @OneToOne
     @JoinColumn(name="`DivisionID`", nullable=false, updatable=false)

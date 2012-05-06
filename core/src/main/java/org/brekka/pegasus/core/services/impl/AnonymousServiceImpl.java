@@ -64,6 +64,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         
         encryptBundleDocument(doc, bundleModel, secretKey);
+        bundleDAO.create(bundleModel);
         
         // Allocate a code
         String code = RandomStringUtils.random(8, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
@@ -72,8 +73,8 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
          * Use phalanx to store the secret key for the bundle XML, encrypted with the code.
          */
         CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), code);
-        bundleModel.setCryptedDataId(pbeEncryptedData.getId());
-        bundleDAO.create(bundleModel);
+        
+        
         
         /*
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
@@ -83,6 +84,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setBundle(bundleModel);
         anonTransfer.setToken(token);
+        anonTransfer.setCryptedDataId(pbeEncryptedData.getId());
         
         eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
@@ -105,7 +107,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         
         Bundle bundle = transfer.getBundle();
-        byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(bundle.getCryptedDataId()), code);
+        byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), code);
         
         try {
             return decryptBundle(agreementAccepted, bundle, secretKeyBytes);

@@ -4,7 +4,6 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +13,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.brekka.xml.pegasus.v1.model.BundleType;
-import org.hibernate.annotations.Type;
 
 /**
  * @author Andrew Taylor
@@ -28,13 +26,6 @@ public class Bundle extends SnapshotEntity {
      * Serial UID
      */
     private static final long serialVersionUID = -5103824363711199962L;
-
-    /**
-     * Id of the crypted data that contains the key used to encrypt this file's parts.
-     */
-    @Type(type="pg-uuid")
-    @Column(name="`CryptedDataID`")
-    private UUID cryptedDataId;
     
     /**
      * Crypto profile used for this file
@@ -67,14 +58,6 @@ public class Bundle extends SnapshotEntity {
      */
     @Transient
     private transient BundleType xml;
-    
-    public UUID getCryptedDataId() {
-        return cryptedDataId;
-    }
-
-    public void setCryptedDataId(UUID cryptedDataId) {
-        this.cryptedDataId = cryptedDataId;
-    }
 
     public Date getExpires() {
         return expires;

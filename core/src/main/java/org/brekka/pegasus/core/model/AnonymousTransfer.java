@@ -3,12 +3,17 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
 
 /**
  * Enables an anonymous transfer
@@ -32,6 +37,13 @@ public class AnonymousTransfer extends SnapshotEntity {
     @JoinColumn(name="`BundleID`")
     private Bundle bundle;
 
+    /**
+     * Id of the crypted data that contains the key used to encrypt the bundle
+     */
+    @Type(type="pg-uuid")
+    @Column(name="`CryptedDataID`")
+    private UUID cryptedDataId;
+
     
     public Token getToken() {
         return token;
@@ -47,5 +59,13 @@ public class AnonymousTransfer extends SnapshotEntity {
 
     public void setBundle(Bundle bundle) {
         this.bundle = bundle;
+    }
+    
+    public UUID getCryptedDataId() {
+        return cryptedDataId;
+    }
+
+    public void setCryptedDataId(UUID cryptedDataId) {
+        this.cryptedDataId = cryptedDataId;
     }
 }
