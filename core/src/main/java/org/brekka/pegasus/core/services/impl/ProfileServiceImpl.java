@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.ProfileDAO;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
@@ -16,11 +15,13 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.xml.pegasus.v1.model.ProfileDocument;
-import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -120,25 +121,54 @@ public class ProfileServiceImpl implements ProfileService {
      */
     @Override
     public void currentUserProfileUpdated() {
-        /*
-         * TODO bind the update as a single operation to the transaction so that
-         * multiple changes can be made to the profile but only persisted once.
-         */
+        List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
+        for (TransactionSynchronization transactionSynchronization : synchronizations) {
+            if (transactionSynchronization instanceof ProfileSynchronization) {
+                // Already added for update
+                return;
+            }
+        }
         AuthenticatedMemberImpl current = (AuthenticatedMemberImpl) memberService.getCurrent();
         Profile activeProfile = current.getActiveProfile();
-        ProfileDocument profileDocument = activeProfile.getXml().getBean();
-        XmlEntity<ProfileDocument> currentXml = activeProfile.getXml();
-        XmlEntity<ProfileDocument> replacementXml;
-        if (currentXml.getCryptedDataId() == null) {
-            // Plain
-            replacementXml = xmlEntityService.persistPlainEntity(profileDocument);
-        } else {
-            KeySafe keySafe = currentXml.getKeySafe();
-            replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
+        TransactionSynchronizationManager.registerSynchronization(new ProfileSynchronization(activeProfile));
+    }
+    
+    private class ProfileSynchronization extends TransactionSynchronizationAdapter {
+        
+        private Profile activeProfile;
+        
+        public ProfileSynchronization(Profile activeProfile) {
+            this.activeProfile = activeProfile;
         }
-        xmlEntityService.delete(currentXml.getId());
-        activeProfile.setXml(replacementXml);
-        profileDAO.update(activeProfile);
+
+        /* (non-Javadoc)
+         * @see org.springframework.transaction.support.TransactionSynchronizationAdapter#beforeCommit(boolean)
+         */
+        @Override
+        public void beforeCommit(boolean readOnly) {
+            ProfileDocument profileDocument = activeProfile.getXml().getBean();
+            XmlEntity<ProfileDocument> currentXml = activeProfile.getXml();
+            XmlEntity<ProfileDocument> replacementXml;
+            if (currentXml.getCryptedDataId() == null) {
+                // Plain
+                replacementXml = xmlEntityService.persistPlainEntity(profileDocument);
+            } else {
+                KeySafe keySafe = currentXml.getKeySafe();
+                replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
+            }
+            xmlEntityService.delete(currentXml.getId());
+            activeProfile.setXml(replacementXml);
+            profileDAO.update(activeProfile);
+        }
+        
+        /* (non-Javadoc)
+         * @see org.springframework.transaction.support.TransactionSynchronizationAdapter#getOrder()
+         */
+        @Override
+        public int getOrder() {
+            // Execute before the Hibernate session logic.
+            return 100;
+        }
     }
 
 }
