@@ -12,8 +12,8 @@ import javax.persistence.ManyToOne;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@DiscriminatorValue("Employee")
-public class Employee extends Actor {
+@DiscriminatorValue("Associate")
+public class Associate extends Actor {
 
     /**
      * Serial UID
@@ -21,7 +21,7 @@ public class Employee extends Actor {
     private static final long serialVersionUID = -7785708271201081308L;
 
     /**
-     * The person whose is an employee
+     * The person who is an employee
      */
     @ManyToOne
     @JoinColumn(name="`MemberID`")

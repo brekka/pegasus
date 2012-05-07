@@ -8,7 +8,7 @@ package org.brekka.pegasus.core.model;
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public enum MemberStatus {
+public enum ActorStatus {
     /**
      * The member has just logged in and needs to setup their profile.
      */

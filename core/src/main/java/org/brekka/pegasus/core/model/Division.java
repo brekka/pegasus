@@ -32,6 +32,13 @@ public class Division extends KeySafe {
     private Division parent;
     
     /**
+     * The organization that this division belongs to
+     */
+    @ManyToOne
+    @JoinColumn(name="`OrganizationID`")
+    private Organization organization;
+    
+    /**
      * The key pair of this division.
      */
     @Column(name="`KeyPairID`")
@@ -53,5 +60,13 @@ public class Division extends KeySafe {
 
     public void setKeyPairId(UUID keyPairId) {
         this.keyPairId = keyPairId;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 }

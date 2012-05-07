@@ -9,7 +9,8 @@ import org.apache.tapestry5.annotations.SetupRender;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.MemberStatus;
+import org.brekka.pegasus.core.model.ActorStatus;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.services.MemberService;
 
 /**
@@ -36,15 +37,16 @@ public class Layout {
     }
     
     public String getMemberName() {
-        String name;
+        String name = "?";
         if (user == null) {
             return null;
         }
         Member member = user.getMember();
-        if (member.getStatus() == MemberStatus.NEW) {
+        if (member.getStatus() == ActorStatus.NEW) {
             name = "New Member";
-        } else {
-            name = member.getName();
+        } else if (member instanceof Person) {
+            Person person = (Person) member;
+            name = person.getName();
         }
         return name;
     }

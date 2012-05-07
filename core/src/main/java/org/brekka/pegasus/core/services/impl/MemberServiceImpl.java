@@ -6,7 +6,8 @@ package org.brekka.pegasus.core.services.impl;
 import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.MemberStatus;
+import org.brekka.pegasus.core.model.ActorStatus;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
@@ -46,14 +47,14 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public UserDetails loadUserByUsername(String openId) throws UsernameNotFoundException {
-        Member member = memberDAO.retrieveByOpenId(openId);
-        if (member == null) {
+        Person person = (Person) memberDAO.retrieveByOpenId(openId);
+        if (person == null) {
             // Not a member yet, create a new entry
-            member = new Member();
-            member.setOpenId(openId);
-            memberDAO.create(member);
+            person = new Person();
+            person.setOpenId(openId);
+            memberDAO.create(person);
         }
-        AuthenticatedMemberImpl authMember = new AuthenticatedMemberImpl(member);
+        AuthenticatedMemberImpl authMember = new AuthenticatedMemberImpl(person);
         return authMember;
     }
     
@@ -63,16 +64,16 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Override
     public boolean isNewMember() {
         Member member = getManaged();
-        return member.getStatus() == MemberStatus.NEW;
+        return member.getStatus() == ActorStatus.NEW;
     }
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public void setupMember(String name, String email, String vaultPassword, boolean encryptedProfile) {
-        Member managed = getManaged();
+        Person managed = (Person) getManaged();
         managed.setName(name);
         managed.setEmail(email);
-        managed.setStatus(MemberStatus.ACTIVE);
+        managed.setStatus(ActorStatus.ACTIVE);
         
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, managed);
         managed.setDefaultVault(defaultVault);
@@ -111,7 +112,7 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
             authMember = (AuthenticatedMemberImpl) principal;
             Member member = authMember.getMember();
             // Attempt to locate the user profile
-            if (member.getStatus() == MemberStatus.ACTIVE
+            if (member.getStatus() == ActorStatus.ACTIVE
                     && authMember.getActiveProfile() == null) {
                 Profile profile = profileService.retrieveProfile(member);
                 authMember.setActiveProfile(profile);

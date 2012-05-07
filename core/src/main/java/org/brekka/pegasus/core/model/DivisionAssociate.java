@@ -14,13 +14,13 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 /**
- * Defines the relationship between an employee and an orgainzation.
+ * Defines the relationship between an associate and an orgainzation.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`DivisionEmployee`")
-public class DivisionEmployee extends LongevousEntity {
+@Table(name="`DivisionAssociate`")
+public class DivisionAssociate extends LongevousEntity {
 
     /**
      * Serial UID
@@ -28,21 +28,21 @@ public class DivisionEmployee extends LongevousEntity {
     private static final long serialVersionUID = 4972021130097729646L;
 
     /**
-     * The division that the employee is a member of
+     * The division that the associate is a member of
      */
     @ManyToOne
     @JoinColumn(name="`DivisionID`")
     private Division division;
     
     /**
-     * The employee
+     * The associate
      */
     @ManyToOne
-    @JoinColumn(name="`EmployeeID`")
-    private Employee employee;
+    @JoinColumn(name="`AssociateID`")
+    private Associate associate;
     
     /**
-     * The key pair that gives the user access to the contents of this division.
+     * The key pair that gives the associate access to the contents of this division.
      */
     @Column(name="KeyPairID")
     @Type(type="pg-uuid")
@@ -58,12 +58,12 @@ public class DivisionEmployee extends LongevousEntity {
         this.division = division;
     }
 
-    public Employee getEmployee() {
-        return employee;
+    public Associate getAssociate() {
+        return associate;
     }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
+    public void setAssociate(Associate associate) {
+        this.associate = associate;
     }
 
     public UUID getKeyPairId() {

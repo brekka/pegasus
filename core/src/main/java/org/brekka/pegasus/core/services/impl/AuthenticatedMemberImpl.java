@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.xml.pegasus.v1.model.ProfileDocument;
@@ -43,9 +44,9 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
     
     private transient Profile activeProfile;
 
-    public AuthenticatedMemberImpl(Member member) {
-        super(member.getOpenId(), "notused", USER_AUTHORITIES);
-        this.member = member;
+    public AuthenticatedMemberImpl(Person person) {
+        super(person.getOpenId(), "notused", USER_AUTHORITIES);
+        this.member = person;
     }
 
     /* (non-Javadoc)

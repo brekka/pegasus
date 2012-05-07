@@ -9,7 +9,7 @@ package org.brekka.pegasus.core.model;
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public enum VaultStatus {
+public enum KeySafeStatus {
     /**
      * Fully functional.
      */
