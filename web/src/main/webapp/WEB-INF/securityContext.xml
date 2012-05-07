@@ -36,7 +36,10 @@
 	</http>
     
     <beans:bean id="tokenRepo"
-            class="org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl" />
+             class="org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl" />
+            
+    <beans:bean id="sessionTerminationListener" lazy-init="false" 
+             class="org.brekka.pegasus.web.session.SessionTerminationListener"/>
     
     <authentication-manager alias="authenticationManager"/>
     

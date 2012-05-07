@@ -3,7 +3,9 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +135,20 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
         return vaultMap().get(vaultId);
     }
     
+
+    /**
+     * @return
+     */
+    synchronized List<OpenVault> clearVaults() {
+        this.activeVault = null;
+        if (this.vaults == null) {
+            return Collections.emptyList();
+        }
+        List<OpenVault> vaults = new ArrayList<>(this.vaults.values());
+        this.vaults = null;
+        return vaults;
+    }
+    
     private synchronized Map<UUID, OpenVault> vaultMap() {
         Map<UUID, OpenVault> map = this.vaults;
         if (map == null) {
@@ -140,4 +156,5 @@ class AuthenticatedMemberImpl extends User implements AuthenticatedMember, UserD
         }
         return this.vaults;
     }
+
 }

@@ -3,16 +3,21 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.List;
+
 import org.brekka.pegasus.core.dao.MemberDAO;
+import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.ActorStatus;
+import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
+import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
+import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -40,6 +45,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     
     @Autowired
     private ProfileService profileService;
+    
+    @Autowired
+    private PhalanxService phalanxService;
     
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
@@ -96,6 +104,22 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         vaultService.openVault(defaultVault, vaultPassword);
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#logout(org.springframework.security.core.context.SecurityContext)
+     */
+    @Override
+    public void logout(SecurityContext securityContext) {
+        AuthenticatedMemberImpl authenticatedMember = getAuthenticatedMember(securityContext);
+        if (authenticatedMember != null) {
+            List<OpenVault> vaults = authenticatedMember.clearVaults();
+            for (OpenVault openVault : vaults) {
+                OpenVaultImpl openVaultImpl = (OpenVaultImpl) openVault;
+                AuthenticatedPrincipal authenticatedPrincipal = openVaultImpl.getAuthenticatedPrincipal();
+                phalanxService.logout(authenticatedPrincipal);
+            }
+        }   
+    }
+    
     protected Member getManaged() {
         AuthenticatedMember current = getCurrent();
         Member member = current.getMember();
@@ -105,11 +129,8 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Override
     public AuthenticatedMember getCurrent() {
         SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        Object principal = authentication.getPrincipal();
-        AuthenticatedMemberImpl authMember = null;
-        if (principal instanceof AuthenticatedMemberImpl) {
-            authMember = (AuthenticatedMemberImpl) principal;
+        AuthenticatedMemberImpl authMember = getAuthenticatedMember(context);
+        if (authMember != null) {
             Member member = authMember.getMember();
             // Attempt to locate the user profile
             if (member.getStatus() == ActorStatus.ACTIVE
@@ -118,7 +139,15 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
                 authMember.setActiveProfile(profile);
             }
         }
-        
         return authMember;
+    }
+    
+    private AuthenticatedMemberImpl getAuthenticatedMember(SecurityContext securityContext) {
+        Authentication authentication = securityContext.getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof AuthenticatedMemberImpl) {
+            return (AuthenticatedMemberImpl) principal;
+        }
+        return null;
     }
 }
