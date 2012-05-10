@@ -5,14 +5,17 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -49,6 +52,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Autowired
     private PhalanxService phalanxService;
     
+    @Autowired
+    private EMailAddressService eMailAddressService;
+    
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
      */
@@ -77,31 +83,37 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void setupMember(String name, String email, String vaultPassword, boolean encryptedProfile) {
+    public void setupMember(String fullName, String email, String vaultPassword, boolean encryptedProfile) {
         Person managed = (Person) getManaged();
-        managed.setName(name);
-        managed.setEmail(email);
+        managed.setFullName(fullName);
         managed.setStatus(ActorStatus.ACTIVE);
         
+        // Vault
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, managed);
         managed.setDefaultVault(defaultVault);
+        vaultService.openVault(defaultVault, vaultPassword);
         
-        memberDAO.update(managed);
-        
+        // Binding to context
         AuthenticatedMember current = getCurrent();
+        AuthenticatedMemberImpl authenticatedMemberImpl = (AuthenticatedMemberImpl) current;
+        authenticatedMemberImpl.setMember(managed);
         
+        // Profile
         Profile profile;
         if (encryptedProfile) {
             profile = profileService.createEncryptedProfile(managed, defaultVault);
         } else {
             profile = profileService.createPlainProfile(managed);
         }
-        
-        AuthenticatedMemberImpl authenticatedMemberImpl = (AuthenticatedMemberImpl) current;
-        authenticatedMemberImpl.setMember(managed);
         authenticatedMemberImpl.setActiveProfile(profile);
         
-        vaultService.openVault(defaultVault, vaultPassword);
+        // E-Mail - needs to happen once profile/context are set
+        if (StringUtils.isNotBlank(email)) {
+            EMailAddress emailAddress = eMailAddressService.createEMail(email);
+            managed.setDefaultEmailAddress(emailAddress);
+        }
+        
+        memberDAO.update(managed);
     }
     
     /* (non-Javadoc)

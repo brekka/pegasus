@@ -8,6 +8,7 @@ import java.util.List;
 import org.brekka.pegasus.core.dao.ProfileDAO;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
@@ -15,6 +16,7 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.xml.pegasus.v1.model.ProfileDocument;
+import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,10 +52,14 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setOwner(member);
         
         ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
-        profileDocument.addNewProfile();
+        ProfileType profileType = profileDocument.addNewProfile();
         
         XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistPlainEntity(profileDocument);
         profile.setXml(xmlEntity);
+        
+        if (member instanceof Person) {
+            profileType.setFullName(((Person) member).getFullName());
+        }
         
         profileDAO.create(profile);
         return profile;
@@ -90,7 +96,12 @@ public class ProfileServiceImpl implements ProfileService {
         if (xmlEntity.getCryptedDataId() == null) {
             // We can extract the model
             XmlEntity<ProfileDocument> managedXmlEntity = xmlEntityService.retrieveEntity(xmlEntity.getId(), ProfileDocument.class);
-            xmlEntity.setBean(managedXmlEntity.getBean());
+            ProfileDocument profileBean = managedXmlEntity.getBean();
+            xmlEntity.setBean(profileBean);
+            if (member instanceof Person) {
+                ((Person) member).setFullName(profileBean.getProfile().getFullName());
+            }
+            
         }
         return profile;
     }

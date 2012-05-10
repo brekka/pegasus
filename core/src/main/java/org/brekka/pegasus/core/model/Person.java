@@ -3,9 +3,13 @@
  */
 package org.brekka.pegasus.core.model;
 
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 /**
  * A person represents someone who logs into the system with an OpenID account in order to carry out tasks.
@@ -23,16 +27,23 @@ public class Person extends Member {
 
     /**
      * The open ID of this member
+     * Can't be made non-nullable due to the inheritence.
      */
     @Column(name="`OpenID`", unique = true)
     private String openId;
 
-    @Column(name="`Name`")
-    private String name;
+    /**
+     * The persons full name (normally kept in the profile).
+     */
+    @Transient
+    private transient String fullName;
 
-    // TODO consider a separate table
-    @Column(name="`Email`")
-    private String email;
+    /**
+     * The user's default e-mail address
+     */
+    @OneToOne
+    @JoinColumn(name="`EMailAddress`")
+    private EMailAddress defaultEmailAddress;
     
     
 
@@ -44,19 +55,19 @@ public class Person extends Member {
         this.openId = openId;
     }
 
-    public String getName() {
-        return name;
+    public EMailAddress getDefaultEmailAddress() {
+        return defaultEmailAddress;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDefaultEmailAddress(EMailAddress defaultEmailAddress) {
+        this.defaultEmailAddress = defaultEmailAddress;
     }
 
-    public String getEmail() {
-        return email;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

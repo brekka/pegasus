@@ -46,7 +46,10 @@ public class Layout {
             name = "New Member";
         } else if (member instanceof Person) {
             Person person = (Person) member;
-            name = person.getName();
+            name = person.getFullName();
+            if (name == null) {
+                name = "Name locked";
+            }
         }
         return name;
     }

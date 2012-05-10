@@ -35,6 +35,7 @@ import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.xml.pegasus.v1.model.BundleDocument;
 import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.xml.pegasus.v1.model.InboxType;
 import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,7 +85,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         inbox.setOwner(member);
         inboxDAO.create(inbox);
         
-        ProfileType.Inbox newXmlInbox = authenticatedMember.getProfile().addNewInbox();
+        InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
         newXmlInbox.setUUID(inbox.getId().toString());
         newXmlInbox.setName(name);
         profileService.currentUserProfileUpdated();
@@ -143,7 +144,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         ProfileType profile = authenticatedMember.getProfile();
         for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
-            ProfileType.Inbox inboxXml = profile.getInboxArray(i);
+            InboxType inboxXml = profile.getInboxArray(i);
             if (inboxXml.getUUID().equals(inbox.getId().toString())) {
                 String name = inboxXml.getName();
                 inbox.setName(name);
@@ -187,7 +188,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         if (profile != null) {
             for (Inbox inbox : inboxList) {
                 for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
-                    ProfileType.Inbox inboxXml = profile.getInboxArray(i);
+                    InboxType inboxXml = profile.getInboxArray(i);
                     if (inboxXml.getUUID().equals(inbox.getId().toString())) {
                         String name = inboxXml.getName();
                         inbox.setName(name);

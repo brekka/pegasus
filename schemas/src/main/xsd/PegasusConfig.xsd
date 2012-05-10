@@ -10,6 +10,21 @@
 			<xsd:sequence>
                 <xsd:element name="FetchBase" type="xsd:anyURI" />
                 <xsd:element name="ResourceStoreDir" type="xsd:anyURI" />
+                <xsd:element name="EMailAddresses">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="Hashing">
+                                <xsd:complexType>
+                                    <xsd:sequence>
+                                        <xsd:element name="Iterations" type="xsd:int" />
+                                        <xsd:element name="Algorithm"  type="xsd:string" />
+                                        <xsd:element name="Salt"       type="xsd:base64Binary" />
+                                    </xsd:sequence>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
 				<xsd:element ref="pnxm:CryptoProfileRegistry" />
 			</xsd:sequence>
 		</xsd:complexType>

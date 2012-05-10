@@ -27,15 +27,23 @@
     
     <xsd:complexType name="ProfileType">
 		<xsd:sequence>
-			<xsd:element name="Inbox" minOccurs="0" maxOccurs="unbounded">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
-                        <xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-			
+            <xsd:element name="FullName"    type="xsd:string"       minOccurs="0" maxOccurs="1" />
+            <xsd:element name="EMail"       type="pgm:EMailType"    minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="Inbox"       type="pgm:InboxType"    minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+    
+    <xsd:complexType name="EMailType">
+		<xsd:sequence>
+			<xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Address"     type="xsd:anyURI"       minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+    
+    <xsd:complexType name="InboxType">
+		<xsd:sequence>
+            <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
     

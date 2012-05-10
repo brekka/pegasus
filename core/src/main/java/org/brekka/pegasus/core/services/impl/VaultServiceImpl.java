@@ -10,6 +10,7 @@ import org.brekka.pegasus.core.dao.VaultDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
@@ -95,7 +96,12 @@ public class VaultServiceImpl implements VaultService {
         
         // Check the profile, release it if necessary
         Profile activeProfile = currentMemberImpl.getActiveProfile();
-        profileService.releaseProfile(activeProfile, vault);
+        boolean released = profileService.releaseProfile(activeProfile, vault);
+        if (released 
+                && current.getMember() instanceof Person) {
+            String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
+            ((Person) current.getMember()).setFullName(fullName);
+        }
         
         return openVault;
     }
