@@ -91,6 +91,9 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional(propagation=Propagation.REQUIRED)
     public Profile retrieveProfile(Member member) {
         List<Profile> profileList = profileDAO.retrieveByMember(member);
+        if (profileList.size() == 0) {
+            return null;
+        }
         Profile profile = profileList.get(0);
         XmlEntity<ProfileDocument> xmlEntity = profile.getXml();
         if (xmlEntity.getCryptedDataId() == null) {
@@ -112,6 +115,9 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public boolean releaseProfile(Profile profile, Vault vault) {
+        if (profile == null) {
+            return false;
+        }
         if (profile.getXml().getBean() != null) {
             // The bean is already unlocked
             return false;

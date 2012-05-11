@@ -6,12 +6,14 @@ package org.brekka.pegasus.core.services.impl;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.DomainNameDAO;
 import org.brekka.pegasus.core.dao.EMailAddressDAO;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.stillingar.annotations.Configured;
 import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus.EMailAddresses.Hashing;
@@ -39,7 +41,7 @@ public class EMailAddressServiceImpl implements EMailAddressService {
      * Will be combined with all e-mail hashes. Ensures that an attacked with access to the database will not be
      * able to identify addresses without access to this salt.
      */
-    @Configured("//EMailAddresses/Hashing")
+    @Configured("//c:EMailAddresses/c:Hashing")
     private Hashing hashingConfig;
     
     /* (non-Javadoc)
@@ -47,7 +49,7 @@ public class EMailAddressServiceImpl implements EMailAddressService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public EMailAddress createEMail(String email) {
+    public EMailAddress createEMail(String email, Member owner, boolean requiresVerification) {
         String domain = StringUtils.substringAfterLast(email, "@");
         
         DomainName domainName = toDomainName(domain);
@@ -56,6 +58,14 @@ public class EMailAddressServiceImpl implements EMailAddressService {
         eMailAddress.setHash(hash(email));
         eMailAddress.setDomainName(domainName);
         eMailAddress.setAddress(email);
+        eMailAddress.setOwner(owner);
+        if (!requiresVerification) {
+            eMailAddress.setActive(Boolean.TRUE);
+            eMailAddress.setVerified(new Date());
+        } else {
+            // TODO
+//            eMailAddress.setVerificationCode("");
+        }
         eMailAddressDAO.create(eMailAddress);
         
         // TODO add to profile
@@ -68,9 +78,14 @@ public class EMailAddressServiceImpl implements EMailAddressService {
      */
     private DomainName toDomainName(String domain) {
         byte[] hash = hash(domain);
-        
-        // TODO Auto-generated method stub
-        return null;
+        DomainName domainName = domainNameDAO.retrieveByHash(hash);
+        if (domainName == null) {
+            domainName = new DomainName();
+            domainName.setHash(hash);
+            domainName.setAddress(domain);
+            domainNameDAO.create(domainName);
+        }
+        return domainName;
     }
 
     protected byte[] hash(String value) {

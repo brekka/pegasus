@@ -88,15 +88,16 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         managed.setFullName(fullName);
         managed.setStatus(ActorStatus.ACTIVE);
         
+        // Binding to context
+        AuthenticatedMember current = getCurrent();
+        AuthenticatedMemberImpl authenticatedMemberImpl = (AuthenticatedMemberImpl) current;
+        authenticatedMemberImpl.setMember(managed);
+        
         // Vault
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, managed);
         managed.setDefaultVault(defaultVault);
         vaultService.openVault(defaultVault, vaultPassword);
         
-        // Binding to context
-        AuthenticatedMember current = getCurrent();
-        AuthenticatedMemberImpl authenticatedMemberImpl = (AuthenticatedMemberImpl) current;
-        authenticatedMemberImpl.setMember(managed);
         
         // Profile
         Profile profile;
@@ -109,7 +110,7 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         
         // E-Mail - needs to happen once profile/context are set
         if (StringUtils.isNotBlank(email)) {
-            EMailAddress emailAddress = eMailAddressService.createEMail(email);
+            EMailAddress emailAddress = eMailAddressService.createEMail(email, managed, false);
             managed.setDefaultEmailAddress(emailAddress);
         }
         

@@ -14,4 +14,9 @@ import org.brekka.pegasus.core.model.DomainName;
  */
 public interface DomainNameDAO extends EntityDAO<UUID, DomainName> {
 
+    /**
+     * @param hash
+     */
+    DomainName retrieveByHash(byte[] hash);
+
 }

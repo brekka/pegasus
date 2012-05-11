@@ -4,7 +4,9 @@
 package org.brekka.pegasus.core.dao.hibernate;
 
 import org.brekka.pegasus.core.dao.DomainNameDAO;
+import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.DomainName;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -21,4 +23,14 @@ public class DomainNameHibernateDAO extends AbstractPegasusHibernateDAO<DomainNa
     protected Class<DomainName> type() {
         return DomainName.class;
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DomainNameDAO#retrieveByHash(byte[])
+     */
+    @Override
+    public DomainName retrieveByHash(byte[] hash) {
+        return (DomainName) getCurrentSession().createCriteria(DomainName.class)
+                .add(Restrictions.eq("hash", hash))
+                .uniqueResult();
+    } 
 }
