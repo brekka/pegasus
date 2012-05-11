@@ -27,10 +27,17 @@ public class BundleUnlockEvent extends RemoteUserEvent {
      */
     private static final long serialVersionUID = 4307560513008867955L;
 
+    /**
+     * The bundle that was unlocked
+     */
     @ManyToOne
     @JoinColumn(name="`BundleID`", nullable=false)
     private Bundle bundle;
     
+    /**
+     * If the user was required to accept an agreement, record here the moment in time
+     * they agreed.
+     */
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Date agreementAccepted;

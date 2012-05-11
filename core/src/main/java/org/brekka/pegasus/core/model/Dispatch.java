@@ -37,17 +37,24 @@ public class Dispatch extends SnapshotEntity {
     private Actor actor;
     
     /**
+     * The division this from which this was dispatched.
+     */
+    @ManyToOne
+    @JoinColumn(name="`DivisionID`")
+    private Division division;
+    
+    /**
      * The key safe that contains the key
      */
     @ManyToOne
-    @JoinColumn(name="`KeySafeID`")
+    @JoinColumn(name="`KeySafeID`", nullable=false, updatable=false)
     private KeySafe keySafe;
     
     /**
      * The bundle that was sent.
      */
     @OneToOne
-    @JoinColumn(name="`BundleID`")
+    @JoinColumn(name="`BundleID`", nullable=false, updatable=false)
     private Bundle bundle;
     
     /**
@@ -55,7 +62,7 @@ public class Dispatch extends SnapshotEntity {
      * the private key of the keySafe.
      */
     @Type(type="pg-uuid")
-    @Column(name="`CryptedDataID`")
+    @Column(name="`CryptedDataID`", nullable=false, updatable=false)
     private UUID cryptedDataId;
 
     public Actor getActor() {
@@ -88,5 +95,13 @@ public class Dispatch extends SnapshotEntity {
 
     public void setCryptedDataId(UUID cryptedDataId) {
         this.cryptedDataId = cryptedDataId;
+    }
+
+    public Division getDivision() {
+        return division;
+    }
+
+    public void setDivision(Division division) {
+        this.division = division;
     }
 }

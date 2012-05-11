@@ -26,6 +26,11 @@ import org.hibernate.annotations.Type;
 public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
 
     /**
+     * The maximum length of data that this entity can store.
+     */
+    public static final int MAX_DATA_LENGTH = 200000;
+
+    /**
      * Serial UID
      */
     private static final long serialVersionUID = 1708978401887395862L;
@@ -40,11 +45,11 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
     /**
      * Crypto profile used for this file
      */
-    @Column(name="`Profile`")
+    @Column(name="`Profile`", updatable=false)
     private int profile;
     
     /**
-     * The encryption initialisation vector used for the profile encryption (if encrypted).
+     * The encryption initialization vector used for the profile encryption (if encrypted).
      */
     @Column(name="`IV`", updatable=false)
     private byte[] iv;
@@ -60,7 +65,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
      * Should not be more than 200KB of compressed data. 
      * Use a blob so that the raw data does not remain in memory.
      */
-    @Column(name="`Data`", length=200000, nullable=false, updatable=false)
+    @Column(name="`Data`", length=MAX_DATA_LENGTH, nullable=false, updatable=false)
     private Blob data;
     
     /**

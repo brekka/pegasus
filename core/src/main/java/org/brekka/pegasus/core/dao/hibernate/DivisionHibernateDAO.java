@@ -3,23 +3,22 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
-import org.brekka.pegasus.core.dao.BundleDAO;
-import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.dao.DivisionDAO;
+import org.brekka.pegasus.core.model.Division;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 @Repository
-public class BundleHibernateDAO extends AbstractPegasusHibernateDAO<Bundle> implements BundleDAO {
+public class DivisionHibernateDAO extends AbstractPegasusHibernateDAO<Division> implements DivisionDAO {
 
     /* (non-Javadoc)
      * @see org.brekka.commons.persistence.dao.impl.AbstractIdentifiableEntityHibernateDAO#type()
      */
     @Override
-    protected Class<Bundle> type() {
-        return Bundle.class;
+    protected Class<Division> type() {
+        return Division.class;
     }
 
 }

@@ -8,7 +8,7 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  *
  */
 @Repository

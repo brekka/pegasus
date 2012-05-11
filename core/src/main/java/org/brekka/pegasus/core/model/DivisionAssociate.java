@@ -14,7 +14,9 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 /**
- * Defines the relationship between an associate and an orgainzation.
+ * Defines the relationship between an associate and a division within an organization.
+ * Essentially it stores the private key that can be used to unlock resources bound to this
+ * division and its children.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */

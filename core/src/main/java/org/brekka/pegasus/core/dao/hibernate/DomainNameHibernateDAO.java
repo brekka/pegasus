@@ -4,7 +4,6 @@
 package org.brekka.pegasus.core.dao.hibernate;
 
 import org.brekka.pegasus.core.dao.DomainNameDAO;
-import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.DomainName;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;

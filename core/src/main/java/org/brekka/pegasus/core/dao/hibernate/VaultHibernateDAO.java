@@ -12,8 +12,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author Andrew Taylor
- *
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Repository
 public class VaultHibernateDAO extends AbstractPegasusHibernateDAO<Vault> implements VaultDAO {

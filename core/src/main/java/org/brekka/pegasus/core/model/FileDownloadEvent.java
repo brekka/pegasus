@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.brekka.paveway.core.model.CryptedFile;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
@@ -30,6 +31,9 @@ public class FileDownloadEvent extends RemoteUserEvent {
      */
     private static final long serialVersionUID = -2521026919756337883L;
 
+    /**
+     * Id of the file that was downloaded. Corresponds to a {@link CryptedFile} id.
+     */
     @Type(type="pg-uuid")
     @Column(name="`FileID`")
     @Index(name="`IDX_FileDownloadId`")

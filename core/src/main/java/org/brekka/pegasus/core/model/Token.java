@@ -7,8 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.brekka.commons.persistence.model.IdentifiableEntity;
-
 /**
  * A token is a URL-safe string fragment used to identify a resource at a moment in time to the outside world.
  * As such tokens may be reused so long as the thing it was referencing is no longer available.
@@ -17,17 +15,23 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  */
 @Entity
 @Table(name="`Token`")
-public class Token extends IdentifiableEntity {
+public class Token extends SnapshotEntity {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -2345199614401295313L;
     
-    @Column(name="`Path`", unique=true)
+    /**
+     * The token path that must consist of URL-safe characters
+     */
+    @Column(name="`Path`", nullable=false, unique=true, length=32)
     private String path;
     
-    @Column(name="`Type`")
+    /**
+     * The type of this token
+     */
+    @Column(name="`Type`", nullable=false, length=8)
     private TokenType type;
 
     

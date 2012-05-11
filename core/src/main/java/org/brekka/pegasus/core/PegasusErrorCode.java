@@ -5,7 +5,7 @@ import org.brekka.commons.lang.ErrorCode;
 /**
  * Error types relating to the Pegasus subsystem.
  * 
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public enum PegasusErrorCode implements ErrorCode {
 

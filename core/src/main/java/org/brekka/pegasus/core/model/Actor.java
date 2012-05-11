@@ -35,17 +35,19 @@ public abstract class Actor extends LongevousEntity {
      */
     private static final long serialVersionUID = 3647113396750700928L;
 
-    
+    /**
+     * The current status of this actor.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name="`Status`", length=8, nullable=false)
     private ActorStatus status = ActorStatus.NEW;
     
 
-    public ActorStatus getStatus() {
+    public final ActorStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ActorStatus status) {
+    public final void setStatus(ActorStatus status) {
         this.status = status;
     }
 }

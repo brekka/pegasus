@@ -3,8 +3,8 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
-import org.brekka.pegasus.core.dao.BundleDAO;
-import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.dao.OrganizationDAO;
+import org.brekka.pegasus.core.model.Organization;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class BundleHibernateDAO extends AbstractPegasusHibernateDAO<Bundle> implements BundleDAO {
+public class OrganizationHibernateDAO extends AbstractPegasusHibernateDAO<Organization> implements OrganizationDAO {
 
     /* (non-Javadoc)
      * @see org.brekka.commons.persistence.dao.impl.AbstractIdentifiableEntityHibernateDAO#type()
      */
     @Override
-    protected Class<Bundle> type() {
-        return Bundle.class;
+    protected Class<Organization> type() {
+        return Organization.class;
     }
 
 }

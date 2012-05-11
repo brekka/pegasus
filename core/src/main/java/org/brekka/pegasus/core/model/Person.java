@@ -27,16 +27,10 @@ public class Person extends Member {
 
     /**
      * The open ID of this member
-     * Can't be made non-nullable due to the inheritence.
+     * Can't be made non-nullable due to the inheritence of {@link Member}.
      */
-    @Column(name="`OpenID`", unique = true)
+    @Column(name="`OpenID`", unique=true, length=512)
     private String openId;
-
-    /**
-     * The persons full name (normally kept in the profile).
-     */
-    @Transient
-    private transient String fullName;
 
     /**
      * The user's default e-mail address
@@ -44,7 +38,12 @@ public class Person extends Member {
     @OneToOne
     @JoinColumn(name="`EMailAddress`")
     private EMailAddress defaultEmailAddress;
-    
+
+    /**
+     * The persons full name (normally kept in the profile).
+     */
+    @Transient
+    private transient String fullName;
     
 
     public String getOpenId() {

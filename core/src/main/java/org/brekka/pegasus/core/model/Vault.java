@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.Type;
 
 /**
+ * A vault is a place for a member to store various keys.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -33,8 +34,11 @@ public class Vault extends KeySafe {
     @Column(name="`PrincipalID`")
     private UUID principalId;
     
+    /**
+     * The owner of this vault
+     */
     @ManyToOne
-    @JoinColumn(name="`OwnerID`", nullable=false)
+    @JoinColumn(name="`OwnerID`")
     private Member owner;
     
 

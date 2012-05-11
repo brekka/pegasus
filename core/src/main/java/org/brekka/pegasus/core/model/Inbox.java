@@ -36,19 +36,26 @@ public class Inbox extends LongevousEntity {
     private Token token;
 
     /**
-     * The vault that will be used to store files added to this inbox. The user can change this vault at any time,
-     * however the associated {@link Deposit} will become unavailable.
+     * The key safe that will be used to store files added to this inbox. The user can change this at any time,
+     * with future deposits being associated with the new key safe.
      */
     @ManyToOne
     @JoinColumn(name="`KeySafeID`", nullable = false)
     private KeySafe keySafe;
     
     /**
-     * The owner of this inbox
+     * The owner of this inbox. One of owner or division should be set.
      */
     @ManyToOne
-    @JoinColumn(name="`OwnerID`", nullable = false)
+    @JoinColumn(name="`OwnerID`")
     private Actor owner;
+    
+    /**
+     * The division this inbox may belong to.
+     */
+    @ManyToOne
+    @JoinColumn(name="`DivisionID`")
+    private Division division;
     
     /**
      * Text to be displayed to the person when depositing a file.
@@ -115,5 +122,13 @@ public class Inbox extends LongevousEntity {
 
     public void setStatus(InboxStatus status) {
         this.status = status;
+    }
+
+    public Division getDivision() {
+        return division;
+    }
+
+    public void setDivision(Division division) {
+        this.division = division;
     }
 }

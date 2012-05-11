@@ -4,7 +4,7 @@ import org.brekka.commons.lang.BaseException;
 
 
 /**
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public class PegasusException extends BaseException {
 

@@ -49,34 +49,41 @@ public abstract class KeySafe extends LongevousEntity {
     @Enumerated(EnumType.STRING)
     private KeySafeStatus status = KeySafeStatus.ACTIVE;
     
+    /**
+     * URL-safe version of the name that can be used as part of a surrogate key to 
+     * identify this instance.
+     */
     @Column(name="`Slug`", nullable=false)
     private String slug;
     
+    /**
+     * The friendly name given to the vault.
+     */
     @Column(name="`Name`", nullable=false)
     private String name;
     
 
-    public String getSlug() {
+    public final String getSlug() {
         return slug;
     }
 
-    public void setSlug(String slug) {
+    public final void setSlug(String slug) {
         this.slug = slug;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public final void setName(String name) {
         this.name = name;
     }
 
-    public KeySafeStatus getStatus() {
+    public final KeySafeStatus getStatus() {
         return status;
     }
 
-    public void setStatus(KeySafeStatus status) {
+    public final void setStatus(KeySafeStatus status) {
         this.status = status;
     }
 }

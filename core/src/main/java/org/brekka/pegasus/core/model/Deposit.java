@@ -51,7 +51,7 @@ public class Deposit extends SnapshotEntity {
     private Inbox inbox;
     
     /**
-     * The vault that will contain the encryption key for the bundle
+     * The key safe that will contain the encryption key for the bundle
      */
     @ManyToOne
     @JoinColumn(name="`KeySafeID`", updatable=false, nullable=false)

@@ -15,8 +15,9 @@ import javax.persistence.Transient;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 
 /**
- * @author Andrew Taylor
- *
+ * A bundle represents a collection of files that should be transferred from one entity to another.
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @Table(name="`Bundle`")
@@ -30,7 +31,7 @@ public class Bundle extends SnapshotEntity {
     /**
      * Crypto profile used for this file
      */
-    @Column(name="`Profile`")
+    @Column(name="`Profile`", nullable=false)
     private int profile;
     
     /**

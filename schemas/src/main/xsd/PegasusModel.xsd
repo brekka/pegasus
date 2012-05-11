@@ -3,8 +3,10 @@
 	xmlns:pgm="http://brekka.org/xml/pegasus/v1/model" elementFormDefault="qualified"
 	attributeFormDefault="unqualified">
 
-	<xsd:element name="Bundle" type="pgm:BundleType" />
-	<xsd:element name="Profile" type="pgm:ProfileType" />
+	<xsd:element name="Bundle"              type="pgm:BundleType" />
+	<xsd:element name="Profile"             type="pgm:ProfileType" />
+	<xsd:element name="Organization"        type="pgm:OrganizationType" />
+	<xsd:element name="Division"            type="pgm:DivisionType" />
     
     <xsd:complexType name="BundleType">
 		<xsd:sequence>
@@ -30,6 +32,18 @@
             <xsd:element name="FullName"    type="xsd:string"       minOccurs="0" maxOccurs="1" />
             <xsd:element name="EMail"       type="pgm:EMailType"    minOccurs="0" maxOccurs="unbounded" />
 			<xsd:element name="Inbox"       type="pgm:InboxType"    minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+    
+    <xsd:complexType name="OrganizationType">
+		<xsd:sequence>
+            
+		</xsd:sequence>
+	</xsd:complexType>
+    
+    <xsd:complexType name="DivisionType">
+		<xsd:sequence>
+            
 		</xsd:sequence>
 	</xsd:complexType>
     

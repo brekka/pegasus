@@ -11,7 +11,7 @@ import javax.persistence.OneToOne;
 /**
  * A member of the site, can be either a {@link Person} or a {@link Robot}.
  * 
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @DiscriminatorValue("Member")
@@ -22,16 +22,18 @@ public abstract class Member extends Actor {
      */
     private static final long serialVersionUID = -6815079717237157048L;
 
-    
+    /**
+     * The default vault for this member (normally contains the profile).
+     */
     @OneToOne
     @JoinColumn(name="`DefaultVaultID`")
     private Vault defaultVault;
 
-    public Vault getDefaultVault() {
+    public final Vault getDefaultVault() {
         return defaultVault;
     }
 
-    public void setDefaultVault(Vault defaultVault) {
+    public final void setDefaultVault(Vault defaultVault) {
         this.defaultVault = defaultVault;
     }
 }

@@ -10,7 +10,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @author Andrew Taylor
+ * @author Andrew Taylor (andrew@brekka.org)
  *
  */
 public abstract class AbstractPegasusHibernateDAO<Entity extends IdentifiableEntity> extends AbstractIdentifiableEntityHibernateDAO<Entity>  {

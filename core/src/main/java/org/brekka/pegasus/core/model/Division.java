@@ -10,7 +10,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
+import org.brekka.xml.pegasus.v1.model.DivisionDocument;
 import org.hibernate.annotations.Type;
 
 /**
@@ -27,6 +29,10 @@ public class Division extends KeySafe {
      */
     private static final long serialVersionUID = -3361259068549984723L;
     
+    /**
+     * The parent of this division. The parent can open the resources of this 
+     * division via the key pair.
+     */
     @ManyToOne
     @JoinColumn(name="`ParentDivisionID`")
     private Division parent;
@@ -44,6 +50,13 @@ public class Division extends KeySafe {
     @Column(name="`KeyPairID`")
     @Type(type="pg-uuid")
     private UUID keyPairId;
+    
+    /**
+     * Additional division details that can be encrypted (ie only associates with access can view/edit the details).
+     */
+    @OneToOne()
+    @JoinColumn(name="`XmlEntityID`")
+    private XmlEntity<DivisionDocument> xml;
 
 
     public Division getParent() {
@@ -68,5 +81,13 @@ public class Division extends KeySafe {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    public XmlEntity<DivisionDocument> getXml() {
+        return xml;
+    }
+
+    public void setXml(XmlEntity<DivisionDocument> xml) {
+        this.xml = xml;
     }
 }

@@ -29,10 +29,16 @@ public class AnonymousTransfer extends SnapshotEntity {
      */
     private static final long serialVersionUID = -4542707737980018991L;
 
+    /**
+     * Token that identifies this transfer
+     */
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="`TokenID`")
     private Token token;
     
+    /**
+     * The bundle being transferred
+     */
     @OneToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="`BundleID`")
     private Bundle bundle;

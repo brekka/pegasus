@@ -22,6 +22,9 @@ public class BundleCreatedEvent extends RemoteUserEvent {
      */
     private static final long serialVersionUID = 4307560513008867955L;
 
+    /**
+     * The bundle that was created
+     */
     @ManyToOne
     @JoinColumn(name="`BundleID`", nullable=false)
     private Bundle bundle;
