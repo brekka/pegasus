@@ -3,8 +3,6 @@
  */
 package org.brekka.pegasus.core.model;
 
-import java.util.UUID;
-
 import org.brekka.xml.pegasus.v1.model.ProfileType;
 
 /**
@@ -13,12 +11,12 @@ import org.brekka.xml.pegasus.v1.model.ProfileType;
  */
 public interface AuthenticatedMember {
 
+    Actor getActiveActor();
     
     Member getMember();
     
-    OpenVault getActiveVault();
+    Vault getActiveVault();
     
     ProfileType getProfile();
     
-    OpenVault getVault(UUID vaultId);
 }

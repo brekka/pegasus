@@ -13,13 +13,14 @@
 		
 		<div class="field">
 			<t:label for="vaultPassword">Vault password</t:label>
-			<t:passwordfield t:id="vaultPassword" />
+			<t:passwordfield t:id="vaultPassword" validate="required,minlength=8" />
 			<p>TODO.</p>
 		</div>
         
         <div class="field">
             <t:label for="vaultPasswordRepeat">Vault password (repeat)</t:label>
-            <t:passwordfield t:id="vaultPasswordRepeat" />
+            <t:passwordfield t:id="vaultPasswordRepeat" validate="required,minlength=8" />
+            <p>Repeat the password you entered above to ensure that you typed it correctly.</p>
         </div>
         
         <div class="field">

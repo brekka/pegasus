@@ -11,10 +11,10 @@ import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
-import org.brekka.pegasus.core.model.InboxTransferKey;
 import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.core.services.InboxService.InboxAllocatedBundle;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -30,7 +30,7 @@ public class DepositDone {
     
     @SuppressWarnings("unused")
     @Property
-    private InboxTransferKey transferKey;
+    private InboxAllocatedBundle transferKey;
     
     @Inject
     private AlertManager alertManager;
@@ -43,7 +43,7 @@ public class DepositDone {
         BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
         if (bundleMakerContext.contains(makeKey)) {
             BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
-            transferKey = (InboxTransferKey) bundleMaker.getTransferKey();
+            transferKey = (InboxAllocatedBundle) bundleMaker.getTransferKey();
             return Boolean.TRUE;
         }
         alertManager.alert(Duration.SINGLE, Severity.WARN, "Details of the requested upload are no longer available.");

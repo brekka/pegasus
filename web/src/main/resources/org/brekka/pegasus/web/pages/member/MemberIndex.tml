@@ -1,23 +1,33 @@
 <html t:type="layout" xmlns:p="tapestry:parameter"
 	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
 
-
     <h2>Member</h2>
     
     <h3>Vaults</h3>
-    <ul>
-    <t:loop source="vaultList" value="loopVault">
-        <li>
-            <t:if test="vaultOpen">
-                <span>${loopVault.name} (open)</span>
-                <p:else>
-                    <t:pagelink page="open" context="loopVault.slug">${loopVault.name}</t:pagelink>
-                </p:else>
-            </t:if>
-        </li>        
-    </t:loop>
-    </ul>
-    
+    <t:zone t:id="openVaultZone">
+        <ul>
+            <t:loop source="vaultList" value="loopVault">
+                <li class="open-vault" id="vault_${loopVault.id}">
+                    <t:if test="vaultOpen">
+                        <span>${loopVault.name} (open)</span>
+                        <p:else>
+                            <span>${loopVault.name}</span>
+                            <t:if test="selectedVault">
+                                <t:form context="${loopVault.id}" t:id="openVault" zone="openVaultZone">
+                                    Password: <t:passwordfield t:id="vaultPassword" />
+                                    <t:submit />
+                                </t:form>
+                                <p:else>
+                                    <t:actionlink t:id="showVaultOpenForm" context="loopVault.id" zone="openVaultZone">Unlock</t:actionlink>
+                                </p:else>
+                            </t:if>
+                        </p:else>
+                    </t:if>
+                </li>        
+            </t:loop>
+        </ul>
+    </t:zone>
+    <t:pagelink page="vault/create">Create a new vault</t:pagelink>
 
     <h3>Your inboxes</h3>
     <ul>

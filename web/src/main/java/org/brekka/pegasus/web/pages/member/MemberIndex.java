@@ -4,10 +4,14 @@
 package org.brekka.pegasus.web.pages.member;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.tapestry5.annotations.InjectComponent;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SessionAttribute;
+import org.apache.tapestry5.corelib.components.Zone;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.Vault;
@@ -37,6 +41,9 @@ public class MemberIndex {
     @Inject
     private VaultService vaultService;
     
+    @InjectComponent
+    private Zone openVaultZone;
+    
     @Property
     private Inbox loopInbox;
     
@@ -52,20 +59,48 @@ public class MemberIndex {
     @SessionAttribute("bundles")
     private Bundles bundles;
     
-
+    @Property
+    private Vault selectedVault;
+    
+    @Property
+    private String vaultPassword;
     
     Object onActivate() {
         Object retVal = Boolean.TRUE;
         if (memberService.isNewMember()) {
             retVal = SetupMember.class;
-        }
-        if (bundles == null) {
-            bundles = new Bundles();
+        } else {
+            if (bundles == null) {
+                bundles = new Bundles();
+            }
+            
+            AuthenticatedMember current = memberService.getCurrent();
+            selectedVault = current.getMember().getDefaultVault();
         }
         return retVal;
     }
     
+    Object onSuccessFromOpenVault(String vaultIdStr) {
+        UUID vaultId = UUID.fromString(vaultIdStr);
+        Vault vault = vaultService.retrieveById(vaultId);
+        vaultService.openVault(vault, vaultPassword);
+        AuthenticatedMember current = memberService.getCurrent();
+        Vault defaultVault = current.getMember().getDefaultVault();
+        if (defaultVault.getId().equals(vaultId)) {
+            return MemberIndex.class;
+        }
+        return openVaultZone;
+    }
 
+    Object onActionFromShowVaultOpenForm(final String vaultId) {
+        selectedVault = vaultService.retrieveById(UUID.fromString(vaultId));
+        return openVaultZone.getBody();
+    }
+    
+    public boolean isSelectedVault() {
+        return selectedVault.getId().equals(loopVault.getId());
+    }
+    
     
     public List<Inbox> getInboxList() {
         return inboxService.retrieveForMember();

@@ -11,11 +11,12 @@ import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
-import org.brekka.pegasus.core.model.AnonymousTransferKey;
 import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
 import org.brekka.pegasus.web.support.Configuration;
+
+import org.brekka.pegasus.core.services.AnonymousService.AnonymousAllocatedBundle;
 
 /**
  * @author Andrew Taylor
@@ -33,7 +34,7 @@ public class DirectDone {
     private RequestGlobals requestGlobals;
     
     @Property
-    private AnonymousTransferKey transferKey;
+    private AnonymousAllocatedBundle transferKey;
     
     @Inject
     private AlertManager alertManager;
@@ -46,7 +47,7 @@ public class DirectDone {
         BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
         if (bundleMakerContext.contains(makeKey)) {
             BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
-            transferKey = (AnonymousTransferKey) bundleMaker.getTransferKey();
+            transferKey = (AnonymousAllocatedBundle) bundleMaker.getTransferKey();
             return Boolean.TRUE;
         }
         alertManager.alert(Duration.SINGLE, Severity.WARN, "Details of the requested upload are no longer available.");

@@ -5,10 +5,8 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.UUID;
 
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -17,6 +15,7 @@ import org.brekka.phalanx.api.beans.IdentityKeyPair;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,19 +64,29 @@ public class KeySafeServiceImpl implements KeySafeService {
     @Transactional(propagation=Propagation.REQUIRED)
     public byte[] release(UUID cryptedDataId, KeySafe keySafe) {
         byte[] data;
+        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        PrivateKeyToken privateKey;
         if (keySafe instanceof Vault) {
-            AuthenticatedMember current = memberService.getCurrent();
-            OpenVault openVault = current.getVault(keySafe.getId());
-            OpenVaultImpl openVaultImpl = (OpenVaultImpl) openVault;
-            AuthenticatedPrincipal authenticatedPrincipal = openVaultImpl.getAuthenticatedPrincipal();
-            data = phalanxService.asymDecrypt(new IdentityCryptedData(cryptedDataId), 
-                    authenticatedPrincipal.getDefaultPrivateKey());
+            AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(keySafe.getId());
+            privateKey = authenticatedPrincipal.getDefaultPrivateKey();
         } else if (keySafe instanceof Division) {
-            throw new UnsupportedOperationException("Not yet implemented");
+            Division division = (Division) keySafe;
+            privateKey = identifyPrivateKey(division, currentMember);
         } else {
             throw new IllegalStateException();
         }
+        data = phalanxService.asymDecrypt(new IdentityCryptedData(cryptedDataId), privateKey);
         return data;
+    }
+
+    /**
+     * @param division
+     * @param currentMember
+     * @return
+     */
+    private PrivateKeyToken identifyPrivateKey(Division division, AuthenticatedMemberBase currentMember) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

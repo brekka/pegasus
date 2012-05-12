@@ -20,7 +20,6 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
-import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
@@ -53,7 +52,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public TransferKey createBundle(String comment, List<FileBuilder> fileBuilders) {
+    public AnonymousAllocatedBundle createBundle(String comment, List<FileBuilder> fileBuilders) {
         Bundle bundleModel = new Bundle();
         bundleModel.setId(UUID.randomUUID());
         
@@ -95,7 +94,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         if (fileList.size() == 1) {
             fileName = fileList.get(0).getName();
         }
-        return new AnonymousTransferKeyImpl(bundleModel.getId(), token.getPath(), code, fileName);
+        return new AnonymousAllocatedBundleImpl(bundleModel.getId(), token.getPath(), code, fileName);
     }
     
     /* (non-Javadoc)

@@ -5,20 +5,20 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.UUID;
 
-import org.brekka.pegasus.core.model.AnonymousTransferKey;
+import org.brekka.pegasus.core.services.AnonymousService;
 
 /**
  * @author Andrew Taylor
  *
  */
-public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
+class AnonymousAllocatedBundleImpl implements AnonymousService.AnonymousAllocatedBundle {
 
     private final UUID bundleId;
     private final String token;
     private final String code;
     private final String fileName;
     
-    public AnonymousTransferKeyImpl(UUID bundleId, String token, String code, String fileName) {
+    public AnonymousAllocatedBundleImpl(UUID bundleId, String token, String code, String fileName) {
         this.bundleId = bundleId;
         this.token = token;
         this.code = code;
@@ -26,7 +26,7 @@ public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
     }
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.TransferKey#getBundleId()
+     * @see org.brekka.pegasus.core.model.AllocatedBundle#getBundleId()
      */
     @Override
     public UUID getBundleId() {
@@ -34,7 +34,7 @@ public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.TransferKey#getToken()
+     * @see org.brekka.pegasus.core.model.AllocatedBundle#getToken()
      */
     @Override
     public String getToken() {
@@ -42,7 +42,7 @@ public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.TransferKey#getCode()
+     * @see org.brekka.pegasus.core.model.AllocatedBundle#getCode()
      */
     @Override
     public String getCode() {
@@ -50,7 +50,7 @@ public class AnonymousTransferKeyImpl implements AnonymousTransferKey {
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.TransferKey#getFileName()
+     * @see org.brekka.pegasus.core.model.AllocatedBundle#getFileName()
      */
     @Override
     public String getFileName() {

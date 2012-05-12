@@ -11,7 +11,9 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
+import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.xml.pegasus.v1.model.DivisionDocument;
 import org.hibernate.annotations.Type;
 
@@ -43,6 +45,13 @@ public class Division extends KeySafe {
     @ManyToOne
     @JoinColumn(name="`OrganizationID`")
     private Organization organization;
+
+    /**
+     * Additional division details that can be encrypted (ie only associates with access can view/edit the details).
+     */
+    @OneToOne()
+    @JoinColumn(name="`XmlEntityID`")
+    private XmlEntity<DivisionDocument> xml;
     
     /**
      * The key safe that will be used to store the key pair identified by keyPairId.
@@ -59,11 +68,10 @@ public class Division extends KeySafe {
     private UUID keyPairId;
     
     /**
-     * Additional division details that can be encrypted (ie only associates with access can view/edit the details).
+     * The private key token which becomes available when the key pair above is unlocked.
      */
-    @OneToOne()
-    @JoinColumn(name="`XmlEntityID`")
-    private XmlEntity<DivisionDocument> xml;
+    @Transient
+    private transient PrivateKeyToken privateKeyToken;
 
 
     public Division getParent() {
@@ -104,5 +112,13 @@ public class Division extends KeySafe {
 
     public void setKeySafe(KeySafe keySafe) {
         this.keySafe = keySafe;
+    }
+
+    public PrivateKeyToken getPrivateKeyToken() {
+        return privateKeyToken;
+    }
+
+    public void setPrivateKeyToken(PrivateKeyToken privateKeyToken) {
+        this.privateKeyToken = privateKeyToken;
     }
 }

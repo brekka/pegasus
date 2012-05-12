@@ -57,7 +57,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Organization createOrganization(String name, String tokenStr, String domainNameStr, 
-            String ownerEmailStr, Member owner, Vault toMemberVault) {
+            String ownerEmailStr, Member owner) {
         Organization organization = new Organization();
         organization.setName(name);
         
@@ -70,8 +70,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         organizationDAO.create(organization);
         
+        Vault vault = owner.getDefaultVault();
+        
         // Create a new key pair
-        KeyPair keyPair = vaultService.createKeyPair(toMemberVault);
+        KeyPair keyPair = vaultService.createKeyPair(vault);
         
         // Add current user as an associate
         Associate associate = new Associate();
@@ -82,7 +84,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             EMailAddress ownerEMail = eMailAddressService.createEMail(ownerEmailStr, owner, false);
             associate.setPrimaryEMailAddress(ownerEMail);
         }
-        associate.setKeySafe(toMemberVault);
+        associate.setKeySafe(vault);
         associate.setKeyPairId(keyPair.getId());
         associateDAO.create(associate);
         

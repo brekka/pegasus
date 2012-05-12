@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.ProfileDAO;
+import org.brekka.pegasus.core.event.VaultOpenEvent;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Person;
@@ -18,6 +19,7 @@ import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.xml.pegasus.v1.model.ProfileDocument;
 import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @Service
 @Transactional
-public class ProfileServiceImpl implements ProfileService {
+public class ProfileServiceImpl implements ProfileService, ApplicationListener<VaultOpenEvent> {
 
     @Autowired
     private ProfileDAO profileDAO;
@@ -51,15 +53,10 @@ public class ProfileServiceImpl implements ProfileService {
         Profile profile = new Profile();
         profile.setOwner(member);
         
-        ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
-        ProfileType profileType = profileDocument.addNewProfile();
+        ProfileDocument profileDocument = createProfile(member);
         
         XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistPlainEntity(profileDocument);
         profile.setXml(xmlEntity);
-        
-        if (member instanceof Person) {
-            profileType.setFullName(((Person) member).getFullName());
-        }
         
         profileDAO.create(profile);
         return profile;
@@ -74,14 +71,23 @@ public class ProfileServiceImpl implements ProfileService {
         Profile profile = new Profile();
         profile.setOwner(member);
         
-        ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
-        profileDocument.addNewProfile();
+        ProfileDocument profileDocument = createProfile(member);
         
         XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(profileDocument, vault);
         profile.setXml(xmlEntity);
         
         profileDAO.create(profile);
         return profile;
+    }
+    
+    private ProfileDocument createProfile(Member member) {
+        ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
+        ProfileType profileType = profileDocument.addNewProfile();
+
+        if (member instanceof Person) {
+            profileType.setFullName(((Person) member).getFullName());
+        }
+        return profileDocument;
     }
     
     /* (non-Javadoc)
@@ -145,9 +151,26 @@ public class ProfileServiceImpl implements ProfileService {
                 return;
             }
         }
-        AuthenticatedMemberImpl current = (AuthenticatedMemberImpl) memberService.getCurrent();
+        AuthenticatedPersonImpl current = (AuthenticatedPersonImpl) memberService.getCurrent();
         Profile activeProfile = current.getActiveProfile();
         TransactionSynchronizationManager.registerSynchronization(new ProfileSynchronization(activeProfile));
+    }
+    
+    /* (non-Javadoc)
+     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
+     */
+    @Override
+    public void onApplicationEvent(VaultOpenEvent event) {
+        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+
+        // Check the profile, release it if necessary
+        Profile activeProfile = currentMember.getActiveProfile();
+        boolean released = releaseProfile(activeProfile, event.getVault());
+        if (released 
+                && currentMember.getMember() instanceof Person) {
+            String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
+            ((Person) currentMember.getMember()).setFullName(fullName);
+        }
     }
     
     private class ProfileSynchronization extends TransactionSynchronizationAdapter {

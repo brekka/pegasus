@@ -16,7 +16,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.TransferKey;
+import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.Index;
@@ -97,7 +97,7 @@ public class MakeDeposit extends AbstractMakePage {
         BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            TransferKey transferKey = inboxService.depositFiles(inbox, reference, comment, fileBuilderList);
+            AllocatedBundle transferKey = inboxService.depositFiles(inbox, reference, comment, fileBuilderList);
             bundleMaker.setTransferKey(transferKey);
             depositDonePage.init(makeKey);
             retVal = depositDonePage;

@@ -10,7 +10,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
+import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.hibernate.annotations.Type;
 
 /**
@@ -41,6 +43,13 @@ public class Vault extends KeySafe {
     @JoinColumn(name="`OwnerID`")
     private Member owner;
     
+    /**
+     * When the vault has been 'opened' this field will be set to the marker used to 
+     * identify the open now open "principal".
+     */
+    @Transient
+    private transient AuthenticatedPrincipal authenticatedPrincipal;
+    
 
     public UUID getPrincipalId() {
         return principalId;
@@ -56,5 +65,13 @@ public class Vault extends KeySafe {
 
     public void setOwner(Member owner) {
         this.owner = owner;
+    }
+
+    public AuthenticatedPrincipal getAuthenticatedPrincipal() {
+        return authenticatedPrincipal;
+    }
+
+    public void setAuthenticatedPrincipal(AuthenticatedPrincipal authenticatedPrincipal) {
+        this.authenticatedPrincipal = authenticatedPrincipal;
     }
 }

@@ -11,7 +11,9 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
+import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.hibernate.annotations.Type;
 
 /**
@@ -61,6 +63,12 @@ public class Associate extends Actor {
     @Column(name="KeyPairID")
     @Type(type="pg-uuid")
     private UUID keyPairId;
+    
+    /**
+     * The private key token which becomes available when the key pair above is unlocked.
+     */
+    @Transient
+    private transient PrivateKeyToken privateKeyToken;
 
     
     public Member getMember() {
@@ -101,5 +109,13 @@ public class Associate extends Actor {
 
     public void setKeySafe(KeySafe keySafe) {
         this.keySafe = keySafe;
+    }
+
+    public PrivateKeyToken getPrivateKeyToken() {
+        return privateKeyToken;
+    }
+
+    public void setPrivateKeyToken(PrivateKeyToken privateKeyToken) {
+        this.privateKeyToken = privateKeyToken;
     }
 }

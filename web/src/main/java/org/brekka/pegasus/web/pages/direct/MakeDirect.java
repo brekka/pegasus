@@ -13,7 +13,7 @@ import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.TransferKey;
+import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.Index;
@@ -76,7 +76,7 @@ public class MakeDirect extends AbstractMakePage {
         BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            TransferKey transferKey = anonymousService.createBundle(comment, fileBuilderList);
+            AllocatedBundle transferKey = anonymousService.createBundle(comment, fileBuilderList);
             bundleMaker.setTransferKey(transferKey);
             directDonePage.init(makeKey);
             retVal = directDonePage;

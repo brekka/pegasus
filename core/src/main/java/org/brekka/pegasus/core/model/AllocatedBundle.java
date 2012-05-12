@@ -10,7 +10,7 @@ import java.util.UUID;
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface TransferKey {
+public interface AllocatedBundle {
     
     UUID getBundleId();
 }

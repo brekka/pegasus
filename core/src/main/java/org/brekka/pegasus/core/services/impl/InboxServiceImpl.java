@@ -19,10 +19,8 @@ import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.InboxTransferKey;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
@@ -99,7 +97,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InboxTransferKey depositFiles(Inbox inbox, String reference, String comment, List<FileBuilder> fileBuilders) {
+    public InboxAllocatedBundle depositFiles(Inbox inbox, String reference, String comment, List<FileBuilder> fileBuilders) {
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
         Vault vault = (Vault) inbox.getKeySafe();
@@ -130,7 +128,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         
         depositDAO.create(deposit);
         
-        return new InboxTransferKeyImp(bundleModel.getId(), inbox, fileBuilders.size());
+        return new InboxAllocatedBundleImpl(bundleModel.getId(), inbox, fileBuilders.size());
     }
     
     /* (non-Javadoc)
@@ -164,7 +162,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         UUID cryptedDataId = deposit.getCryptedDataId();
         
         AuthenticatedMember current = memberService.getCurrent();
-        OpenVault activeVault = current.getActiveVault();
+        Vault activeVault = current.getActiveVault();
         
         byte[] secretKeyBytes = vaultService.releaseKey(cryptedDataId, activeVault);
         

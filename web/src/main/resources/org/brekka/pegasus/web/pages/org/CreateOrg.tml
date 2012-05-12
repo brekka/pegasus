@@ -26,13 +26,6 @@
             <t:textfield t:id="orgToken" validate="required,regexp"/>
             <p>The token that will identify this organization to the rest of the world.</p>
         </div>
-        <div class="advanced">
-            <h3>Advanced options</h3>
-            <div class="field">
-                <t:label for="selectedVault">Vault</t:label>
-                <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
-            </div>
-        </div>
 		<div class="field">
 			<label>Submit</label>
 			<t:submit value="Create organization..." />

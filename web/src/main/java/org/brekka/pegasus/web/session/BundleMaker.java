@@ -12,7 +12,7 @@ import java.util.Map;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.FileInfo;
 import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.TransferKey;
+import org.brekka.pegasus.core.model.AllocatedBundle;
 
 /**
  * @author Andrew Taylor
@@ -26,7 +26,7 @@ public class BundleMaker {
     
     private final Map<String, FileBuilder> inProgress = new HashMap<>();
     
-    private TransferKey transferKey;
+    private AllocatedBundle transferKey;
     
     private boolean done = false;
     
@@ -90,14 +90,14 @@ public class BundleMaker {
     /**
      * @param transferKey the transferKey to set
      */
-    public void setTransferKey(TransferKey transferKey) {
+    public void setTransferKey(AllocatedBundle transferKey) {
         this.transferKey = transferKey;
     }
     
     /**
      * @return the transferKey
      */
-    public TransferKey getTransferKey() {
+    public AllocatedBundle getTransferKey() {
         return transferKey;
     }
     

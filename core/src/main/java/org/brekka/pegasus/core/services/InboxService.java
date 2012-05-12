@@ -8,8 +8,8 @@ import java.util.List;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.InboxTransferKey;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 
 /**
@@ -33,7 +33,7 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    InboxTransferKey depositFiles(Inbox inbox, String reference, 
+    InboxAllocatedBundle depositFiles(Inbox inbox, String reference, 
             String comment, List<FileBuilder> fileBuilders);
 
     /**
@@ -61,4 +61,11 @@ public interface InboxService {
      * @return
      */
     BundleType unlock(Deposit deposit);
+    
+    
+    interface InboxAllocatedBundle extends AllocatedBundle {
+        int getFileCount();
+        
+        Inbox getInbox();
+    }
 }
