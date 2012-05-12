@@ -48,7 +48,14 @@ public class Associate extends Actor {
     private EMailAddress primaryEMailAddress;
     
     /**
-     * The associate copy of the organization-wide kep pair. Needed to decrypt the protected organization
+     * The key safe that will be used to store the key pair identified by keyPairId.
+     */
+    @ManyToOne
+    @JoinColumn(name="`KeySafeID`")
+    private KeySafe keySafe;
+    
+    /**
+     * The associate copy of the organization-wide key pair. Needed to decrypt the protected organization
      * details.
      */
     @Column(name="KeyPairID")
@@ -86,5 +93,13 @@ public class Associate extends Actor {
 
     public void setKeyPairId(UUID keyPairId) {
         this.keyPairId = keyPairId;
+    }
+
+    public KeySafe getKeySafe() {
+        return keySafe;
+    }
+
+    public void setKeySafe(KeySafe keySafe) {
+        this.keySafe = keySafe;
     }
 }

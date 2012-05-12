@@ -40,13 +40,6 @@ public class Organization extends LongevousEntity {
     private String name;
     
     /**
-     * The root division, every organization must have one.
-     */
-    @OneToOne
-    @JoinColumn(name="`DivisionID`", nullable=false, updatable=false)
-    private Division division;
-    
-    /**
      * The primary domain name associated with this organization.
      */
     @OneToOne
@@ -76,14 +69,6 @@ public class Organization extends LongevousEntity {
         this.token = token;
     }
 
-    public Division getDivision() {
-        return division;
-    }
-
-    public void setDivision(Division division) {
-        this.division = division;
-    }
-
     public DomainName getPrimaryDomainName() {
         return primaryDomainName;
     }
@@ -99,6 +84,4 @@ public class Organization extends LongevousEntity {
     public void setXml(XmlEntity<OrganizationDocument> xml) {
         this.xml = xml;
     }
-    
-    
 }

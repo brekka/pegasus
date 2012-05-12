@@ -21,6 +21,7 @@ import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.Principal;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,6 +121,21 @@ public class VaultServiceImpl implements VaultService {
         byte[] secretKeyBytes = phalanxService.asymDecrypt(cryptedData, authenticatedPrincipal.getDefaultPrivateKey());
         return secretKeyBytes;
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.VaultService#createKeyPair(org.brekka.pegasus.core.model.Vault)
+     */
+    @Override
+    public KeyPair createKeyPair(Vault vault) {
+        AuthenticatedMember current = memberService.getCurrent();
+        OpenVault openVault = current.getVault(vault.getId());
+        OpenVaultImpl ovi = (OpenVaultImpl) openVault;
+        AuthenticatedPrincipal authenticatedPrincipal = ovi.getAuthenticatedPrincipal();
+        KeyPair keyPair = authenticatedPrincipal.getDefaultPrivateKey().getKeyPair();
+        KeyPair newKeyPair = phalanxService.generateKeyPair(keyPair, authenticatedPrincipal.getPrincipal());
+        return newKeyPair;
+    }
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.VaultService#retrieveBySlug(java.lang.String)

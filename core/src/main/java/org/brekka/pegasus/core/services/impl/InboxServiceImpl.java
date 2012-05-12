@@ -24,6 +24,7 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Token;
+import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -75,7 +76,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Transactional(propagation=Propagation.REQUIRED)
     public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe keySafe) {
         Inbox inbox = new Inbox();
-        Token token = tokenService.createForInbox(inboxToken);
+        Token token = tokenService.createToken(inboxToken, TokenType.INBOX);
         inbox.setToken(token);
         inbox.setIntroduction(introduction);
         inbox.setKeySafe(keySafe);

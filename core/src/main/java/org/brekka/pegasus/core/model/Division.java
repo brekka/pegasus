@@ -45,6 +45,13 @@ public class Division extends KeySafe {
     private Organization organization;
     
     /**
+     * The key safe that will be used to store the key pair identified by keyPairId.
+     */
+    @ManyToOne
+    @JoinColumn(name="`KeySafeID`")
+    private KeySafe keySafe;
+    
+    /**
      * The key pair of this division.
      */
     @Column(name="`KeyPairID`")
@@ -89,5 +96,13 @@ public class Division extends KeySafe {
 
     public void setXml(XmlEntity<DivisionDocument> xml) {
         this.xml = xml;
+    }
+
+    public KeySafe getKeySafe() {
+        return keySafe;
+    }
+
+    public void setKeySafe(KeySafe keySafe) {
+        this.keySafe = keySafe;
     }
 }

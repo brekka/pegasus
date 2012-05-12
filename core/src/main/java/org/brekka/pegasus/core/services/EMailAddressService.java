@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.services;
 
+import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
 
@@ -19,4 +20,10 @@ public interface EMailAddressService {
      */
     EMailAddress createEMail(String email, Member owner, boolean requiresVerification);
 
+    /**
+     * Retrieve or create a domain name entry
+     * @param domain
+     * @return
+     */
+    DomainName toDomainName(String domain);
 }

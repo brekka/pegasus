@@ -34,13 +34,15 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- * @author Andrew Taylor
- *
+ * A filter that identifies paths containing tokens. A token must start with a number or upper case character. 
+ * Subsequent characters may be mixed case, numbers or underscore.
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public class TokenFilter implements Filter {
     
     private static final Pattern TOKEN_PATTERN = Pattern.compile(String.format(
-            "^(?:/([0-9]+))?/([A-Z0-9]{%d,%d})(?:\\.zip|/[^/]+)?$",
+            "^(?:/([0-9]+))?/([A-Z0-9][A-Za-z0-9_]{%d,%d})(?:\\.zip|/[^/]+)?$",
             TokenType.MIN_LENGTH, TokenType.MAX_LENGTH));
     
     private AnonymousService anonymousService;

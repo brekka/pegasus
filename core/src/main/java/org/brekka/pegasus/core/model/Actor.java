@@ -24,7 +24,7 @@ import javax.persistence.Table;
 @Table(name="`Actor`")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-    name="`Type`", length=8,
+    name="`Type`", length=9,
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Actor")

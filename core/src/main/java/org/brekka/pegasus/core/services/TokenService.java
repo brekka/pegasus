@@ -4,20 +4,23 @@
 package org.brekka.pegasus.core.services;
 
 import org.brekka.pegasus.core.model.Token;
+import org.brekka.pegasus.core.model.TokenType;
 
 /**
- * @author Andrew Taylor
- *
+ * Manipulate tokens
+ * 
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface TokenService {
 
-    Token allocateAnonymous();
+    Token generateToken(TokenType tokenType);
     
-    Token createForInbox(String slug);
+    Token createToken(String path, TokenType type);
 
     /**
      * @param inboxToken
      * @return
      */
     Token retrieveByPath(String path);
+
 }

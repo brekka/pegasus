@@ -1,0 +1,42 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+
+    
+    <h2>Create a new organization</h2>
+    
+    <t:form t:id="org">
+        <t:errors/>
+        <div class="field">
+            <t:label for="name">Name</t:label>
+            <t:textfield t:id="name" />
+            <p>The name you want to give this organization.</p>
+        </div>
+        <div class="field">
+            <t:label for="domainName">Domain</t:label>
+            <t:textfield t:id="domainName" />
+            <p>The domain name used by the organization such as "@brekka.org".</p>
+        </div>
+        <div class="field">
+            <t:label for="orgOwnerEmail">Owner E-Mail address</t:label>
+            <t:textfield t:id="orgOwnerEmail" />
+            <p>The e-mail address of the existing member which should have the same domain as the company.</p>
+        </div>
+        <div class="field">
+            <t:label for="orgToken">Token</t:label>
+            <t:textfield t:id="orgToken" validate="required,regexp"/>
+            <p>The token that will identify this organization to the rest of the world.</p>
+        </div>
+        <div class="advanced">
+            <h3>Advanced options</h3>
+            <div class="field">
+                <t:label for="selectedVault">Vault</t:label>
+                <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
+            </div>
+        </div>
+		<div class="field">
+			<label>Submit</label>
+			<t:submit value="Create organization..." />
+		</div>
+    </t:form>
+
+</html>

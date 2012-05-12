@@ -28,6 +28,11 @@ public enum TokenType {
      * possible combinations.
      */
     INBOX(7),
+    
+    /**
+     * An organization. Will normally be chosen rather than auto-generated.
+     */
+    ORG(4),
 
     ;
 

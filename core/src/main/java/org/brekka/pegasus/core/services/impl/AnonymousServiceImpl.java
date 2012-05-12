@@ -19,6 +19,7 @@ import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Token;
+import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.TransferKey;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.TokenService;
@@ -80,7 +81,7 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
          * the third party.
          */
-        Token token = tokenService.allocateAnonymous();
+        Token token = tokenService.generateToken(TokenType.ANON);
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setBundle(bundleModel);
         anonTransfer.setToken(token);

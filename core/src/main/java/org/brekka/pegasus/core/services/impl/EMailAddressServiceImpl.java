@@ -76,7 +76,9 @@ public class EMailAddressServiceImpl implements EMailAddressService {
      * @param domain
      * @return
      */
-    private DomainName toDomainName(String domain) {
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public DomainName toDomainName(String domain) {
         byte[] hash = hash(domain);
         DomainName domainName = domainNameDAO.retrieveByHash(hash);
         if (domainName == null) {

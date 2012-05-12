@@ -26,46 +26,41 @@ public class TokenServiceImpl implements TokenService {
     private TokenDAO tokenDAO;
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TokenService#allocateAnonymous()
+     * @see org.brekka.pegasus.core.services.TokenService#createToken(java.lang.String, org.apache.xmlbeans.XmlCursor.TokenType)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Token allocateAnonymous() {
-        // For now just keep generating random tokens
-        Token token = chooseRandomToken(TokenType.ANON);
-        tokenDAO.create(token);
-        return token;
-    }
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TokenService#createForInbox(java.lang.String)
-     */
-    @Override
-    public Token createForInbox(String chosen) {
+    public Token createToken(String path, TokenType type) {
         Token token;
-        if (chosen != null) {
-            chosen = chosen.toUpperCase();
-            if (chosen.length() != TokenType.INBOX.getGenerateLength()) {
+        if (path != null) {
+            if (tokenDAO.retrieveByPath(path) != null) {
                 throw new PegasusException(PegasusErrorCode.PG300, 
-                        "The inbox token '%s' must be %d characters", chosen, 
-                        TokenType.INBOX.getGenerateLength());
-            }
-            if (tokenDAO.retrieveByPath(chosen) != null) {
-                throw new PegasusException(PegasusErrorCode.PG300, 
-                        "The inbox token '%s' is already taken", chosen);
+                        "The inbox token '%s' is already taken", path);
             } else {
                 token = new Token();
-                token.setType(TokenType.INBOX);
-                token.setPath(chosen);
+                token.setType(type);
+                token.setPath(path);
             }
         } else {
             // Use random token, make sure it is not already in use
-            token = chooseRandomToken(TokenType.INBOX);
+            token = chooseRandomToken(type);
         }
         tokenDAO.create(token);
         return token;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TokenService#allocateAnonymous()
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Token generateToken(TokenType tokenType) {
+        // For now just keep generating random tokens
+        Token token = chooseRandomToken(tokenType);
+        tokenDAO.create(token);
+        return token;
+    }
+
     private Token chooseRandomToken(TokenType type) {
         Token token = type.generateRandom();
         while (tokenDAO.retrieveByPath(token.getPath()) != null) {

@@ -5,6 +5,8 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /**
@@ -32,6 +34,7 @@ public class Token extends SnapshotEntity {
      * The type of this token
      */
     @Column(name="`Type`", nullable=false, length=8)
+    @Enumerated(EnumType.STRING)
     private TokenType type;
 
     

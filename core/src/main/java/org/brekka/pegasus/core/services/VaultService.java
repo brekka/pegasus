@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenVault;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.phalanx.api.model.KeyPair;
 
 /**
  * 
@@ -49,4 +50,10 @@ public interface VaultService {
      * @return
      */
     boolean isOpen(Vault vault);
+
+    /**
+     * @param toMemberVault
+     * @return
+     */
+    KeyPair createKeyPair(Vault toMemberVault);
 }
