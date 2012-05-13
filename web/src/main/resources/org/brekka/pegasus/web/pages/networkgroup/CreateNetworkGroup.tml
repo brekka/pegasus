@@ -1,0 +1,25 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+
+    
+    <h2>Create a new network group</h2>
+    
+    <t:form t:id="networkgroup">
+        <t:errors/>
+        <div class="field">
+            <t:label for="name">Name</t:label>
+            <t:textfield t:id="name" />
+            <p>The label to give this group of networks (so you can find it later).</p>
+        </div>
+        <div class="field">
+            <t:label for="category">Category</t:label>
+            <t:select t:id="category" />
+            <p>The action to perform if no rules are matched.</p>
+        </div>
+		<div class="field">
+			<label>Submit</label>
+			<t:submit value="Create network group..." />
+		</div>
+    </t:form>
+
+</html>

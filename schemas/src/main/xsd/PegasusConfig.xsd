@@ -10,7 +10,7 @@
 	<xsd:element name="Pegasus">
 		<xsd:complexType>
 			<xsd:sequence>
-                <xsd:element name="SystemID" type="pgm:UUIDType" />
+                <xsd:element name="SystemFirewall" type="plxc:FirewallType" />
                 <xsd:element name="FetchBase" type="xsd:anyURI" />
                 <xsd:element name="ResourceStoreDir" type="xsd:anyURI" />
                 <xsd:element name="EMailAddresses">
@@ -32,4 +32,11 @@
 			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
+    
+    <xsd:complexType name="FirewallType">
+        <xsd:sequence>
+            <xsd:element name="ID" type="pgm:UUIDType" />
+            <xsd:element name="Network" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
 </xsd:schema>

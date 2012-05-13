@@ -45,6 +45,12 @@ public class FirewallRule extends SnapshotEntity {
     @Column(name="`Action`", length=5, nullable=false)
     @Enumerated(EnumType.STRING)
     private FirewallAction action;
+    
+    /**
+     * Priority of this rule over others. Lower value = higher priority.
+     */
+    @Column(name="`Priority`")
+    private int priority;
 
     public Firewall getFirewall() {
         return firewall;
@@ -68,5 +74,13 @@ public class FirewallRule extends SnapshotEntity {
 
     public void setAction(FirewallAction action) {
         this.action = action;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }

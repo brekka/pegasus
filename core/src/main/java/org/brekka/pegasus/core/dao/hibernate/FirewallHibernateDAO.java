@@ -3,9 +3,12 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.brekka.pegasus.core.dao.FirewallDAO;
 import org.brekka.pegasus.core.model.Firewall;
-import org.hibernate.SQLQuery;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -23,21 +26,13 @@ public class FirewallHibernateDAO extends AbstractPegasusHibernateDAO<Firewall> 
     }
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.FirewallDAO#isAccessAllowed(java.lang.String, org.brekka.pegasus.core.model.Firewall)
+     * @see org.brekka.pegasus.core.dao.FirewallDAO#retrieveByOwner(java.util.UUID)
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean isAccessAllowed(String ipAddress, Firewall firewall) {
-        SQLQuery query = getCurrentSession().createSQLQuery(
-                "SELECT count(ipn.ID) " +
-                "  FROM `FirewallRule` fr" +
-                "  JOIN `Network` ipn" +
-                "    ON  fr.`NetworkGroupID` = ipn.`NetworkGroupID`" +
-                " WHERE ipn.`Network` >> :ip" +
-                "   AND fr.`FirewallID` = :firewall");
-        query.setString("ip", ipAddress);
-        query.setString("firewall", firewall.getId().toString());
-        Number count = (Number) query.uniqueResult();
-        return count.intValue() != 0;
+    public List<Firewall> retrieveByOwner(UUID owningEntityId) {
+        return getCurrentSession().createCriteria(Firewall.class)
+                .add(Restrictions.eq("owningEntityId", owningEntityId))
+                .list();
     }
-
 }

@@ -1,0 +1,8 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+
+    
+    <h2>Modify firewall ruleset '${firewall.name}'</h2>
+    
+
+</html>

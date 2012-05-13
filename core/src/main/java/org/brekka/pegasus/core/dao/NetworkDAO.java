@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
-import org.brekka.pegasus.core.model.Firewall;
+import org.brekka.pegasus.core.model.Network;
+import org.brekka.pegasus.core.model.NetworkGroup;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public interface FirewallDAO extends EntityDAO<UUID, Firewall>  {
+public interface NetworkDAO extends EntityDAO<UUID, Network> {
 
     /**
-     * @param owningEntityId
+     * @param group
      * @return
      */
-    List<Firewall> retrieveByOwner(UUID owningEntityId);
+    List<Network> retrieveForGroup(NetworkGroup group);
 
 }
