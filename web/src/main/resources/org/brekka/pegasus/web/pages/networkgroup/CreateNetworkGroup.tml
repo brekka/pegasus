@@ -4,6 +4,7 @@
     
     <h2>Create a new network group</h2>
     
+    
     <t:form t:id="networkgroup">
         <t:errors/>
         <div class="field">

@@ -96,6 +96,8 @@ public class FirewallServiceImpl implements FirewallService {
     @Transactional(propagation=Propagation.REQUIRED)
     public NetworkGroup createGroup(String name, NetworkGroupCategory networkGroupCategory) {
         NetworkGroup networkGroup = new NetworkGroup();
+        networkGroup.setName(name);
+        networkGroup.setNetworkGroupCategory(networkGroupCategory);
         networkGroupDAO.create(networkGroup);
         return networkGroup;
     }

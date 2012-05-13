@@ -1,0 +1,9 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+
+    
+    <h2>Modify network group '${networkGroup.name}'</h2>
+    
+
+
+</html>

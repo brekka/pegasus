@@ -6,6 +6,7 @@ package org.brekka.pegasus.web.pages.networkgroup;
 import java.util.UUID;
 
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.FirewallRule;
 import org.brekka.pegasus.core.model.NetworkGroup;
 import org.brekka.pegasus.core.services.FirewallService;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ModifyNetworkGroup {
 
-    @Autowired
+    @Inject
     private FirewallService firewallService;
     
     @Property

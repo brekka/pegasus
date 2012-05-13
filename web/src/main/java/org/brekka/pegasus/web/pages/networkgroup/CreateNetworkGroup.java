@@ -3,8 +3,11 @@
  */
 package org.brekka.pegasus.web.pages.networkgroup;
 
+import org.apache.tapestry5.annotations.InjectComponent;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.corelib.components.Form;
+import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.NetworkGroup;
 import org.brekka.pegasus.core.model.NetworkGroupCategory;
 import org.brekka.pegasus.core.services.FirewallService;
@@ -19,7 +22,10 @@ public class CreateNetworkGroup {
     @InjectPage
     private ModifyNetworkGroup modifyNetworkGroupPage;
     
-    @Autowired
+    @InjectComponent
+    private Form networkGroup;
+    
+    @Inject
     private FirewallService firewallService;
     
     @Property

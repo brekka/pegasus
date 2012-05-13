@@ -5,8 +5,11 @@ package org.brekka.pegasus.web.pages.firewall;
 
 import java.util.UUID;
 
+import org.apache.tapestry5.annotations.InjectComponent;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.corelib.components.Form;
+import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Firewall;
 import org.brekka.pegasus.core.model.FirewallAction;
 import org.brekka.pegasus.core.services.FirewallService;
@@ -20,7 +23,10 @@ public class CreateFirewall {
     @InjectPage
     private ModifyFirewall modifyFirewallPage;
     
-    @Autowired
+    @InjectComponent
+    private Form firewall;
+    
+    @Inject
     private FirewallService firewallService;
     
     
