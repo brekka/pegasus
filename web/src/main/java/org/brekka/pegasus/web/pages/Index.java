@@ -12,7 +12,7 @@ import org.brekka.pegasus.web.pages.direct.MakeDirect;
  */
 public class Index {
     
-    Object onActivate() {
-        return MakeDirect.class;
-    }
+//    Object onActivate() {
+//        return MakeDirect.class;
+//    }
 }

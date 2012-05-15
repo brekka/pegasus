@@ -20,4 +20,13 @@ public class Configuration {
     public String getFetchBase() {
         return pegasus.getFetchBase();
     }
+    
+    
+    /**
+     * @return the pegasus
+     */
+    public Pegasus getRoot() {
+        return pegasus;
+    }
+    
 }

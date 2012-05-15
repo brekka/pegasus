@@ -1,0 +1,12 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+
+    
+    <h2>Firewall Index</h2>
+    
+    <ul>
+        <li><t:pagelink page="firewall/modify" context="anonymousTransferKey">Anonymous transfer</t:pagelink></li>
+        <li><t:pagelink page="firewall/modify" context="memberSetupKey">Member Setup</t:pagelink></li>
+    </ul>
+    
+</html>

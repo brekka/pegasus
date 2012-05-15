@@ -135,8 +135,8 @@ public class FirewallServiceImpl implements FirewallService {
         UUID systemId = UUID.fromString(firewallConfig.getID());
         Firewall firewall = firewallDAO.retrieveById(systemId);
         if (firewall == null) {
-            firewall = createFirewall(systemId, "System Firewall", FirewallAction.DENY);
-            FirewallRule rule = createRule("Local", firewall, FirewallAction.ALLOW, 1);
+            firewall = createFirewall(systemId, firewallConfig.getName(), FirewallAction.DENY);
+            FirewallRule rule = createRule("Default", firewall, FirewallAction.ALLOW, 1);
             NetworkGroup networkGroup = rule.getNetworkGroup();
             List<String> networkList = firewallConfig.getNetworkList();
             for (String block : networkList) {

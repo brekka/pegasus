@@ -25,7 +25,7 @@ public class NetworkHibernateDAO extends AbstractPegasusHibernateDAO<Network> im
     protected Class<Network> type() {
         return Network.class;
     }
-
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.NetworkDAO#retrieveForGroup(org.brekka.pegasus.core.model.NetworkGroup)
      */

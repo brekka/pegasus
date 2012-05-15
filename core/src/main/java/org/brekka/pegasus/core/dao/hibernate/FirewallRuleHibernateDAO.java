@@ -3,13 +3,17 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.sql.Types;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.FirewallRuleDAO;
 import org.brekka.pegasus.core.model.Firewall;
 import org.brekka.pegasus.core.model.FirewallRule;
+import org.brekka.pegasus.core.support.CidrUserType;
+import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.ObjectType;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -34,13 +38,13 @@ public class FirewallRuleHibernateDAO extends AbstractPegasusHibernateDAO<Firewa
     public List<FirewallRule> findApplicableRules(Firewall firewall, String ipAddress) {
         SQLQuery query = getCurrentSession().createSQLQuery(
                 "SELECT fr.* " +
-                "  FROM `FirewallRule` fr" +
-                "  JOIN `Network` ipn" +
-                "    ON  fr.`NetworkGroupID` = ipn.`NetworkGroupID`" +
-                " WHERE ipn.`Network` >> :ip" +
-                "   AND fr.`FirewallID` = :firewall" +
-                " ORDER BY fr.priority ASC");
-        query.setString("ip", ipAddress);
+                "  FROM \"FirewallRule\" fr" +
+                "  JOIN \"Network\" ipn" +
+                "    ON  fr.\"NetworkGroupID\" = ipn.\"NetworkGroupID\"" +
+                " WHERE ipn.\"Block\" >> cast(:ip as cidr)" +
+                "   AND fr.\"FirewallID\" = cast(:firewall as uuid)" +
+                " ORDER BY fr.\"Priority\" ASC");
+        query.setParameter("ip", ipAddress);
         query.setString("firewall", firewall.getId().toString());
         query.addEntity(FirewallRule.class);
         return (List<FirewallRule>) query.list();

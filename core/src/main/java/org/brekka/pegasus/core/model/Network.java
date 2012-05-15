@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Type;
 
 /**
  * A network block such as "10.0.0.0/8".
@@ -36,9 +37,9 @@ public class Network extends SnapshotEntity {
      * The CIDR network block, e.g. "10.0.0.0/8"
      */
     @Column(name="`Block`", columnDefinition="cidr", nullable=false)
+    @Type(type="org.brekka.pegasus.core.support.CidrUserType")
     @Index(name="IDX_Network_Block")
     private String block;
-    
 
     public NetworkGroup getNetworkGroup() {
         return networkGroup;

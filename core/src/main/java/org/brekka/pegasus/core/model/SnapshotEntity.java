@@ -40,7 +40,7 @@ public class SnapshotEntity extends IdentifiableEntity {
     /**
      * @param created the created to set
      */
-    void setCreated(Date created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 }
