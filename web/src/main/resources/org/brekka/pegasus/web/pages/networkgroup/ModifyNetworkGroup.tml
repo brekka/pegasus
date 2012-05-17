@@ -4,6 +4,23 @@
     
     <h2>Modify network group '${networkGroup.name}'</h2>
     
-
+    <t:if test="firewallRule">
+        <t:pagelink page="firewall/modify" context="firewallRule.firewall.id">Return to firewall</t:pagelink>
+        <p:else>
+            <t:pagelink page="networkgroup/index">All categorized groups</t:pagelink> 
+        </p:else>
+    </t:if>
+    
+    <t:zone t:id="networkZone">
+        <t:form zone="networkZone">
+            Add block(s): <t:textarea t:id="blocks"/>
+            <t:submit value="Add" />
+        </t:form>
+        <t:grid source="networks" row="loopNetwork" add="remove">
+            <p:removeCell>
+                <t:actionlink t:id="remove" context="loopNetwork.id" zone="networkZone">Remove</t:actionlink>
+            </p:removeCell>
+        </t:grid>
+    </t:zone>
 
 </html>

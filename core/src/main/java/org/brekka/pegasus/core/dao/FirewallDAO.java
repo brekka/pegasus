@@ -19,6 +19,7 @@ public interface FirewallDAO extends EntityDAO<UUID, Firewall>  {
      * @param owningEntityId
      * @return
      */
-    List<Firewall> retrieveByOwner(UUID owningEntityId);
+    List<Firewall> retrieveByOwningEntity(UUID owningEntityId);
+
 
 }

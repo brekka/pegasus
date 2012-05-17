@@ -133,8 +133,9 @@ public class FirewallServiceImpl implements FirewallService {
     @Transactional(propagation=Propagation.REQUIRED)
     public Firewall retrieveConfiguredFirewall(FirewallType firewallConfig) {
         UUID systemId = UUID.fromString(firewallConfig.getID());
-        Firewall firewall = firewallDAO.retrieveById(systemId);
-        if (firewall == null) {
+        List<Firewall> firewallList = firewallDAO.retrieveByOwningEntity(systemId);
+        Firewall firewall;
+        if (firewallList.isEmpty()) {
             firewall = createFirewall(systemId, firewallConfig.getName(), FirewallAction.DENY);
             FirewallRule rule = createRule("Default", firewall, FirewallAction.ALLOW, 1);
             NetworkGroup networkGroup = rule.getNetworkGroup();
@@ -142,8 +143,55 @@ public class FirewallServiceImpl implements FirewallService {
             for (String block : networkList) {
                 createNetwork(block, networkGroup);
             }
+        } else {
+            firewall = firewallList.get(0);
         }
         return firewall;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.FirewallService#updateFirewall(java.util.UUID, java.lang.String, org.brekka.pegasus.core.model.FirewallAction)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Firewall updateFirewall(UUID id, String firewallName, FirewallAction firewallAction) {
+        Firewall firewall = firewallDAO.retrieveById(id);
+        firewall.setName(firewallName);
+        firewall.setDefaultAction(firewallAction);
+        firewallDAO.update(firewall);
+        return firewall;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.FirewallService#deleteNetwork(java.util.UUID)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void deleteNetwork(UUID networkId) {
+        networkDAO.delete(networkId);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.FirewallService#deleteRule(java.util.UUID)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void deleteRule(UUID id) {
+        FirewallRule rule = firewallRuleDAO.retrieveById(id);
+        NetworkGroup networkGroup = rule.getNetworkGroup();
+        firewallRuleDAO.delete(id);
+        if (networkGroup.getNetworkGroupCategory() == null) {
+            networkGroupDAO.delete(networkGroup.getId());
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.FirewallService#retrieveCategorizedGroups()
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<NetworkGroup> retrieveCategorizedGroups(Firewall excludeFrom) {
+        return networkGroupDAO.retrieveCategorized(excludeFrom);
     }
     
     /* (non-Javadoc)
@@ -152,7 +200,7 @@ public class FirewallServiceImpl implements FirewallService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public List<Firewall> retrieveFirewallsByOwner(UUID owningEntityId) {
-        return firewallDAO.retrieveByOwner(owningEntityId);
+        return firewallDAO.retrieveByOwningEntity(owningEntityId);
     }
     
     /* (non-Javadoc)
@@ -177,6 +225,7 @@ public class FirewallServiceImpl implements FirewallService {
      * @see org.brekka.pegasus.core.services.FirewallService#retrieveGroupById(java.util.UUID)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public NetworkGroup retrieveGroupById(UUID groupId) {
         return networkGroupDAO.retrieveById(groupId);
     }
@@ -185,6 +234,7 @@ public class FirewallServiceImpl implements FirewallService {
      * @see org.brekka.pegasus.core.services.FirewallService#retrieveRuleById(java.util.UUID)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public FirewallRule retrieveRuleById(UUID ruleId) {
         return firewallRuleDAO.retrieveById(ruleId);
     }
@@ -193,6 +243,7 @@ public class FirewallServiceImpl implements FirewallService {
      * @see org.brekka.pegasus.core.services.FirewallService#retrieveFirewallById(java.util.UUID)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public Firewall retrieveFirewallById(UUID firewallId) {
         return firewallDAO.retrieveById(firewallId);
     }

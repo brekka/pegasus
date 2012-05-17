@@ -51,4 +51,27 @@ public interface FirewallService {
      * @return
      */
     Firewall retrieveFirewallById(UUID firewallId);
+
+    /**
+     * @return
+     */
+    List<NetworkGroup> retrieveCategorizedGroups(Firewall excludeFrom);
+
+    /**
+     * @param id
+     */
+    void deleteNetwork(UUID networkId);
+
+    /**
+     * @param id
+     */
+    void deleteRule(UUID id);
+
+    /**
+     * @param id
+     * @param firewallName
+     * @param firewallAction
+     * @return
+     */
+    Firewall updateFirewall(UUID id, String firewallName, FirewallAction firewallAction);
 }

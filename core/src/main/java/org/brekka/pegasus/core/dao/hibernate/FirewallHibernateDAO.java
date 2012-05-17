@@ -30,7 +30,7 @@ public class FirewallHibernateDAO extends AbstractPegasusHibernateDAO<Firewall> 
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Firewall> retrieveByOwner(UUID owningEntityId) {
+    public List<Firewall> retrieveByOwningEntity(UUID owningEntityId) {
         return getCurrentSession().createCriteria(Firewall.class)
                 .add(Restrictions.eq("owningEntityId", owningEntityId))
                 .list();
