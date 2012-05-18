@@ -20,6 +20,8 @@ import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
+import org.brekka.stillingar.annotations.Configured;
+import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus.Administration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -37,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
+@Configured
 public class MemberServiceImpl implements UserDetailsService, MemberService {
 
     @Autowired
@@ -54,6 +57,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Autowired
     private EMailAddressService eMailAddressService;
     
+    @Configured
+    private Administration administrationConfig;
+    
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
      */
@@ -61,13 +67,22 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Transactional(propagation=Propagation.REQUIRED)
     public UserDetails loadUserByUsername(String openId) throws UsernameNotFoundException {
         Person person = (Person) memberDAO.retrieveByOpenId(openId);
+        boolean admin = false;
         if (person == null) {
             // Not a member yet, create a new entry
             person = new Person();
             person.setOpenId(openId);
             memberDAO.create(person);
+        } else {
+            List<String> userOpenIDList = administrationConfig.getUserOpenIDList();
+            for (String adminOpenId : userOpenIDList) {
+                if (adminOpenId.equals(openId)) {
+                    admin = true;
+                    break;
+                }
+            }
         }
-        AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person);
+        AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person, admin);
         return authMember;
     }
     

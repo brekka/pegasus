@@ -4,10 +4,7 @@
 package org.brekka.pegasus.web.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -19,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.brekka.pegasus.web.security.AnonymousAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.FilterInvocation;
@@ -31,8 +28,12 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
+ * Identifies when a user is attempting to access a resource which requires a proper login. 
+ * 
+ * An alternative would be to override the {@link AuthenticationTrustResolver} to indentify our custom
+ * anonymous type but that would require the custom bean definition of a lot of spring security classes.
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 public class SwitchAuthenticationFilter extends GenericFilterBean {
 
@@ -66,7 +67,7 @@ public class SwitchAuthenticationFilter extends GenericFilterBean {
             boolean anon = false;
             Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
             for (ConfigAttribute configAttribute : attributes) {
-                if (SpecialAnonymousAuthenticationFilter.ANONYMOUS.getAuthority().equals(configAttribute.getAttribute())) {
+                if (AnonymousAuthenticationFilter.ANONYMOUS.getAuthority().equals(configAttribute.getAttribute())) {
                     anon = true;
                     break;
                 }

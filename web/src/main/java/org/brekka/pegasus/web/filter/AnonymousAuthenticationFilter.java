@@ -31,7 +31,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public class SpecialAnonymousAuthenticationFilter extends GenericFilterBean implements InitializingBean {
+public class AnonymousAuthenticationFilter extends GenericFilterBean implements InitializingBean {
 
     public static final GrantedAuthority ANONYOUS_TRANSFER = new SimpleGrantedAuthority("ROLE_ANONYMOUS_TRANSFER");
     public static final GrantedAuthority MEMBER_SIGNUP = new SimpleGrantedAuthority("ROLE_MEMBER_SIGNUP");
@@ -48,7 +48,7 @@ public class SpecialAnonymousAuthenticationFilter extends GenericFilterBean impl
     private Firewall memberSignup;
 
     @Autowired
-    public SpecialAnonymousAuthenticationFilter(
+    public AnonymousAuthenticationFilter(
             FirewallService firewallService, 
             WebAuthenticationDetailsSource authenticationDetailsSource, 
             Configuration configuration) {

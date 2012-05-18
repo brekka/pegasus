@@ -10,13 +10,15 @@
     
     <context:annotation-config />
     
-	<http  >
-        <intercept-url pattern="/direct/**" access="ROLE_ANONYMOUS_TRANSFER"/>
-        <intercept-url pattern="/member/**" access="ROLE_USER"/>
-        <intercept-url pattern="/inbox/**"  access="ROLE_USER"/>
-        <intercept-url pattern="/**"        access="ROLE_USER,ROLE_ANONYMOUS"/>
+	<http >
+        <intercept-url pattern="/networkgroup/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/firewall/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/member/**"   access="ROLE_USER"/>
+        <intercept-url pattern="/inbox/**"    access="ROLE_USER"/>
+        <intercept-url pattern="/direct/**"   access="ROLE_ANONYMOUS_TRANSFER"/>
+        <intercept-url pattern="/**"          access="ROLE_USER,ROLE_ANONYMOUS"/>
         <logout logout-url="/logout"/>
-        <openid-login login-page="/login" authentication-failure-url="/login?error=true" 
+        <openid-login login-page="/login" authentication-failure-url="/login?error=true" default-target-url="/member"
                       authentication-details-source-ref="authenticationDetailsSource" >
             <attribute-exchange identifier-match="https://www.google.com/.*">
                 <openid-attribute name="email" type="http://schema.openid.net/contact/email" required="true" />
@@ -49,9 +51,11 @@
         <authentication-provider ref="anonymousAuthenticationProvider" />
     </authentication-manager>
     
+    
+    
     <beans:bean id="anonymousAuthenticationProvider" class="org.brekka.pegasus.web.security.AnonymousAuthenticationProvider" />
     
-    <beans:bean id="anonymousFilter" class="org.brekka.pegasus.web.filter.SpecialAnonymousAuthenticationFilter">
+    <beans:bean id="anonymousFilter" class="org.brekka.pegasus.web.filter.AnonymousAuthenticationFilter">
     </beans:bean>
     
     <beans:bean id="authenticationDetailsSource" class="org.brekka.pegasus.web.security.WebAuthenticationDetailsSource" />

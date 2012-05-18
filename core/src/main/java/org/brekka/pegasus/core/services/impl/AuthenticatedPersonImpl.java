@@ -19,8 +19,13 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDetails {
     
+    public static final GrantedAuthority USER = new SimpleGrantedAuthority("ROLE_USER");
+    public static final GrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
+    
     private static final List<GrantedAuthority> USER_AUTHORITIES = Arrays.<GrantedAuthority>
-            asList(new SimpleGrantedAuthority("ROLE_USER"));
+            asList(USER);
+    private static final List<GrantedAuthority> ADMIN_AUTHORITIES = Arrays.<GrantedAuthority>
+            asList(USER, ADMIN);
     
     /**
      * Serial UID
@@ -32,8 +37,11 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
      */
     private Person person;
     
-    public AuthenticatedPersonImpl(Person person) {
+    private final List<GrantedAuthority> authorities;
+    
+    public AuthenticatedPersonImpl(Person person, boolean admin) {
         this.person = person;
+        this.authorities = admin ? ADMIN_AUTHORITIES : USER_AUTHORITIES;
     }
 
     /* (non-Javadoc)
@@ -53,7 +61,7 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return USER_AUTHORITIES;
+        return authorities;
     }
 
     /* (non-Javadoc)
