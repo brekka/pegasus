@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.tapestry5.annotations.InjectComponent;
+import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.corelib.components.Zone;
@@ -20,17 +21,18 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
+import org.brekka.pegasus.web.pages.org.OrgIndex;
 import org.brekka.pegasus.web.support.Bundles;
-import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
-import org.brekka.xml.pegasus.v1.model.BundleType;
-import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public class MemberIndex {
+    
+    @InjectPage
+    private OrgIndex orgIndexPage;
     
     @Inject
     private MemberService memberService;
@@ -54,9 +56,6 @@ public class MemberIndex {
     private Associate loopAssociate;
     
     @Property
-    private Deposit loopDeposit;
-    
-    @Property
     private Vault loopVault;
     
     @SessionAttribute("bundles")
@@ -71,14 +70,22 @@ public class MemberIndex {
     Object onActivate() {
         Object retVal = Boolean.TRUE;
         if (memberService.isNewMember()) {
+            // New member, go to the setup page
             retVal = SetupMember.class;
         } else {
-            if (bundles == null) {
-                bundles = new Bundles();
-            }
-            
             AuthenticatedMember current = memberService.getCurrent();
-            selectedVault = current.getMember().getDefaultVault();
+            if (current.getActiveActor() instanceof Associate) {
+                // In org mode, redirect back to the corresponding organization home
+                Associate associate = (Associate) current.getActiveActor();
+                orgIndexPage.init(associate.getOrganization());
+                retVal = orgIndexPage;
+            } else {
+                // Normal member flow
+                if (bundles == null) {
+                    bundles = new Bundles();
+                }
+                selectedVault = current.getMember().getDefaultVault();
+            }
         }
         return retVal;
     }

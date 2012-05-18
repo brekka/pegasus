@@ -14,7 +14,6 @@ import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
-import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Token;
@@ -88,7 +87,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             EMailAddress ownerEMail = eMailAddressService.createEMail(ownerEmailStr, owner, false);
             associate.setPrimaryEMailAddress(ownerEMail);
         }
-        associate.setKeySafe(vault);
+        associate.setDefaultVault(vault);
         associate.setKeyPairId(keyPair.getId());
         associateDAO.create(associate);
         
@@ -117,12 +116,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveAssociate(org.brekka.pegasus.core.model.Organization, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Associate retrieveAssociate(Organization organization, Member member) {
+        Associate associate = associateDAO.retrieveByOrgAndMember(organization, member);
+        return associate;
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveAssociates(org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public List<Associate> retrieveAssociates(KeySafe keySafe) {
-        List<Associate> asociateList = associateDAO.retrieveAssociatesInKeySafe(keySafe);
+    public List<Associate> retrieveAssociates(Vault vault) {
+        List<Associate> asociateList = associateDAO.retrieveAssociatesInVault(vault);
         return asociateList;
     }
 }

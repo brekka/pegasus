@@ -21,12 +21,16 @@ public class OrgIndex {
     @Property
     private Organization organization;
     
-    void init(Organization organization) {
+    public void init(Organization organization) {
         this.organization = organization;
     }
     
     Object onActivate(String token) {
         this.organization = organizationService.retrieveByToken(token);
         return Boolean.TRUE;
+    }
+    
+    String onPassivate() {
+        return organization.getToken().getPath();
     }
 }

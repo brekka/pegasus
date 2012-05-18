@@ -3,17 +3,13 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
-import java.sql.Types;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.FirewallRuleDAO;
 import org.brekka.pegasus.core.model.Firewall;
 import org.brekka.pegasus.core.model.FirewallRule;
-import org.brekka.pegasus.core.support.CidrUserType;
-import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.ObjectType;
 import org.springframework.stereotype.Repository;
 
 /**

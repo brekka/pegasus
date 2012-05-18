@@ -10,6 +10,8 @@ import org.apache.tapestry5.annotations.Import;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SetupRender;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.pegasus.core.model.Actor;
+import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.ActorStatus;
@@ -47,15 +49,29 @@ public class Layout {
         if (user == null) {
             return null;
         }
-        Member member = user.getMember();
-        if (member.getStatus() == ActorStatus.NEW) {
+        Actor actor = user.getActiveActor();
+        if (actor.getStatus() == ActorStatus.NEW) {
             name = "New Member";
-        } else if (member instanceof Person) {
-            Person person = (Person) member;
+        } else if (actor instanceof Person) {
+            Person person = (Person) actor;
             name = person.getFullName();
             if (name == null) {
                 name = "Name locked";
             }
+        } else if (actor instanceof Associate) {
+            Associate associate = (Associate) actor;
+            Member member = associate.getMember();
+            if (member instanceof Person) {
+                Person person = (Person) member;
+                name = person.getFullName();
+                if (name == null) {
+                    name = "Name locked";
+                }
+            } else {
+                name = "Robot";
+            }
+            String orgName = associate.getOrganization().getName();
+            name = name + " @ " + orgName;
         }
         return name;
     }

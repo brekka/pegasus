@@ -9,7 +9,6 @@ import java.util.List;
 import org.brekka.pegasus.core.dao.DispatchDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Dispatch;
-import org.brekka.pegasus.core.model.FirewallRule;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;

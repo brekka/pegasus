@@ -22,18 +22,4 @@ public abstract class Member extends Actor {
      */
     private static final long serialVersionUID = -6815079717237157048L;
 
-    /**
-     * The default vault for this member (normally contains the profile).
-     */
-    @OneToOne
-    @JoinColumn(name="`DefaultVaultID`")
-    private Vault defaultVault;
-
-    public final Vault getDefaultVault() {
-        return defaultVault;
-    }
-
-    public final void setDefaultVault(Vault defaultVault) {
-        this.defaultVault = defaultVault;
-    }
 }

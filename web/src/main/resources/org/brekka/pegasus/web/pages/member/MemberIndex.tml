@@ -33,6 +33,7 @@
                                 <t:loop source="associateList" value="loopAssociate">
                                     <li>
                                         <t:pagelink page="org/index" context="loopAssociate.organization.token.path">${loopAssociate.organization.name}</t:pagelink>
+                                        - <t:pagelink page="org/activate" context="loopAssociate.organization.token.path">Activate</t:pagelink>
                                     </li>        
                                 </t:loop>
                                 </ul>

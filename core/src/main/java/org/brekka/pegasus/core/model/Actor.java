@@ -12,7 +12,10 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * An actor can be either a {@link Member} or an {@link Associate}. An employee is simply an association
@@ -21,7 +24,12 @@ import javax.persistence.Table;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Actor`")
+@Table(name="`Actor`",
+    uniqueConstraints={ 
+        // Associate unique key
+        @UniqueConstraint(columnNames = {"`MemberID`", "`OrganizationID`" }),
+    }
+)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
     name="`Type`", length=9,
@@ -34,6 +42,13 @@ public abstract class Actor extends LongevousEntity {
      * Serial UID
      */
     private static final long serialVersionUID = 3647113396750700928L;
+
+    /**
+     * The default vault for this member (normally contains the profile).
+     */
+    @OneToOne
+    @JoinColumn(name="`DefaultVaultID`")
+    private Vault defaultVault;
 
     /**
      * The current status of this actor.
@@ -49,5 +64,13 @@ public abstract class Actor extends LongevousEntity {
 
     public final void setStatus(ActorStatus status) {
         this.status = status;
+    }
+
+    public final Vault getDefaultVault() {
+        return defaultVault;
+    }
+
+    public final void setDefaultVault(Vault defaultVault) {
+        this.defaultVault = defaultVault;
     }
 }

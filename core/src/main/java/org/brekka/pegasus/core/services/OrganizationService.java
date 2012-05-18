@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Vault;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -35,7 +35,7 @@ public interface OrganizationService {
      * @param loopVault
      * @return
      */
-    List<Associate> retrieveAssociates(KeySafe keySafe);
+    List<Associate> retrieveAssociates(Vault vault);
 
     /**
      * @param token
@@ -49,5 +49,12 @@ public interface OrganizationService {
      * @return
      */
     Division retrieveDivision(String orgToken, String divisionSlug);
+
+    /**
+     * @param organization
+     * @param member
+     * @return
+     */
+    Associate retrieveAssociate(Organization organization, Member member);
 
 }

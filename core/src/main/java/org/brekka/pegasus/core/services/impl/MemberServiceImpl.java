@@ -8,14 +8,17 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
+import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
+import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
@@ -57,8 +60,12 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Autowired
     private EMailAddressService eMailAddressService;
     
+    @Autowired
+    private OrganizationService organizationService;
+    
     @Configured
     private Administration administrationConfig;
+    
     
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
@@ -84,6 +91,28 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         }
         AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person, admin);
         return authMember;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#activateOrganization(org.brekka.pegasus.core.model.Organization)
+     */
+    @Override
+    public void activateOrganization(Organization organization) {
+        AuthenticatedMemberBase current = (AuthenticatedMemberBase) getCurrent();
+        Member member = current.getMember();
+        Associate associate = organizationService.retrieveAssociate(organization, member);
+        associate.setMember(member);
+        current.setActiveActor(associate);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#activateMember()
+     */
+    @Override
+    public void activateMember() {
+        AuthenticatedMemberBase current = (AuthenticatedMemberBase) getCurrent();
+        Member member = current.getMember();
+        current.setActiveActor(member);
     }
     
     /* (non-Javadoc)

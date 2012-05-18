@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
@@ -21,7 +22,12 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`DivisionAssociate`")
+@Table(name="`DivisionAssociate`",
+    uniqueConstraints={ 
+        // Surrogate key
+        @UniqueConstraint(columnNames = {"`DivisionID`", "`AssociateID`" }),
+    }
+)
 public class DivisionAssociate extends LongevousEntity {
 
     /**
@@ -46,7 +52,7 @@ public class DivisionAssociate extends LongevousEntity {
     /**
      * The key pair that gives the associate access to the contents of this division.
      */
-    @Column(name="KeyPairID")
+    @Column(name="`KeyPairID`")
     @Type(type="pg-uuid")
     private UUID keyPairId;
     

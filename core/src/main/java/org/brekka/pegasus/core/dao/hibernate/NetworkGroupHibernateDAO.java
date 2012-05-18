@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.brekka.pegasus.core.dao.NetworkGroupDAO;
 import org.brekka.pegasus.core.model.Firewall;
-import org.brekka.pegasus.core.model.Network;
 import org.brekka.pegasus.core.model.NetworkGroup;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
