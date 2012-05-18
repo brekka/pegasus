@@ -3,8 +3,8 @@
  */
 package org.brekka.pegasus.web.pages.inbox;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tapestry5.SelectModel;
-import org.apache.tapestry5.ValueEncoder;
 import org.apache.tapestry5.alerts.AlertManager;
 import org.apache.tapestry5.alerts.Duration;
 import org.apache.tapestry5.alerts.Severity;
@@ -14,6 +14,7 @@ import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
+import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.pages.member.MemberIndex;
 import org.brekka.pegasus.web.support.VaultEncoder;
 import org.brekka.pegasus.web.support.VaultSelectModelBuilder;
@@ -28,6 +29,9 @@ public class CreateInbox {
     
     @Inject
     private MemberService memberService;
+    
+    @Inject
+    private VaultService vaultService;
     
     @Inject
     private AlertManager alertManager;
@@ -51,8 +55,16 @@ public class CreateInbox {
     private String introduction;
     
     Object onActivate() {
+        return onActivate(null);
+    }
+    
+    Object onActivate(String vaultSlug) {
         Object retVal = Boolean.TRUE;
-        selectedVault = memberService.getCurrent().getMember().getDefaultVault();
+        if (StringUtils.isBlank(vaultSlug)) {
+            selectedVault = memberService.getCurrent().getMember().getDefaultVault();
+        } else {
+            selectedVault = vaultService.retrieveBySlug(vaultSlug);
+        }
         inboxToken = TokenType.INBOX.generateRandom().getPath();
         return retVal;
     }

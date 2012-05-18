@@ -1,0 +1,71 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+    
+    <h2>Send file(s)</h2>
+    
+    <h3><em>1.</em> Files to send</h3>
+    <div id="enhanced" class="hidden">
+	    <div class="field">
+			<label for="comment">Select file(s)</label>
+			<span class="add_files"></span>
+		    <p>Click 'Browse...' above to add one or more files, or drag the files onto this window. The files will begin to upload
+		       immediately but will not become available for download until "Make available" is clicked in section 3.</p>
+		</div>
+    </div>
+    <div id="files_outer">
+	    <table id="files" class="hidden">
+	   		<thead>
+	    		<tr>
+	    			<th>Filename</th>
+	    			<th>Size</th>
+	    			<th>Progress</th>
+	    		</tr>
+	   		</thead>
+	   		<tbody>
+	   			<t:loop source="files" value="loopFile">
+	   				<tr>
+	    				<td>${loopFile.fileName}</td>
+	    				<td>${loopFile.length}</td>
+	    				<td>100%</td>
+	    			</tr>
+	   			</t:loop>
+	   		</tbody>
+	   	</table>
+    </div>
+   	
+	<t:form>
+		<div id="normal_filefield" class="field">
+			<t:label for="file">Select file</t:label>
+			<t:upload t:id="file" file="file" />
+			<p>Choose the file you wish to transfer using the selection box immediately above this text</p>
+		</div>
+        
+        <h3><em>2.</em> Recipient</h3>
+        <div class="field">
+            <t:label for="recipientEMail">Recipient e-mail address</t:label>
+            <t:textfield t:id="recipientEMail" />
+            <p>Set the e-mail address of the person you want to send this file or leave it blank for an 'anonymous' transfer.</p>
+        </div>
+		
+		<h3><em>3.</em> Optional additions</h3>
+		<div class="field">
+			<t:label for="reference">Reference</t:label>
+			<t:textfield t:id="reference" />
+			<p>If the recipient gave you are reference number, enter it here.</p>
+		</div>
+		<div class="field">
+			<t:label for="comment">Comment</t:label>
+			<t:textarea t:id="comment" />
+			<p>You can leave a comment for the recipient by entering it in the field above.</p>
+		</div>
+		
+		<h3><em>4.</em> Initiate transfer</h3>
+		<div class="field">
+			<label>Submit</label>
+			<t:submit value="Make available..." t:id="send_button" />
+			<p id="prepare_to_send">Please add one or more files in section 1 above.</p>
+		</div>
+	</t:form>
+	
+	<t:outputRaw value="uploadLinkScript" />
+</html>

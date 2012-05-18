@@ -2,7 +2,7 @@
 	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
 
     
-    <h2>Org index</h2>
+    <h2>Organization '${organization.name}'</h2>
    
 
 </html>

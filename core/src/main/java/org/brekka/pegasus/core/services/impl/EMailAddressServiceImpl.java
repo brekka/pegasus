@@ -71,6 +71,15 @@ public class EMailAddressServiceImpl implements EMailAddressService {
         // TODO add to profile
         return eMailAddress;
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EMailAddressService#retrieveByAddress(java.lang.String)
+     */
+    @Override
+    public EMailAddress retrieveByAddress(String address) {
+        byte[] hash = hash(address);
+        return eMailAddressDAO.retrieveByHash(hash);
+    }
 
     /**
      * @param domain

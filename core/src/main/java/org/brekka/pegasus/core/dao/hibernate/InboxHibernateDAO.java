@@ -6,7 +6,9 @@ package org.brekka.pegasus.core.dao.hibernate;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.InboxDAO;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.hibernate.criterion.Restrictions;
@@ -38,6 +40,16 @@ public class InboxHibernateDAO extends AbstractPegasusHibernateDAO<Inbox> implem
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.InboxDAO#retrieveForEMailAddress(org.brekka.pegasus.core.model.EMailAddress)
+     */
+    @Override
+    public Inbox retrieveForEMailAddress(EMailAddress eMailAddress) {
+        return (Inbox) getCurrentSession().createCriteria(EMailAddress.class)
+                .add(Restrictions.eq("eMailAddress", eMailAddress))
+                .uniqueResult();
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.InboxDAO#retrieveForMember(org.brekka.pegasus.core.model.Member)
      */
     @SuppressWarnings("unchecked")
@@ -45,6 +57,17 @@ public class InboxHibernateDAO extends AbstractPegasusHibernateDAO<Inbox> implem
     public List<Inbox> retrieveForMember(Member member) {
         return getCurrentSession().createCriteria(Inbox.class)
                 .add(Restrictions.eq("owner", member))
+                .list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.InboxDAO#retrieveForVault(org.brekka.pegasus.core.model.Vault)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Inbox> retrieveForKeySafe(KeySafe keySafe) {
+        return getCurrentSession().createCriteria(Inbox.class)
+                .add(Restrictions.eq("keySafe", keySafe))
                 .list();
     }
 }

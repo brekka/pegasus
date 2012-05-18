@@ -3,35 +3,29 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import java.util.UUID;
+import javax.crypto.SecretKey;
 
+import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.services.AnonymousService;
 
 /**
  * @author Andrew Taylor
  *
  */
-class AnonymousAllocatedBundleImpl implements AnonymousService.AnonymousAllocatedBundle {
+class AnonymousAllocatedBundleImpl extends AbstractAllocatedBundle implements AnonymousService.AnonymousAllocatedBundle {
 
-    private final UUID bundleId;
+    
     private final String token;
     private final String code;
     private final String fileName;
     
-    public AnonymousAllocatedBundleImpl(UUID bundleId, String token, String code, String fileName) {
-        this.bundleId = bundleId;
+    public AnonymousAllocatedBundleImpl(Bundle bundle, SecretKey secretKey, String token, String code, String fileName) {
+        super(bundle, secretKey);
         this.token = token;
         this.code = code;
         this.fileName = fileName;
     }
     
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AllocatedBundle#getBundleId()
-     */
-    @Override
-    public UUID getBundleId() {
-        return bundleId;
-    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AllocatedBundle#getToken()

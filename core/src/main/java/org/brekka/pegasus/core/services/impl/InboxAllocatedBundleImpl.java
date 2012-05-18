@@ -3,8 +3,9 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import java.util.UUID;
+import javax.crypto.SecretKey;
 
+import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
 
@@ -12,27 +13,18 @@ import org.brekka.pegasus.core.services.InboxService;
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-class InboxAllocatedBundleImpl implements InboxService.InboxAllocatedBundle {
+class InboxAllocatedBundleImpl extends AbstractAllocatedBundle implements InboxService.InboxAllocatedBundle {
 
-    private final UUID bundleId;
     private final Inbox inbox;
     private final int fileCount;
     
     
-    public InboxAllocatedBundleImpl(UUID bundleId, Inbox inbox, int fileCount) {
-        this.bundleId = bundleId;
+    public InboxAllocatedBundleImpl(Bundle bundle, SecretKey secretKey, Inbox inbox, int fileCount) {
+        super(bundle, secretKey);
         this.inbox = inbox;
         this.fileCount = fileCount;
     }
     
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AllocatedBundle#getBundleId()
-     */
-    @Override
-    public UUID getBundleId() {
-        return bundleId;
-    }
-
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.InboxTransferKey#getFileCount()
      */

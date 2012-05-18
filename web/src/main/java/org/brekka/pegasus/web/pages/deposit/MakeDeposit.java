@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tapestry5.alerts.Duration;
 import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.InjectPage;
@@ -15,14 +14,15 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.pages.NoSession;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.support.MakeKeyUtils;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -52,7 +52,7 @@ public class MakeDeposit extends AbstractMakePage {
      */
     Object onActivate(String inboxToken) {
         Inbox inbox = inboxService.retrieveForToken(inboxToken);
-        String makeKey = RandomStringUtils.randomAlphabetic(4);
+        String makeKey = MakeKeyUtils.newKey();
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
         BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
         bundleMakerContext.get(makeKey, inbox);
@@ -97,7 +97,7 @@ public class MakeDeposit extends AbstractMakePage {
         BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            AllocatedBundle transferKey = inboxService.depositFiles(inbox, reference, comment, fileBuilderList);
+            AllocatedBundle transferKey = inboxService.depositFiles(inbox, reference, comment, null, fileBuilderList);
             bundleMaker.setTransferKey(transferKey);
             depositDonePage.init(makeKey);
             retVal = depositDonePage;

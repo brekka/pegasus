@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
@@ -25,10 +27,10 @@ import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
+import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
-import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
@@ -61,7 +63,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     private MemberService memberService;
     
     @Autowired
-    private VaultService vaultService;
+    private KeySafeService keySafeService;
     
     @Autowired
     private ProfileService profileService;
@@ -97,7 +99,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InboxAllocatedBundle depositFiles(Inbox inbox, String reference, String comment, List<FileBuilder> fileBuilders) {
+    public InboxAllocatedBundle depositFiles(Inbox inbox, String reference, String comment, String agreementText, List<FileBuilder> fileBuilders) {
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
         Vault vault = (Vault) inbox.getKeySafe();
@@ -109,6 +111,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         BundleDocument bundleDocument = prepareBundleDocument(comment, fileBuilders);
         BundleType bundleType = bundleDocument.getBundle();
         bundleType.setReference(reference);
+        bundleType.setAgreement(agreementText);
         
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
@@ -128,7 +131,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         
         depositDAO.create(deposit);
         
-        return new InboxAllocatedBundleImpl(bundleModel.getId(), inbox, fileBuilders.size());
+        return new InboxAllocatedBundleImpl(bundleModel, secretKey, inbox, fileBuilders.size());
     }
     
     /* (non-Javadoc)
@@ -139,17 +142,28 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     public Inbox retrieveForToken(String inboxToken) {
         Token token = tokenService.retrieveByPath(inboxToken);
         Inbox inbox = inboxDAO.retrieveByToken(token);
-        
-        AuthenticatedMember authenticatedMember = memberService.getCurrent();
-        ProfileType profile = authenticatedMember.getProfile();
-        for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
-            InboxType inboxXml = profile.getInboxArray(i);
-            if (inboxXml.getUUID().equals(inbox.getId().toString())) {
-                String name = inboxXml.getName();
-                inbox.setName(name);
-                break;
-            }
-        }
+        populateNames(Arrays.asList(inbox));
+        return inbox;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForVault(org.brekka.pegasus.core.model.Vault)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Inbox> retrieveForKeySafe(KeySafe keySafe) {
+        List<Inbox> inboxList = inboxDAO.retrieveForKeySafe(keySafe);
+        populateNames(inboxList);
+        return inboxList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForEMailAddress(org.brekka.pegasus.core.model.EMailAddress)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Inbox retrieveForEMailAddress(EMailAddress eMailAddress) {
+        Inbox inbox = inboxDAO.retrieveForEMailAddress(eMailAddress);
         return inbox;
     }
     
@@ -157,14 +171,14 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
      * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public BundleType unlock(Deposit deposit) {
         Bundle bundle = deposit.getBundle();
         UUID cryptedDataId = deposit.getCryptedDataId();
         
-        AuthenticatedMember current = memberService.getCurrent();
-        Vault activeVault = current.getActiveVault();
+        KeySafe keySafe = deposit.getKeySafe();
         
-        byte[] secretKeyBytes = vaultService.releaseKey(cryptedDataId, activeVault);
+        byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
         
         try {
             return decryptBundle(null, bundle, secretKeyBytes);
@@ -182,7 +196,22 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     public List<Inbox> retrieveForMember() {
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         List<Inbox> inboxList = inboxDAO.retrieveForMember(authenticatedMember.getMember());
+        populateNames(inboxList);
+        return inboxList;
+    }
 
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Inbox)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Deposit> retrieveDeposits(Inbox inbox) {
+        return depositDAO.retrieveByInbox(inbox);
+    }
+    
+    private void populateNames(List<Inbox> inboxList) {
+        AuthenticatedMember authenticatedMember = memberService.getCurrent();
         ProfileType profile = authenticatedMember.getProfile();
         if (profile != null) {
             for (Inbox inbox : inboxList) {
@@ -196,16 +225,5 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
                 }
             }
         }
-        
-        return inboxList;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Inbox)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<Deposit> retrieveDeposits(Inbox inbox) {
-        return depositDAO.retrieveByInbox(inbox);
     }
 }

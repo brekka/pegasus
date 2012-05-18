@@ -32,7 +32,7 @@ public class Inbox extends LongevousEntity {
      * The token that identifies this inbox to the outside world.
      */
     @OneToOne
-    @JoinColumn(name="`TokenID`", nullable = false)
+    @JoinColumn(name="`TokenID`", nullable = false, unique=true)
     private Token token;
 
     /**
@@ -69,6 +69,13 @@ public class Inbox extends LongevousEntity {
     @Column(name="`Status`", length=8, nullable=false)
     @Enumerated(EnumType.STRING)
     private InboxStatus status = InboxStatus.ACTIVE;
+    
+    /**
+     * The user can connect an e-mail address to the inbox as another way to identify it.
+     */
+    @OneToOne
+    @JoinColumn(name="`EMailAddressID`", unique=true)
+    private EMailAddress eMailAddress;
     
     /**
      * Name will be stored separately
@@ -130,5 +137,13 @@ public class Inbox extends LongevousEntity {
 
     public void setDivision(Division division) {
         this.division = division;
+    }
+
+    public EMailAddress geteMailAddress() {
+        return eMailAddress;
+    }
+
+    public void seteMailAddress(EMailAddress eMailAddress) {
+        this.eMailAddress = eMailAddress;
     }
 }

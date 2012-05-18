@@ -3,14 +3,18 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.AssociateDAO;
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.OrganizationDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Token;
@@ -89,5 +93,36 @@ public class OrganizationServiceImpl implements OrganizationService {
         associateDAO.create(associate);
         
         return organization;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveDivision(java.lang.String, java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Division retrieveDivision(String orgToken, String divisionSlug) {
+        Organization organization = retrieveByToken(orgToken);
+        Division division = divisionDAO.retrieveBySlug(organization, divisionSlug);
+        return division;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveByToken(java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Organization retrieveByToken(String tokenPath) {
+        Token token = tokenService.retrieveByPath(tokenPath);
+        return organizationDAO.retrieveByToken(token);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveAssociates(org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Associate> retrieveAssociates(KeySafe keySafe) {
+        List<Associate> asociateList = associateDAO.retrieveAssociatesInKeySafe(keySafe);
+        return asociateList;
     }
 }

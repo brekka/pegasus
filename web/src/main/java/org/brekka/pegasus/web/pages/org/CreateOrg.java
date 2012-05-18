@@ -48,7 +48,7 @@ public class CreateOrg {
         Member member = memberService.getCurrent().getMember();
         Organization organization = organizationService.createOrganization(
                 name, orgToken, domainName, orgOwnerEmail, member);
-        orgIndex.init(organization.getToken().getPath());
+        orgIndex.init(organization);
         return orgIndex;
     }
 }

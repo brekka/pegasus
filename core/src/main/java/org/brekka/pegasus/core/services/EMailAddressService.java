@@ -26,4 +26,10 @@ public interface EMailAddressService {
      * @return
      */
     DomainName toDomainName(String domain);
+
+    /**
+     * @param recipientEMail
+     * @return
+     */
+    EMailAddress retrieveByAddress(String recipientEMail);
 }

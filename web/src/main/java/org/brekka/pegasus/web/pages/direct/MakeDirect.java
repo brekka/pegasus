@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tapestry5.alerts.Duration;
 import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.InjectPage;
@@ -20,6 +19,7 @@ import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.pages.NoSession;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.support.MakeKeyUtils;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -37,7 +37,7 @@ public class MakeDirect extends AbstractMakePage {
      * @return
      */
     Object onActivate() {
-        String makeKey = RandomStringUtils.randomAlphabetic(4);
+        String makeKey = MakeKeyUtils.newKey();
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
         BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
         bundleMakerContext.get(makeKey);

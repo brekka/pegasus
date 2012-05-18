@@ -14,4 +14,10 @@ import org.brekka.pegasus.core.model.EMailAddress;
  */
 public interface EMailAddressDAO extends EntityDAO<UUID, EMailAddress> {
 
+    /**
+     * @param hash
+     * @return
+     */
+    EMailAddress retrieveByHash(byte[] hash);
+
 }

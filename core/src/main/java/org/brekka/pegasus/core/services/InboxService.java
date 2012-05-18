@@ -6,10 +6,11 @@ package org.brekka.pegasus.core.services;
 import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 
 /**
@@ -34,7 +35,7 @@ public interface InboxService {
      * @return
      */
     InboxAllocatedBundle depositFiles(Inbox inbox, String reference, 
-            String comment, List<FileBuilder> fileBuilders);
+            String comment, String agreementText, List<FileBuilder> fileBuilders);
 
     /**
      * Retrieve the inboxes owned by this member.
@@ -47,6 +48,13 @@ public interface InboxService {
      * @return
      */
     Inbox retrieveForToken(String inboxToken);
+    
+    /**
+     * E-Mail address
+     * @param eMailAddress
+     * @return
+     */
+    Inbox retrieveForEMailAddress(EMailAddress eMailAddress);
     
     /**
      * Retrieve all deposits from the specified inbox.
@@ -62,10 +70,17 @@ public interface InboxService {
      */
     BundleType unlock(Deposit deposit);
     
+    /**
+     * @param keySafe
+     * @return
+     */
+    List<Inbox> retrieveForKeySafe(KeySafe keySafe);
     
     interface InboxAllocatedBundle extends AllocatedBundle {
         int getFileCount();
         
         Inbox getInbox();
     }
+
+
 }

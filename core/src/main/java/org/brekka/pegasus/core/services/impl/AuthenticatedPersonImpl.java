@@ -41,6 +41,7 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
     
     public AuthenticatedPersonImpl(Person person, boolean admin) {
         this.person = person;
+        setActiveActor(person);
         this.authorities = admin ? ADMIN_AUTHORITIES : USER_AUTHORITIES;
     }
 

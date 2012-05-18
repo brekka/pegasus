@@ -5,53 +5,67 @@
     
     <h3>Vaults</h3>
     <t:zone t:id="openVaultZone">
-        <ul>
+        <ul id="vaults">
             <t:loop source="vaultList" value="loopVault">
-                <li class="open-vault" id="vault_${loopVault.id}">
+                <ol class="${vaultStyleClass}" id="vault_${loopVault.id}">
                     <t:if test="vaultOpen">
                         <span>${loopVault.name} (open)</span>
+                        <div class="shelves">
+                            <div class="shelf">
+                                <h4>Inboxes <t:pagelink page="inbox/create" context="loopVault.slug">Create a new inbox</t:pagelink></h4>
+                                <ul class="inboxes">
+                                <t:loop source="inboxList" value="loopInbox">
+                                    <li>
+                                        <t:pagelink page="inbox/index" context="loopInbox.token.path">${inboxName}</t:pagelink>
+                                    </li>        
+                                </t:loop>
+                                </ul>
+                            </div>
+                            <div class="shelf">
+                                <h4>Sent <t:pagelink page="dispatch/make" context="inboxDispatchContext">Send file(s)</t:pagelink></h4>
+                                <ul>
+                                    <li><t:pagelink page="dispatch/listing" context="sentDispatchContext">Today</t:pagelink></li>
+                                </ul>
+                            </div>
+                            <div class="shelf">
+                                <h4>Organizations</h4>
+                                <ul class="organizations">
+                                <t:loop source="associateList" value="loopAssociate">
+                                    <li>
+                                        <t:pagelink page="org/index" context="loopAssociate.organization.token.path">${loopAssociate.organization.name}</t:pagelink>
+                                    </li>        
+                                </t:loop>
+                                </ul>
+                            </div>
+                            <div class="shelf">
+                                <h4>Invitations</h4>
+                            </div>
+                            <div class="shelf">
+                                <h4>Personal Profile</h4>
+                            </div>
+                        </div>
+                        
                         <p:else>
                             <span>${loopVault.name}</span>
                             <t:if test="selectedVault">
-                                <t:form context="${loopVault.id}" t:id="openVault" zone="openVaultZone">
-                                    Password: <t:passwordfield t:id="vaultPassword" />
-                                    <t:submit />
-                                </t:form>
+                                <div class="code">
+                                    <t:form context="${loopVault.id}" t:id="openVault" zone="openVaultZone">
+                                        <t:label for="vaultPassword">Enter password: </t:label>
+                                        <t:passwordfield t:id="vaultPassword" />
+                                        <t:submit value="Unlock" />
+                                    </t:form>
+                                </div>
                                 <p:else>
-                                    <t:actionlink t:id="showVaultOpenForm" context="loopVault.id" zone="openVaultZone">Unlock</t:actionlink>
+                                    <div class="unlock">
+                                        <t:actionlink t:id="showVaultOpenForm" context="loopVault.id" zone="openVaultZone">Unlock</t:actionlink>
+                                    </div>
                                 </p:else>
                             </t:if>
                         </p:else>
                     </t:if>
-                </li>        
+                </ol>        
             </t:loop>
         </ul>
     </t:zone>
     <t:pagelink page="vault/create">Create a new vault</t:pagelink>
-
-    <h3>Your inboxes</h3>
-    <ul>
-    <t:loop source="inboxList" value="loopInbox">
-        <li>
-            <p>${inboxName} - ${inboxLink}</p>
-            <ul>
-                <t:loop source="depositList" value="loopDeposit">
-                    <li>
-                        <p>Uploaded: ${loopDeposit.created}</p>
-                        <t:if test="depositVaultOpen">
-                            <ul>
-                                <t:loop source="bundle.fileList" value="loopFile">
-                                    <li><t:pagelink page="download" context="fileContext">
-                                        ${loopFile.name} (${loopFile.length} bytes)</t:pagelink></li>
-                                </t:loop>
-                            </ul>
-                        </t:if>
-                    </li>
-                </t:loop>
-            </ul>
-        </li>        
-    </t:loop>
-    </ul>
-    <t:pagelink page="inbox/create">Create a new inbox</t:pagelink>
-
 </html>
