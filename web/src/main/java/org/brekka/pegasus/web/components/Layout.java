@@ -3,6 +3,9 @@
  */
 package org.brekka.pegasus.web.components;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.tapestry5.annotations.Import;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SetupRender;
@@ -12,6 +15,9 @@ import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.services.MemberService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * @author Andrew Taylor
@@ -52,5 +58,13 @@ public class Layout {
             }
         }
         return name;
+    }
+    
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getAuthorities();
+        }
+        return null;
     }
 }

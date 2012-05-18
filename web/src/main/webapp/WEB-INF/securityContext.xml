@@ -10,11 +10,11 @@
     
     <context:annotation-config />
     
-
-	<http>
-        <intercept-url pattern="/member**" access="ROLE_USER"/>
-        <intercept-url pattern="/inbox**" access="ROLE_USER"/>
-        <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+	<http  >
+        <intercept-url pattern="/direct/**" access="ROLE_ANONYMOUS_TRANSFER"/>
+        <intercept-url pattern="/member/**" access="ROLE_USER"/>
+        <intercept-url pattern="/inbox/**"  access="ROLE_USER"/>
+        <intercept-url pattern="/**"        access="ROLE_USER,ROLE_ANONYMOUS"/>
         <logout logout-url="/logout"/>
         <openid-login login-page="/login" authentication-failure-url="/login?error=true" 
                       authentication-details-source-ref="authenticationDetailsSource" >
@@ -32,8 +32,12 @@
             </attribute-exchange>
         </openid-login>
         <remember-me use-secure-cookie="true" data-source-ref="pegasusDataSource" />
-        <custom-filter ref="anonymousFilter" before="ANONYMOUS_FILTER"/>
+        <custom-filter ref="switchAuthenticationFilter" before="FILTER_SECURITY_INTERCEPTOR"/>
+        <custom-filter ref="anonymousFilter" after="REMEMBER_ME_FILTER"/>
 	</http>
+    
+    <beans:bean id="switchAuthenticationFilter"
+             class="org.brekka.pegasus.web.filter.SwitchAuthenticationFilter" />
     
     <beans:bean id="tokenRepo"
              class="org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl" />
@@ -41,11 +45,13 @@
     <beans:bean id="sessionTerminationListener" lazy-init="false" 
              class="org.brekka.pegasus.web.session.SessionTerminationListener"/>
     
-    <authentication-manager alias="authenticationManager"/>
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="anonymousAuthenticationProvider" />
+    </authentication-manager>
     
-    <beans:bean id="anonymousFilter" class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-        <beans:constructor-arg value="notRequired" />
-        <beans:property name="authenticationDetailsSource" ref="authenticationDetailsSource" />
+    <beans:bean id="anonymousAuthenticationProvider" class="org.brekka.pegasus.web.security.AnonymousAuthenticationProvider" />
+    
+    <beans:bean id="anonymousFilter" class="org.brekka.pegasus.web.filter.SpecialAnonymousAuthenticationFilter">
     </beans:bean>
     
     <beans:bean id="authenticationDetailsSource" class="org.brekka.pegasus.web.security.WebAuthenticationDetailsSource" />

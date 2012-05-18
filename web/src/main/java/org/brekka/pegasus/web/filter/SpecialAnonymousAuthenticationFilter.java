@@ -12,21 +12,19 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.brekka.pegasus.core.model.Firewall;
 import org.brekka.pegasus.core.security.WebAuthenticationDetails;
 import org.brekka.pegasus.core.services.FirewallService;
+import org.brekka.pegasus.web.security.AnonymousAuthenticationToken;
 import org.brekka.pegasus.web.security.WebAuthenticationDetailsSource;
 import org.brekka.pegasus.web.support.Configuration;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
@@ -45,8 +43,6 @@ public class SpecialAnonymousAuthenticationFilter extends GenericFilterBean impl
     
     private final Configuration configuration;
     
-    private final SessionAuthenticationStrategy sessionAuthenticationStrategy;
-    
     private Firewall anonymousAccess;
     
     private Firewall memberSignup;
@@ -55,12 +51,10 @@ public class SpecialAnonymousAuthenticationFilter extends GenericFilterBean impl
     public SpecialAnonymousAuthenticationFilter(
             FirewallService firewallService, 
             WebAuthenticationDetailsSource authenticationDetailsSource, 
-            Configuration configuration, 
-            SessionAuthenticationStrategy sessionAuthenticationStrategy) {
+            Configuration configuration) {
         this.firewallService = firewallService;
         this.authenticationDetailsSource = authenticationDetailsSource;
         this.configuration = configuration;
-        this.sessionAuthenticationStrategy = sessionAuthenticationStrategy;
     }
     
     /* (non-Javadoc)
@@ -80,11 +74,9 @@ public class SpecialAnonymousAuthenticationFilter extends GenericFilterBean impl
             ServletException {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             HttpServletRequest request = (HttpServletRequest) req;
-            HttpServletResponse response = (HttpServletResponse) res;
+//            HttpServletResponse response = (HttpServletResponse) res;
             Authentication authentication = createAuthentication(request);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            sessionAuthenticationStrategy.onAuthentication(authentication, request, response);
-
             if (logger.isDebugEnabled()) {
                 logger.debug("Populated SecurityContextHolder with anonymous token: '"
                     + SecurityContextHolder.getContext().getAuthentication() + "'");
@@ -105,7 +97,7 @@ public class SpecialAnonymousAuthenticationFilter extends GenericFilterBean impl
             // Can sign up
             granted.add(MEMBER_SIGNUP);
         }
-        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("anonymous",  "anonymousUser", granted);
+        AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("anonymousUser", granted);
         WebAuthenticationDetails details = authenticationDetailsSource.buildDetails(request);
         auth.setDetails(details);
         return auth;

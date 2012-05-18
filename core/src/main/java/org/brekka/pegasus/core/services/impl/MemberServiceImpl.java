@@ -154,6 +154,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     
     private AuthenticatedPersonImpl getAuthenticatedMember(SecurityContext securityContext) {
         Authentication authentication = securityContext.getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthenticatedPersonImpl) {
             return (AuthenticatedPersonImpl) principal;
