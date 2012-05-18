@@ -7,19 +7,23 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.AssociateDAO;
+import org.brekka.pegasus.core.dao.DivisionAssociateDAO;
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.OrganizationDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
+import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
+import org.brekka.pegasus.core.model.KeySafeStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.EMailAddressService;
+import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -46,6 +50,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private AssociateDAO associateDAO;
     
     @Autowired
+    private DivisionAssociateDAO divisionAssociateDAO;
+    
+    @Autowired
     private EMailAddressService eMailAddressService;
     
     @Autowired
@@ -53,6 +60,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Autowired
     private VaultService vaultService;
+    
+    @Autowired
+    private MemberService memberService;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#createOrganization(java.lang.String, java.lang.String, java.lang.String, org.brekka.pegasus.core.model.Vault)
@@ -76,7 +86,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Vault vault = owner.getDefaultVault();
         
         // Create a new key pair
-        KeyPair keyPair = vaultService.createKeyPair(vault);
+        KeyPair organizationKeyPair = vaultService.createKeyPair(vault);
         
         // Add current user as an associate
         Associate associate = new Associate();
@@ -88,9 +98,24 @@ public class OrganizationServiceImpl implements OrganizationService {
             associate.setPrimaryEMailAddress(ownerEMail);
         }
         associate.setDefaultVault(vault);
-        associate.setKeyPairId(keyPair.getId());
+        associate.setKeyPairId(organizationKeyPair.getId());
         associateDAO.create(associate);
         
+        // Also create a default division
+        KeyPair divisionKeyPair = vaultService.createKeyPair(vault);
+        Division division = new Division();
+        division.setOrganization(organization);
+        division.setKeyPairId(divisionKeyPair.getId()); // Root division - used for the public key.
+        division.setName("Company Home");
+        division.setSlug("company_home");
+        division.setStatus(KeySafeStatus.ACTIVE);
+        divisionDAO.create(division);
+        
+        DivisionAssociate divisionAssociate = new DivisionAssociate();
+        divisionAssociate.setAssociate(associate);
+        divisionAssociate.setDivision(division);
+        divisionAssociate.setKeyPairId(divisionKeyPair.getId());
+        divisionAssociateDAO.create(divisionAssociate);
         return organization;
     }
     
@@ -103,6 +128,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization organization = retrieveByToken(orgToken);
         Division division = divisionDAO.retrieveBySlug(organization, divisionSlug);
         return division;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveDivisions(org.brekka.pegasus.core.model.Organization)
+     */
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public List<DivisionAssociate> retrieveCurrentDivisions() {
+        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        Associate associate = (Associate) currentMember.getActiveActor();
+        return divisionAssociateDAO.retrieveForOrg(associate);
     }
     
     /* (non-Javadoc)

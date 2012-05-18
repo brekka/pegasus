@@ -63,4 +63,9 @@ public interface VaultService {
      * @return
      */
     PrivateKeyToken releaseKeyPair(KeyPair keyPair, Vault vault);
+
+    /**
+     * @param fromString
+     */
+    void closeVault(UUID fromString);
 }

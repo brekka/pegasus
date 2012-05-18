@@ -8,14 +8,18 @@ import org.apache.tapestry5.SelectModel;
 import org.apache.tapestry5.alerts.AlertManager;
 import org.apache.tapestry5.alerts.Duration;
 import org.apache.tapestry5.alerts.Severity;
+import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
+import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.pages.member.MemberIndex;
+import org.brekka.pegasus.web.pages.org.OrgIndex;
 import org.brekka.pegasus.web.support.VaultEncoder;
 import org.brekka.pegasus.web.support.VaultSelectModelBuilder;
 
@@ -23,6 +27,11 @@ import org.brekka.pegasus.web.support.VaultSelectModelBuilder;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public class CreateInbox {
+    @InjectPage
+    private OrgIndex orgIndexPage;
+    
+    @Inject
+    private OrganizationService organizationService;
     
     @Inject
     private InboxService inboxService;
@@ -54,26 +63,52 @@ public class CreateInbox {
     @Property
     private String introduction;
     
+    @Property
+    private Division division;
+    
+    private Object[] context;
+    
     Object onActivate() {
         return onActivate(null);
     }
     
     Object onActivate(String vaultSlug) {
-        Object retVal = Boolean.TRUE;
         if (StringUtils.isBlank(vaultSlug)) {
             selectedVault = memberService.getCurrent().getMember().getDefaultVault();
         } else {
             selectedVault = vaultService.retrieveBySlug(vaultSlug);
         }
-        inboxToken = TokenType.INBOX.generateRandom().getPath();
-        return retVal;
+        return activate(selectedVault, vaultSlug);
+    }
+    
+    Object onActivate(String orgToken, String divisionSlug) {
+        division = organizationService.retrieveDivision(orgToken, divisionSlug);
+        return activate(orgToken, divisionSlug);
+    }
+    
+    Object activate(Object... context) {
+        this.context = context;
+        this.inboxToken = TokenType.INBOX.generateRandom().getPath();
+        return Boolean.TRUE;
+    }
+    
+    Object[] onPassivate() {
+        return context;
     }
     
     Object onSuccess() {
-        inboxService.createInbox(name, introduction, inboxToken, selectedVault);
+        Object retVal;
+        if (division == null) {
+            inboxService.createInbox(name, introduction, inboxToken, selectedVault);
+            retVal = MemberIndex.class;
+        } else {
+            inboxService.createInbox(name, introduction, inboxToken, division);
+            orgIndexPage.init(division.getOrganization());
+            retVal = orgIndexPage;
+        }
         alertManager.alert(Duration.SINGLE, Severity.INFO, 
-                String.format("Your new inbox '%s' has been created", name));
-        return MemberIndex.class;
+                String.format("The new inbox '%s' has been created", name));
+        return retVal;
     }
     
     public SelectModel getVaultSelectModel() {

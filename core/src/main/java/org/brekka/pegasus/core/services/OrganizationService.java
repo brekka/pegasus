@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
+import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
@@ -56,5 +57,11 @@ public interface OrganizationService {
      * @return
      */
     Associate retrieveAssociate(Organization organization, Member member);
+
+    /**
+     * @param organization
+     * @return
+     */
+    List<DivisionAssociate> retrieveCurrentDivisions();
 
 }

@@ -3,6 +3,29 @@
 
     
     <h2>Organization '${organization.name}'</h2>
-   
-
+    
+    <t:pagelink page="org/close">Close</t:pagelink>
+    
+    
+    
+    <ol id="divisions">
+    <t:loop source="divisions" value="loopDivision">
+        <li class="division">
+            <h3>${loopDivision.division.name}</h3>
+            <t:pagelink page="dispatch/make" context="dispatchContext">Send file(s)</t:pagelink>
+            
+            <h4>Sent</h4>
+            <t:pagelink page="dispatch/listing" context="sentDispatchContext">Today</t:pagelink>
+            
+            <h4>Inboxes <t:pagelink page="inbox/create" context="divisionContext">Create a new inbox</t:pagelink></h4>
+            <ul class="inboxes">
+            <t:loop source="inboxList" value="loopInbox">
+                <li>
+                    <t:pagelink page="inbox/index" context="loopInbox.token.path">${inboxName}</t:pagelink>
+                </li> 
+            </t:loop>
+            </ul>
+        </li>
+    </t:loop>
+    </ol>
 </html>

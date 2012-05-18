@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
@@ -22,5 +23,12 @@ public interface DivisionAssociateDAO extends EntityDAO<UUID, DivisionAssociate>
      * @return
      */
     DivisionAssociate retrieveBySurrogateKey(Division division, Associate associate);
+
+    /**
+     * @param organization
+     * @param associate
+     * @return
+     */
+    List<DivisionAssociate> retrieveForOrg(Associate associate);
 
 }

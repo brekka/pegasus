@@ -16,8 +16,10 @@ import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
+import org.brekka.pegasus.core.model.Invitation;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
+import org.brekka.pegasus.core.services.InvitationService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -46,6 +48,9 @@ public class MemberIndex {
     @Inject
     private OrganizationService organizationService;
     
+    @Inject
+    private InvitationService invitationService;
+    
     @InjectComponent
     private Zone openVaultZone;
     
@@ -54,6 +59,9 @@ public class MemberIndex {
     
     @Property
     private Associate loopAssociate;
+    
+    @Property
+    private Invitation loopInvitation;
     
     @Property
     private Vault loopVault;
@@ -107,6 +115,11 @@ public class MemberIndex {
         return openVaultZone.getBody();
     }
     
+    Object onActionFromCloseVault(final String vaultId) {
+        vaultService.closeVault(UUID.fromString(vaultId));
+        return openVaultZone.getBody();
+    }
+    
     public boolean isSelectedVault() {
         return selectedVault.getId().equals(loopVault.getId());
     }
@@ -134,6 +147,10 @@ public class MemberIndex {
     
     public List<Associate> getAssociateList() {
         return organizationService.retrieveAssociates(loopVault);
+    }
+    
+    public List<Invitation> getInvistationList() {
+        return invitationService.retrieveCurrent(loopVault);
     }
     
     public boolean isVaultOpen() {

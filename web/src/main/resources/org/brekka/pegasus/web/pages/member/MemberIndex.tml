@@ -9,7 +9,7 @@
             <t:loop source="vaultList" value="loopVault">
                 <ol class="${vaultStyleClass}" id="vault_${loopVault.id}">
                     <t:if test="vaultOpen">
-                        <span>${loopVault.name} (open)</span>
+                        <span>${loopVault.name} <t:actionlink t:id="closeVault" context="${loopVault.id}" zone="openVaultZone">close</t:actionlink></span>
                         <div class="shelves">
                             <div class="shelf">
                                 <h4>Inboxes <t:pagelink page="inbox/create" context="loopVault.slug">Create a new inbox</t:pagelink></h4>
@@ -32,14 +32,21 @@
                                 <ul class="organizations">
                                 <t:loop source="associateList" value="loopAssociate">
                                     <li>
-                                        <t:pagelink page="org/index" context="loopAssociate.organization.token.path">${loopAssociate.organization.name}</t:pagelink>
-                                        - <t:pagelink page="org/activate" context="loopAssociate.organization.token.path">Activate</t:pagelink>
+                                        <t:pagelink page="org/activate" context="loopAssociate.organization.token.path">${loopAssociate.organization.name}</t:pagelink>
                                     </li>        
                                 </t:loop>
                                 </ul>
                             </div>
                             <div class="shelf">
                                 <h4>Invitations</h4>
+                                <ul class="invitations">
+                                <t:loop source="invistationList" value="loopInvitation">
+                                    <li>
+                                        ${loopInvitation.id}
+                                    </li>        
+                                </t:loop>
+                                </ul>
+                                
                             </div>
                             <div class="shelf">
                                 <h4>Personal Profile</h4>

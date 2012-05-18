@@ -144,6 +144,10 @@ abstract class AuthenticatedMemberBase implements AuthenticatedMember {
         return vaultKeyCache.clear();
     }
     
+    synchronized void clearVault(UUID vaultId) {
+        vaultKeyCache.remove(vaultId);
+    }
+    
     static AuthenticatedMemberBase getCurrent(MemberService memberService) {
         AuthenticatedMember current = memberService.getCurrent();
         if (current instanceof AuthenticatedMemberBase) {

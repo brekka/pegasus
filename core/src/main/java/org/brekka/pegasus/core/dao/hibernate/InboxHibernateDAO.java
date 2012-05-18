@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.dao.hibernate;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.InboxDAO;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -57,6 +58,17 @@ public class InboxHibernateDAO extends AbstractPegasusHibernateDAO<Inbox> implem
     public List<Inbox> retrieveForMember(Member member) {
         return getCurrentSession().createCriteria(Inbox.class)
                 .add(Restrictions.eq("owner", member))
+                .list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.InboxDAO#retrieveForDivision(org.brekka.pegasus.core.model.Division)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Inbox> retrieveForDivision(Division division) {
+        return getCurrentSession().createCriteria(Inbox.class)
+                .add(Restrictions.eq("division", division))
                 .list();
     }
     

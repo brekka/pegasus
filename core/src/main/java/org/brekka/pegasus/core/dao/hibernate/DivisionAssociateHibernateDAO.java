@@ -3,6 +3,8 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+
 import org.brekka.pegasus.core.dao.DivisionAssociateDAO;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
@@ -34,5 +36,16 @@ public class DivisionAssociateHibernateDAO extends AbstractPegasusHibernateDAO<D
                 .add(Restrictions.eq("division", division))
                 .add(Restrictions.eq("associate", associate))
                 .uniqueResult();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DivisionAssociateDAO#retrieveForOrg(org.brekka.pegasus.core.model.Organization, org.brekka.pegasus.core.model.Associate)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<DivisionAssociate> retrieveForOrg(Associate associate) {
+        return getCurrentSession().createCriteria(DivisionAssociate.class)
+                .add(Restrictions.eq("associate", associate))
+                .list();
     }
 }

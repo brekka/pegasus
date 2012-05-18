@@ -174,6 +174,17 @@ public class VaultServiceImpl implements VaultService {
         return (vaultKey != null);
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.VaultService#closeVault(java.util.UUID)
+     */
+    @Override
+    public void closeVault(UUID vaultId) {
+        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);
+        phalanxService.logout(authenticatedPrincipal);
+        currentMember.clearVault(vaultId);
+    }
+    
     private AuthenticatedPrincipal getVaultKey(UUID vaultId) {
         AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
         AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);

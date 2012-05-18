@@ -1,8 +1,13 @@
 <html t:type="layout" xmlns:p="tapestry:parameter"
 	xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
 
+    <t:if test="division">
+        <h2>Create a new inbox in division '${division.name}'</h2>
+        <p:else>
+            <h2>Create a new inbox</h2>
+        </p:else>
+    </t:if>
     
-    <h2>Create a new inbox</h2>
     
     <t:form t:id="inbox">
         <t:errors/>
@@ -26,10 +31,12 @@
                 <p>The token that will identify this inbox to the rest of the world. In most situations you 
                    should just use the auto-generated value as that is hard to guess.</p>
             </div>
-            <div class="field">
-                <t:label for="selectedVault">Vault</t:label>
-                <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
-            </div>
+            <t:if test="!division">
+                <div class="field">
+                    <t:label for="selectedVault">Vault</t:label>
+                    <t:select t:id="selectedVault" encoder="vaultEncoder" model="vaultSelectModel" />
+                </div>
+            </t:if>
         </div>
 		<div class="field">
 			<label>Submit</label>

@@ -73,20 +73,20 @@ public class MakeDispatch extends AbstractMakePage {
     
     Object onActivate(String orgToken, String divisionSlug, String makeKey) {
         Division division = organizationService.retrieveDivision(orgToken, divisionSlug);
-        return onActivate(makeKey, division, division, orgToken, divisionSlug);
+        return activate(makeKey, division, division, orgToken, divisionSlug);
     }
     
     Object onActivate(String vaultSlug, String makeKey) {
         Vault vault = vaultService.retrieveBySlug(vaultSlug);
-        return onActivate(makeKey, null, vault, vaultSlug);
+        return activate(makeKey, null, vault, vaultSlug);
     }
     
     Object onActivate(String makeKey) {
         Vault activeVault = memberService.getCurrent().getActiveVault();
-        return onActivate(makeKey, null, activeVault);
+        return activate(makeKey, null, activeVault);
     }
     
-    Object onActivate(String makeKey, Division division, KeySafe keySafe, Object... context) {
+    Object activate(String makeKey, Division division, KeySafe keySafe, Object... context) {
         this.division = division;
         this.keySafe = keySafe;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();

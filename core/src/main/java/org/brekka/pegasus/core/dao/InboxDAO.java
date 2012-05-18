@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -37,4 +38,10 @@ public interface InboxDAO extends EntityDAO<UUID, Inbox> {
      * @return
      */
     Inbox retrieveForEMailAddress(EMailAddress eMailAddress);
+
+    /**
+     * @param division
+     * @return
+     */
+    List<Inbox> retrieveForDivision(Division division);
 }

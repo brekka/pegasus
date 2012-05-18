@@ -19,19 +19,18 @@ import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
-import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
-import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.xml.pegasus.v1.model.BundleDocument;
@@ -83,13 +82,17 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         inbox.setName(name);
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
         Member member = authenticatedMember.getMember();
-        inbox.setOwner(member);
+        if (keySafe instanceof Division) {
+            inbox.setDivision((Division) keySafe);
+        } else {
+            inbox.setOwner(member);
+            InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
+            newXmlInbox.setUUID(inbox.getId().toString());
+            newXmlInbox.setName(name);
+            profileService.currentUserProfileUpdated();
+        }
         inboxDAO.create(inbox);
         
-        InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
-        newXmlInbox.setUUID(inbox.getId().toString());
-        newXmlInbox.setName(name);
-        profileService.currentUserProfileUpdated();
         
         return inbox;
     }
@@ -102,8 +105,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     public InboxAllocatedBundle depositFiles(Inbox inbox, String reference, String comment, String agreementText, List<FileBuilder> fileBuilders) {
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
-        Vault vault = (Vault) inbox.getKeySafe();
-        UUID principalId = vault.getPrincipalId();
+        KeySafe keySafe = inbox.getKeySafe();
         
         Bundle bundleModel = new Bundle();
         bundleModel.setId(UUID.randomUUID());
@@ -121,12 +123,12 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         encryptBundleDocument(bundleDocument, bundleModel, secretKey);
         bundleDAO.create(bundleModel);
         
-        CryptedData cryptedData = phalanxService.asymEncrypt(secretKey.getEncoded(), new IdentityPrincipal(principalId));
+        CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         
         Deposit deposit = new Deposit();
         deposit.setBundle(bundleModel);
         deposit.setInbox(inbox);
-        deposit.setKeySafe(inbox.getKeySafe());
+        deposit.setKeySafe(keySafe);
         deposit.setCryptedDataId(cryptedData.getId());
         
         depositDAO.create(deposit);
@@ -165,6 +167,15 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     public Inbox retrieveForEMailAddress(EMailAddress eMailAddress) {
         Inbox inbox = inboxDAO.retrieveForEMailAddress(eMailAddress);
         return inbox;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForDivision(org.brekka.pegasus.core.model.DivisionAssociate)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Inbox> retrieveForDivision(Division division) {
+        return inboxDAO.retrieveForDivision(division);
     }
     
     /* (non-Javadoc)
