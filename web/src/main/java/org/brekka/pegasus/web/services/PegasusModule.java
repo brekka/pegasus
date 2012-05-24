@@ -61,6 +61,10 @@ public class PegasusModule {
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
         // Disable Tapestry's secure handling in favour of Spring's.
         configuration.add(SymbolConstants.SECURE_ENABLED, "false"); 
+        configuration.add(SymbolConstants.PRODUCTION_MODE, "true"); 
+        configuration.add(SymbolConstants.COMPACT_JSON, "false"); 
+        configuration.add(SymbolConstants.COMBINE_SCRIPTS, "false"); 
+        configuration.add(SymbolConstants.MINIFICATION_ENABLED, "false"); 
     }
     
 

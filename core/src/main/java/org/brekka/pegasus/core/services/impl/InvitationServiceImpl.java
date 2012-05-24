@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.dao.InvitationDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
@@ -39,7 +40,7 @@ public class InvitationServiceImpl implements InvitationService {
     
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
-    public Invitation createInvitation(InvitationDocument document, Member recipient) {
+    public Invitation createInvitation(InvitationDocument document, Member recipient, UUID invitedResourceCryptedDataId) {
         Invitation invitation = new Invitation();
         
         AuthenticatedMember current = memberService.getCurrent();
@@ -50,6 +51,7 @@ public class InvitationServiceImpl implements InvitationService {
         invitation.setXml(xmlEntity);
         invitation.setRecipient(recipient);
         invitation.setSender(current.getActiveActor());
+        invitation.setCryptedDataId(invitedResourceCryptedDataId);
         
         invitationDAO.create(invitation);
         

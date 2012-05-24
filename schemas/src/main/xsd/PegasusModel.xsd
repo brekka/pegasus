@@ -38,6 +38,27 @@
     
     <xsd:complexType name="InvitationType">
 		<xsd:sequence>
+            <xsd:element name="SenderFullName"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Comment"           type="xsd:string"       minOccurs="0" maxOccurs="1" />
+            <xsd:choice>
+                <xsd:element name="Organization">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="ID"      type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+                            <xsd:element name="Name"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="Division">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="ID"      type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+                            <xsd:element name="Name"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
+                            <xsd:element name="OrgName" type="xsd:string"     minOccurs="1" maxOccurs="1" />
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:choice>
 		</xsd:sequence>
 	</xsd:complexType>
     

@@ -50,6 +50,9 @@ public class Layout {
             return null;
         }
         Actor actor = user.getActiveActor();
+        if (actor == null) {
+            return null;
+        }
         if (actor.getStatus() == ActorStatus.NEW) {
             name = "New Member";
         } else if (actor instanceof Person) {

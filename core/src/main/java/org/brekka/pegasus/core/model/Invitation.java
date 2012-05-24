@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.brekka.xml.pegasus.v1.model.InvitationDocument;
+import org.hibernate.annotations.Type;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -50,6 +52,15 @@ public class Invitation extends SnapshotEntity {
     @OneToOne
     @JoinColumn(name="`XmlEntityID`", nullable=false)
     private XmlEntity<InvitationDocument> xml;
+    
+    /**
+     * The key to the resource that the invitation if for. It will have been encrypted
+     * using the public key of the keySafe found in the XML entity. If the invitation
+     * is accepted, this should be transferred, otherwise it should be deleted in phalanx.
+     */
+    @Type(type="pg-uuid")
+    @Column(name="`CryptedDataID`", updatable=false)
+    private UUID cryptedDataId;
 
     
     
@@ -91,5 +102,13 @@ public class Invitation extends SnapshotEntity {
 
     public void setXml(XmlEntity<InvitationDocument> xml) {
         this.xml = xml;
+    }
+
+    public UUID getCryptedDataId() {
+        return cryptedDataId;
+    }
+
+    public void setCryptedDataId(UUID cryptedDataId) {
+        this.cryptedDataId = cryptedDataId;
     }
 }

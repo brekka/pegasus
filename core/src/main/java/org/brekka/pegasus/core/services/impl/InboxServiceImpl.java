@@ -75,6 +75,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Transactional(propagation=Propagation.REQUIRED)
     public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe keySafe) {
         Inbox inbox = new Inbox();
+        inbox.setId(UUID.randomUUID());
         Token token = tokenService.createToken(inboxToken, TokenType.INBOX);
         inbox.setToken(token);
         inbox.setIntroduction(introduction);
@@ -223,6 +224,9 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     
     private void populateNames(List<Inbox> inboxList) {
         AuthenticatedMember authenticatedMember = memberService.getCurrent();
+        if (authenticatedMember == null) {
+            return;
+        }
         ProfileType profile = authenticatedMember.getProfile();
         if (profile != null) {
             for (Inbox inbox : inboxList) {

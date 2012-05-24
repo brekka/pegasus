@@ -68,19 +68,19 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
     protected File toFile(UUID uuid) {
         String idStr = uuid.toString();
         
-//        String part1 = idStr.substring(0, 2);
-//        File dir1 = new File(new File(root), part1);
-//        if (!dir1.exists()) {
-//            dir1.mkdir();
-//        }
-//        
-//        String part2 = idStr.substring(2, 4);
-//        File dir2 = new File(dir1, part2);
-//        if (!dir2.exists()) {
-//            dir2.mkdir();
-//        }
-//        return new File(dir2, idStr);
-        return new File(new File(root), idStr);
+        String part1 = idStr.substring(0, 2);
+        File dir1 = new File(new File(root), part1);
+        if (!dir1.exists()) {
+            dir1.mkdir();
+        }
+        
+        String part2 = idStr.substring(2, 4);
+        File dir2 = new File(dir1, part2);
+        if (!dir2.exists()) {
+            dir2.mkdir();
+        }
+        return new File(dir2, idStr);
+//        return new File(new File(root), idStr);
     }
 
 }
