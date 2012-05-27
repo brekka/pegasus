@@ -33,7 +33,7 @@ import org.springframework.web.filter.GenericFilterBean;
  */
 public class AnonymousAuthenticationFilter extends GenericFilterBean implements InitializingBean {
 
-    public static final GrantedAuthority ANONYOUS_TRANSFER = new SimpleGrantedAuthority("ROLE_ANONYMOUS_TRANSFER");
+    public static final GrantedAuthority ANONYMOUS_TRANSFER = new SimpleGrantedAuthority("ROLE_ANONYMOUS_TRANSFER");
     public static final GrantedAuthority MEMBER_SIGNUP = new SimpleGrantedAuthority("ROLE_MEMBER_SIGNUP");
     public static final GrantedAuthority ANONYMOUS = new SimpleGrantedAuthority("ROLE_ANONYMOUS");
     
@@ -91,7 +91,7 @@ public class AnonymousAuthenticationFilter extends GenericFilterBean implements 
         granted.add(ANONYMOUS);
         if (firewallService.isAccessAllowed(anonymousAccess, ipAddress)) {
             // Can send files anonymously
-            granted.add(ANONYOUS_TRANSFER);
+            granted.add(ANONYMOUS_TRANSFER);
         }
         if (firewallService.isAccessAllowed(memberSignup, ipAddress)) {
             // Can sign up

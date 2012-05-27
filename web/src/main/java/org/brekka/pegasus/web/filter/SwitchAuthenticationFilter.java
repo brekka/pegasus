@@ -65,19 +65,29 @@ public class SwitchAuthenticationFilter extends GenericFilterBean {
             HttpServletResponse response = (HttpServletResponse) res;
             FilterInvocation fi = new FilterInvocation(request, response, chain);
             boolean anon = false;
+            boolean firewalled = false;
             Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
             for (ConfigAttribute configAttribute : attributes) {
-                if (AnonymousAuthenticationFilter.ANONYMOUS.getAuthority().equals(configAttribute.getAttribute())) {
+                String authority = configAttribute.getAttribute();
+                if (AnonymousAuthenticationFilter.ANONYMOUS_TRANSFER.getAuthority().equals(authority)) {
+                    // Requires the anon transfer authority, does the user have it?
+                    firewalled = !authentication.getAuthorities().contains(AnonymousAuthenticationFilter.ANONYMOUS_TRANSFER);
+                    anon = true;
+                    break;
+                }
+                if (AnonymousAuthenticationFilter.ANONYMOUS.getAuthority().equals(authority)) {
                     anon = true;
                     break;
                 }
             }
-            if (!anon) {
+            if (firewalled) {
+                redirectStrategy.sendRedirect(request, response, "/denied");
+            } else if (anon) {
+                chain.doFilter(req, res);
+            } else {
                 // Need to login
                 cache.saveRequest(request, response);
                 redirectStrategy.sendRedirect(request, response, "/login");
-            } else {
-                chain.doFilter(req, res);
             }
         } else {
             chain.doFilter(req, res);
