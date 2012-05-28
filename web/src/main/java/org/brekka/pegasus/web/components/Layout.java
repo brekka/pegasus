@@ -4,20 +4,18 @@
 package org.brekka.pegasus.web.components;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.tapestry5.SymbolConstants;
-import org.apache.tapestry5.TapestryConstants;
 import org.apache.tapestry5.annotations.Import;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SetupRender;
 import org.apache.tapestry5.ioc.annotations.Inject;
-import org.apache.tapestry5.ioc.annotations.Value;
+import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.brekka.pegasus.core.model.Actor;
+import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.services.MemberService;
 import org.springframework.security.core.Authentication;
@@ -39,8 +37,9 @@ public class Layout {
     @Property
     private AuthenticatedMember user;
     
+    @Inject
     @Property
-    @Value(SymbolConstants.PRODUCTION_MODE)
+    @Symbol(SymbolConstants.PRODUCTION_MODE)
     private boolean productionMode;
     
     @SetupRender
