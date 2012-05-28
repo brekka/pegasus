@@ -4,7 +4,7 @@
 package org.brekka.pegasus.core.dao.hibernate;
 
 import org.brekka.pegasus.core.dao.BundleUnlockEventDAO;
-import org.brekka.pegasus.core.model.BundleUnlockEvent;
+import org.brekka.pegasus.core.model.TransferUnlockEvent;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * 
  */
 @Repository
-public class BundleUnlockEventHibernateDAO extends AbstractPegasusHibernateDAO<BundleUnlockEvent> implements
+public class BundleUnlockEventHibernateDAO extends AbstractPegasusHibernateDAO<TransferUnlockEvent> implements
         BundleUnlockEventDAO {
 
     /*
@@ -21,8 +21,8 @@ public class BundleUnlockEventHibernateDAO extends AbstractPegasusHibernateDAO<B
      * @see org.brekka.commons.persistence.dao.impl.AbstractIdentifiableEntityHibernateDAO#type()
      */
     @Override
-    protected Class<BundleUnlockEvent> type() {
-        return BundleUnlockEvent.class;
+    protected Class<TransferUnlockEvent> type() {
+        return TransferUnlockEvent.class;
     }
 
 }

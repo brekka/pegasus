@@ -6,10 +6,13 @@ package org.brekka.pegasus.web.components;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.tapestry5.SymbolConstants;
+import org.apache.tapestry5.TapestryConstants;
 import org.apache.tapestry5.annotations.Import;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SetupRender;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.Value;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
@@ -35,6 +38,10 @@ public class Layout {
     
     @Property
     private AuthenticatedMember user;
+    
+    @Property
+    @Value(SymbolConstants.PRODUCTION_MODE)
+    private boolean productionMode;
     
     @SetupRender
     void initialize() {
@@ -86,4 +93,5 @@ public class Layout {
         }
         return null;
     }
+    
 }

@@ -8,9 +8,9 @@ import javax.inject.Inject;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SessionAttribute;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.services.AnonymousService;
-import org.brekka.pegasus.web.support.Bundles;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.pegasus.web.support.Transfers;
 
 /**
  * @author Andrew Taylor
@@ -22,11 +22,14 @@ public class UnlockDirect {
     @InjectPage
     private FetchDirect fetchPage;
     
+    @InjectPage
+    private AgreementDirect agreementDirectPage;
+    
     @Inject
     private AnonymousService anonymousService;
     
-    @SessionAttribute("bundles")
-    private Bundles bundles;
+    @SessionAttribute("transfers")
+    private Transfers transfers;
     
     @Property
     private String token;
@@ -36,8 +39,8 @@ public class UnlockDirect {
     
     void onActivate(String token) {
         this.token = token;
-        if (bundles == null) {
-            bundles = new Bundles();
+        if (transfers == null) {
+            transfers = new Transfers();
         }
     }
     
@@ -46,9 +49,13 @@ public class UnlockDirect {
     }
     
     Object onSuccess() {
-        BundleType bundle = anonymousService.unlock(token, code, null);
-        bundles.add(token, bundle);
+        AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
+        transfers.add(token, anonymousTransfer);
         fetchPage.init(token);
+        if (anonymousTransfer.getBundle().getXml().isSetAgreement()) {
+            agreementDirectPage.init(token);
+            return agreementDirectPage;
+        }
         return fetchPage;
     }
 }

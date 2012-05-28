@@ -3,6 +3,10 @@
  */
 package org.brekka.pegasus.web.filter;
 
+import static org.brekka.pegasus.core.security.PegasusAuthority.ANONYMOUS;
+import static org.brekka.pegasus.core.security.PegasusAuthority.ANONYMOUS_TRANSFER;
+import static org.brekka.pegasus.core.security.PegasusAuthority.MEMBER_SIGNUP;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +27,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -33,10 +36,6 @@ import org.springframework.web.filter.GenericFilterBean;
  */
 public class AnonymousAuthenticationFilter extends GenericFilterBean implements InitializingBean {
 
-    public static final GrantedAuthority ANONYMOUS_TRANSFER = new SimpleGrantedAuthority("ROLE_ANONYMOUS_TRANSFER");
-    public static final GrantedAuthority MEMBER_SIGNUP = new SimpleGrantedAuthority("ROLE_MEMBER_SIGNUP");
-    public static final GrantedAuthority ANONYMOUS = new SimpleGrantedAuthority("ROLE_ANONYMOUS");
-    
     private final WebAuthenticationDetailsSource authenticationDetailsSource;
     
     private final FirewallService firewallService;

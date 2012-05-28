@@ -24,7 +24,7 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.pages.org.OrgIndex;
-import org.brekka.pegasus.web.support.Bundles;
+import org.brekka.pegasus.web.support.Transfers;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 
 /**
@@ -67,7 +67,7 @@ public class MemberIndex {
     private Vault loopVault;
     
     @SessionAttribute("bundles")
-    private Bundles bundles;
+    private Transfers bundles;
     
     @Property
     private Vault selectedVault;
@@ -90,7 +90,7 @@ public class MemberIndex {
             } else {
                 // Normal member flow
                 if (bundles == null) {
-                    bundles = new Bundles();
+                    bundles = new Transfers();
                 }
                 selectedVault = current.getMember().getDefaultVault();
             }

@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +13,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.AllocatedFile;
 import org.brekka.paveway.core.model.ByteSequence;
@@ -27,6 +27,7 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.BundleDAO;
 import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.services.PhalanxService;
@@ -75,7 +76,7 @@ abstract class PegasusServiceSupport {
      * @param fileBuilders
      * @return
      */
-    protected BundleDocument prepareBundleDocument(String comment, List<FileBuilder> fileBuilders) {
+    protected BundleDocument prepareBundleDocument(String comment, String agreementText, List<FileBuilder> fileBuilders) {
         BundleDocument doc = BundleDocument.Factory.newInstance();
         BundleType bundleXml = doc.addNewBundle();
         for (FileBuilder fileBuilder : fileBuilders) {
@@ -88,6 +89,9 @@ abstract class PegasusServiceSupport {
             fileXml.setLength(allocatedFile.getCryptedFile().getOriginalLength());
         }
         bundleXml.setComment(comment);
+        if (StringUtils.isNotEmpty(agreementText)) {
+            bundleXml.setAgreement(agreementText);
+        }
         return doc;
     }
     
@@ -106,7 +110,8 @@ abstract class PegasusServiceSupport {
     
 
 
-    protected BundleType decryptBundle(Date agreementAccepted, Bundle bundle, byte[] secretKeyBytes) throws XmlException, IOException {
+    protected BundleType decryptTransfer(Transfer transfer, byte[] secretKeyBytes) throws XmlException, IOException {
+        Bundle bundle = transfer.getBundle();
         UUID bundleId = bundle.getId();
         ByteSequence byteSequence = resourceStorageService.retrieve(bundleId);
         IvParameterSpec iv = new IvParameterSpec(bundle.getIv());
@@ -116,7 +121,7 @@ abstract class PegasusServiceSupport {
         try ( InputStream is = byteSequence.getInputStream(); ) {
             InputStream dis = resourceCryptoService.decryptor(bundle.getProfile(), Compression.GZIP, iv, secretKey, is);
             
-            eventService.bundleUnlocked(bundle, agreementAccepted);
+            eventService.transferUnlocked(transfer);
             
             BundleDocument bundleDocument = BundleDocument.Factory.parse(dis);
             return bundleDocument.getBundle();

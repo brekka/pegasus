@@ -3,6 +3,8 @@
  */
 package org.brekka.pegasus.web.filter;
 
+import static org.brekka.pegasus.core.security.PegasusAuthority.*;
+
 import java.io.IOException;
 import java.util.Collection;
 
@@ -69,19 +71,19 @@ public class SwitchAuthenticationFilter extends GenericFilterBean {
             Collection<ConfigAttribute> attributes = securityMetadataSource.getAttributes(fi);
             for (ConfigAttribute configAttribute : attributes) {
                 String authority = configAttribute.getAttribute();
-                if (AnonymousAuthenticationFilter.ANONYMOUS_TRANSFER.getAuthority().equals(authority)) {
+                if (ANONYMOUS_TRANSFER.getAuthority().equals(authority)) {
                     // Requires the anon transfer authority, does the user have it?
-                    firewalled = !authentication.getAuthorities().contains(AnonymousAuthenticationFilter.ANONYMOUS_TRANSFER);
+                    firewalled = !authentication.getAuthorities().contains(ANONYMOUS_TRANSFER);
                     anon = true;
                     break;
                 }
-                if (AnonymousAuthenticationFilter.MEMBER_SIGNUP.getAuthority().equals(authority)) {
+                if (MEMBER_SIGNUP.getAuthority().equals(authority)) {
                     // Can the user signup?
-                    firewalled = !authentication.getAuthorities().contains(AnonymousAuthenticationFilter.MEMBER_SIGNUP);
+                    firewalled = !authentication.getAuthorities().contains(MEMBER_SIGNUP);
                     anon = true;
                     break;
                 }
-                if (AnonymousAuthenticationFilter.ANONYMOUS.getAuthority().equals(authority)) {
+                if (ANONYMOUS.getAuthority().equals(authority)) {
                     anon = true;
                     break;
                 }

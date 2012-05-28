@@ -3,14 +3,14 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Set;
 
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Person;
+import org.brekka.pegasus.core.security.PegasusAuthority;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
@@ -18,14 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDetails {
-    
-    public static final GrantedAuthority USER = new SimpleGrantedAuthority("ROLE_USER");
-    public static final GrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
-    
-    private static final List<GrantedAuthority> USER_AUTHORITIES = Arrays.<GrantedAuthority>
-            asList(USER);
-    private static final List<GrantedAuthority> ADMIN_AUTHORITIES = Arrays.<GrantedAuthority>
-            asList(USER, ADMIN);
     
     /**
      * Serial UID
@@ -37,13 +29,18 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
      */
     private Person person;
     
-    private final List<GrantedAuthority> authorities;
+    private final Set<PegasusAuthority> authorities;
     
-    public AuthenticatedPersonImpl(Person person, boolean admin) {
+    public AuthenticatedPersonImpl(Person person, Set<PegasusAuthority> authorities) {
         this.person = person;
         setActiveActor(person);
-        this.authorities = admin ? ADMIN_AUTHORITIES : USER_AUTHORITIES;
+        this.authorities = authorities;
     }
+    
+    public AuthenticatedPersonImpl(Person person, PegasusAuthority... authorities) {
+        this(person, toSet(authorities));
+    }
+
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#getMember()
@@ -55,6 +52,10 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
     
     void setPerson(Person person) {
         this.person = person;
+        setActiveActor(person);
+        this.authorities.remove(PegasusAuthority.MEMBER_SIGNUP);
+        this.authorities.remove(PegasusAuthority.ANONYMOUS);
+        this.authorities.add(PegasusAuthority.USER);
     }
 
     /* (non-Javadoc)
@@ -119,6 +120,19 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    
+
+    /**
+     * @param authorities2
+     * @return
+     */
+    private static Set<PegasusAuthority> toSet(PegasusAuthority[] authoritiesArr) {
+        Set<PegasusAuthority> authorities = EnumSet.noneOf(PegasusAuthority.class);
+        for (PegasusAuthority pegasusAuthority : authoritiesArr) {
+            authorities.add(pegasusAuthority);
+        }
+        return authorities;
     }
 
 }

@@ -50,5 +50,4 @@ class AnonymousAllocatedBundleImpl extends AbstractAllocatedBundle implements An
     public String getFileName() {
         return fileName;
     }
-
 }

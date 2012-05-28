@@ -59,7 +59,7 @@ public class Bundle extends SnapshotEntity {
      */
     @Transient
     private transient BundleType xml;
-
+    
     public Date getExpires() {
         return expires;
     }

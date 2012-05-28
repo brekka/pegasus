@@ -8,24 +8,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
- * Bundles must be memory resident only
+ * Transfers must be memory resident only
  * 
  * @author Andrew Taylor
  */
-public class Bundles {
+public class Transfers {
 
-    private transient Map<String, BundleType> map;
+    private transient Map<String, Transfer> map;
     
     
-    public void add(String token, BundleType bundle) {
+    public void add(String token, Transfer bundle) {
         map().put(token, bundle);
     }
     
-    public BundleType get(String token) {
+    public Transfer get(String token) {
         return map().get(token);
     }
     
@@ -42,9 +44,9 @@ public class Bundles {
      * Ensures that a map is always available.
      * @return
      */
-    protected Map<String, BundleType> map() {
+    protected Map<String, Transfer> map() {
         if (map == null) {
-            map = new HashMap<String, BundleType>();
+            map = new HashMap<String, Transfer>();
         }
         return map;
     }
@@ -54,9 +56,11 @@ public class Bundles {
      * @return
      */
     public FileType getFile(String fileId) {
-        Map<String, BundleType> map = map();
-        Collection<BundleType> values = map.values();
-        for (BundleType bundleType : values) {
+        Map<String, Transfer> map = map();
+        Collection<Transfer> values = map.values();
+        for (Transfer transfer : values) {
+            Bundle bundle = transfer.getBundle();
+            BundleType bundleType = bundle.getXml();
             List<FileType> fileList = bundleType.getFileList();
             for (FileType fileType : fileList) {
                 if (fileType.getUUID().equals(fileId)) {

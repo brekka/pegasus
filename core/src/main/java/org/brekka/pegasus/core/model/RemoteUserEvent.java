@@ -6,6 +6,8 @@ package org.brekka.pegasus.core.model;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,14 +30,14 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
     /**
      * The moment the event begun
      */
-    @Column(name="`Initiated`")
+    @Column(name="`Initiated`", updatable=false, nullable=false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date initiated; 
     
     /**
      * IP address of the system this web server talked to.
      */
-    @Column(name="`RemoteAddress`")
+    @Column(name="`RemoteAddress`", nullable=false)
     private String remoteAddress;
     
     /**
@@ -50,6 +52,13 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
      */
     @Column(name="`UserAgent`")
     private String userAgent;
+    
+    /**
+     * The member who performed the event (if available).
+     */
+    @ManyToOne
+    @JoinColumn(name="MemberID")
+    private Member member;
 
     public Date getInitiated() {
         return initiated;
@@ -81,5 +90,13 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 }

@@ -197,7 +197,7 @@ input.code {
 	font-family: monospace;
 	font-size: 24px;
 	padding: 1px 12px;
-	width: 120px;
+	width: 160px;
 }
 
 .advanced {
@@ -261,4 +261,26 @@ input.code {
 	margin: 0.6em;
 	border-radius: 4px;
 	padding: 5px;
+}
+
+#development {
+	margin: 1em;
+	border: 1px dotted #000080;
+	padding: 1em;
+}
+
+.agreement {
+	margin: 1em;
+}
+
+.agreement h4 {
+	margin: 0.2em 0 0 0;
+	padding: 0;
+	color: #808080;
+}
+
+.agreement pre {
+	border: 1px dotted #808080;
+	padding: 0.5em;
+	margin: 0.2em 0 0 0;
 }

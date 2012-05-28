@@ -111,10 +111,9 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         Bundle bundleModel = new Bundle();
         bundleModel.setId(UUID.randomUUID());
         
-        BundleDocument bundleDocument = prepareBundleDocument(comment, fileBuilders);
+        BundleDocument bundleDocument = prepareBundleDocument(comment, agreementText, fileBuilders);
         BundleType bundleType = bundleDocument.getBundle();
         bundleType.setReference(reference);
-        bundleType.setAgreement(agreementText);
         
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
@@ -184,7 +183,7 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public BundleType unlock(Deposit deposit) {
+    public Deposit unlock(Deposit deposit) {
         Bundle bundle = deposit.getBundle();
         UUID cryptedDataId = deposit.getCryptedDataId();
         
@@ -193,7 +192,9 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
         
         try {
-            return decryptBundle(null, bundle, secretKeyBytes);
+            BundleType bundleType = decryptTransfer(deposit, secretKeyBytes);
+            bundle.setXml(bundleType);
+            return deposit;
         } catch (XmlException | IOException e) {
             throw new PegasusException(PegasusErrorCode.PG200, e, 
                     "Failed to retrieve bundle XML for deposit '%s'" , deposit.getId());

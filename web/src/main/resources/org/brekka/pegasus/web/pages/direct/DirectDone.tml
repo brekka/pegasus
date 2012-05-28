@@ -24,26 +24,27 @@
     	</div>
     </form>
     
+    <t:if test="!transferKey.agreement">
+        <h2>Direct link</h2>
+        
+        <p> A direct link is for situations where you simply want to transfer the file(s) to another system and can either
+            copy the following link, or type it out again (note that the file name part is not required). </p>
+        
+        <form>
+        	<div class="field">
+    	    	<label>Copy to remote system</label>
+    	    	<input type="text" class="link direct" value="${directLink}" />
+        	</div>
+        </form>
+        
+        
+        <h2>Send to mobile (scannable QR code)</h2>
+        
+        <p> Scan the following image with your mobile phone. </p>
     
-    <h2>Direct link</h2>
-    
-    <p> A direct link is for situations where you simply want to transfer the file(s) to another system and can either
-        copy the following link, or type it out again (note that the file name part is not required). </p>
-    
-    <form>
     	<div class="field">
-	    	<label>Copy to remote system</label>
-	    	<input type="text" class="link direct" value="${directLink}" />
+        	<label>QR code</label>
+        	<img src="${qrCodeImageLink}" alt="QR code for mobile transfer" class="qrcode"/>
     	</div>
-    </form>
-    
-    
-    <h2>Send to mobile (scannable QR code)</h2>
-    
-    <p> Scan the following image with your mobile phone. </p>
-
-	<div class="field">
-    	<label>QR code</label>
-    	<img src="${qrCodeImageLink}" alt="QR code for mobile transfer" class="qrcode"/>
-	</div>
+    </t:if>
 </html>

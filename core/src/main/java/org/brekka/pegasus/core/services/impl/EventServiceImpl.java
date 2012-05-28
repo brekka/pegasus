@@ -6,16 +6,21 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.Date;
 import java.util.UUID;
 
+import org.brekka.pegasus.core.dao.AgreementAcceptedEventDAO;
 import org.brekka.pegasus.core.dao.BundleCreatedEventDAO;
 import org.brekka.pegasus.core.dao.BundleUnlockEventDAO;
 import org.brekka.pegasus.core.dao.FileDownloadEventDAO;
+import org.brekka.pegasus.core.model.AgreementAcceptedEvent;
+import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.BundleCreatedEvent;
-import org.brekka.pegasus.core.model.BundleUnlockEvent;
+import org.brekka.pegasus.core.model.Transfer;
+import org.brekka.pegasus.core.model.TransferUnlockEvent;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.RemoteUserEvent;
 import org.brekka.pegasus.core.security.WebAuthenticationDetails;
 import org.brekka.pegasus.core.services.EventService;
+import org.brekka.pegasus.core.services.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -41,14 +46,20 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private BundleCreatedEventDAO bundleCreatedEventDAO;
     
+    @Autowired
+    private AgreementAcceptedEventDAO agreementAcceptedEventDAO;
+    
+    @Autowired
+    private MemberService memberService;
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EventService#bundleUnlocked(java.lang.String, java.lang.String, java.lang.String, org.brekka.pegasus.core.model.Bundle, java.util.Date)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void bundleUnlocked(Bundle bundle, Date agreementAccepted) {
-        BundleUnlockEvent event = new BundleUnlockEvent();
-        event.setBundle(bundle);
+    public void transferUnlocked(Transfer transfer) {
+        TransferUnlockEvent event = new TransferUnlockEvent();
+        event.setTransfer(transfer);
         populate(event);
         bundleUnlockEventDAO.create(event);
     }
@@ -67,9 +78,19 @@ public class EventServiceImpl implements EventService {
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EventService#isAccepted(org.brekka.pegasus.core.model.Bundle)
+     */
+    @Override
+    public boolean isAccepted(Transfer transfer) {
+        AgreementAcceptedEvent event = agreementAcceptedEventDAO.retrieveByTransfer(transfer);
+        return event != null;
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EventService#bundleCreated(java.lang.String, java.lang.String, java.lang.String, org.brekka.pegasus.core.model.Bundle)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public void bundleCreated(Bundle bundle) {
         BundleCreatedEvent event = new BundleCreatedEvent();
         event.setBundle(bundle);
@@ -84,7 +105,17 @@ public class EventServiceImpl implements EventService {
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void completeEvent(FileDownloadEvent event) {
         event.setCompleted(new Date());
+        populate(event);
         fileDownloadEventDAO.update(event);
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void agreementAccepted(Transfer transfer) {
+        AgreementAcceptedEvent event = new AgreementAcceptedEvent();
+        event.setTransfer(transfer);
+        populate(event);
+        agreementAcceptedEventDAO.create(event);
     }
     
     protected void populate(RemoteUserEvent remoteUserEvent) {
@@ -97,6 +128,13 @@ public class EventServiceImpl implements EventService {
             remoteUserEvent.setOnBehalfOfAddress(wad.getOnBehalfOfAddress());
             remoteUserEvent.setRemoteAddress(wad.getRemoteAddress());
             remoteUserEvent.setUserAgent(wad.getUserAgent());
+        } else {
+            throw new IllegalStateException("No web authentication details found.");
+        }
+        
+        AuthenticatedMember current = memberService.getCurrent();
+        if (current != null) {
+            remoteUserEvent.setMember(current.getMember());
         }
     }
 

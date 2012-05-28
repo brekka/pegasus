@@ -49,4 +49,12 @@ class AbstractAllocatedBundle implements AllocatedBundle {
     public final UUID getBundleId() {
         return bundle.getId();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService.AnonymousAllocatedBundle#isAgreement()
+     */
+    @Override
+    public boolean isAgreement() {
+        return bundle.getXml().isSetAgreement();
+    }
 }

@@ -4,7 +4,6 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +20,7 @@ import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
@@ -47,16 +47,20 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
     @Autowired
     private TokenService tokenService;
     
+    @Autowired
+    private EventService eventService;
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.AnonymousService#createBundle(java.util.List)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousAllocatedBundle createBundle(String comment, List<FileBuilder> fileBuilders) {
+    public AnonymousAllocatedBundle createBundle(String comment, String agreementText, List<FileBuilder> fileBuilders) {
         Bundle bundleModel = new Bundle();
         bundleModel.setId(UUID.randomUUID());
         
-        BundleDocument doc = prepareBundleDocument(comment, fileBuilders);
+        BundleDocument doc = prepareBundleDocument(comment, agreementText, fileBuilders);
+        bundleModel.setXml(doc.getBundle());
         
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
@@ -67,14 +71,21 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         bundleDAO.create(bundleModel);
         
         // Allocate a code
-        String code = RandomStringUtils.random(8, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
+        StringBuilder codeBuilder = new StringBuilder();
+        StringBuilder prettyCodeBuilder = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                prettyCodeBuilder.append(" ");
+            }
+            String codePart = RandomStringUtils.random(2, 0, 0, false, true, null, defaultCryptoFactory.getSecureRandom());
+            prettyCodeBuilder.append(codePart);
+            codeBuilder.append(codePart);
+        }
         
         /*
          * Use phalanx to store the secret key for the bundle XML, encrypted with the code.
          */
-        CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), code);
-        
-        
+        CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), codeBuilder.toString());
         
         /*
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
@@ -86,15 +97,34 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         anonTransfer.setToken(token);
         anonTransfer.setCryptedDataId(pbeEncryptedData.getId());
         
-        eventService.bundleCreated(bundleModel);
         anonymousTransferDAO.create(anonTransfer);
+        eventService.bundleCreated(bundleModel);
         
         List<FileType> fileList = doc.getBundle().getFileList();
         String fileName = null;
         if (fileList.size() == 1) {
             fileName = fileList.get(0).getName();
         }
-        return new AnonymousAllocatedBundleImpl(bundleModel, secretKey, token.getPath(), code, fileName);
+        return new AnonymousAllocatedBundleImpl(bundleModel, secretKey, token.getPath(), prettyCodeBuilder.toString(), fileName);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#agreementAccepted(java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void agreementAccepted(String token) {
+        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
+        eventService.agreementAccepted(transfer);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#isAccepted(org.brekka.pegasus.core.model.Bundle)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public boolean isAccepted(AnonymousTransfer anonymousTransfer) {
+        return eventService.isAccepted(anonymousTransfer);
     }
     
     /* (non-Javadoc)
@@ -102,15 +132,18 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public BundleType unlock(String token, String code, Date agreementAccepted) {
+    public AnonymousTransfer unlock(String token, String code) {
+        String codeClean = code.replaceAll("[^0-9]+", "");
         
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         
         Bundle bundle = transfer.getBundle();
-        byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), code);
+        byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), codeClean);
         
         try {
-            return decryptBundle(agreementAccepted, bundle, secretKeyBytes);
+            BundleType bundleType = decryptTransfer(transfer, secretKeyBytes);
+            bundle.setXml(bundleType);
+            return transfer;
         } catch (XmlException | IOException e) {
             throw new PegasusException(PegasusErrorCode.PG200, e, 
                     "Failed to retrieve bundle XML for token '%s'" , token);

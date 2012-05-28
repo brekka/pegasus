@@ -49,10 +49,17 @@
 		
 		<h3><em>3.</em> Optional additions</h3>
 		<div class="field">
+			<t:label for="agreementText">Agreement text</t:label>
+			<t:textarea t:id="agreementText" />
+			<p>If you require that the user accept and agreement prior to downloading the file(s), enter it here.</p>
+		</div>
+        
+		<div class="field">
 			<t:label for="reference">Reference</t:label>
 			<t:textfield t:id="reference" />
 			<p>If the recipient gave you are reference number, enter it here.</p>
 		</div>
+        
 		<div class="field">
 			<t:label for="comment">Comment</t:label>
 			<t:textarea t:id="comment" />

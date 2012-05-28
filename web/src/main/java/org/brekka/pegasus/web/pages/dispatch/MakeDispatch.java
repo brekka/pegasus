@@ -3,7 +3,6 @@
  */
 package org.brekka.pegasus.web.pages.dispatch;
 
-import java.lang.reflect.Array;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +23,7 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
+import org.brekka.pegasus.web.pages.direct.DirectDone;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.brekka.pegasus.web.session.BundleMakerContext;
 
@@ -35,7 +35,7 @@ import org.brekka.pegasus.web.session.BundleMakerContext;
 public class MakeDispatch extends AbstractMakePage {
 
     @InjectPage
-    private DispatchDirect dispatchDirectPage;
+    private DirectDone directDonePage;
     
     @InjectPage
     private DispatchDeposit dispatchDepositPage;
@@ -115,8 +115,8 @@ public class MakeDispatch extends AbstractMakePage {
                 dispatchDepositPage.init(makeKey);
                 retVal = dispatchDepositPage;
             } else if (transferKey instanceof AnonymousService.AnonymousAllocatedBundle) {
-                dispatchDirectPage.init(makeKey);
-                retVal = dispatchDirectPage;
+                directDonePage.init(makeKey);
+                retVal = directDonePage;
             } else {
                 // TODO
                 throw new IllegalStateException();

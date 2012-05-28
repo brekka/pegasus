@@ -4,7 +4,9 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.MemberDAO;
@@ -17,6 +19,7 @@ import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.security.PegasusAuthority;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
@@ -75,23 +78,29 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public UserDetails loadUserByUsername(String openId) throws UsernameNotFoundException {
+        Set<PegasusAuthority> authorities = EnumSet.noneOf(PegasusAuthority.class);
         Person person = (Person) memberDAO.retrieveByOpenId(openId);
-        boolean admin = false;
-        if (person == null) {
-            // Not a member yet, create a new entry
-            person = new Person();
-            person.setOpenId(openId);
-            memberDAO.create(person);
-        } else {
+        if (person != null 
+                && person.getStatus() != ActorStatus.NEW) {
             List<String> userOpenIDList = administrationConfig.getUserOpenIDList();
             for (String adminOpenId : userOpenIDList) {
                 if (adminOpenId.equals(openId)) {
-                    admin = true;
+                    authorities.add(PegasusAuthority.ADMIN);
                     break;
                 }
             }
+            authorities.add(PegasusAuthority.USER);
+        } else {
+            // Not a member yet, create a new entry
+            if (person == null) {
+                person = new Person();
+                person.setOpenId(openId);
+                memberDAO.create(person);
+            }
+            authorities.add(PegasusAuthority.MEMBER_SIGNUP);
+            authorities.add(PegasusAuthority.ANONYMOUS);
         }
-        AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person, admin);
+        AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person, authorities);
         return authMember;
     }
     
@@ -122,8 +131,9 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
      */
     @Override
     public boolean isNewMember() {
-        Member member = getManaged();
-        return member.getStatus() == ActorStatus.NEW;
+        AuthenticatedMember authMem = getCurrent();
+        return authMem != null 
+             && authMem.getMember().getStatus() == ActorStatus.NEW;
     }
     
     @Override

@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
@@ -69,7 +70,7 @@ public interface InboxService {
      * @param deposit
      * @return
      */
-    BundleType unlock(Deposit deposit);
+    Deposit unlock(Deposit deposit);
     
     /**
      * @param keySafe

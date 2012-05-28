@@ -5,11 +5,11 @@
     <h1>Fetch</h1>
     
     <p>
-    	${bundle.comment}
+    	${transfer.bundle.xml.comment}
     </p>
     
     <ul>
-	<t:loop source="bundle.fileList" value="file">
+	<t:loop source="transfer.bundle.xml.fileList" value="file">
 		<li><t:pagelink page="download" context="fileContext">${file.name} (${file.length} bytes)</t:pagelink></li>
 	</t:loop>
     </ul>

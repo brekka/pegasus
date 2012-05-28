@@ -13,4 +13,6 @@ import java.util.UUID;
 public interface AllocatedBundle {
     
     UUID getBundleId();
+    
+    boolean isAgreement();
 }

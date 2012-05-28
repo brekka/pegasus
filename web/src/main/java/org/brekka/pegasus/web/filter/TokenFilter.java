@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
@@ -28,7 +29,6 @@ import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.web.pages.deposit.MakeDeposit;
 import org.brekka.pegasus.web.pages.direct.UnlockDirect;
-import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -114,8 +114,8 @@ public class TokenFilter implements Filter {
      * @param resp
      */
     private void dispatchBundle(String token, String code, HttpServletResponse resp) throws ServletException, IOException {
-        BundleType bundle = anonymousService.unlock(token, code, null);
-        List<FileType> fileList = bundle.getFileList();
+        AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
+        List<FileType> fileList = anonymousTransfer.getBundle().getXml().getFileList();
         if (fileList.size() == 1) {
             // Just one file, return it.
             FileType fileType = fileList.get(0);

@@ -17,8 +17,12 @@
 		       	<t:body/>
 	    	</div>
 	    	<div id="footer">
-	    	  <!-- ${authorities} -->
 	    	</div>
+            <t:if test="!productionMode">
+    	       <div id="development">
+                    Authorities: ${authorities}               
+               </div>
+            </t:if>
     	</div>
     </body>
 </html>

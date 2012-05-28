@@ -79,7 +79,7 @@ public class DispatchServiceImpl extends PegasusServiceSupport implements Dispat
         if (inbox != null) {
             bundle = inboxService.depositFiles(inbox, reference, comment, agreementText, fileBuilderList);
         } else {
-            bundle = anonymousService.createBundle(comment, fileBuilderList);
+            bundle = anonymousService.createBundle(comment, agreementText, fileBuilderList);
         }
         
         AbstractAllocatedBundle allocatedBundle = (AbstractAllocatedBundle) bundle;

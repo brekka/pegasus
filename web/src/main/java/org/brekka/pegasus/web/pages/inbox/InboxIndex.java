@@ -11,9 +11,8 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
-import org.brekka.pegasus.web.support.Bundles;
 import org.brekka.pegasus.web.support.Configuration;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.pegasus.web.support.Transfers;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
@@ -28,8 +27,8 @@ public class InboxIndex {
     @Inject
     private InboxService inboxService;
     
-    @SessionAttribute("bundles")
-    private Bundles bundles;
+    @SessionAttribute("transfers")
+    private Transfers transfers;
     
     @Property
     private Inbox inbox;
@@ -61,12 +60,12 @@ public class InboxIndex {
         return new String[]{ loopFile.getUUID(), loopFile.getName() };
     }
     
-    public BundleType getBundle() {
-        String bundleId = loopDeposit.getBundle().getId().toString();
-        if (!bundles.contains(bundleId)) {
-            BundleType bundle = inboxService.unlock(loopDeposit);
-            bundles.add(bundleId, bundle);
+    public Deposit getDeposit() {
+        String transferId = loopDeposit.getId().toString();
+        if (!transfers.contains(transferId)) {
+            Deposit deposit = inboxService.unlock(loopDeposit);
+            transfers.add(transferId, deposit);
         }
-        return bundles.get(bundleId);
+        return (Deposit) transfers.get(transferId);
     }
 }
