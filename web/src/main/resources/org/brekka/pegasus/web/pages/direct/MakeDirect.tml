@@ -1,7 +1,8 @@
 <html t:type="layout" xmlns:p="tapestry:parameter"
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
-      
-      
+    
+    <h1>Direct transfer</h1>  
+    
     <h3><em>1.</em> Files to send</h3>
     <div id="enhanced" class="hidden">
 	    <div class="field">

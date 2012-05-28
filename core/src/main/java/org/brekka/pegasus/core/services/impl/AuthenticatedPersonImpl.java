@@ -64,6 +64,14 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.AuthenticatedMember#hasAccess(org.springframework.security.core.GrantedAuthority)
+     */
+    @Override
+    public boolean hasAccess(GrantedAuthority grantedAuthority) {
+        return getAuthorities().contains(grantedAuthority);
+    }
 
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetails#getPassword()

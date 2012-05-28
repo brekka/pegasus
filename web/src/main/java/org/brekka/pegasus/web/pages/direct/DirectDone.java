@@ -66,13 +66,28 @@ public class DirectDone {
         return configuration.getFetchBase() + "/" + transferKey.getToken(); 
     }
     
+    /**
+     * /cxt/qr/code/token/filename
+     * @return
+     */
+    public String getQrCodeImageLink() {
+        String cxtPath = requestGlobals.getRequest().getContextPath();
+        String path = String.format("%s/qr/%s", cxtPath, getPath());
+        return path;
+    }
+    
     public String getDirectLink() {
+        
+        return configuration.getFetchBase() + "/" + getPath();
+    }
+    
+    private String getPath() {
         String path;
         if (transferKey.getFileName() != null) {
             path = transferKey.getCode() + "/" + transferKey.getToken() + "/" + transferKey.getFileName();
         } else {
             path = transferKey.getCode() + "/" + transferKey.getToken() + ".zip";
         }
-        return configuration.getFetchBase() + "/" + path;
+        return path;
     }
 }

@@ -13,6 +13,7 @@
 	<http >
         <intercept-url pattern="/networkgroup/**" access="ROLE_ADMIN"/>
         <intercept-url pattern="/firewall/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/member/setup*" access="ROLE_MEMBER_SIGNUP"/>
         <intercept-url pattern="/member/**"   access="ROLE_USER"/>
         <intercept-url pattern="/inbox/**"    access="ROLE_USER"/>
         <intercept-url pattern="/direct/**"   access="ROLE_ANONYMOUS_TRANSFER"/>

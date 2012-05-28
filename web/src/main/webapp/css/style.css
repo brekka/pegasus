@@ -249,3 +249,16 @@ input.code {
 .shelf h4 {
 	margin: 2px;
 }
+
+#enter h3 {
+	margin: 0 0 0.5em 0;
+}
+
+#enter .direct,#enter .login {
+	border: 1px solid #A0A0A0;
+	float: left;
+	width: 440px;
+	margin: 0.6em;
+	border-radius: 4px;
+	padding: 5px;
+}

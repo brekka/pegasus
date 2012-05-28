@@ -6,7 +6,7 @@
 	<display-name>Pegasus Web</display-name>
 
     <session-config>
-        <session-timeout>3</session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
 
 	<context-param>

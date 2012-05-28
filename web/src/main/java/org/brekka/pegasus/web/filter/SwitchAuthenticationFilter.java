@@ -75,6 +75,12 @@ public class SwitchAuthenticationFilter extends GenericFilterBean {
                     anon = true;
                     break;
                 }
+                if (AnonymousAuthenticationFilter.MEMBER_SIGNUP.getAuthority().equals(authority)) {
+                    // Can the user signup?
+                    firewalled = !authentication.getAuthorities().contains(AnonymousAuthenticationFilter.MEMBER_SIGNUP);
+                    anon = true;
+                    break;
+                }
                 if (AnonymousAuthenticationFilter.ANONYMOUS.getAuthority().equals(authority)) {
                     anon = true;
                     break;

@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Organization;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 
 /**
@@ -36,6 +37,12 @@ public interface MemberService {
      * 
      */
     void activateMember();
+
+    /**
+     * @param anonymousTransfer
+     * @return
+     */
+    boolean hasAccess(GrantedAuthority anonymousTransfer);
 
 }
 

@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,7 @@ import org.brekka.stillingar.annotations.Configured;
 import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus.Administration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -172,6 +174,17 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
                 phalanxService.logout(authenticatedPrincipal);
             }
         }   
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#hasAccess(org.springframework.security.core.GrantedAuthority)
+     */
+    @Override
+    public boolean hasAccess(GrantedAuthority anonymousTransfer) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        return authorities.contains(anonymousTransfer);
     }
     
     protected Member getManaged() {
