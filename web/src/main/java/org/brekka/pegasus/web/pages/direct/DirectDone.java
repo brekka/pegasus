@@ -82,11 +82,12 @@ public class DirectDone {
     }
     
     private String getPath() {
+        String code = transferKey.getCode().replaceAll("[^0-9]+", "");
         String path;
         if (transferKey.getFileName() != null) {
-            path = transferKey.getCode() + "/" + transferKey.getToken() + "/" + transferKey.getFileName();
+            path = code + "/" + transferKey.getToken() + "/" + transferKey.getFileName();
         } else {
-            path = transferKey.getCode() + "/" + transferKey.getToken() + ".zip";
+            path = code + "/" + transferKey.getToken() + ".zip";
         }
         return path;
     }
