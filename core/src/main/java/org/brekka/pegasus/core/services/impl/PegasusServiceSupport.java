@@ -26,7 +26,9 @@ import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.BundleDAO;
+import org.brekka.pegasus.core.dao.BundleFileDAO;
 import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.KeySafeService;
@@ -46,6 +48,9 @@ abstract class PegasusServiceSupport {
     
     @Autowired
     protected BundleDAO bundleDAO;
+    
+    @Autowired
+    protected BundleFileDAO bundleFileDAO;
     
     
     @Autowired
@@ -68,6 +73,20 @@ abstract class PegasusServiceSupport {
     
     @Autowired
     protected KeySafeService keySafeService;
+    
+    /**
+     * Allocate {@link BundleFile} instances for each file in the builder list.
+     * @param bundle
+     * @param fileBuilders
+     */
+    protected void allocateBundleFiles(Bundle bundle, BundleType bundleType) {
+        List<FileType> fileList = bundleType.getFileList();
+        for (FileType fileType : fileList) {
+            UUID id = UUID.fromString(fileType.getUUID());
+            BundleFile bf = new BundleFile(id, bundle);
+            bundleFileDAO.create(bf);
+        }
+    }
     
     /**
      * Prepare the XML based structure that will contain the details for this bundle,

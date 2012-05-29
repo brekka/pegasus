@@ -46,6 +46,7 @@ public abstract class Transfer extends SnapshotEntity {
     
     /**
      * Id of the crypted data that contains the key used to encrypt this file's parts.
+     * Will be nulled-out once the bundle is de-allocated.
      */
     @Type(type="pg-uuid")
     @Column(name="`CryptedDataID`")

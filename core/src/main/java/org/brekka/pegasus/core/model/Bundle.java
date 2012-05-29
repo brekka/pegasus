@@ -35,9 +35,10 @@ public class Bundle extends SnapshotEntity {
     private int profile;
     
     /**
-     * The encryption initialisation vector use for the bundle XML
+     * The encryption initialisation vector use for the bundle XML.
+     * Will be nulled out when the bundle is de-allocated
      */
-    @Column(name="`IV`", nullable=false)
+    @Column(name="`IV`")
     private byte[] iv;
     
     /**

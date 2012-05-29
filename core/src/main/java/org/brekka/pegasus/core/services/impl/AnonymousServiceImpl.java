@@ -28,6 +28,7 @@ import org.brekka.phoenix.CryptoFactory;
 import org.brekka.xml.pegasus.v1.model.BundleDocument;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.FileType;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -67,8 +68,16 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
         bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         
+        // TODO Expiry, currently fixed at 12 hours, should be configured.
+        DateTime now = new DateTime();
+        DateTime expires = now.plusHours(12);
+        bundleModel.setExpires(expires.toDate());
+        
         encryptBundleDocument(doc, bundleModel, secretKey);
         bundleDAO.create(bundleModel);
+        
+        // Store the relationship between bundle and file (for de-allocator)
+        allocateBundleFiles(bundleModel, doc.getBundle());
         
         // Allocate a code
         StringBuilder codeBuilder = new StringBuilder();

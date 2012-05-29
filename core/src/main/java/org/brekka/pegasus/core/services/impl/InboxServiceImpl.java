@@ -37,6 +37,7 @@ import org.brekka.xml.pegasus.v1.model.BundleDocument;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.InboxType;
 import org.brekka.xml.pegasus.v1.model.ProfileType;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -120,8 +121,16 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
         bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         
+        // TODO Expiry, currently fixed at one week, should be configured.
+        DateTime now = new DateTime();
+        DateTime expires = now.plusDays(7);
+        bundleModel.setExpires(expires.toDate());
+        
         encryptBundleDocument(bundleDocument, bundleModel, secretKey);
         bundleDAO.create(bundleModel);
+        
+        // Store the relationship between bundle and file (for de-allocator)
+        allocateBundleFiles(bundleModel, bundleDocument.getBundle());
         
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         

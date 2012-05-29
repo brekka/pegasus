@@ -12,5 +12,20 @@
 		<config>src/main/webapp/WEB-INF/phalanxClientContext.xml</config>
 	</configs>
 	<configSets>
+		<configSet>
+			<name><![CDATA[PegasusWeb]]></name>
+			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>/pegasus-core/src/main/resources/org/brekka/pegasus/core/spring/daoContext.xml</config>
+				<config>/pegasus-core/src/main/resources/org/brekka/pegasus/core/spring/databaseContext.xml</config>
+				<config>/pegasus-core/src/main/resources/org/brekka/pegasus/core/spring/serviceContext.xml</config>
+				<config>src/main/webapp/WEB-INF/applicationContext.xml</config>
+				<config>src/main/webapp/WEB-INF/phalanxClientContext.xml</config>
+				<config>src/main/webapp/WEB-INF/securityContext.xml</config>
+			</configs>
+			<profiles>
+			</profiles>
+		</configSet>
 	</configSets>
 </beansProjectDescription>

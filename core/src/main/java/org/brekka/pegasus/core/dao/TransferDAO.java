@@ -8,17 +8,19 @@ import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.model.Transfer;
 
 /**
  * @author Andrew Taylor
  *
  */
-public interface BundleDAO extends EntityDAO<UUID, Bundle> {
+public interface TransferDAO extends EntityDAO<UUID, Transfer> {
 
     /**
-     * @param maxBundleCount
+     * @param bundle
      * @return
      */
-    List<Bundle> retrieveOldestExpired(int maxBundleCount);
+    List<Transfer> retrieveByBundle(Bundle bundle);
+
 
 }

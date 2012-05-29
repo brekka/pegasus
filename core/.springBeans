@@ -12,5 +12,17 @@
 		<config>src/main/resources/org/brekka/pegasus/core/spring/serviceContext.xml</config>
 	</configs>
 	<configSets>
+		<configSet>
+			<name><![CDATA[Pegasus]]></name>
+			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>src/main/resources/org/brekka/pegasus/core/spring/daoContext.xml</config>
+				<config>src/main/resources/org/brekka/pegasus/core/spring/databaseContext.xml</config>
+				<config>src/main/resources/org/brekka/pegasus/core/spring/serviceContext.xml</config>
+			</configs>
+			<profiles>
+			</profiles>
+		</configSet>
 	</configSets>
 </beansProjectDescription>
