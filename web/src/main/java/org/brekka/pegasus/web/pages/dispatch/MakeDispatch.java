@@ -3,13 +3,18 @@
  */
 package org.brekka.pegasus.web.pages.dispatch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.tapestry5.OptionModel;
+import org.apache.tapestry5.SelectModel;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.internal.OptionModelImpl;
+import org.apache.tapestry5.internal.SelectModelImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.AllocatedBundle;
@@ -68,6 +73,9 @@ public class MakeDispatch extends AbstractMakePage {
     @Property
     private String agreementText;
     
+    @Property
+    private int maxDownloads = 1;
+    
     
     private Object[] context;
     
@@ -109,7 +117,8 @@ public class MakeDispatch extends AbstractMakePage {
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
             AllocatedBundle transferKey = dispatchService.createDispatch(
-                    recipientEMail, division, keySafe, reference, comment, agreementText, fileBuilderList);
+                    recipientEMail, division, keySafe, reference, comment, 
+                    agreementText, maxDownloads, fileBuilderList);
             bundleMaker.setTransferKey(transferKey);
             if (transferKey instanceof InboxService.InboxAllocatedBundle) {
                 dispatchDepositPage.init(makeKey);
@@ -126,5 +135,14 @@ public class MakeDispatch extends AbstractMakePage {
             throw new IllegalStateException();
         }
         return retVal;
+    }
+    
+    public SelectModel getDownloadOptionModel() {
+        List<OptionModel> options = new ArrayList<>();
+        options.add(new OptionModelImpl("1", 1));
+        options.add(new OptionModelImpl("2", 2));
+        options.add(new OptionModelImpl("3", 3));
+        options.add(new OptionModelImpl("5", 5));
+        return new SelectModelImpl(null, options);
     }
 }

@@ -22,4 +22,10 @@ public interface BundleFileDAO extends EntityDAO<UUID, BundleFile> {
      */
     List<BundleFile> retrieveByBundle(Bundle bundle);
 
+    /**
+     * @param maxFileCount
+     * @return
+     */
+    List<BundleFile> retrieveOldestExpired(int maxFileCount);
+
 }

@@ -3,30 +3,26 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.PegasusErrorCode;
-import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.BundleService;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.CryptoFactory;
-import org.brekka.xml.pegasus.v1.model.BundleDocument;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.phoenix.CryptoFactoryRegistry;
 import org.brekka.xml.pegasus.v1.model.FileType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AnonymousServiceImpl extends PegasusServiceSupport implements AnonymousService {
+public class AnonymousServiceImpl implements AnonymousService {
     
     @Autowired
     private AnonymousTransferDAO anonymousTransferDAO;
@@ -51,33 +47,32 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
     @Autowired
     private EventService eventService;
     
+    @Autowired
+    private BundleService bundleService;
+    
+    @Autowired
+    private PhalanxService phalanxService;
+    
+    @Autowired
+    private CryptoFactoryRegistry cryptoFactoryRegistry;
+    
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.AnonymousService#createBundle(java.util.List)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousAllocatedBundle createBundle(String comment, String agreementText, List<FileBuilder> fileBuilders) {
-        Bundle bundleModel = new Bundle();
-        bundleModel.setId(UUID.randomUUID());
-        
-        BundleDocument doc = prepareBundleDocument(comment, agreementText, fileBuilders);
-        bundleModel.setXml(doc.getBundle());
-        
+    public AnonymousAllocatedBundle createBundle(String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilders) {
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
-        bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         
         // TODO Expiry, currently fixed at 12 hours, should be configured.
         DateTime now = new DateTime();
         DateTime expires = now.plusHours(12);
-        bundleModel.setExpires(expires.toDate());
         
-        encryptBundleDocument(doc, bundleModel, secretKey);
-        bundleDAO.create(bundleModel);
-        
-        // Store the relationship between bundle and file (for de-allocator)
-        allocateBundleFiles(bundleModel, doc.getBundle());
+        Bundle bundleModel = bundleService.createBundle(comment, agreementText, null, expires, 
+                maxDownloads, secretKey, defaultCryptoFactory.getProfileId(), fileBuilders);
         
         // Allocate a code
         StringBuilder codeBuilder = new StringBuilder();
@@ -109,12 +104,13 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
         anonymousTransferDAO.create(anonTransfer);
         eventService.bundleCreated(bundleModel);
         
-        List<FileType> fileList = doc.getBundle().getFileList();
+        List<FileType> fileList = bundleModel.getXml().getFileList();
         String fileName = null;
         if (fileList.size() == 1) {
             fileName = fileList.get(0).getName();
         }
-        return new AnonymousAllocatedBundleImpl(bundleModel, secretKey, token.getPath(), prettyCodeBuilder.toString(), fileName);
+        return new AnonymousAllocatedBundleImpl(bundleModel, secretKey, token.getPath(), 
+                prettyCodeBuilder.toString(), fileName);
     }
     
     /* (non-Javadoc)
@@ -143,19 +139,9 @@ public class AnonymousServiceImpl extends PegasusServiceSupport implements Anony
     @Transactional(propagation=Propagation.REQUIRED)
     public AnonymousTransfer unlock(String token, String code) {
         String codeClean = code.replaceAll("[^0-9]+", "");
-        
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
-        
-        Bundle bundle = transfer.getBundle();
         byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), codeClean);
-        
-        try {
-            BundleType bundleType = decryptTransfer(transfer, secretKeyBytes);
-            bundle.setXml(bundleType);
-            return transfer;
-        } catch (XmlException | IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG200, e, 
-                    "Failed to retrieve bundle XML for token '%s'" , token);
-        }
+        bundleService.decryptTransfer(transfer, secretKeyBytes);
+        return transfer;
     }
 }

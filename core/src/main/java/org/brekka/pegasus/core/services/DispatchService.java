@@ -29,7 +29,7 @@ public interface DispatchService {
      * @return
      */
     AllocatedBundle createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
-            String comment, String agreementText, List<FileBuilder> fileBuilderList);
+            String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList);
 
     /**
      * @param from
@@ -37,5 +37,6 @@ public interface DispatchService {
      * @return
      */
     List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until);
+
 
 }

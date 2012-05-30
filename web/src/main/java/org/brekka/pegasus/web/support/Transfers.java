@@ -5,13 +5,12 @@ package org.brekka.pegasus.web.support;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.Transfer;
-import org.brekka.xml.pegasus.v1.model.BundleType;
-import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
  * Transfers must be memory resident only
@@ -55,18 +54,13 @@ public class Transfers {
      * @param fromString
      * @return
      */
-    public FileType getFile(String fileId) {
+    public BundleFile getFile(UUID bundleFileId) {
         Map<String, Transfer> map = map();
         Collection<Transfer> values = map.values();
         for (Transfer transfer : values) {
             Bundle bundle = transfer.getBundle();
-            BundleType bundleType = bundle.getXml();
-            List<FileType> fileList = bundleType.getFileList();
-            for (FileType fileType : fileList) {
-                if (fileType.getUUID().equals(fileId)) {
-                    return fileType;
-                }
-            }
+            Map<UUID, BundleFile> files = bundle.getFiles();
+            return files.get(bundleFileId);
         }
         return null;
     }

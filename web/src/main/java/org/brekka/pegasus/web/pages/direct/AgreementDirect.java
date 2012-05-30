@@ -46,6 +46,7 @@ public class AgreementDirect {
         }
         
         transfer = (AnonymousTransfer) transfers.get(token);
+        
         if (transfer == null) {
             unlockPage.onActivate(token);
             return unlockPage;

@@ -23,15 +23,18 @@ import org.apache.xmlbeans.XmlBeans;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.paveway.core.model.Compression;
+import org.brekka.paveway.core.services.ResourceCryptoService;
 import org.brekka.paveway.core.services.ResourceEncryptor;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.XmlEntityDAO;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
+import org.brekka.phoenix.CryptoFactoryRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,10 +46,20 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class XmlEntityServiceImpl extends PegasusServiceSupport implements XmlEntityService {
+public class XmlEntityServiceImpl implements XmlEntityService {
 
     @Autowired
     private XmlEntityDAO xmlEntityDAO;
+
+    
+    @Autowired
+    private CryptoFactoryRegistry cryptoFactoryRegistry;
+    
+    @Autowired
+    private ResourceCryptoService resourceCryptoService;
+    
+    @Autowired
+    private KeySafeService keySafeService;
     
     
     /* (non-Javadoc)

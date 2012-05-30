@@ -5,6 +5,7 @@ package org.brekka.pegasus.web.filter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
@@ -115,14 +117,15 @@ public class TokenFilter implements Filter {
      */
     private void dispatchBundle(String token, String code, HttpServletResponse resp) throws ServletException, IOException {
         AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
-        List<FileType> fileList = anonymousTransfer.getBundle().getXml().getFileList();
+        List<BundleFile> fileList = new ArrayList<>(anonymousTransfer.getBundle().getFiles().values());
         if (fileList.size() == 1) {
             // Just one file, return it.
-            FileType fileType = fileList.get(0);
+            BundleFile file = fileList.get(0);
+            FileType fileType = file.getXml();
             resp.setHeader("Content-Length", String.valueOf(fileType.getLength()));
             resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileType.getName() + "\"");
             resp.setContentType(fileType.getMimeType());
-            try ( InputStream is = downloadService.download(fileType) ) {
+            try ( InputStream is = downloadService.download(file) ) {
                 IOUtils.copy(is, resp.getOutputStream());
             }
         } else {
@@ -131,11 +134,12 @@ public class TokenFilter implements Filter {
             resp.setHeader("Content-Disposition", "attachment; filename=\"Bundle_" + token + ".zip\"");
             ZipOutputStream zos = new ZipOutputStream(resp.getOutputStream());
             zos.setLevel(ZipEntry.STORED);
-            for (FileType fileType : fileList) {
+            for (BundleFile file : fileList) {
+                FileType fileType = file.getXml();
                 ZipEntry ze = new ZipEntry(fileType.getName());
                 ze.setSize(fileType.getLength());
                 zos.putNextEntry(ze);
-                try ( InputStream is = downloadService.download(fileType) ) {
+                try ( InputStream is = downloadService.download(file) ) {
                     IOUtils.copy(is, zos);
                 }
                 zos.closeEntry();

@@ -21,4 +21,9 @@ public interface BundleDAO extends EntityDAO<UUID, Bundle> {
      */
     List<Bundle> retrieveOldestExpired(int maxBundleCount);
 
+    /**
+     * @param bundle
+     */
+    void refresh(Bundle bundle);
+
 }

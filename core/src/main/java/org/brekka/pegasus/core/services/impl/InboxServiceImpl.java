@@ -3,17 +3,13 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
-import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.PegasusErrorCode;
-import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
@@ -26,6 +22,7 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.services.BundleService;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -33,8 +30,7 @@ import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.CryptoFactory;
-import org.brekka.xml.pegasus.v1.model.BundleDocument;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.phoenix.CryptoFactoryRegistry;
 import org.brekka.xml.pegasus.v1.model.InboxType;
 import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.joda.time.DateTime;
@@ -48,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class InboxServiceImpl extends PegasusServiceSupport implements InboxService {
+public class InboxServiceImpl implements InboxService {
 
     @Autowired
     private TokenService tokenService;
@@ -67,6 +63,13 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     
     @Autowired
     private ProfileService profileService;
+    
+    @Autowired
+    private BundleService bundleService;
+    
+    @Autowired
+    private CryptoFactoryRegistry cryptoFactoryRegistry;
+    
     
     
     /* (non-Javadoc)
@@ -109,28 +112,16 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
         inbox = inboxDAO.retrieveById(inbox.getId());
         KeySafe keySafe = inbox.getKeySafe();
         
-        Bundle bundleModel = new Bundle();
-        bundleModel.setId(UUID.randomUUID());
-        
-        BundleDocument bundleDocument = prepareBundleDocument(comment, agreementText, fileBuilders);
-        BundleType bundleType = bundleDocument.getBundle();
-        bundleType.setReference(reference);
-        
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
-        bundleModel.setProfile(defaultCryptoFactory.getProfileId());
         
         // TODO Expiry, currently fixed at one week, should be configured.
         DateTime now = new DateTime();
         DateTime expires = now.plusDays(7);
-        bundleModel.setExpires(expires.toDate());
         
-        encryptBundleDocument(bundleDocument, bundleModel, secretKey);
-        bundleDAO.create(bundleModel);
-        
-        // Store the relationship between bundle and file (for de-allocator)
-        allocateBundleFiles(bundleModel, bundleDocument.getBundle());
+        Bundle bundleModel = bundleService.createBundle(comment, agreementText, reference, expires, 
+                0, secretKey, defaultCryptoFactory.getProfileId(), fileBuilders);
         
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         
@@ -193,21 +184,11 @@ public class InboxServiceImpl extends PegasusServiceSupport implements InboxServ
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Deposit unlock(Deposit deposit) {
-        Bundle bundle = deposit.getBundle();
         UUID cryptedDataId = deposit.getCryptedDataId();
-        
         KeySafe keySafe = deposit.getKeySafe();
-        
         byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-        
-        try {
-            BundleType bundleType = decryptTransfer(deposit, secretKeyBytes);
-            bundle.setXml(bundleType);
-            return deposit;
-        } catch (XmlException | IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG200, e, 
-                    "Failed to retrieve bundle XML for deposit '%s'" , deposit.getId());
-        }
+        bundleService.decryptTransfer(deposit, secretKeyBytes);
+        return deposit;
     }
     
     /* (non-Javadoc)

@@ -40,4 +40,12 @@ public class BundleHibernateDAO extends AbstractPegasusHibernateDAO<Bundle> impl
                 .addOrder(Order.asc("expires"))
                 .list();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.BundleDAO#refresh(org.brekka.pegasus.core.model.Bundle)
+     */
+    @Override
+    public void refresh(Bundle bundle) {
+        getCurrentSession().refresh(bundle);
+    }
 }

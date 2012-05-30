@@ -65,6 +65,12 @@
 			<t:textarea t:id="comment" />
 			<p>You can leave a comment for the recipient by entering it in the field above.</p>
 		</div>
+        
+		<div class="field">
+			<t:label for="maxDownloads">Max downloads</t:label>
+			<t:select t:id="maxDownloads" model="downloadOptionModel" />
+			<p>The number of times the file can be downloaded.</p>
+		</div>
 		
 		<h3><em>4.</em> Initiate transfer</h3>
 		<div class="field">

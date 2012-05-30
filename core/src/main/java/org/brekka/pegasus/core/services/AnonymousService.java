@@ -15,7 +15,8 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
  */
 public interface AnonymousService {
 
-    AnonymousAllocatedBundle createBundle(String comment, String agreementText, List<FileBuilder> fileBuilders);
+    AnonymousAllocatedBundle createBundle(String comment, String agreementText, 
+            int maxDownloads, List<FileBuilder> fileBuilders);
     
     AnonymousTransfer unlock(String token, String code);
 

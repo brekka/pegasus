@@ -4,9 +4,13 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -56,6 +60,13 @@ public class Bundle extends SnapshotEntity {
     private Date deleted;
     
     /**
+     * The list of files containened in the bundle
+     */
+    @OneToMany(mappedBy="bundle")
+    @MapKey
+    private Map<UUID, BundleFile> files;
+    
+    /**
      * The XML that backs this bundle. Transient as it will be encrypted and stored separately
      */
     @Transient
@@ -99,5 +110,13 @@ public class Bundle extends SnapshotEntity {
 
     public void setXml(BundleType xml) {
         this.xml = xml;
+    }
+
+    public Map<UUID, BundleFile> getFiles() {
+        return files;
+    }
+
+    public void setFiles(Map<UUID, BundleFile> files) {
+        this.files = files;
     }
 }

@@ -9,8 +9,17 @@
     </p>
     
     <ul>
-	<t:loop source="transfer.bundle.xml.fileList" value="file">
-		<li><t:pagelink page="download" context="fileContext">${file.name} (${file.length} bytes)</t:pagelink></li>
+	<t:loop source="files" value="file">
+		<li>
+            <t:if test="file.deleted">
+                <span>${file.xml.name} (${file.xml.length} bytes) DELETED count: ${file.downloadCount}</span>
+                <p:else>
+                    <t:pagelink page="download" context="fileContext">
+                        ${file.xml.name} (${file.xml.length} bytes) count: ${file.downloadCount}
+                    </t:pagelink>
+                </p:else>
+            </t:if>
+         </li>
 	</t:loop>
     </ul>
 

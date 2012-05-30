@@ -25,6 +25,7 @@
 			<xsd:element name="Length"      type="xsd:long"         minOccurs="1" maxOccurs="1" />
 			<xsd:element name="MimeType"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Key"         type="xsd:base64Binary" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="MaxDownloads" type="xsd:int"         minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
     

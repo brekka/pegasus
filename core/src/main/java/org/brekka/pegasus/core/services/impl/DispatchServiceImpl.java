@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class DispatchServiceImpl extends PegasusServiceSupport implements DispatchService {
+public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private MemberService memberService;
@@ -62,7 +62,7 @@ public class DispatchServiceImpl extends PegasusServiceSupport implements Dispat
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public AllocatedBundle createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
-            String comment, String agreementText, List<FileBuilder> fileBuilderList) {
+            String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
         Actor activeActor = authenticatedMember.getActiveActor();
@@ -79,7 +79,7 @@ public class DispatchServiceImpl extends PegasusServiceSupport implements Dispat
         if (inbox != null) {
             bundle = inboxService.depositFiles(inbox, reference, comment, agreementText, fileBuilderList);
         } else {
-            bundle = anonymousService.createBundle(comment, agreementText, fileBuilderList);
+            bundle = anonymousService.createBundle(comment, agreementText, maxDownloads, fileBuilderList);
         }
         
         AbstractAllocatedBundle allocatedBundle = (AbstractAllocatedBundle) bundle;

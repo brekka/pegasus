@@ -13,7 +13,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.paveway.core.services.PavewayService;
+import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
+import org.brekka.pegasus.core.services.BundleService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.phoenix.CryptoFactory;
@@ -41,31 +43,41 @@ public class DownloadServiceImpl implements DownloadService {
     @Autowired
     private EventService eventService;
     
+    @Autowired
+    private BundleService bundleService;
+    
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DownloadService#download(org.brekka.xml.pegasus.v1.model.FileType, java.lang.String, java.lang.String, java.lang.String, java.io.OutputStream)
+     * @see org.brekka.pegasus.core.services.DownloadService#download(
+     *      org.brekka.xml.pegasus.v1.model.FileType, java.lang.String, 
+     *      java.lang.String, java.lang.String, java.io.OutputStream)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InputStream download(FileType fileType) {
+    public InputStream download(BundleFile file) {
+        FileType fileType = file.getXml();
         UUID fileId = UUID.fromString(fileType.getUUID());
         FileDownloadEvent event = eventService.beginFileDownloadEvent(fileId);
         CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(fileId);
         CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(cryptedFile.getProfile());
-        SecretKey secretKey = new SecretKeySpec(fileType.getKey(), cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
+        SecretKey secretKey = new SecretKeySpec(fileType.getKey(), 
+                cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
         InputStream is = pavewayService.download(cryptedFile, secretKey);
-        return new EventInputStream(is, event, cryptedFile.getOriginalLength());
+        return new EventInputStream(is, file, event, cryptedFile.getOriginalLength());
     }
     
     private class EventInputStream extends FilterInputStream {
 
+        private final BundleFile bundleFile;
+        
         private final FileDownloadEvent event;
         
         private final long expectedLength;
         
         private long length;
         
-        public EventInputStream(InputStream in, FileDownloadEvent event, long expectedLength) {
+        public EventInputStream(InputStream in, BundleFile bundleFile, FileDownloadEvent event, long expectedLength) {
             super(in);
+            this.bundleFile = bundleFile;
             this.event = event;
             this.expectedLength = expectedLength;
         }
@@ -90,6 +102,7 @@ public class DownloadServiceImpl implements DownloadService {
             super.close();
             if (expectedLength == length) {
                 eventService.completeEvent(event);
+                bundleService.incrementDownloadCounter(bundleFile);
             }
         }
     }

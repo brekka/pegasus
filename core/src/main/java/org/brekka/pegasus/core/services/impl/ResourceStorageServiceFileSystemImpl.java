@@ -4,7 +4,11 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URI;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -62,6 +66,7 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
     @Override
     public void remove(UUID id) {
         File file = toFile(id);
+        overwrite(file);
         FileUtils.deleteQuietly(file);
     }
     
@@ -80,7 +85,27 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
             dir2.mkdir();
         }
         return new File(dir2, idStr);
-//        return new File(new File(root), idStr);
     }
 
+    /**
+     * Best effort to de-allocate the file with zeros. Seems a waste of resources
+     * to write random data, especially given the physical bytes of the original
+     * file may not actually get overwritten.
+     * 
+     * @param file
+     */
+    static void overwrite(File file) {
+        try (RandomAccessFile rwFile = new RandomAccessFile(file, "rw"); 
+               FileChannel rwChannel = rwFile.getChannel()) {  
+            long size = rwChannel.size(); 
+            MappedByteBuffer buffer = rwChannel.map(FileChannel.MapMode.READ_WRITE, 0, size);     
+            for (int i = 0; i < size; i++) {
+                buffer.put((byte) 0);     
+            }   
+            buffer.force();  
+        } catch (IOException e) {
+            throw new PegasusException(PegasusErrorCode.PG100, 
+                    "Failed to overwrite the file '%s' with zeros", file);
+        }
+    }
 }
