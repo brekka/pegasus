@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.FileInfo;
+import org.brekka.paveway.core.model.FilesContext;
+import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.AllocatedBundle;
 
@@ -18,9 +20,11 @@ import org.brekka.pegasus.core.model.AllocatedBundle;
  * @author Andrew Taylor
  *
  */
-public class BundleMaker {
+public class BundleMaker implements FilesContext {
 
     private final String makerKey;
+    
+    private final UploadPolicy policy;
     
     private final List<FileBuilder> completed = new ArrayList<>();
     
@@ -35,29 +39,57 @@ public class BundleMaker {
     /**
      * @param makerKey
      */
-    public BundleMaker(String makerKey) {
-        this(makerKey, null);
+    public BundleMaker(String makerKey, UploadPolicy policy) {
+        this(makerKey, policy, null);
     }
     
     /**
      * @param makerKey
      */
-    public BundleMaker(String makerKey, Inbox inbox) {
+    public BundleMaker(String makerKey, UploadPolicy policy, Inbox inbox) {
         this.makerKey = makerKey;
+        this.policy = policy;
         this.inbox = inbox;
     }
     
-    public void retainInProgress(String fileName, FileBuilder fileBuilder) {
+    public synchronized boolean isFileSlotAvailable() {
+        if (done) {
+            return false;
+        }
+        return policy.getMaxFiles() > (completed.size() + inProgress.size());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.paveway.core.model.FilesContext#retain(java.lang.String, org.brekka.paveway.core.model.FileBuilder)
+     */
+    @Override
+    public void retain(String fileName, FileBuilder fileBuilder) {
         inProgress.put(fileName, fileBuilder);
     }
     
-    public FileBuilder retrieveInProgress(String fileName) {
+    /* (non-Javadoc)
+     * @see org.brekka.paveway.core.model.FilesContext#retrieve(java.lang.String)
+     */
+    @Override
+    public FileBuilder retrieve(String fileName) {
         return inProgress.get(fileName);
     }
     
-    public void makeComplete(FileBuilder fileBuilder) {
+    /* (non-Javadoc)
+     * @see org.brekka.paveway.core.model.FilesContext#complete(org.brekka.paveway.core.model.FileBuilder)
+     */
+    @Override
+    public void complete(FileBuilder fileBuilder) {
         inProgress.remove(fileBuilder.getFileName());
         completed.add(fileBuilder);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.paveway.core.model.FilesContext#getPolicy()
+     */
+    @Override
+    public UploadPolicy getPolicy() {
+        return policy;
     }
     
     public boolean isDone() {

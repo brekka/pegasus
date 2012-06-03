@@ -4,20 +4,25 @@
 package org.brekka.pegasus.web.base;
 
 import java.lang.reflect.Field;
+import java.text.Format;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.tapestry5.ComponentResources;
 import org.apache.tapestry5.alerts.AlertManager;
 import org.apache.tapestry5.annotations.Import;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.apache.tapestry5.upload.services.UploadedFile;
+import org.brekka.commons.lang.ByteLengthFormat;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.FileInfo;
+import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.web.upload.EncryptedFileItem;
+import org.brekka.pegasus.core.services.UploadPolicyService;
 import org.brekka.pegasus.web.session.BundleMaker;
 import org.got5.tapestry5.jquery.JQuerySymbolConstants;
 
@@ -38,7 +43,13 @@ public abstract class AbstractMakePage {
 
     @Inject
     protected AlertManager alertManager;
-
+    
+    @Inject
+    private UploadPolicyService uploadPolicyService;
+    
+    @Inject
+    protected ComponentResources resources;
+    
     @Property
     protected UploadedFile file;
 
@@ -53,7 +64,11 @@ public abstract class AbstractMakePage {
 
     @Property
     protected FileInfo loopFile;
-
+    
+    @Property
+    protected Format byteLengthFormat = new ByteLengthFormat(resources.getLocale(), ByteLengthFormat.Mode.SI);
+    
+    
     protected List<FileBuilder> processFiles(BundleMaker bundleMaker) throws NoSuchFieldException,
             IllegalAccessException {
         List<FileBuilder> fileBuilderList;
@@ -75,12 +90,20 @@ public abstract class AbstractMakePage {
         return fileBuilderList;
     }
     
+    public UploadPolicy getUploadPolicy() {
+        return uploadPolicyService.identifyUploadPolicy();
+    }
+    
     protected void init(String makeKey) {
         this.makeKey = makeKey;
     }
     
     public String getUploadLinkScript() {
+        UploadPolicy policy = uploadPolicyService.identifyUploadPolicy();
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        return "<script>uploadLink = '" + req.getContextPath() + "/upload/" + makeKey + "';</script>";
+        String uploadLink = req.getContextPath() + "/upload/" + makeKey;
+        
+        return String.format("<script>uploadLink = '%s', maxFileSize = %s, maxFiles = %s;</script>",
+                uploadLink, policy.getMaxFileSize(), policy.getMaxFiles());
     }
 }

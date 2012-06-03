@@ -24,8 +24,10 @@ import org.apache.tapestry5.upload.internal.services.MultipartDecoderImpl;
 import org.apache.tapestry5.upload.services.MultipartDecoder;
 import org.apache.tapestry5.upload.services.UploadSymbols;
 import org.brekka.commons.maven.ModuleVersion;
+import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.web.upload.EncryptedFileItemFactory;
+import org.brekka.pegasus.core.services.UploadPolicyService;
 import org.brekka.pegasus.web.services.impl.PegasusExceptionHandler;
 import org.got5.tapestry5.jquery.services.AjaxUploadDecoder;
 import org.got5.tapestry5.jquery.services.AjaxUploadDecoderImpl;
@@ -75,18 +77,18 @@ public class PegasusModule {
     public static EncryptedFileItemFactory buildEncryptedFileItemFactory(
             @Symbol(UploadSymbols.REPOSITORY_THRESHOLD) int repositoryThreshold,
             @Symbol(UploadSymbols.REPOSITORY_LOCATION) String repositoryLocation,
-            PavewayService pavewayService) {
-        return new EncryptedFileItemFactory(repositoryThreshold, new File(repositoryLocation), pavewayService);
+            UploadPolicyService uploadPolicyService, PavewayService pavewayService) {
+        return new EncryptedFileItemFactory(repositoryThreshold, 
+                new File(repositoryLocation), pavewayService, uploadPolicyService.identifyUploadPolicy());
     }
 
     @Scope(ScopeConstants.PERTHREAD)
     public static MultipartDecoder buildOverrideMultipartDecoder(PerthreadManager perthreadManager,
-            RegistryShutdownHub shutdownHub, @Symbol(UploadSymbols.REQUESTSIZE_MAX) long maxRequestSize,
-            @Symbol(UploadSymbols.FILESIZE_MAX) long maxFileSize,
+            RegistryShutdownHub shutdownHub, UploadPolicyService uploadPolicyService,
             @Symbol(SymbolConstants.CHARSET) String requestEncoding, @Local FileItemFactory fileItemFactory) {
-
-        MultipartDecoderImpl multipartDecoder = new MultipartDecoderImpl(fileItemFactory, maxRequestSize, maxFileSize,
-                requestEncoding);
+        UploadPolicy policy = uploadPolicyService.identifyUploadPolicy();
+        MultipartDecoderImpl multipartDecoder = new MultipartDecoderImpl(fileItemFactory, policy.getMaxSize(), 
+                policy.getMaxFileSize(), requestEncoding);
         perthreadManager.addThreadCleanupListener(multipartDecoder);
         return multipartDecoder;
     }

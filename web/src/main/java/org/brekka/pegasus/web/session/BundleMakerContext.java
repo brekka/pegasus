@@ -10,7 +10,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.pegasus.core.model.Inbox;
+import org.brekka.pegasus.web.support.PolicyHelper;
 
 /**
  * @author Andrew Taylor
@@ -21,6 +23,12 @@ public class BundleMakerContext {
 
     private transient Map<String, BundleMaker> makers;
     
+    private final UploadPolicy policy;
+    
+    private BundleMakerContext(UploadPolicy policy) {
+        this.policy = policy;
+    }
+
     public synchronized boolean contains(String makerKey) {
         return map().containsKey(makerKey);
     }
@@ -33,7 +41,7 @@ public class BundleMakerContext {
         Map<String, BundleMaker> map = map();
         BundleMaker bundleMaker = map.get(makerKey);
         if (bundleMaker == null) {
-            bundleMaker = new BundleMaker(makerKey, inbox);
+            bundleMaker = new BundleMaker(makerKey, policy, inbox);
             map.put(makerKey, bundleMaker);
         }
         return bundleMaker;
@@ -66,8 +74,9 @@ public class BundleMakerContext {
     
     public static BundleMakerContext get(HttpSession session) {
         BundleMakerContext content = (BundleMakerContext) session.getAttribute(BundleMakerContext.SESSION_KEY);
+        UploadPolicy policy = PolicyHelper.identifyPolicy(session.getServletContext());
         if (content == null) {
-            content = new BundleMakerContext();
+            content = new BundleMakerContext(policy);
             session.setAttribute(SESSION_KEY, content);
         }
         return content;

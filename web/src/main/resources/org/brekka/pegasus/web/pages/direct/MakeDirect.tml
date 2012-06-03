@@ -9,7 +9,9 @@
 			<label for="comment">Select file(s)</label>
 			<span class="add_files"></span>
 		    <p>Click 'Browse...' above to add one or more files, or drag the files onto this window. The files will begin to upload
-		       immediately but will not become available for download until "Make available" is clicked in section 3.</p>
+		       immediately but will not become available for download until "Make available" is clicked in section 3.
+               You can upload up to <em>${uploadPolicy.maxFiles}</em> files, where each file can be at most <em><t:output value="uploadPolicy.maxFileSize" format="byteLengthFormat" /></em>.   
+            </p>
 		</div>
     </div>
     <div id="files_outer">
