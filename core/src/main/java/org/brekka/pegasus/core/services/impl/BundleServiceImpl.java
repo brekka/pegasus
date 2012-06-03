@@ -110,6 +110,15 @@ public class BundleServiceImpl implements BundleService {
         return bundleModel;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.BundleService#downloadCountForTransfer(org.brekka.pegasus.core.model.AnonymousTransfer)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int downloadCountForTransfer(BundleFile bundleFile, Transfer transfer) {
+        return eventService.fileDownloadCount(bundleFile, transfer);
+    }
+    
     
 
     @Override

@@ -4,7 +4,6 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Date;
-import java.util.UUID;
 
 import org.brekka.pegasus.core.dao.AgreementAcceptedEventDAO;
 import org.brekka.pegasus.core.dao.BundleCreatedEventDAO;
@@ -14,10 +13,11 @@ import org.brekka.pegasus.core.model.AgreementAcceptedEvent;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.BundleCreatedEvent;
-import org.brekka.pegasus.core.model.Transfer;
-import org.brekka.pegasus.core.model.TransferUnlockEvent;
+import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.RemoteUserEvent;
+import org.brekka.pegasus.core.model.Transfer;
+import org.brekka.pegasus.core.model.TransferUnlockEvent;
 import org.brekka.pegasus.core.security.WebAuthenticationDetails;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -69,18 +69,29 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public FileDownloadEvent beginFileDownloadEvent(UUID fileId) {
+    public FileDownloadEvent beginFileDownloadEvent(BundleFile bundleFile, Transfer transfer) {
         FileDownloadEvent event = new FileDownloadEvent();
-        event.setFileId(fileId);
+        event.setBundleFile(bundleFile);
+        event.setTransfer(transfer);
         populate(event);
         fileDownloadEventDAO.create(event);
         return event;
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EventService#fileDownloadCount(org.brekka.pegasus.core.model.BundleFile, org.brekka.pegasus.core.model.Transfer)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int fileDownloadCount(BundleFile bundleFile, Transfer transfer) {
+        return fileDownloadEventDAO.fileDownloadCount(bundleFile, transfer);
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EventService#isAccepted(org.brekka.pegasus.core.model.Bundle)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public boolean isAccepted(Transfer transfer) {
         AgreementAcceptedEvent event = agreementAcceptedEventDAO.retrieveByTransfer(transfer);
         return event != null;

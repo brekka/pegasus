@@ -57,7 +57,7 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
      * The member who performed the event (if available).
      */
     @ManyToOne
-    @JoinColumn(name="MemberID")
+    @JoinColumn(name="`MemberID`")
     private Member member;
 
     public Date getInitiated() {

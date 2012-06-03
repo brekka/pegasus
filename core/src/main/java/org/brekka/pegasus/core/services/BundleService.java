@@ -41,4 +41,10 @@ public interface BundleService {
      * @param bundle
      */
     void refreshBundle(Bundle bundle);
+
+    /**
+     * @param transfer
+     * @return
+     */
+    int downloadCountForTransfer(BundleFile bundleFile, Transfer transfer);
 }

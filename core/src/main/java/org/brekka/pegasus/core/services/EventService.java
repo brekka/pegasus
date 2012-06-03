@@ -3,9 +3,8 @@
  */
 package org.brekka.pegasus.core.services;
 
-import java.util.UUID;
-
 import org.brekka.pegasus.core.model.Bundle;
+import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.Transfer;
 
@@ -19,7 +18,7 @@ public interface EventService {
     
     void transferUnlocked(Transfer transfer);
     
-    FileDownloadEvent beginFileDownloadEvent(UUID fileId);
+    FileDownloadEvent beginFileDownloadEvent(BundleFile bundleFile, Transfer transfer);
     
     void completeEvent(FileDownloadEvent event);
     
@@ -30,4 +29,10 @@ public interface EventService {
      * @return
      */
     boolean isAccepted(Transfer transfer);
+
+    /**
+     * @param transfer
+     * @return
+     */
+    int fileDownloadCount(BundleFile bundleFile, Transfer transfer);
 }

@@ -2,23 +2,41 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
       
       
-    <h1>Fetch</h1>
+    <h1>Download your files</h1>
     
-    <p>
-    	${transfer.bundle.xml.comment}
-    </p>
+    <p> Your file(s) are now ready to be downloaded. </p>
     
-    <ul>
+    <t:if test="transfer.bundle.xml.comment">
+        <div class="comment">
+            <h4>Comment from sender</h4>
+            <pre>
+${transfer.bundle.xml.comment}
+            </pre>
+        </div>
+    </t:if>
+    
+    <ul id="fetch">
 	<t:loop source="files" value="file">
-		<li>
-            <t:if test="file.deleted">
-                <span>${file.xml.name} (${file.xml.length} bytes) DELETED count: ${file.downloadCount}</span>
-                <p:else>
-                    <t:pagelink page="download" context="fileContext">
-                        ${file.xml.name} (${file.xml.length} bytes) count: ${file.downloadCount}
-                    </t:pagelink>
-                </p:else>
+		<li class="${fileClass}">
+            <span class="filename" title="${file.xml.name}">
+                ${fileName}
+            </span>
+            <span class="size">
+                <t:output value="file.xml.length" format="byteLengthFormat" />
+            </span>
+            <t:if test="!file.deleted">
+                <t:pagelink page="download" context="fileContext" class="download">
+                    Download
+                </t:pagelink>
             </t:if>
+            <div class="note">
+                <t:if test="lastAttempt">
+                    <p class="warning"><em>Important:</em> this file can be downloaded once only.</p>
+                </t:if>
+                <t:if test="file.deleted">
+                    <p>This file is no longer available.</p>
+                </t:if>
+            </div>
          </li>
 	</t:loop>
     </ul>

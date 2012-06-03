@@ -4,17 +4,16 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.brekka.paveway.core.model.CryptedFile;
 import org.hibernate.annotations.Index;
-import org.hibernate.annotations.Type;
 
 /**
  * Tracks when an actual file is downloaded, including the IP information etc.
@@ -32,12 +31,19 @@ public class FileDownloadEvent extends RemoteUserEvent {
     private static final long serialVersionUID = -2521026919756337883L;
 
     /**
-     * Id of the file that was downloaded. Corresponds to a {@link CryptedFile} id.
+     * The file that was downloaded
      */
-    @Type(type="pg-uuid")
-    @Column(name="`FileID`")
-    @Index(name="`IDX_FileDownloadId`")
-    private UUID fileId;
+    @ManyToOne
+    @JoinColumn(name="`BundleFileID`", nullable=false)
+    @Index(name="IDX_FileDownloadEvent_01", columnNames={ "`BundleFileID`", "`TransferID`" })
+    private BundleFile bundleFile;
+    
+    /**
+     * Which transfer was the download for
+     */
+    @ManyToOne
+    @JoinColumn(name="`TransferID`", nullable=false)
+    private Transfer transfer;
     
     /**
      * The moment the last byte was sent
@@ -46,12 +52,21 @@ public class FileDownloadEvent extends RemoteUserEvent {
     @Temporal(TemporalType.TIMESTAMP)
     private Date completed;
 
-    public UUID getFileId() {
-        return fileId;
+
+    public Transfer getTransfer() {
+        return transfer;
     }
 
-    public void setFileId(UUID fileId) {
-        this.fileId = fileId;
+    public void setTransfer(Transfer transfer) {
+        this.transfer = transfer;
+    }
+
+    public BundleFile getBundleFile() {
+        return bundleFile;
+    }
+
+    public void setBundleFile(BundleFile bundleFile) {
+        this.bundleFile = bundleFile;
     }
 
     public Date getCompleted() {

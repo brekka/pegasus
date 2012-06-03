@@ -15,6 +15,7 @@ import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
+import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.BundleService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.EventService;
@@ -53,16 +54,16 @@ public class DownloadServiceImpl implements DownloadService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InputStream download(BundleFile file) {
+    public InputStream download(BundleFile file, Transfer transfer, ProgressCallback progressCallback) {
         FileType fileType = file.getXml();
         UUID fileId = UUID.fromString(fileType.getUUID());
-        FileDownloadEvent event = eventService.beginFileDownloadEvent(fileId);
+        FileDownloadEvent event = eventService.beginFileDownloadEvent(file, transfer);
         CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(fileId);
         CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(cryptedFile.getProfile());
         SecretKey secretKey = new SecretKeySpec(fileType.getKey(), 
                 cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
         InputStream is = pavewayService.download(cryptedFile, secretKey);
-        return new EventInputStream(is, file, event, cryptedFile.getOriginalLength());
+        return new EventInputStream(is, file, event, cryptedFile.getOriginalLength(), progressCallback);
     }
     
     private class EventInputStream extends FilterInputStream {
@@ -73,13 +74,18 @@ public class DownloadServiceImpl implements DownloadService {
         
         private final long expectedLength;
         
+        private final ProgressCallback progressCallback;
+        
         private long length;
         
-        public EventInputStream(InputStream in, BundleFile bundleFile, FileDownloadEvent event, long expectedLength) {
+        
+        public EventInputStream(InputStream in, BundleFile bundleFile, FileDownloadEvent event, 
+                long expectedLength, ProgressCallback progressCallback) {
             super(in);
             this.bundleFile = bundleFile;
             this.event = event;
             this.expectedLength = expectedLength;
+            this.progressCallback = progressCallback;
         }
         
         /* (non-Javadoc)
@@ -90,6 +96,9 @@ public class DownloadServiceImpl implements DownloadService {
             int i = super.read(b, off, len);
             if (i != -1) {
                 length += i;
+            }
+            if (progressCallback != null) {
+                progressCallback.update(length, expectedLength);
             }
             return i;
         }
@@ -103,6 +112,9 @@ public class DownloadServiceImpl implements DownloadService {
             if (expectedLength == length) {
                 eventService.completeEvent(event);
                 bundleService.incrementDownloadCounter(bundleFile);
+                if (progressCallback != null) {
+                    progressCallback.update(length, expectedLength);
+                }
             }
         }
     }
