@@ -15,6 +15,8 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.brekka.commons.persistence.model.LongevousEntity;
+
 /**
  * Keeps keys safe.
  * 

@@ -17,6 +17,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.brekka.commons.persistence.model.LongevousEntity;
+
 /**
  * An actor can be either a {@link Member} or an {@link Associate}. An employee is simply an association
  * of a member with an organization.

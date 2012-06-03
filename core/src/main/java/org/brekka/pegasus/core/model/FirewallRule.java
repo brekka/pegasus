@@ -11,6 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
+
 /**
  * A rule within the firewall
  * 

@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.brekka.commons.persistence.model.LongevousEntity;
 import org.hibernate.annotations.Type;
 
 /**

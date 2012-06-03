@@ -14,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.brekka.commons.persistence.model.LongevousEntity;
 import org.hibernate.annotations.Index;
 
 /**

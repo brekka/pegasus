@@ -18,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.hibernate.annotations.Type;
 
 /**

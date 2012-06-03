@@ -13,6 +13,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.brekka.commons.persistence.model.LongevousEntity;
+
 /**
  * An inbox allows an individual on the internet to send a file to a {@link Member}. The public key of the vault will be
  * used to store the key of the uploaded file.

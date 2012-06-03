@@ -11,6 +11,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 

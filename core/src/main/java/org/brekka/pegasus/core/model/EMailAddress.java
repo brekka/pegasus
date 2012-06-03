@@ -17,6 +17,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
+
 /**
  * Encapsulates an e-mail address owned by a member (who can have more than one address). Note that the address itself is not
  * stored here, but a hash which can be used to lookup the address.

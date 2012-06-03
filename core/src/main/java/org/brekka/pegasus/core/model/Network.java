@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 

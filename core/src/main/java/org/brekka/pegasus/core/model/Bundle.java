@@ -16,6 +16,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 
 /**

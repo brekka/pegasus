@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
+
 /**
  * Represents an internet domain name such as 'brekka.org'. 
  * 

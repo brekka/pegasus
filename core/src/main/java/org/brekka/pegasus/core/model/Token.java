@@ -9,6 +9,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
+
 /**
  * A token is a URL-safe string fragment used to identify a resource at a moment in time to the outside world.
  * As such tokens may be reused so long as the thing it was referencing is no longer available.

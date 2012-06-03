@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.xml.pegasus.v1.model.InvitationDocument;
 import org.hibernate.annotations.Type;
 

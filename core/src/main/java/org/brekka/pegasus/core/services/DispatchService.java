@@ -30,6 +30,8 @@ public interface DispatchService {
      */
     AllocatedBundle createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
             String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList);
+    
+    
 
     /**
      * @param from

@@ -19,7 +19,7 @@
 			</props>
 		</property>
         <property name="entityInterceptor">
-            <bean class="org.brekka.pegasus.core.support.PegasusEntityInterceptor" />
+            <bean class="org.brekka.commons.persistence.support.EntityInterceptor" />
         </property>
 	</bean>
     
