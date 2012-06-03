@@ -107,7 +107,7 @@ public class InboxServiceImpl implements InboxService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InboxAllocatedBundle depositFiles(Inbox inbox, String reference, String comment, String agreementText, List<FileBuilder> fileBuilders) {
+    public Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, List<FileBuilder> fileBuilders) {
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
         KeySafe keySafe = inbox.getKeySafe();
@@ -130,10 +130,10 @@ public class InboxServiceImpl implements InboxService {
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
         deposit.setCryptedDataId(cryptedData.getId());
-        
+        deposit.setSecretKey(secretKey);
         depositDAO.create(deposit);
         
-        return new InboxAllocatedBundleImpl(bundleModel, secretKey, inbox, fileBuilders.size());
+        return deposit;
     }
     
     /* (non-Javadoc)

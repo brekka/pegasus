@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services;
 import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
@@ -34,7 +33,7 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    InboxAllocatedBundle depositFiles(Inbox inbox, String reference, 
+    Deposit createDeposit(Inbox inbox, String reference, 
             String comment, String agreementText, List<FileBuilder> fileBuilders);
 
     /**
@@ -75,12 +74,6 @@ public interface InboxService {
      * @return
      */
     List<Inbox> retrieveForKeySafe(KeySafe keySafe);
-    
-    interface InboxAllocatedBundle extends AllocatedBundle {
-        int getFileCount();
-        
-        Inbox getInbox();
-    }
 
     /**
      * @param loopDivision

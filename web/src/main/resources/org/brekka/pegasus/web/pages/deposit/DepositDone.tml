@@ -4,6 +4,6 @@
     
     <h2>Files deposited</h2>
     
-    <t:pagelink page="deposit/make" context="transferKey.inbox.token.path">Deposit more files.</t:pagelink>
+    <t:pagelink page="deposit/make" context="deposit.inbox.token.path">Deposit more files.</t:pagelink>
 
 </html>

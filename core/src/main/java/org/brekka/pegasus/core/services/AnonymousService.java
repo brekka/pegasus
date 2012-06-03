@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services;
 import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.AllocatedBundle;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 
 /**
@@ -15,7 +14,7 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
  */
 public interface AnonymousService {
 
-    AnonymousAllocatedBundle createBundle(String comment, String agreementText, 
+    AnonymousTransfer createTransfer(String comment, String agreementText, 
             int maxDownloads, List<FileBuilder> fileBuilders);
     
     AnonymousTransfer unlock(String token, String code);
@@ -31,14 +30,5 @@ public interface AnonymousService {
      */
     boolean isAccepted(AnonymousTransfer anonymousTransfer);
     
-    
-    interface AnonymousAllocatedBundle extends AllocatedBundle {
-        String getToken();
-
-        String getCode();
-        
-        String getFileName();
-    }
-
 
 }

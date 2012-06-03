@@ -97,8 +97,8 @@ public class MakeDeposit extends AbstractMakePage {
         BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            AllocatedBundle transferKey = inboxService.depositFiles(inbox, reference, comment, null, fileBuilderList);
-            bundleMaker.setTransferKey(transferKey);
+            AllocatedBundle transferKey = inboxService.createDeposit(inbox, reference, comment, null, fileBuilderList);
+            bundleMaker.setAllocatedBundle(transferKey);
             depositDonePage.init(makeKey);
             retVal = depositDonePage;
         } else {

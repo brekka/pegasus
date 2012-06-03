@@ -20,11 +20,11 @@
     	</div>
     	<div class="field">
     		<label><em>Unlock code</em>: communicate via SMS or phone</label>
-    		<input type="text" class="code" value="${transferKey.code}" />
+    		<input type="text" class="code" value="${transfer.code}" />
     	</div>
     </form>
     
-    <t:if test="!transferKey.agreement">
+    <t:if test="!transfer.agreement">
         <h2>Direct link</h2>
         
         <p> A direct link is for situations where you simply want to transfer the file(s) to another system and can either

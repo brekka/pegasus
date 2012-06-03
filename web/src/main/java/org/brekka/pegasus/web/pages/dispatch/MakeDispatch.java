@@ -18,12 +18,12 @@ import org.apache.tapestry5.internal.SelectModelImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Vault;
-import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.DispatchService;
-import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -119,11 +119,11 @@ public class MakeDispatch extends AbstractMakePage {
             AllocatedBundle transferKey = dispatchService.createDispatch(
                     recipientEMail, division, keySafe, reference, comment, 
                     agreementText, maxDownloads, fileBuilderList);
-            bundleMaker.setTransferKey(transferKey);
-            if (transferKey instanceof InboxService.InboxAllocatedBundle) {
+            bundleMaker.setAllocatedBundle(transferKey);
+            if (transferKey instanceof Deposit) {
                 dispatchDepositPage.init(makeKey);
                 retVal = dispatchDepositPage;
-            } else if (transferKey instanceof AnonymousService.AnonymousAllocatedBundle) {
+            } else if (transferKey instanceof AnonymousTransfer) {
                 directDonePage.init(makeKey);
                 retVal = directDonePage;
             } else {

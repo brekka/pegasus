@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 /**
  * Enables an anonymous transfer
@@ -30,11 +31,22 @@ public class AnonymousTransfer extends Transfer {
     @JoinColumn(name="`TokenID`")
     private Token token;
     
+    @Transient
+    private transient String code;
+    
     public Token getToken() {
         return token;
     }
 
     public void setToken(Token token) {
         this.token = token;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

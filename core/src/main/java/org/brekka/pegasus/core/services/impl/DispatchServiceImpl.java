@@ -77,19 +77,18 @@ public class DispatchServiceImpl implements DispatchService {
         }
         AllocatedBundle bundle;
         if (inbox != null) {
-            bundle = inboxService.depositFiles(inbox, reference, comment, agreementText, fileBuilderList);
+            bundle = inboxService.createDeposit(inbox, reference, comment, agreementText, fileBuilderList);
         } else {
-            bundle = anonymousService.createBundle(comment, agreementText, maxDownloads, fileBuilderList);
+            bundle = anonymousService.createTransfer(comment, agreementText, maxDownloads, fileBuilderList);
         }
-        
-        AbstractAllocatedBundle allocatedBundle = (AbstractAllocatedBundle) bundle;
         
         dispatch.setDivision(division);
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
-        dispatch.setBundle(allocatedBundle.getBundle());
+        dispatch.setBundle(bundle.getBundle());
         
-        SecretKey secretKey = allocatedBundle.removeSecretKey();
+        SecretKey secretKey = bundle.getSecretKey();
+        bundle.setSecretKey(null);
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         dispatch.setCryptedDataId(cryptedData.getId());
         

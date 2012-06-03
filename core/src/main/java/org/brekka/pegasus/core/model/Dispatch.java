@@ -3,16 +3,10 @@
  */
 package org.brekka.pegasus.core.model;
 
-import java.util.UUID;
-
-import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Type;
 
 /**
  * A bundle that has been or is in the process of being dispatched. Essentially exists as a way for
@@ -22,8 +16,8 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Dispatch`")
-public class Dispatch extends SnapshotEntity {
+@DiscriminatorValue("`Dispatch`")
+public class Dispatch extends AllocatedBundle {
     /**
      * Serial UID
      */
@@ -50,20 +44,6 @@ public class Dispatch extends SnapshotEntity {
     @JoinColumn(name="`KeySafeID`", nullable=false, updatable=false)
     private KeySafe keySafe;
     
-    /**
-     * The bundle that was sent.
-     */
-    @OneToOne
-    @JoinColumn(name="`BundleID`", nullable=false, updatable=false)
-    private Bundle bundle;
-    
-    /**
-     * Id of the phalanx data item containing the key used to encrypt the bundle. It can be decrypted using
-     * the private key of the keySafe.
-     */
-    @Type(type="pg-uuid")
-    @Column(name="`CryptedDataID`", nullable=false, updatable=false)
-    private UUID cryptedDataId;
 
     public Actor getActor() {
         return actor;
@@ -79,22 +59,6 @@ public class Dispatch extends SnapshotEntity {
 
     public void setKeySafe(KeySafe keySafe) {
         this.keySafe = keySafe;
-    }
-
-    public Bundle getBundle() {
-        return bundle;
-    }
-
-    public void setBundle(Bundle bundle) {
-        this.bundle = bundle;
-    }
-
-    public UUID getCryptedDataId() {
-        return cryptedDataId;
-    }
-
-    public void setCryptedDataId(UUID cryptedDataId) {
-        this.cryptedDataId = cryptedDataId;
     }
 
     public Division getDivision() {

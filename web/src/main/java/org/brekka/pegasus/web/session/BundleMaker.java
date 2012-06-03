@@ -30,7 +30,7 @@ public class BundleMaker implements FilesContext {
     
     private final Map<String, FileBuilder> inProgress = new HashMap<>();
     
-    private AllocatedBundle transferKey;
+    private AllocatedBundle allocatedBundle;
     
     private boolean done = false;
     
@@ -120,17 +120,17 @@ public class BundleMaker implements FilesContext {
     }
     
     /**
-     * @param transferKey the transferKey to set
+     * @param allocatedBundle the allocatedBundle to set
      */
-    public void setTransferKey(AllocatedBundle transferKey) {
-        this.transferKey = transferKey;
+    public void setAllocatedBundle(AllocatedBundle transferKey) {
+        this.allocatedBundle = transferKey;
     }
     
     /**
-     * @return the transferKey
+     * @return the allocatedBundle
      */
-    public AllocatedBundle getTransferKey() {
-        return transferKey;
+    public AllocatedBundle getAllocatedBundle() {
+        return allocatedBundle;
     }
     
     /**

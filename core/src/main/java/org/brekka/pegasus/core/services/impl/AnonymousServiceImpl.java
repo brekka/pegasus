@@ -23,7 +23,6 @@ import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.phoenix.CryptoFactoryRegistry;
-import org.brekka.xml.pegasus.v1.model.FileType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,7 @@ public class AnonymousServiceImpl implements AnonymousService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousAllocatedBundle createBundle(String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilders) {
+    public AnonymousTransfer createTransfer(String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilders) {
         // Fetch the default crypto factory, generate a new secret key
         CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
         SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
@@ -100,17 +99,11 @@ public class AnonymousServiceImpl implements AnonymousService {
         anonTransfer.setBundle(bundleModel);
         anonTransfer.setToken(token);
         anonTransfer.setCryptedDataId(pbeEncryptedData.getId());
+        anonTransfer.setSecretKey(secretKey);
         
         anonymousTransferDAO.create(anonTransfer);
         eventService.bundleCreated(bundleModel);
-        
-        List<FileType> fileList = bundleModel.getXml().getFileList();
-        String fileName = null;
-        if (fileList.size() == 1) {
-            fileName = fileList.get(0).getName();
-        }
-        return new AnonymousAllocatedBundleImpl(bundleModel, secretKey, token.getPath(), 
-                prettyCodeBuilder.toString(), fileName);
+        return anonTransfer;
     }
     
     /* (non-Javadoc)

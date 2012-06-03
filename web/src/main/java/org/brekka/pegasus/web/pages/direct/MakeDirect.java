@@ -76,8 +76,8 @@ public class MakeDirect extends AbstractMakePage {
         BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            AllocatedBundle transferKey = anonymousService.createBundle(comment, null, 1, fileBuilderList);
-            bundleMaker.setTransferKey(transferKey);
+            AllocatedBundle transferKey = anonymousService.createTransfer(comment, null, 1, fileBuilderList);
+            bundleMaker.setAllocatedBundle(transferKey);
             directDonePage.init(makeKey);
             retVal = directDonePage;
         } else {
