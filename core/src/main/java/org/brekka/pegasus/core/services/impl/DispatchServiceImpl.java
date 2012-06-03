@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.dao.DispatchDAO;
 import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
@@ -24,6 +24,7 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class DispatchServiceImpl implements DispatchService {
+public class DispatchServiceImpl extends AllocationServiceSupport implements DispatchService {
 
     @Autowired
     private MemberService memberService;
@@ -61,7 +62,7 @@ public class DispatchServiceImpl implements DispatchService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AllocatedBundle createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
+    public Allocation createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
             String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
@@ -75,25 +76,30 @@ public class DispatchServiceImpl implements DispatchService {
                 inbox = inboxService.retrieveForEMailAddress(address);
             }
         }
-        AllocatedBundle bundle;
+        Allocation allocation;
         if (inbox != null) {
-            bundle = inboxService.createDeposit(inbox, reference, comment, agreementText, fileBuilderList);
+            allocation = inboxService.createDeposit(inbox, reference, comment, agreementText, fileBuilderList);
         } else {
-            bundle = anonymousService.createTransfer(comment, agreementText, maxDownloads, fileBuilderList);
+            allocation = anonymousService.createTransfer(comment, agreementText, maxDownloads, fileBuilderList);
         }
+        
+        // Copy the allocation to
+        AllocationDocument allocationDocument = AllocationDocument.Factory.newInstance();
+        allocationDocument.setAllocation(allocation.getXml());
+        encryptDocument(dispatch, allocationDocument);
         
         dispatch.setDivision(division);
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
-        dispatch.setBundle(bundle.getBundle());
+        dispatch.setBundleId(allocation.getBundleId());
         
-        SecretKey secretKey = bundle.getSecretKey();
-        bundle.setSecretKey(null);
+        SecretKey secretKey = allocation.getSecretKey();
+        allocation.setSecretKey(null);
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         dispatch.setCryptedDataId(cryptedData.getId());
         
         dispatchDAO.create(dispatch);
-        return bundle;
+        return allocation;
     }
     
     /* (non-Javadoc)

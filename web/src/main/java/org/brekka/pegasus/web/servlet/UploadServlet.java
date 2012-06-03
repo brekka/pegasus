@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FilesContext;
 import org.brekka.paveway.web.servlet.AbstractUploadServlet;
-import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.session.AllocationMakerContext;
 
 public class UploadServlet extends AbstractUploadServlet {
 
@@ -24,7 +24,7 @@ public class UploadServlet extends AbstractUploadServlet {
         String requestURI = req.getRequestURI();
         requestURI = requestURI.substring(contextPath.length());
         String makerKey = StringUtils.substringAfterLast(requestURI, "/");
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
         return bundleMakerContext.get(makerKey);
     }
 }

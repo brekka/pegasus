@@ -34,8 +34,8 @@ public class FirewallRuleHibernateDAO extends AbstractPegasusHibernateDAO<Firewa
     public List<FirewallRule> findApplicableRules(Firewall firewall, String ipAddress) {
         SQLQuery query = getCurrentSession().createSQLQuery(
                 "SELECT fr.* " +
-                "  FROM \"FirewallRule\" fr" +
-                "  JOIN \"Network\" ipn" +
+                "  FROM \"Pegasus\".\"FirewallRule\" fr" +
+                "  JOIN \"Pegasus\".\"Network\" ipn" +
                 "    ON  fr.\"NetworkGroupID\" = ipn.\"NetworkGroupID\"" +
                 " WHERE ipn.\"Block\" >> cast(:ip as cidr)" +
                 "   AND fr.\"FirewallID\" = cast(:firewall as uuid)" +

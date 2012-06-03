@@ -4,7 +4,7 @@
 package org.brekka.pegasus.core.dao.hibernate;
 
 import org.brekka.pegasus.core.dao.BundleCreatedEventDAO;
-import org.brekka.pegasus.core.model.BundleCreatedEvent;
+import org.brekka.pegasus.core.model.TransferCreatedEvent;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class BundleCreatedEventHiberateDAO extends AbstractPegasusHibernateDAO<BundleCreatedEvent> implements
+public class BundleCreatedEventHiberateDAO extends AbstractPegasusHibernateDAO<TransferCreatedEvent> implements
         BundleCreatedEventDAO {
 
     /* (non-Javadoc)
      * @see org.brekka.commons.persistence.dao.impl.AbstractIdentifiableEntityHibernateDAO#type()
      */
     @Override
-    protected Class<BundleCreatedEvent> type() {
-        return BundleCreatedEvent.class;
+    protected Class<TransferCreatedEvent> type() {
+        return TransferCreatedEvent.class;
     }
 
 }

@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.hibernate.annotations.Type;
 
 /**
@@ -23,7 +24,7 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`DivisionAssociate`",
+@Table(name="`DivisionAssociate`", schema=PegasusConstants.SCHEMA,
     uniqueConstraints={ 
         // Surrogate key
         @UniqueConstraint(columnNames = {"`DivisionID`", "`AssociateID`" }),

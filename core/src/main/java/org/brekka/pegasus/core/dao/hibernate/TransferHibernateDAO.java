@@ -5,8 +5,8 @@ package org.brekka.pegasus.core.dao.hibernate;
 
 import java.util.List;
 
+import org.brekka.paveway.core.model.Bundle;
 import org.brekka.pegasus.core.dao.TransferDAO;
-import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Transfer;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;

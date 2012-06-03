@@ -18,6 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.InvitationDocument;
 import org.hibernate.annotations.Type;
 
@@ -26,7 +27,7 @@ import org.hibernate.annotations.Type;
  *
  */
 @Entity
-@Table(name="`Invitation`")
+@Table(name="`Invitation`", schema=PegasusConstants.SCHEMA)
 public class Invitation extends SnapshotEntity {
     
     /**

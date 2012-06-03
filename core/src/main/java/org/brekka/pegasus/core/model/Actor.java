@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * An actor can be either a {@link Member} or an {@link Associate}. An employee is simply an association
@@ -26,7 +27,7 @@ import org.brekka.commons.persistence.model.LongevousEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Actor`",
+@Table(name="`Actor`", schema=PegasusConstants.SCHEMA,
     uniqueConstraints={ 
         // Associate unique key
         @UniqueConstraint(columnNames = {"`MemberID`", "`OrganizationID`" }),

@@ -17,6 +17,7 @@ import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.brekka.paveway.core.model.CryptedFile;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
@@ -29,8 +30,8 @@ import org.brekka.xml.pegasus.v1.model.FileType;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name = "`BundleFile`")
-public class BundleFile extends IdentifiableEntity {
+@Table(name = "`AllocationFile`", schema=PegasusConstants.SCHEMA)
+public class AllocationFile extends IdentifiableEntity {
 
     /**
      * Serial UID
@@ -38,11 +39,11 @@ public class BundleFile extends IdentifiableEntity {
     private static final long serialVersionUID = -5007642578887170101L;
 
     /**
-     * The bundle that this file is part of
+     * The transfer that this file is part of
      */
     @ManyToOne
-    @JoinColumn(name = "`BundleID`")
-    private Bundle bundle;
+    @JoinColumn(name = "`AllocationID`")
+    private Allocation allocation;
     
     /**
      * When did this bundle file expire?
@@ -74,12 +75,12 @@ public class BundleFile extends IdentifiableEntity {
     /**
      * 
      */
-    public BundleFile() {
+    public AllocationFile() {
     }
 
-    public BundleFile(UUID id, Bundle bundle) {
+    public AllocationFile(UUID id, Allocation allocation) {
         super(id);
-        this.bundle = bundle;
+        this.allocation = allocation;
     }
 
     public Date getDeleted() {
@@ -88,14 +89,6 @@ public class BundleFile extends IdentifiableEntity {
 
     public void setDeleted(Date deleted) {
         this.deleted = deleted;
-    }
-
-    public Bundle getBundle() {
-        return bundle;
-    }
-
-    public void setBundle(Bundle bundle) {
-        this.bundle = bundle;
     }
 
     public FileType getXml() {
@@ -120,5 +113,13 @@ public class BundleFile extends IdentifiableEntity {
 
     public void setDownloadCount(int downloadCount) {
         this.downloadCount = downloadCount;
+    }
+
+    public Allocation getAllocation() {
+        return allocation;
+    }
+
+    public void setAllocation(Allocation allocation) {
+        this.allocation = allocation;
     }
 }

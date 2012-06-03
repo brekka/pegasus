@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * A rule within the firewall
@@ -19,7 +20,7 @@ import org.brekka.commons.persistence.model.SnapshotEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`FirewallRule`")
+@Table(name="`FirewallRule`", schema=PegasusConstants.SCHEMA)
 public class FirewallRule extends SnapshotEntity {
 
     /**

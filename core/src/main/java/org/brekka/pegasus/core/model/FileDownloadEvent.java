@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.brekka.pegasus.core.PegasusConstants;
 import org.hibernate.annotations.Index;
 
 /**
@@ -22,7 +23,7 @@ import org.hibernate.annotations.Index;
  *
  */
 @Entity
-@Table(name="`FileDownloadEvent`")
+@Table(name="`FileDownloadEvent`", schema=PegasusConstants.SCHEMA)
 public class FileDownloadEvent extends RemoteUserEvent {
 
     /**
@@ -34,16 +35,10 @@ public class FileDownloadEvent extends RemoteUserEvent {
      * The file that was downloaded
      */
     @ManyToOne
-    @JoinColumn(name="`BundleFileID`", nullable=false)
-    @Index(name="IDX_FileDownloadEvent_01", columnNames={ "`BundleFileID`", "`TransferID`" })
-    private BundleFile bundleFile;
+    @JoinColumn(name="`TransferFileID`", nullable=false)
+    @Index(name="IDX_FileDownloadEvent_01")
+    private AllocationFile transferFile;
     
-    /**
-     * Which transfer was the download for
-     */
-    @ManyToOne
-    @JoinColumn(name="`TransferID`", nullable=false)
-    private Transfer transfer;
     
     /**
      * The moment the last byte was sent
@@ -53,20 +48,13 @@ public class FileDownloadEvent extends RemoteUserEvent {
     private Date completed;
 
 
-    public Transfer getTransfer() {
-        return transfer;
+
+    public AllocationFile getTransferFile() {
+        return transferFile;
     }
 
-    public void setTransfer(Transfer transfer) {
-        this.transfer = transfer;
-    }
-
-    public BundleFile getBundleFile() {
-        return bundleFile;
-    }
-
-    public void setBundleFile(BundleFile bundleFile) {
-        this.bundleFile = bundleFile;
+    public void setTransferFile(AllocationFile transferFile) {
+        this.transferFile = transferFile;
     }
 
     public Date getCompleted() {

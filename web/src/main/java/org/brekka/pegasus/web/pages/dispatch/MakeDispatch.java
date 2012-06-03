@@ -17,7 +17,7 @@ import org.apache.tapestry5.internal.OptionModelImpl;
 import org.apache.tapestry5.internal.SelectModelImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Division;
@@ -29,8 +29,8 @@ import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.direct.DirectDone;
-import org.brekka.pegasus.web.session.BundleMaker;
-import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.session.AllocationMaker;
+import org.brekka.pegasus.web.session.AllocationMakerContext;
 
 /**
  * 
@@ -98,7 +98,7 @@ public class MakeDispatch extends AbstractMakePage {
         this.division = division;
         this.keySafe = keySafe;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
         bundleMakerContext.get(makeKey);
         this.context = ArrayUtils.add(context, makeKey);
         super.init(makeKey);
@@ -112,14 +112,14 @@ public class MakeDispatch extends AbstractMakePage {
     Object onSuccess() throws Exception {
         Object retVal;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
-        BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
+        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            AllocatedBundle transferKey = dispatchService.createDispatch(
+            Allocation transferKey = dispatchService.createDispatch(
                     recipientEMail, division, keySafe, reference, comment, 
                     agreementText, maxDownloads, fileBuilderList);
-            bundleMaker.setAllocatedBundle(transferKey);
+            bundleMaker.setAllocation(transferKey);
             if (transferKey instanceof Deposit) {
                 dispatchDepositPage.init(makeKey);
                 retVal = dispatchDepositPage;

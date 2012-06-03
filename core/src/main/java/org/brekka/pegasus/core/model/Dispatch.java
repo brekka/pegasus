@@ -16,8 +16,8 @@ import javax.persistence.ManyToOne;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@DiscriminatorValue("`Dispatch`")
-public class Dispatch extends AllocatedBundle {
+@DiscriminatorValue("Dispatch")
+public class Dispatch extends Allocation {
     /**
      * Serial UID
      */

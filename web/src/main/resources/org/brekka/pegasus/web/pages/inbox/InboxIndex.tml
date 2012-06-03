@@ -10,7 +10,7 @@
     <t:grid source="deposits" row="loopDeposit" add="details">
         <p:detailsCell>
             <ul>
-                <t:loop source="deposit.bundle.xml.fileList" value="loopFile">
+                <t:loop source="deposit.xml.bundle.fileList" value="loopFile">
                     <li><t:pagelink page="download" context="fileContext">
                         ${loopFile.name} (${loopFile.length} bytes)</t:pagelink></li>
                 </t:loop>

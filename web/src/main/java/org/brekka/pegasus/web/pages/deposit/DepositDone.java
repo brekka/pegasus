@@ -13,8 +13,8 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.web.pages.Index;
-import org.brekka.pegasus.web.session.BundleMaker;
-import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.session.AllocationMaker;
+import org.brekka.pegasus.web.session.AllocationMakerContext;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -40,10 +40,10 @@ public class DepositDone {
         this.makeKey = makeKey;
         
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
         if (bundleMakerContext.contains(makeKey)) {
-            BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
-            deposit = (Deposit) bundleMaker.getAllocatedBundle();
+            AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
+            deposit = (Deposit) bundleMaker.getAllocation();
             return Boolean.TRUE;
         }
         alertManager.alert(Duration.SINGLE, Severity.WARN, "Details of the requested upload are no longer available.");

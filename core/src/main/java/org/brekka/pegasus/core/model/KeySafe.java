@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * Keeps keys safe.
@@ -23,7 +24,7 @@ import org.brekka.commons.persistence.model.LongevousEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`KeySafe`",
+@Table(name="`KeySafe`", schema=PegasusConstants.SCHEMA,
     uniqueConstraints={ 
         // Division slugs must be unique within the the organization. 
         @UniqueConstraint(columnNames = {"`OrganizationID`", "`Slug`"}),

@@ -11,7 +11,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.Transfer;
-import org.brekka.pegasus.core.services.BundleService;
+import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.pegasus.web.support.Transfers;
@@ -30,7 +30,7 @@ public class InboxIndex {
     private InboxService inboxService;
     
     @Inject
-    private BundleService bundleService;
+    private AllocationService allocationService;
     
     @SessionAttribute("transfers")
     private Transfers transfers;
@@ -72,7 +72,7 @@ public class InboxIndex {
             transfers.add(transferId, deposit);
         }
         Transfer transfer = transfers.get(transferId);
-        bundleService.refreshBundle(transfer.getBundle());
+        allocationService.refreshAllocation(transfer);
         return (Deposit) transfer;
     }
 }

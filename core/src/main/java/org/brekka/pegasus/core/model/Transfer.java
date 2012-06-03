@@ -13,7 +13,7 @@ import javax.persistence.Entity;
  */
 @Entity
 @DiscriminatorValue("Transfer")
-public abstract class Transfer extends AllocatedBundle {
+public abstract class Transfer extends Allocation {
 
     /**
      * Serial UID

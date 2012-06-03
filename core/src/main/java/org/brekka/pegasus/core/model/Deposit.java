@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.brekka.paveway.core.model.Bundle;
+
 /**
  * Represents a file which has been deposited with a member via their public key. Essentially it links
  * together a {@link Bundle}, {@link Inbox} and {@link Vault}.

@@ -12,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
@@ -21,7 +22,7 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Firewall`")
+@Table(name="`Firewall`", schema=PegasusConstants.SCHEMA)
 public class Firewall extends SnapshotEntity {
 
     /**

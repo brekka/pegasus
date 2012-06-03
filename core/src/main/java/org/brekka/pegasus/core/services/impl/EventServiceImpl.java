@@ -10,13 +10,12 @@ import org.brekka.pegasus.core.dao.BundleCreatedEventDAO;
 import org.brekka.pegasus.core.dao.BundleUnlockEventDAO;
 import org.brekka.pegasus.core.dao.FileDownloadEventDAO;
 import org.brekka.pegasus.core.model.AgreementAcceptedEvent;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
-import org.brekka.pegasus.core.model.Bundle;
-import org.brekka.pegasus.core.model.BundleCreatedEvent;
-import org.brekka.pegasus.core.model.BundleFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.RemoteUserEvent;
 import org.brekka.pegasus.core.model.Transfer;
+import org.brekka.pegasus.core.model.TransferCreatedEvent;
 import org.brekka.pegasus.core.model.TransferUnlockEvent;
 import org.brekka.pegasus.core.security.WebAuthenticationDetails;
 import org.brekka.pegasus.core.services.EventService;
@@ -69,21 +68,20 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public FileDownloadEvent beginFileDownloadEvent(BundleFile bundleFile, Transfer transfer) {
+    public FileDownloadEvent beginFileDownloadEvent(AllocationFile bundleFile) {
         FileDownloadEvent event = new FileDownloadEvent();
-        event.setBundleFile(bundleFile);
-        event.setTransfer(transfer);
+        event.setTransferFile(bundleFile);
         populate(event);
         fileDownloadEventDAO.create(event);
         return event;
     }
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.EventService#fileDownloadCount(org.brekka.pegasus.core.model.BundleFile, org.brekka.pegasus.core.model.Transfer)
+     * @see org.brekka.pegasus.core.services.EventService#fileDownloadCount(org.brekka.pegasus.core.model.AllocationFile, org.brekka.pegasus.core.model.Transfer)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public int fileDownloadCount(BundleFile bundleFile, Transfer transfer) {
+    public int fileDownloadCount(AllocationFile bundleFile, Transfer transfer) {
         return fileDownloadEventDAO.fileDownloadCount(bundleFile, transfer);
     }
     
@@ -102,9 +100,9 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void bundleCreated(Bundle bundle) {
-        BundleCreatedEvent event = new BundleCreatedEvent();
-        event.setBundle(bundle);
+    public void transferCreated(Transfer transfer) {
+        TransferCreatedEvent event = new TransferCreatedEvent();
+        event.setTransfer(transfer);
         populate(event);
         bundleCreatedEventDAO.create(event);
     }

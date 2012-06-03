@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSessionListener;
  * @author Andrew Taylor
  *
  */
-public class BundleMakerContextListener implements HttpSessionListener {
+public class AllocationMakerContextListener implements HttpSessionListener {
 
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpSessionListener#sessionCreated(javax.servlet.http.HttpSessionEvent)
@@ -27,7 +27,7 @@ public class BundleMakerContextListener implements HttpSessionListener {
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
         HttpSession session = se.getSession();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(session);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(session);
         bundleMakerContext.discard();
     }
 

@@ -14,14 +14,14 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.pages.NoSession;
-import org.brekka.pegasus.web.session.BundleMaker;
-import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.session.AllocationMaker;
+import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 
 /**
@@ -54,7 +54,7 @@ public class MakeDeposit extends AbstractMakePage {
         Inbox inbox = inboxService.retrieveForToken(inboxToken);
         String makeKey = MakeKeyUtils.newKey();
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
         bundleMakerContext.get(makeKey, inbox);
         init(inbox, makeKey);
         return this;
@@ -64,7 +64,7 @@ public class MakeDeposit extends AbstractMakePage {
         this.inbox = inboxService.retrieveForToken(inboxToken);
         this.makeKey = makeKey;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, false);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, false);
         if (bundleMakerContext == null) {
             return NoSession.class;
         }
@@ -72,7 +72,7 @@ public class MakeDeposit extends AbstractMakePage {
             alertManager.alert(Duration.SINGLE, Severity.WARN, "Sorry, but the uploaded files are no longer available. Please try again.");
             return onActivate(inboxToken);
         }
-        BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
+        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (bundleMaker.isDone()) {
             return Index.class;
         }
@@ -93,12 +93,12 @@ public class MakeDeposit extends AbstractMakePage {
     Object onSuccess() throws Exception {
         Object retVal;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
-        BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
+        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            AllocatedBundle transferKey = inboxService.createDeposit(inbox, reference, comment, null, fileBuilderList);
-            bundleMaker.setAllocatedBundle(transferKey);
+            Allocation transferKey = inboxService.createDeposit(inbox, reference, comment, null, fileBuilderList);
+            bundleMaker.setAllocation(transferKey);
             depositDonePage.init(makeKey);
             retVal = depositDonePage;
         } else {

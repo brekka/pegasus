@@ -53,7 +53,7 @@
     </servlet-mapping>
     
     <listener>
-        <listener-class>org.brekka.pegasus.web.session.BundleMakerContextListener</listener-class>
+        <listener-class>org.brekka.pegasus.web.session.AllocationMakerContextListener</listener-class>
     </listener>
     <listener>
     	<listener-class>org.brekka.pegasus.web.session.HttpSessionEventPublisher</listener-class>

@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * A token is a URL-safe string fragment used to identify a resource at a moment in time to the outside world.
@@ -18,7 +19,7 @@ import org.brekka.commons.persistence.model.SnapshotEntity;
  * @author Andrew Taylor
  */
 @Entity
-@Table(name="`Token`")
+@Table(name="`Token`", schema=PegasusConstants.SCHEMA)
 public class Token extends SnapshotEntity {
 
     /**

@@ -5,7 +5,6 @@ import org.brekka.phoenix.CryptoFactoryRegistry;
 import org.brekka.phoenix.impl.CryptoFactoryRegistryImpl;
 import org.brekka.stillingar.annotations.ConfigurationListener;
 import org.brekka.stillingar.annotations.Configured;
-import org.brekka.xml.phoenix.v1.model.CryptoProfileRegistryDocument;
 import org.brekka.xml.phoenix.v1.model.CryptoProfileRegistryDocument.CryptoProfileRegistry;
 import org.springframework.stereotype.Component;
 

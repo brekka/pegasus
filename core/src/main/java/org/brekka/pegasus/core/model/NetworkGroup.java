@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.hibernate.annotations.Index;
 
 /**
@@ -24,7 +25,7 @@ import org.hibernate.annotations.Index;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`NetworkGroup`")
+@Table(name="`NetworkGroup`", schema=PegasusConstants.SCHEMA)
 public class NetworkGroup extends LongevousEntity {
 
     /**

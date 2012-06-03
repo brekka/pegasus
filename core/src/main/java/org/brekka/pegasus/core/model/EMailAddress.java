@@ -18,6 +18,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * Encapsulates an e-mail address owned by a member (who can have more than one address). Note that the address itself is not
@@ -26,7 +27,7 @@ import org.brekka.commons.persistence.model.SnapshotEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`EMailAddress`", uniqueConstraints={
+@Table(name="`EMailAddress`", schema=PegasusConstants.SCHEMA, uniqueConstraints={
         @UniqueConstraint(columnNames={ "`Hash`", "`Active`"})
 })
 public class EMailAddress extends SnapshotEntity {

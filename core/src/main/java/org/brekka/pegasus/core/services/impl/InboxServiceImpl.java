@@ -9,11 +9,13 @@ import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
+import org.apache.commons.lang3.StringUtils;
+import org.brekka.paveway.core.model.Bundle;
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.services.BundleService;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
-import org.brekka.pegasus.core.model.Bundle;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
@@ -22,15 +24,14 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
-import org.brekka.pegasus.core.services.BundleService;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.model.CryptedData;
-import org.brekka.phoenix.CryptoFactory;
-import org.brekka.phoenix.CryptoFactoryRegistry;
+import org.brekka.xml.pegasus.v1.model.AllocationDocument;
+import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.InboxType;
 import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.joda.time.DateTime;
@@ -44,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class InboxServiceImpl implements InboxService {
+public class InboxServiceImpl extends AllocationServiceSupport implements InboxService {
 
     @Autowired
     private TokenService tokenService;
@@ -66,10 +67,6 @@ public class InboxServiceImpl implements InboxService {
     
     @Autowired
     private BundleService bundleService;
-    
-    @Autowired
-    private CryptoFactoryRegistry cryptoFactoryRegistry;
-    
     
     
     /* (non-Javadoc)
@@ -108,28 +105,41 @@ public class InboxServiceImpl implements InboxService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, List<FileBuilder> fileBuilders) {
+        Deposit deposit = new Deposit();
+        
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
         KeySafe keySafe = inbox.getKeySafe();
-        
-        // Fetch the default crypto factory, generate a new secret key
-        CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
-        SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
         
         // TODO Expiry, currently fixed at one week, should be configured.
         DateTime now = new DateTime();
         DateTime expires = now.plusDays(7);
         
-        Bundle bundleModel = bundleService.createBundle(comment, agreementText, reference, expires, 
-                0, secretKey, defaultCryptoFactory.getProfileId(), fileBuilders);
+        Bundle bundle = bundleService.createBundle(expires, fileBuilders);
+        deposit.setBundleId(bundle.getId());
+        
+        AllocationDocument document = prepareDocument(0, bundle);
+        AllocationType allocationType = document.getAllocation();
+        if (StringUtils.isNotBlank(comment)) {
+            allocationType.setComment(comment);
+        }
+        if (StringUtils.isNotBlank(agreementText)) {
+            allocationType.setAgreement(agreementText);
+        }
+        if (StringUtils.isNotBlank(reference)) {
+            allocationType.setReference(reference);
+        }
+        
+        // Encrypt the document
+        encryptDocument(deposit, document);
+        SecretKey secretKey = deposit.getSecretKey();
         
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
+        deposit.setCryptedDataId(cryptedData.getId());
         
-        Deposit deposit = new Deposit();
-        deposit.setBundle(bundleModel);
+        deposit.setBundleId(bundle.getId());
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
-        deposit.setCryptedDataId(cryptedData.getId());
         deposit.setSecretKey(secretKey);
         depositDAO.create(deposit);
         
@@ -187,7 +197,7 @@ public class InboxServiceImpl implements InboxService {
         UUID cryptedDataId = deposit.getCryptedDataId();
         KeySafe keySafe = deposit.getKeySafe();
         byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-        bundleService.decryptTransfer(deposit, secretKeyBytes);
+        decryptDocument(deposit, secretKeyBytes);
         return deposit;
     }
     

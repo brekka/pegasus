@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.model.BundleFile;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
@@ -117,10 +117,10 @@ public class TokenFilter implements Filter {
      */
     private void dispatchBundle(String token, String code, HttpServletResponse resp) throws ServletException, IOException {
         AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
-        List<BundleFile> fileList = new ArrayList<>(anonymousTransfer.getBundle().getFiles().values());
+        List<AllocationFile> fileList = new ArrayList<>(anonymousTransfer.getFiles().values());
         if (fileList.size() == 1) {
             // Just one file, return it.
-            BundleFile file = fileList.get(0);
+            AllocationFile file = fileList.get(0);
             FileType fileType = file.getXml();
             resp.setHeader("Content-Length", String.valueOf(fileType.getLength()));
             resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileType.getName() + "\"");
@@ -134,7 +134,7 @@ public class TokenFilter implements Filter {
             resp.setHeader("Content-Disposition", "attachment; filename=\"Bundle_" + token + ".zip\"");
             ZipOutputStream zos = new ZipOutputStream(resp.getOutputStream());
             zos.setLevel(ZipEntry.STORED);
-            for (BundleFile file : fileList) {
+            for (AllocationFile file : fileList) {
                 FileType fileType = file.getXml();
                 ZipEntry ze = new ZipEntry(fileType.getName());
                 ze.setSize(fileType.getLength());

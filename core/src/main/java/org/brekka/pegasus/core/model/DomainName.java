@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * Represents an internet domain name such as 'brekka.org'. 
@@ -16,7 +17,7 @@ import org.brekka.commons.persistence.model.SnapshotEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`DomainName`")
+@Table(name="`DomainName`", schema=PegasusConstants.SCHEMA)
 public class DomainName extends SnapshotEntity {
 
     /**

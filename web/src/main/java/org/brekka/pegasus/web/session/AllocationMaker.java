@@ -14,13 +14,13 @@ import org.brekka.paveway.core.model.FileInfo;
 import org.brekka.paveway.core.model.FilesContext;
 import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Allocation;
 
 /**
  * @author Andrew Taylor
  *
  */
-public class BundleMaker implements FilesContext {
+public class AllocationMaker implements FilesContext {
 
     private final String makerKey;
     
@@ -30,7 +30,7 @@ public class BundleMaker implements FilesContext {
     
     private final Map<String, FileBuilder> inProgress = new HashMap<>();
     
-    private AllocatedBundle allocatedBundle;
+    private Allocation allocation;
     
     private boolean done = false;
     
@@ -39,14 +39,14 @@ public class BundleMaker implements FilesContext {
     /**
      * @param makerKey
      */
-    public BundleMaker(String makerKey, UploadPolicy policy) {
+    public AllocationMaker(String makerKey, UploadPolicy policy) {
         this(makerKey, policy, null);
     }
     
     /**
      * @param makerKey
      */
-    public BundleMaker(String makerKey, UploadPolicy policy, Inbox inbox) {
+    public AllocationMaker(String makerKey, UploadPolicy policy, Inbox inbox) {
         this.makerKey = makerKey;
         this.policy = policy;
         this.inbox = inbox;
@@ -120,17 +120,17 @@ public class BundleMaker implements FilesContext {
     }
     
     /**
-     * @param allocatedBundle the allocatedBundle to set
+     * @param allocation the allocation to set
      */
-    public void setAllocatedBundle(AllocatedBundle transferKey) {
-        this.allocatedBundle = transferKey;
+    public void setAllocation(Allocation transferKey) {
+        this.allocation = transferKey;
     }
     
     /**
-     * @return the allocatedBundle
+     * @return the allocation
      */
-    public AllocatedBundle getAllocatedBundle() {
-        return allocatedBundle;
+    public Allocation getAllocation() {
+        return allocation;
     }
     
     /**

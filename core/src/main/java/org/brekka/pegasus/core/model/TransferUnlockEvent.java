@@ -8,13 +8,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.brekka.pegasus.core.PegasusConstants;
+
 /**
  * When a transfer (of a bundle) is unlocked.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`TransferUnlockEvent`")
+@Table(name="`TransferUnlockEvent`", schema=PegasusConstants.SCHEMA)
 public class TransferUnlockEvent extends RemoteUserEvent {
 
     /**

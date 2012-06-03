@@ -10,6 +10,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.OrganizationDocument;
 
 /**
@@ -19,7 +20,7 @@ import org.brekka.xml.pegasus.v1.model.OrganizationDocument;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Organization`")
+@Table(name="`Organization`", schema=PegasusConstants.SCHEMA)
 public class Organization extends LongevousEntity {
 
     /**

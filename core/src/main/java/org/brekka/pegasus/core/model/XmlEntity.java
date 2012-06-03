@@ -15,6 +15,7 @@ import javax.persistence.Transient;
 
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.hibernate.annotations.Type;
 
 /**
@@ -23,7 +24,7 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`XmlEntity`")
+@Table(name="`XmlEntity`", schema=PegasusConstants.SCHEMA)
 public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
 
     /**

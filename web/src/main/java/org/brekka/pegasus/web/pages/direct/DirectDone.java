@@ -15,8 +15,8 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.web.pages.Index;
-import org.brekka.pegasus.web.session.BundleMaker;
-import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.session.AllocationMaker;
+import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
@@ -46,10 +46,10 @@ public class DirectDone {
         this.makeKey = makeKey;
         
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
         if (bundleMakerContext.contains(makeKey)) {
-            BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
-            transfer = (AnonymousTransfer) bundleMaker.getAllocatedBundle();
+            AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
+            transfer = (AnonymousTransfer) bundleMaker.getAllocation();
             return Boolean.TRUE;
         }
         alertManager.alert(Duration.SINGLE, Severity.WARN, "Details of the requested upload are no longer available.");
@@ -65,7 +65,7 @@ public class DirectDone {
     }
     
     public String getUnlockLink() {
-        return configuration.getFetchBase() + "/" + transfer.getToken(); 
+        return configuration.getFetchBase() + "/" + transfer.getToken().getPath(); 
     }
     
     /**
@@ -79,19 +79,22 @@ public class DirectDone {
     }
     
     public String getDirectLink() {
-        
         return configuration.getFetchBase() + "/" + getPath();
+    }
+    
+    public boolean isAgreement() {
+        return transfer.getXml().isSetAgreement();
     }
     
     private String getPath() {
         String code = transfer.getCode().replaceAll("[^0-9]+", "");
         String path;
-        List<FileType> fileList = transfer.getBundle().getXml().getFileList();
+        List<FileType> fileList = transfer.getXml().getBundle().getFileList();
         if (fileList.size() == 1) {
             String fileName = fileList.get(0).getName();
-            path = code + "/" + transfer.getToken() + "/" + fileName;
+            path = code + "/" + transfer.getToken().getPath() + "/" + fileName;
         } else {
-            path = code + "/" + transfer.getToken() + ".zip";
+            path = code + "/" + transfer.getToken().getPath() + ".zip";
         }
         return path;
     }

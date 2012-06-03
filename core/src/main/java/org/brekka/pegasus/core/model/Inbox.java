@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * An inbox allows an individual on the internet to send a file to a {@link Member}. The public key of the vault will be
@@ -22,7 +23,7 @@ import org.brekka.commons.persistence.model.LongevousEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Inbox`")
+@Table(name="`Inbox`", schema=PegasusConstants.SCHEMA)
 public class Inbox extends LongevousEntity {
 
     /**

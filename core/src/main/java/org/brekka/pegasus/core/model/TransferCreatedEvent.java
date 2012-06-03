@@ -5,28 +5,30 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.brekka.pegasus.core.PegasusConstants;
 
 /**
+ * When a bundle is created.
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 @Entity
-@Table(name="`AgreementAcceptedEvent`", schema=PegasusConstants.SCHEMA)
-public class AgreementAcceptedEvent extends RemoteUserEvent {
+@Table(name="`TransferCreatedEvent`", schema=PegasusConstants.SCHEMA)
+public class TransferCreatedEvent extends RemoteUserEvent {
+
     /**
-     * Serial UID
+     * Serial ID
      */
-    private static final long serialVersionUID = 5519875877999283084L;
-    
+    private static final long serialVersionUID = 4307560513008867955L;
+
     /**
-     * The bundle that was created
+     * The transfer that was created
      */
-    @OneToOne
-    @JoinColumn(name="`TransferID`", nullable=false, unique=true)
+    @ManyToOne
+    @JoinColumn(name="`TransferID`", nullable=false)
     private Transfer transfer;
 
     public Transfer getTransfer() {
@@ -36,4 +38,5 @@ public class AgreementAcceptedEvent extends RemoteUserEvent {
     public void setTransfer(Transfer transfer) {
         this.transfer = transfer;
     }
+    
 }

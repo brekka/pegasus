@@ -12,7 +12,7 @@ import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.Response;
-import org.brekka.pegasus.core.model.BundleFile;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.web.support.Transfers;
@@ -33,7 +33,7 @@ public class Download {
     Object onActivate(String uuid, String filename) {
         UUID fileId = UUID.fromString(uuid);
         final Transfer transfer = transfers.getTransferWithFile(fileId);
-        final BundleFile file = transfer.getBundle().getFiles().get(fileId);
+        final AllocationFile file = transfer.getFiles().get(fileId);
         final FileType fileType = file.getXml();
         final MutableFloat progress = transfers.downloadStartProgress(file);
         return new StreamResponse() {

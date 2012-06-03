@@ -13,12 +13,12 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.commons.lang.ByteLengthFormat;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.model.BundleFile;
+import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.AnonymousService;
-import org.brekka.pegasus.core.services.BundleService;
 import org.brekka.pegasus.web.support.Transfers;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
@@ -39,7 +39,7 @@ public class FetchDirect {
     private AnonymousService anonymousService;
     
     @Inject
-    private BundleService bundleService;
+    private AllocationService allocationService;
     
     @Inject
     private ComponentResources resources;
@@ -54,7 +54,7 @@ public class FetchDirect {
     private AnonymousTransfer transfer;
     
     @Property
-    private BundleFile file;
+    private AllocationFile file;
     
     @SuppressWarnings("unused")
     @Property
@@ -75,9 +75,9 @@ public class FetchDirect {
             unlockPage.onActivate(token);
             return unlockPage;
         }
-        bundleService.refreshBundle(transfer.getBundle());
-        BundleType bundleXml = transfer.getBundle().getXml();
-        if (bundleXml.isSetAgreement() 
+        allocationService.refreshAllocation(transfer);
+        AllocationType xml = transfer.getXml();
+        if (xml.isSetAgreement() 
                 && !anonymousService.isAccepted(transfer)) {
             agreementDirectPage.init(token);
             return agreementDirectPage;
@@ -85,12 +85,12 @@ public class FetchDirect {
         return Boolean.TRUE;
     }
     
-    public Collection<BundleFile> getFiles() {
-        return transfer.getBundle().getFiles().values();
+    public Collection<AllocationFile> getFiles() {
+        return transfer.getFiles().values();
     }
     
     public boolean isLastAttempt() {
-        int downloadsForTransfer = bundleService.downloadCountForTransfer(file, transfer);
+        int downloadsForTransfer = file.getDownloadCount();
         return downloadsForTransfer + 1 == file.getXml().getMaxDownloads();
     }
     

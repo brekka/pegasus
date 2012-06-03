@@ -13,10 +13,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.paveway.core.services.PavewayService;
-import org.brekka.pegasus.core.model.BundleFile;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.Transfer;
-import org.brekka.pegasus.core.services.BundleService;
+import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.phoenix.CryptoFactory;
@@ -45,7 +45,7 @@ public class DownloadServiceImpl implements DownloadService {
     private EventService eventService;
     
     @Autowired
-    private BundleService bundleService;
+    private AllocationService allocationService;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.DownloadService#download(
@@ -54,10 +54,10 @@ public class DownloadServiceImpl implements DownloadService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InputStream download(BundleFile file, Transfer transfer, ProgressCallback progressCallback) {
+    public InputStream download(AllocationFile file, Transfer transfer, ProgressCallback progressCallback) {
         FileType fileType = file.getXml();
         UUID fileId = UUID.fromString(fileType.getUUID());
-        FileDownloadEvent event = eventService.beginFileDownloadEvent(file, transfer);
+        FileDownloadEvent event = eventService.beginFileDownloadEvent(file);
         CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(fileId);
         CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(cryptedFile.getProfile());
         SecretKey secretKey = new SecretKeySpec(fileType.getKey(), 
@@ -68,7 +68,7 @@ public class DownloadServiceImpl implements DownloadService {
     
     private class EventInputStream extends FilterInputStream {
 
-        private final BundleFile bundleFile;
+        private final AllocationFile allocationFile;
         
         private final FileDownloadEvent event;
         
@@ -79,10 +79,10 @@ public class DownloadServiceImpl implements DownloadService {
         private long length;
         
         
-        public EventInputStream(InputStream in, BundleFile bundleFile, FileDownloadEvent event, 
+        public EventInputStream(InputStream in, AllocationFile allocationFile, FileDownloadEvent event, 
                 long expectedLength, ProgressCallback progressCallback) {
             super(in);
-            this.bundleFile = bundleFile;
+            this.allocationFile = allocationFile;
             this.event = event;
             this.expectedLength = expectedLength;
             this.progressCallback = progressCallback;
@@ -111,7 +111,7 @@ public class DownloadServiceImpl implements DownloadService {
             super.close();
             if (expectedLength == length) {
                 eventService.completeEvent(event);
-                bundleService.incrementDownloadCounter(bundleFile);
+                allocationService.incrementDownloadCounter(allocationFile);
                 if (progressCallback != null) {
                     progressCallback.update(length, expectedLength);
                 }

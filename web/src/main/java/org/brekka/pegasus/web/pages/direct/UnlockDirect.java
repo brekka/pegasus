@@ -52,7 +52,7 @@ public class UnlockDirect {
         AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
         transfers.add(token, anonymousTransfer);
         fetchPage.init(token);
-        if (anonymousTransfer.getBundle().getXml().isSetAgreement()) {
+        if (anonymousTransfer.getXml().isSetAgreement()) {
             agreementDirectPage.init(token);
             return agreementDirectPage;
         }

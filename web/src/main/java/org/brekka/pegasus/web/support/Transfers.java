@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.mutable.MutableFloat;
-import org.brekka.pegasus.core.model.Bundle;
-import org.brekka.pegasus.core.model.BundleFile;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Transfer;
 
 /**
@@ -42,13 +41,13 @@ public class Transfers {
         return map().containsKey(token);
     }
     
-    public MutableFloat downloadStartProgress(BundleFile bundleFile) {
+    public MutableFloat downloadStartProgress(AllocationFile bundleFile) {
         MutableFloat progress = new MutableFloat();
         progressMap().put(bundleFile.getId(), progress);
         return progress;
     }
     
-    public MutableFloat getProgress(BundleFile bundleFile) {
+    public MutableFloat getProgress(AllocationFile bundleFile) {
         return progressMap().get(bundleFile.getId());
     }
     
@@ -74,13 +73,12 @@ public class Transfers {
      * @param fromString
      * @return
      */
-    public Transfer getTransferWithFile(UUID bundleFileId) {
+    public Transfer getTransferWithFile(UUID fileId) {
         Map<String, Transfer> map = map();
         Collection<Transfer> values = map.values();
         for (Transfer transfer : values) {
-            Bundle bundle = transfer.getBundle();
-            Map<UUID, BundleFile> files = bundle.getFiles();
-            if (files.containsKey(bundleFileId)) {
+            Map<UUID, AllocationFile> files = transfer.getFiles();
+            if (files.containsKey(fileId)) {
                 return transfer;
             }
         }

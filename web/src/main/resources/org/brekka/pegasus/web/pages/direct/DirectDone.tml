@@ -24,7 +24,7 @@
     	</div>
     </form>
     
-    <t:if test="!transfer.agreement">
+    <t:if test="!agreement">
         <h2>Direct link</h2>
         
         <p> A direct link is for situations where you simply want to transfer the file(s) to another system and can either

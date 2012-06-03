@@ -18,14 +18,14 @@ import org.brekka.pegasus.web.support.PolicyHelper;
  * @author Andrew Taylor
  *
  */
-public class BundleMakerContext {
-    public static final String SESSION_KEY = "BUNDLE_MAKER_CONTEXT";
+public class AllocationMakerContext {
+    public static final String SESSION_KEY = "ALLOCATION_MAKER_CONTEXT";
 
-    private transient Map<String, BundleMaker> makers;
+    private transient Map<String, AllocationMaker> makers;
     
     private final UploadPolicy policy;
     
-    private BundleMakerContext(UploadPolicy policy) {
+    private AllocationMakerContext(UploadPolicy policy) {
         this.policy = policy;
     }
 
@@ -33,30 +33,30 @@ public class BundleMakerContext {
         return map().containsKey(makerKey);
     }
     
-    public synchronized BundleMaker get(String makerKey) {
+    public synchronized AllocationMaker get(String makerKey) {
         return get(makerKey, null);
     }
     
-    public synchronized BundleMaker get(String makerKey, Inbox inbox) {
-        Map<String, BundleMaker> map = map();
-        BundleMaker bundleMaker = map.get(makerKey);
+    public synchronized AllocationMaker get(String makerKey, Inbox inbox) {
+        Map<String, AllocationMaker> map = map();
+        AllocationMaker bundleMaker = map.get(makerKey);
         if (bundleMaker == null) {
-            bundleMaker = new BundleMaker(makerKey, policy, inbox);
+            bundleMaker = new AllocationMaker(makerKey, policy, inbox);
             map.put(makerKey, bundleMaker);
         }
         return bundleMaker;
     }
     
     public synchronized void discard() {
-        Collection<BundleMaker> values = map().values();
-        for (BundleMaker bundleMaker : values) {
+        Collection<AllocationMaker> values = map().values();
+        for (AllocationMaker bundleMaker : values) {
             bundleMaker.discard();
         }
         makers.clear();
     }
     
-    private synchronized Map<String, BundleMaker> map() {
-        Map<String, BundleMaker> map = this.makers;
+    private synchronized Map<String, AllocationMaker> map() {
+        Map<String, AllocationMaker> map = this.makers;
         if (map == null) {
             map = new HashMap<>();
         }
@@ -64,7 +64,7 @@ public class BundleMakerContext {
     }
     
 
-    public static BundleMakerContext get(HttpServletRequest req, boolean create) {
+    public static AllocationMakerContext get(HttpServletRequest req, boolean create) {
         HttpSession session = req.getSession(create);
         if (session == null) {
             return null;
@@ -72,11 +72,11 @@ public class BundleMakerContext {
         return get(session);
     }
     
-    public static BundleMakerContext get(HttpSession session) {
-        BundleMakerContext content = (BundleMakerContext) session.getAttribute(BundleMakerContext.SESSION_KEY);
+    public static AllocationMakerContext get(HttpSession session) {
+        AllocationMakerContext content = (AllocationMakerContext) session.getAttribute(AllocationMakerContext.SESSION_KEY);
         UploadPolicy policy = PolicyHelper.identifyPolicy(session.getServletContext());
         if (content == null) {
-            content = new BundleMakerContext(policy);
+            content = new AllocationMakerContext(policy);
             session.setAttribute(SESSION_KEY, content);
         }
         return content;

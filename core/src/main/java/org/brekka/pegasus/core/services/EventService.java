@@ -3,8 +3,7 @@
  */
 package org.brekka.pegasus.core.services;
 
-import org.brekka.pegasus.core.model.Bundle;
-import org.brekka.pegasus.core.model.BundleFile;
+import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.Transfer;
 
@@ -14,11 +13,11 @@ import org.brekka.pegasus.core.model.Transfer;
  */
 public interface EventService {
 
-    void bundleCreated(Bundle bundle);
+    void transferCreated(Transfer transfer);
     
     void transferUnlocked(Transfer transfer);
     
-    FileDownloadEvent beginFileDownloadEvent(BundleFile bundleFile, Transfer transfer);
+    FileDownloadEvent beginFileDownloadEvent(AllocationFile transferFile);
     
     void completeEvent(FileDownloadEvent event);
     
@@ -34,5 +33,5 @@ public interface EventService {
      * @param transfer
      * @return
      */
-    int fileDownloadCount(BundleFile bundleFile, Transfer transfer);
+    int fileDownloadCount(AllocationFile transferFile, Transfer transfer);
 }

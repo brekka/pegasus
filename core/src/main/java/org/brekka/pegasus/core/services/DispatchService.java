@@ -6,7 +6,7 @@ package org.brekka.pegasus.core.services;
 import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -28,7 +28,7 @@ public interface DispatchService {
      * @param fileBuilderList
      * @return
      */
-    AllocatedBundle createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
+    Allocation createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
             String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList);
     
     

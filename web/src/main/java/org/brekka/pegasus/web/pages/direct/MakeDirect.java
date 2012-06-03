@@ -12,13 +12,13 @@ import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.AllocatedBundle;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.pages.NoSession;
-import org.brekka.pegasus.web.session.BundleMaker;
-import org.brekka.pegasus.web.session.BundleMakerContext;
+import org.brekka.pegasus.web.session.AllocationMaker;
+import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 
 /**
@@ -39,7 +39,7 @@ public class MakeDirect extends AbstractMakePage {
     Object onActivate() {
         String makeKey = MakeKeyUtils.newKey();
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
         bundleMakerContext.get(makeKey);
         init(makeKey);
         return this;
@@ -48,7 +48,7 @@ public class MakeDirect extends AbstractMakePage {
     Object onActivate(String makeKey) {
         this.makeKey = makeKey;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, false);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, false);
         if (bundleMakerContext == null) {
             return NoSession.class;
         }
@@ -56,7 +56,7 @@ public class MakeDirect extends AbstractMakePage {
             alertManager.alert(Duration.SINGLE, Severity.WARN, "Sorry, but the uploaded files are no longer available. Please try again.");
             return onActivate();
         }
-        BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
+        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (bundleMaker.isDone()) {
             return Index.class;
         }
@@ -72,12 +72,12 @@ public class MakeDirect extends AbstractMakePage {
     Object onSuccess() throws Exception {
         Object retVal;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        BundleMakerContext bundleMakerContext = BundleMakerContext.get(req, true);
-        BundleMaker bundleMaker = bundleMakerContext.get(makeKey);
+        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
+        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            AllocatedBundle transferKey = anonymousService.createTransfer(comment, null, 1, fileBuilderList);
-            bundleMaker.setAllocatedBundle(transferKey);
+            Allocation transferKey = anonymousService.createTransfer(comment, null, 1, fileBuilderList);
+            bundleMaker.setAllocation(transferKey);
             directDonePage.init(makeKey);
             retVal = directDonePage;
         } else {

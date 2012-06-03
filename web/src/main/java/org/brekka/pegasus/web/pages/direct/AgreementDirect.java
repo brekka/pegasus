@@ -76,6 +76,6 @@ public class AgreementDirect {
     }
     
     public String getAgreementText() {
-        return transfer.getBundle().getXml().getAgreement();
+        return transfer.getXml().getAgreement();
     }
 }
