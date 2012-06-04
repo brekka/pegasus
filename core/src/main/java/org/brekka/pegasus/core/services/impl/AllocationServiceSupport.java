@@ -26,6 +26,7 @@ import org.brekka.paveway.core.services.ResourceEncryptor;
 import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Transfer;
@@ -58,6 +59,9 @@ class AllocationServiceSupport {
     
     @Autowired
     protected EventService eventService;
+    
+    @Autowired
+    private AllocationFileDAO allocationFileDAO;
     
 
     /**
@@ -100,8 +104,15 @@ class AllocationServiceSupport {
         }
     }
     
-    protected void createAllocationFiles(Allocation allocation, Bundle bundle) {
-        // TODO
+    protected void createAllocationFiles(Allocation allocation) {
+        List<FileType> fileList = allocation.getXml().getBundle().getFileList();
+        for (FileType fileType : fileList) {
+            AllocationFile allocationFile = new AllocationFile();
+            allocationFile.setAllocation(allocation);
+            allocationFile.setCryptedFileId(UUID.fromString(fileType.getUUID()));
+            allocationFile.setXml(fileType);
+            allocationFileDAO.create(allocationFile);
+        }
     }
     
     

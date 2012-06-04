@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 /**
@@ -58,9 +59,10 @@ public abstract class Allocation extends SnapshotEntity {
     private byte[] iv;
     
     /**
-     * The bundle represented by this deposit
+     * The bundle represented by this allocation
      */
     @Type(type="pg-uuid")
+    @Index(name="IDX_A_Bundle")
     @Column(name="`BundleID`", updatable=false, nullable=false)
     private UUID bundleId;
     
@@ -76,9 +78,12 @@ public abstract class Allocation extends SnapshotEntity {
      * The list of files contained in the allocation
      */
     @OneToMany(mappedBy="allocation")
-    @MapKey
+    @MapKey(name="cryptedFileId")
     private Map<UUID, AllocationFile> files;
     
+    /**
+     * Secret key for the allocation XML (transient).
+     */
     @Transient
     private transient SecretKey secretKey;
     

@@ -106,8 +106,9 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         Token token = tokenService.generateToken(TokenType.ANON);
         anonTransfer.setToken(token);
         
-        
         anonymousTransferDAO.create(anonTransfer);
+        createAllocationFiles(anonTransfer);
+        
         eventService.transferCreated(anonTransfer);
         return anonTransfer;
     }

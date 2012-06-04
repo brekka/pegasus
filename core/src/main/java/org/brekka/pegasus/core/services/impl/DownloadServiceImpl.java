@@ -56,9 +56,8 @@ public class DownloadServiceImpl implements DownloadService {
     @Transactional(propagation=Propagation.REQUIRED)
     public InputStream download(AllocationFile file, Transfer transfer, ProgressCallback progressCallback) {
         FileType fileType = file.getXml();
-        UUID fileId = UUID.fromString(fileType.getUUID());
         FileDownloadEvent event = eventService.beginFileDownloadEvent(file);
-        CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(fileId);
+        CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(file.getCryptedFileId());
         CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(cryptedFile.getProfile());
         SecretKey secretKey = new SecretKeySpec(fileType.getKey(), 
                 cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());

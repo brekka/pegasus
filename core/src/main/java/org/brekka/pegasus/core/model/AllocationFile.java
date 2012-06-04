@@ -19,6 +19,8 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.FileType;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Type;
 
 /**
  * Stores the relationship between a bundle and {@link CryptedFile}. The id will match that of a corresponding
@@ -44,6 +46,14 @@ public class AllocationFile extends IdentifiableEntity {
     @ManyToOne
     @JoinColumn(name = "`AllocationID`")
     private Allocation allocation;
+    
+    /**
+     * The corresponding crypted file.
+     */
+    @Type(type="pg-uuid")
+    @Index(name="IDX_AF_CryptedFile")
+    @Column(name="`CryptedFileID`", updatable=false, nullable=false)
+    private UUID cryptedFileId;
     
     /**
      * When did this bundle file expire?
@@ -121,5 +131,13 @@ public class AllocationFile extends IdentifiableEntity {
 
     public void setAllocation(Allocation allocation) {
         this.allocation = allocation;
+    }
+
+    public UUID getCryptedFileId() {
+        return cryptedFileId;
+    }
+
+    public void setCryptedFileId(UUID cryptedFileId) {
+        this.cryptedFileId = cryptedFileId;
     }
 }

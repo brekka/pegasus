@@ -141,6 +141,8 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
         deposit.setSecretKey(secretKey);
+        
+        createAllocationFiles(deposit);
         depositDAO.create(deposit);
         
         return deposit;

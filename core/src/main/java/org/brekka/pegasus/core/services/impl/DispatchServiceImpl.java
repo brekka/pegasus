@@ -88,6 +88,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         allocationDocument.setAllocation(allocation.getXml());
         encryptDocument(dispatch, allocationDocument);
         
+        
         dispatch.setDivision(division);
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
@@ -99,6 +100,8 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         dispatch.setCryptedDataId(cryptedData.getId());
         
         dispatchDAO.create(dispatch);
+        createAllocationFiles(dispatch);
+        
         return allocation;
     }
     
