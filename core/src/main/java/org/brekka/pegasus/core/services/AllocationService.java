@@ -22,5 +22,7 @@ public interface AllocationService {
      */
     void refreshAllocation(Allocation allocation);
     
-//    void deallocateAllocation(Allocation allocation);
+    void clearAllocation(Allocation allocation);
+    
+    void clearAllocationFile(AllocationFile file);
 }

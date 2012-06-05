@@ -25,6 +25,7 @@ import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
+import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,35 +77,42 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
                 inbox = inboxService.retrieveForEMailAddress(address);
             }
         }
-        Allocation allocation;
-        if (inbox != null) {
-            allocation = inboxService.createDeposit(inbox, reference, comment, agreementText, fileBuilderList);
-        } else {
-            allocation = anonymousService.createTransfer(comment, agreementText, maxDownloads, fileBuilderList);
-        }
+        
+        BundleType bundleType = completeFiles(0, fileBuilderList);
         
         // Copy the allocation to
-        AllocationDocument allocationDocument = AllocationDocument.Factory.newInstance();
-        allocationDocument.setAllocation(allocation.getXml());
+        AllocationDocument allocationDocument = prepareDocument(bundleType);
+        setComment(comment, allocationDocument);
+        setAgreementText(agreementText, allocationDocument);
+        setReference(reference, allocationDocument);
         encryptDocument(dispatch, allocationDocument);
         
         
         dispatch.setDivision(division);
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
-        dispatch.setBundleId(allocation.getBundleId());
         
-        SecretKey secretKey = allocation.getSecretKey();
-        allocation.setSecretKey(null);
+        SecretKey secretKey = dispatch.getSecretKey();
+        dispatch.setSecretKey(null);
+        
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         dispatch.setCryptedDataId(cryptedData.getId());
         
         dispatchDAO.create(dispatch);
         createAllocationFiles(dispatch);
         
+        BundleType cloneBundle = copyBundle(maxDownloads, bundleType);
+        
+        Allocation allocation;
+        if (inbox != null) {
+            allocation = inboxService.createDeposit(inbox, reference, comment, agreementText, cloneBundle, dispatch);
+        } else {
+            allocation = anonymousService.createTransfer(comment, agreementText, cloneBundle, dispatch);
+        }
         return allocation;
     }
-    
+
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.DispatchService#retrieveCurrentForInterval(org.joda.time.DateTime, org.joda.time.DateTime)
      */

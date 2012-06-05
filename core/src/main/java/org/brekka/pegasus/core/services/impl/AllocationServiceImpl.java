@@ -4,12 +4,15 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.services.AllocationService;
+import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.xml.pegasus.v1.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +34,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     
     @Autowired
     private AllocationDAO allocationDAO;
-
     
     
     /* (non-Javadoc)
@@ -67,20 +69,92 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         assignFileXml(allocation);
     }
     
-//    /* (non-Javadoc)
-//     * @see org.brekka.pegasus.core.services.AllocationService#deallocateAllocation(org.brekka.pegasus.core.model.Allocation)
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#deallocateAllocation(org.brekka.pegasus.core.model.Allocation)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void clearAllocation(Allocation allocation) {
+        UUID cryptedDataId = allocation.getCryptedDataId();
+        
+        List<AllocationFile> fileList = allocationFileDAO.retrieveByAllocation(allocation);
+        for (AllocationFile file : fileList) {
+            clearAllocationFile(file, false);
+        }
+        
+        // Remove the crypted data from phalanx
+        phalanxService.deleteCryptedData(new IdentityCryptedData(cryptedDataId));
+        resourceStorageService.remove(allocation.getId());
+        allocation.setDeleted(new Date());
+        allocationDAO.update(allocation);
+    }
+
+    /**
+     * @param file
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void clearAllocationFile(AllocationFile file) {
+        clearAllocationFile(file, true);
+    }
+    
+    
+    protected void clearAllocationFile(AllocationFile file, boolean deleteAllocationIfPossible) {
+        if (file.getDeleted() != null) {
+            // Already deleted
+            return;
+        }
+        List<AllocationFile> active = allocationFileDAO.retrieveActiveForCryptedFile(file.getCryptedFileId());
+        if (active.size() == 1) {
+            // This is the only file. Safe to obliterate the crypted file
+            UUID cryptedFileId = file.getCryptedFileId();
+            pavewayService.removeFile(cryptedFileId); 
+            file.setCryptedFileId(null);
+        }
+        // Check whether we can delete the rest of the allocation also
+        if (deleteAllocationIfPossible) {
+            Allocation allocation = file.getAllocation();
+            active = allocationFileDAO.retrieveActiveForAllocation(allocation);
+            if (active.size() == 1) {
+                // Make the allocation as expired. The reaper will pick it up soon
+                allocation.setExpires(new Date());
+                allocationDAO.update(allocation);
+            }
+        }
+        file.setDeleted(new Date());
+        allocationFileDAO.update(file);
+    }
+
+//    /**
+//     * Perform the de-allocation
+//     * 
+//     * @param bundle
 //     */
 //    @Override
 //    @Transactional(propagation=Propagation.REQUIRED)
-//    public void deallocateAllocation(Allocation allocation) {
-//        // Find the associated transfers and deallocate the keys in phalanx
-//        List<AllocationList> transferList = allocationFileDAO.retrieveByAllocation(allocation);
-//        for (Transfer transfer : transferList) {
-//            UUID cryptedDataId = transfer.getCryptedDataId();
-//            phalanxService.deleteCryptedData(new IdentityCryptedData(cryptedDataId));
-//            transfer.setCryptedDataId(null);
-//            transferDAO.update(transfer);
+//    public void deallocateBundle(Bundle bundle) {
+//        List<CryptedFile> fileList = cryptedFileDAO.retrieveByBundle(bundle);
+//        for (CryptedFile bundleFile : fileList) {
+//            // Bundle file id matches the crypted file id from paveway.
+//            deallocateCryptedFile(bundleFile);
 //        }
+//        
+//        // Clear the bundle XML
+//        resourceStorageService.remove(bundle.getId());
+//        bundleDAO.delete(bundle.getId());
+//    }
+//    
+//    @Override
+//    @Transactional(propagation=Propagation.REQUIRED)
+//    public void deallocateCryptedFile(CryptedFile cryptedFile) {
+//        cryptedFile = cryptedFileDAO.retrieveById(cryptedFile.getId());
+//        List<CryptedPart> parts = cryptedFile.getParts();
+//        for (CryptedPart cryptedPart : parts) {
+//            UUID partId = cryptedPart.getId();
+//            resourceStorageService.remove(partId);
+//            cryptedPartDAO.delete(partId);
+//        }
+//        cryptedFileDAO.delete(cryptedFile.getId());
 //    }
     
 }

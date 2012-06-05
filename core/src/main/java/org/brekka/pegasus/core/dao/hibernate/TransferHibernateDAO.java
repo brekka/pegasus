@@ -4,8 +4,8 @@
 package org.brekka.pegasus.core.dao.hibernate;
 
 import java.util.List;
+import java.util.UUID;
 
-import org.brekka.paveway.core.model.Bundle;
 import org.brekka.pegasus.core.dao.TransferDAO;
 import org.brekka.pegasus.core.model.Transfer;
 import org.hibernate.criterion.Restrictions;
@@ -30,9 +30,9 @@ public class TransferHibernateDAO extends AbstractPegasusHibernateDAO<Transfer> 
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Transfer> retrieveByBundle(Bundle bundle) {
+    public List<Transfer> retrieveByBundle(UUID bundleId) {
         return getCurrentSession().createCriteria(Transfer.class)
-                .add(Restrictions.eq("bundle", bundle))
+                .add(Restrictions.eq("bundleId", bundleId))
                 .list();
     }
 }

@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,12 +14,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.XmlException;
-import org.brekka.paveway.core.model.Bundle;
 import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.CryptedFile;
-import org.brekka.paveway.core.services.BundleService;
+import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.core.services.ResourceCryptoService;
 import org.brekka.paveway.core.services.ResourceEncryptor;
 import org.brekka.paveway.core.services.ResourceStorageService;
@@ -31,6 +31,7 @@ import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.EventService;
+import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.CryptoFactory;
 import org.brekka.phoenix.CryptoFactoryRegistry;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
@@ -44,9 +45,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 class AllocationServiceSupport {
+
+    @Autowired
+    protected PhalanxService phalanxService;
     
     @Autowired
-    protected BundleService bundleService;
+    protected PavewayService pavewayService;
     
     @Autowired
     protected ResourceStorageService resourceStorageService;
@@ -59,24 +63,17 @@ class AllocationServiceSupport {
     
     @Autowired
     protected EventService eventService;
+
     
     @Autowired
     private AllocationFileDAO allocationFileDAO;
     
 
-    /**
-     * Prepare the XML based structure that will contain the details for this bundle,
-     * while will be subsequently encrypted.
-     * @param comment
-     * @param fileBuilders
-     * @return
-     */
-    protected AllocationDocument prepareDocument(int maxDownloads, Bundle bundle) {
-        AllocationDocument doc = AllocationDocument.Factory.newInstance();
-        AllocationType allocationType = doc.addNewAllocation();
-        BundleType bundleType = allocationType.addNewBundle();
-        Collection<CryptedFile> files = bundle.getFiles().values();
-        for (CryptedFile file : files) {
+    protected BundleType completeFiles(int maxDownloads, List<FileBuilder> fileBuilders) {
+        BundleType bundleType = BundleType.Factory.newInstance();
+        for (FileBuilder fileBuilder : fileBuilders) {
+            CryptedFile file = pavewayService.complete(fileBuilder);
+            
             FileType fileXml = bundleType.addNewFile();
             fileXml.setName(file.getFileName());
             fileXml.setMimeType(file.getMimeType());
@@ -87,6 +84,41 @@ class AllocationServiceSupport {
                 fileXml.setMaxDownloads(maxDownloads);
             }
         }
+        return bundleType;
+    }
+    
+    
+    /**
+     * @param maxDownloads
+     * @param bundleType
+     * @return
+     */
+    protected BundleType copyBundle(int maxDownloads, BundleType bundleType) {
+        BundleType b = BundleType.Factory.newInstance();
+        List<FileType> fileList = bundleType.getFileList();
+        for (FileType file : fileList) {
+            FileType f = b.addNewFile();
+            file.setKey(f.getKey());
+            file.setLength(f.getLength());
+            file.setMimeType(f.getMimeType());
+            file.setName(f.getName());
+            file.setUUID(f.getUUID());
+            file.setMaxDownloads(maxDownloads);
+        }
+        return b;
+    }
+    
+    /**
+     * Prepare the XML based structure that will contain the details for this bundle,
+     * while will be subsequently encrypted.
+     * @param comment
+     * @param fileBuilders
+     * @return
+     */
+    protected AllocationDocument prepareDocument(BundleType bundleType) {
+        AllocationDocument doc = AllocationDocument.Factory.newInstance();
+        AllocationType allocationType = doc.addNewAllocation();
+        allocationType.setBundle(bundleType);
         return doc;
     }
     
@@ -163,5 +195,35 @@ class AllocationServiceSupport {
         allocation.setIv(encryptor.getIV().getIV());
         allocation.setXml(allocationDoc.getAllocation());
     }
+    
 
+    /**
+     * @param reference
+     * @param allocationDocument
+     */
+    protected void setReference(String reference, AllocationDocument allocationDocument) {
+        if (StringUtils.isNotBlank(reference)) {
+            allocationDocument.getAllocation().setReference(reference);
+        }
+    }
+
+    /**
+     * @param agreementText
+     * @param allocationDocument
+     */
+    protected void setAgreementText(String agreementText, AllocationDocument allocationDocument) {
+        if (StringUtils.isNotBlank(agreementText)) {
+            allocationDocument.getAllocation().setAgreement(agreementText);
+        }
+    }
+
+    /**
+     * @param comment
+     * @param allocationDocument
+     */
+    protected void setComment(String comment, AllocationDocument allocationDocument) {
+        if (StringUtils.isNotBlank(comment)) {
+            allocationDocument.getAllocation().setComment(comment);
+        }
+    }
 }

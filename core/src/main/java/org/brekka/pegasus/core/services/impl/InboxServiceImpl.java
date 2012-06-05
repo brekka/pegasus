@@ -10,13 +10,12 @@ import java.util.UUID;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.StringUtils;
-import org.brekka.paveway.core.model.Bundle;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.paveway.core.services.BundleService;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
@@ -32,6 +31,7 @@ import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
+import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.brekka.xml.pegasus.v1.model.InboxType;
 import org.brekka.xml.pegasus.v1.model.ProfileType;
 import org.joda.time.DateTime;
@@ -64,9 +64,6 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     
     @Autowired
     private ProfileService profileService;
-    
-    @Autowired
-    private BundleService bundleService;
     
     
     /* (non-Javadoc)
@@ -104,8 +101,19 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, List<FileBuilder> fileBuilders) {
+    public Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, 
+            List<FileBuilder> fileBuilders) {
+        BundleType bundleType = completeFiles(0, fileBuilders);
+        return createDeposit(inbox, reference, comment, agreementText, bundleType, null);
+    }
+    
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, 
+            BundleType bundleType, Dispatch dispatch) {
         Deposit deposit = new Deposit();
+        deposit.setDerivedFrom(dispatch);
         
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
@@ -114,11 +122,9 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         // TODO Expiry, currently fixed at one week, should be configured.
         DateTime now = new DateTime();
         DateTime expires = now.plusDays(7);
+        deposit.setExpires(expires.toDate());
         
-        Bundle bundle = bundleService.createBundle(expires, fileBuilders);
-        deposit.setBundleId(bundle.getId());
-        
-        AllocationDocument document = prepareDocument(0, bundle);
+        AllocationDocument document = prepareDocument(bundleType);
         AllocationType allocationType = document.getAllocation();
         if (StringUtils.isNotBlank(comment)) {
             allocationType.setComment(comment);
@@ -133,11 +139,11 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         // Encrypt the document
         encryptDocument(deposit, document);
         SecretKey secretKey = deposit.getSecretKey();
+        deposit.setSecretKey(null);
         
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         deposit.setCryptedDataId(cryptedData.getId());
         
-        deposit.setBundleId(bundle.getId());
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
         deposit.setSecretKey(secretKey);

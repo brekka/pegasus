@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
@@ -19,5 +20,11 @@ public interface AllocationDAO extends EntityDAO<UUID, Allocation> {
      * @return 
      */
     void refresh(Allocation allocation);
+
+    /**
+     * @param maxAllocationCount
+     * @return
+     */
+    List<Allocation> retrieveOldestExpired(int maxAllocationCount);
 
 }

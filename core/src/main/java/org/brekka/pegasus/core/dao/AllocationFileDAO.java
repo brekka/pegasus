@@ -28,4 +28,17 @@ public interface AllocationFileDAO extends EntityDAO<UUID, AllocationFile> {
      */
     List<AllocationFile> retrieveOldestExpired(int maxFileCount);
 
+    /**
+     * Find all allocation files that are not deleted and have the specified cryped file id.
+     * @param cryptedFileId
+     * @return
+     */
+    List<AllocationFile> retrieveActiveForCryptedFile(UUID cryptedFileId);
+
+    /**
+     * @param cryptedFileId
+     * @return
+     */
+    List<AllocationFile> retrieveActiveForAllocation(Allocation allocation);
+
 }

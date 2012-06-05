@@ -7,10 +7,12 @@ import java.util.List;
 
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.xml.pegasus.v1.model.BundleType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -35,6 +37,9 @@ public interface InboxService {
      */
     Deposit createDeposit(Inbox inbox, String reference, 
             String comment, String agreementText, List<FileBuilder> fileBuilders);
+    
+    Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, 
+            BundleType bundleType, Dispatch dispatch);
 
     /**
      * Retrieve the inboxes owned by this member.

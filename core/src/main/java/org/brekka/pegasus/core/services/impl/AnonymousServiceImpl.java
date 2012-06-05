@@ -9,11 +9,10 @@ import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.brekka.paveway.core.model.Bundle;
 import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.paveway.core.services.BundleService;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
@@ -23,6 +22,7 @@ import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
+import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,9 +44,6 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     private TokenService tokenService;
     
     @Autowired
-    private BundleService bundleService;
-    
-    @Autowired
     private PhalanxService phalanxService;
     
     
@@ -57,16 +54,22 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     @Transactional(propagation=Propagation.REQUIRED)
     public AnonymousTransfer createTransfer(String comment, String agreementText, int maxDownloads, 
             List<FileBuilder> fileBuilders) {
+        BundleType bundleType = completeFiles(maxDownloads, fileBuilders);
+        return createTransfer(comment, agreementText, bundleType, null);
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public AnonymousTransfer createTransfer(String comment, String agreementText, BundleType bundleType, Dispatch dispatch) {
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
+        anonTransfer.setDerivedFrom(dispatch);
         
         // TODO Expiry, currently fixed at 12 hours, should be configured.
         DateTime now = new DateTime();
         DateTime expires = now.plusHours(12);
+        anonTransfer.setExpires(expires.toDate());
         
-        Bundle bundle = bundleService.createBundle(expires, fileBuilders);
-        anonTransfer.setBundleId(bundle.getId());
-        
-        AllocationDocument document = prepareDocument(maxDownloads, bundle);
+        AllocationDocument document = prepareDocument(bundleType);
         AllocationType allocationType = document.getAllocation();
         if (StringUtils.isNotBlank(comment)) {
             allocationType.setComment(comment);
@@ -78,6 +81,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         // Encrypt the document
         encryptDocument(anonTransfer, document);
         SecretKey secretKey = anonTransfer.getSecretKey();
+        anonTransfer.setSecretKey(null);
         
         
         // Allocate a code

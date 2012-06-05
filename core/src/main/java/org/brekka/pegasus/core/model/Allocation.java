@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,15 +15,18 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 /**
@@ -59,14 +63,6 @@ public abstract class Allocation extends SnapshotEntity {
     private byte[] iv;
     
     /**
-     * The bundle represented by this allocation
-     */
-    @Type(type="pg-uuid")
-    @Index(name="IDX_A_Bundle")
-    @Column(name="`BundleID`", updatable=false, nullable=false)
-    private UUID bundleId;
-    
-    /**
      * Id of the crypted data that contains the key used to encrypt this file's parts.
      * Will be nulled-out once the bundle is de-allocated.
      */
@@ -75,11 +71,32 @@ public abstract class Allocation extends SnapshotEntity {
     private UUID cryptedDataId;
     
     /**
+     * When is this allocation due to expire?
+     */
+    @Column(name="`Expires`")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expires;
+
+    /**
+     * Determines when/whether this allocation has been deleted.
+     */
+    @Column(name = "`Deleted`")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deleted;
+    
+    /**
      * The list of files contained in the allocation
      */
     @OneToMany(mappedBy="allocation")
     @MapKey(name="cryptedFileId")
     private Map<UUID, AllocationFile> files;
+    
+    /**
+     * An allocation could be derived from a dispatch (in the case of a file sent by a member).
+     */
+    @ManyToOne
+    @JoinColumn(name="DerivedFromID")
+    private Dispatch derivedFrom;
     
     /**
      * Secret key for the allocation XML (transient).
@@ -92,14 +109,6 @@ public abstract class Allocation extends SnapshotEntity {
      */
     @Transient
     private transient AllocationType xml;
-    
-    public UUID getBundleId() {
-        return bundleId;
-    }
-
-    public void setBundleId(UUID bundleId) {
-        this.bundleId = bundleId;
-    }
 
     public final UUID getCryptedDataId() {
         return cryptedDataId;
@@ -147,5 +156,29 @@ public abstract class Allocation extends SnapshotEntity {
 
     public void setXml(AllocationType xml) {
         this.xml = xml;
+    }
+
+    public Date getExpires() {
+        return expires;
+    }
+
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    public Date getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Date deleted) {
+        this.deleted = deleted;
+    }
+
+    public Dispatch getDerivedFrom() {
+        return derivedFrom;
+    }
+
+    public void setDerivedFrom(Dispatch derivedFrom) {
+        this.derivedFrom = derivedFrom;
     }
 }
