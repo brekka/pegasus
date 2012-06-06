@@ -105,12 +105,12 @@ class AllocationServiceSupport {
         List<FileType> fileList = bundleType.getFileList();
         for (FileType file : fileList) {
             FileType f = b.addNewFile();
-            file.setKey(f.getKey());
-            file.setLength(f.getLength());
-            file.setMimeType(f.getMimeType());
-            file.setName(f.getName());
-            file.setUUID(f.getUUID());
-            file.setMaxDownloads(maxDownloads);
+            f.setKey(file.getKey());
+            f.setLength(file.getLength());
+            f.setMimeType(file.getMimeType());
+            f.setName(file.getName());
+            f.setUUID(file.getUUID());
+            f.setMaxDownloads(maxDownloads);
         }
         return b;
     }
