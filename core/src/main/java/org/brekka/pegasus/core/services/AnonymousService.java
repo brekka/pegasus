@@ -34,6 +34,12 @@ public interface AnonymousService {
      * @return
      */
     boolean isAccepted(AnonymousTransfer anonymousTransfer);
+
+    /**
+     * @param token
+     * @return
+     */
+    AnonymousTransfer retrieveTransfer(String token);
     
 
 }

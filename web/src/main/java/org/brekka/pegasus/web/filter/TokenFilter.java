@@ -125,7 +125,7 @@ public class TokenFilter implements Filter {
             resp.setHeader("Content-Length", String.valueOf(fileType.getLength()));
             resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileType.getName() + "\"");
             resp.setContentType(fileType.getMimeType());
-            try ( InputStream is = downloadService.download(file, anonymousTransfer, null) ) {
+            try ( InputStream is = downloadService.download(file, null) ) {
                 IOUtils.copy(is, resp.getOutputStream());
             }
         } else {
@@ -139,7 +139,7 @@ public class TokenFilter implements Filter {
                 ZipEntry ze = new ZipEntry(fileType.getName());
                 ze.setSize(fileType.getLength());
                 zos.putNextEntry(ze);
-                try ( InputStream is = downloadService.download(file, anonymousTransfer, null) ) {
+                try ( InputStream is = downloadService.download(file, null) ) {
                     IOUtils.copy(is, zos);
                 }
                 zos.closeEntry();

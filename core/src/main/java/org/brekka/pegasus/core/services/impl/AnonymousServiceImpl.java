@@ -11,6 +11,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
+import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Token;
@@ -118,6 +119,20 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#retrieveTransfer(java.lang.String)
+     */
+    @Override
+    public AnonymousTransfer retrieveTransfer(String token) {
+        AccessorContext accessorContext = AccessorContext.getCurrent();
+        AnonymousTransfer transfer = accessorContext.retrieve(token, AnonymousTransfer.class);
+        if (transfer != null) {
+            refreshAllocation(transfer);
+        }
+        // If the transfer is not unlocked, null will be returned.
+        return transfer;
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.AnonymousService#agreementAccepted(java.lang.String)
      */
     @Override
@@ -146,6 +161,8 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), codeClean);
         decryptDocument(transfer, secretKeyBytes);
+        
+        bindToContext(token, transfer);
         return transfer;
     }
 }

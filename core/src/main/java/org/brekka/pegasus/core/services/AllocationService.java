@@ -3,6 +3,8 @@
  */
 package org.brekka.pegasus.core.services;
 
+import java.util.UUID;
+
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 
@@ -17,12 +19,13 @@ public interface AllocationService {
      */
     void incrementDownloadCounter(AllocationFile allocationFile);
 
-    /**
-     * @param transfer
-     */
-    void refreshAllocation(Allocation allocation);
-    
     void clearAllocation(Allocation allocation);
     
     void clearAllocationFile(AllocationFile file);
+
+    /**
+     * @param fileId
+     * @return
+     */
+    AllocationFile retrieveFile(UUID allocationFileId);
 }

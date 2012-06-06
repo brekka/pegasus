@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Deposit;
@@ -68,11 +69,11 @@ public interface InboxService {
     List<Deposit> retrieveDeposits(Inbox inbox);
     
     /**
-     * Unlock the specified deposit.
+     * Retrieve the specified deposit which will contain the file decryption key metadata.
      * @param deposit
      * @return
      */
-    Deposit unlock(Deposit deposit);
+    Deposit retrieveDeposit(UUID depositId);
     
     /**
      * @param keySafe

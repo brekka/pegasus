@@ -5,6 +5,8 @@ package org.brekka.pegasus.web.security;
 
 import java.util.Collection;
 
+import org.brekka.pegasus.core.model.Accessor;
+import org.brekka.pegasus.core.model.AccessorContext;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -12,7 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public class AnonymousAuthenticationToken extends AbstractAuthenticationToken {
+public class AnonymousAuthenticationToken extends AbstractAuthenticationToken implements Accessor {
 
     /**
      * Serial UID
@@ -20,6 +22,8 @@ public class AnonymousAuthenticationToken extends AbstractAuthenticationToken {
     private static final long serialVersionUID = -353817580361469260L;
     
     private final Object principal;
+    
+    private final AccessorContext context = new AccessorContext();
     
     
     public AnonymousAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
@@ -41,5 +45,13 @@ public class AnonymousAuthenticationToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return principal;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.Accessor#getContext()
+     */
+    @Override
+    public AccessorContext getContext() {
+        return context;
     }
 }

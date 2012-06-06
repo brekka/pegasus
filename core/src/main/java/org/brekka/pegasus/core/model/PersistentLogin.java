@@ -10,8 +10,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.brekka.pegasus.core.PegasusConstants;
-
 /**
  * Recreates the table structure defined by the Spring Security remember-me functionality.
  * 
@@ -19,7 +17,7 @@ import org.brekka.pegasus.core.PegasusConstants;
  * @see http://static.springsource.org/spring-security/site/docs/3.0.x/reference/remember-me.html
  */
 @Entity
-@Table(name="`persistent_logins`", schema=PegasusConstants.SCHEMA)
+@Table(name="`persistent_logins`")
 public class PersistentLogin implements Serializable {
 	/**
 	 * Serial UID

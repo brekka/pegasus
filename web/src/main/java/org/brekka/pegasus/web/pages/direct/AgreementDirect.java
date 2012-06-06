@@ -5,11 +5,9 @@ package org.brekka.pegasus.web.pages.direct;
 
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
-import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.services.AnonymousService;
-import org.brekka.pegasus.web.support.Transfers;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -25,9 +23,6 @@ public class AgreementDirect {
     @Inject
     private AnonymousService anonymousService;
     
-    @SessionAttribute("transfers")
-    private Transfers transfers;
-    
     @Property
     private boolean agree;
     
@@ -40,12 +35,7 @@ public class AgreementDirect {
     Object onActivate(String token) {
         this.token = token;
         
-        if (transfers == null) {
-            unlockPage.onActivate(token);
-            return unlockPage;
-        }
-        
-        transfer = (AnonymousTransfer) transfers.get(token);
+        transfer = anonymousService.retrieveTransfer(token);
         
         if (transfer == null) {
             unlockPage.onActivate(token);

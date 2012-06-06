@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.apache.tapestry5.annotations.InjectComponent;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
-import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.corelib.components.Zone;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Associate;
@@ -24,7 +23,6 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.pages.org.OrgIndex;
-import org.brekka.pegasus.web.support.Transfers;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 
 /**
@@ -66,9 +64,6 @@ public class MemberIndex {
     @Property
     private Vault loopVault;
     
-    @SessionAttribute("bundles")
-    private Transfers bundles;
-    
     @Property
     private Vault selectedVault;
     
@@ -88,10 +83,6 @@ public class MemberIndex {
                 orgIndexPage.init(associate.getOrganization());
                 retVal = orgIndexPage;
             } else {
-                // Normal member flow
-                if (bundles == null) {
-                    bundles = new Transfers();
-                }
                 selectedVault = current.getMember().getDefaultVault();
             }
         }

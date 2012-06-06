@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
+import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.services.AllocationService;
@@ -60,13 +61,19 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     }
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#refreshAllocation(org.brekka.pegasus.core.model.AnonymousTransfer)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrieveFile(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public void refreshAllocation(Allocation allocation) {
-        allocationDAO.refresh(allocation);
-        assignFileXml(allocation);
+    public AllocationFile retrieveFile(UUID allocationFileId) {
+        AccessorContext currentContext = AccessorContext.getCurrent();
+        AllocationFile allocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
+        if (allocationFile == null) {
+            allocationFile = allocationFileDAO.retrieveById(allocationFileId);
+            Allocation allocation = allocationFile.getAllocation();
+            // TODO How do we unlock it?
+            throw new IllegalStateException("Need to unlock allocation");
+        }
+        return allocationFile;
     }
     
     /* (non-Javadoc)

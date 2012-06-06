@@ -81,6 +81,9 @@ public class AllocationFile extends IdentifiableEntity {
      */
     @Transient
     private transient FileType xml;
+    
+    @Transient
+    private transient float progress;
 
     /**
      * 
@@ -139,5 +142,13 @@ public class AllocationFile extends IdentifiableEntity {
 
     public void setCryptedFileId(UUID cryptedFileId) {
         this.cryptedFileId = cryptedFileId;
+    }
+
+    public float getProgress() {
+        return progress;
+    }
+
+    public void setProgress(float progress) {
+        this.progress = progress;
     }
 }

@@ -6,8 +6,11 @@ package org.brekka.pegasus.core.services.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
@@ -26,7 +29,9 @@ import org.brekka.paveway.core.services.ResourceEncryptor;
 import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
+import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Transfer;
@@ -64,6 +69,8 @@ class AllocationServiceSupport {
     @Autowired
     protected EventService eventService;
 
+    @Autowired
+    private AllocationDAO allocationDAO;
     
     @Autowired
     private AllocationFileDAO allocationFileDAO;
@@ -194,6 +201,27 @@ class AllocationServiceSupport {
         allocation.setSecretKey(secretKey);
         allocation.setIv(encryptor.getIV().getIV());
         allocation.setXml(allocationDoc.getAllocation());
+    }
+    
+    protected void bindToContext(Allocation allocation) {
+        bindToContext(allocation.getId(), allocation);
+    }
+    
+    protected void bindToContext(Serializable key, Allocation allocation) {
+        AccessorContext accessorContext = AccessorContext.getCurrent();
+        accessorContext.retain(key, allocation);
+        Set<Entry<UUID,AllocationFile>> fileEntrySet = allocation.getFiles().entrySet();
+        for (Entry<UUID, AllocationFile> entry : fileEntrySet) {
+            accessorContext.retain(entry.getKey(), entry.getValue());
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#refreshAllocation(org.brekka.pegasus.core.model.AnonymousTransfer)
+     */
+    protected void refreshAllocation(Allocation allocation) {
+        allocationDAO.refresh(allocation);
+        assignFileXml(allocation);
     }
     
 

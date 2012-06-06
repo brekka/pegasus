@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
+import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
@@ -201,11 +202,21 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit unlock(Deposit deposit) {
-        UUID cryptedDataId = deposit.getCryptedDataId();
-        KeySafe keySafe = deposit.getKeySafe();
-        byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-        decryptDocument(deposit, secretKeyBytes);
+    public Deposit retrieveDeposit(UUID depositId) {
+        AccessorContext current = AccessorContext.getCurrent();
+        Deposit deposit = current.retrieve(depositId, Deposit.class);
+        if (deposit == null) {
+            // Need to extract the metadata
+            deposit = depositDAO.retrieveById(depositId);
+            UUID cryptedDataId = deposit.getCryptedDataId();
+            KeySafe keySafe = deposit.getKeySafe();
+            byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
+            decryptDocument(deposit, secretKeyBytes);
+            bindToContext(deposit);
+        } else {
+            // Already unlocked, just refresh
+            refreshAllocation(deposit);
+        }
         return deposit;
     }
     

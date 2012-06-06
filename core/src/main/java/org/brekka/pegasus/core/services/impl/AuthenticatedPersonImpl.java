@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.security.PegasusAuthority;
@@ -30,6 +31,8 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
     private Person person;
     
     private final Set<PegasusAuthority> authorities;
+    
+    private final AccessorContext context = new AccessorContext();
     
     public AuthenticatedPersonImpl(Person person, Set<PegasusAuthority> authorities) {
         this.person = person;
@@ -120,6 +123,14 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.Accessor#getContext()
+     */
+    @Override
+    public AccessorContext getContext() {
+        return context;
     }
     
 

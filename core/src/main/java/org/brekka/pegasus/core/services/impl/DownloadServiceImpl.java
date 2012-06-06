@@ -14,7 +14,6 @@ import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
-import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.EventService;
@@ -53,7 +52,7 @@ public class DownloadServiceImpl implements DownloadService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public InputStream download(AllocationFile file, Transfer transfer, ProgressCallback progressCallback) {
+    public InputStream download(AllocationFile file, ProgressCallback progressCallback) {
         FileType fileType = file.getXml();
         FileDownloadEvent event = eventService.beginFileDownloadEvent(file);
         CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(file.getCryptedFileId());

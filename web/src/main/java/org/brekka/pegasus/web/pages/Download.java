@@ -7,15 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.tapestry5.StreamResponse;
-import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.Response;
 import org.brekka.pegasus.core.model.AllocationFile;
-import org.brekka.pegasus.core.model.Transfer;
+import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.DownloadService;
-import org.brekka.pegasus.web.support.Transfers;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
@@ -25,17 +22,19 @@ import org.brekka.xml.pegasus.v1.model.FileType;
 public class Download {
     
     @Inject
+    private AllocationService allocationService;
+    
+    @Inject
     private DownloadService downloadService;
 
-    @SessionAttribute("transfers")
-    private Transfers transfers;
-    
     Object onActivate(String uuid, String filename) {
         UUID fileId = UUID.fromString(uuid);
-        final Transfer transfer = transfers.getTransferWithFile(fileId);
-        final AllocationFile file = transfer.getFiles().get(fileId);
+        final AllocationFile file = allocationService.retrieveFile(fileId);
         final FileType fileType = file.getXml();
-        final MutableFloat progress = transfers.downloadStartProgress(file);
+        if (fileType == null) {
+            // TDODO handle this better
+            throw new IllegalStateException("File data not available");
+        }
         return new StreamResponse() {
             @Override
             public void prepareResponse(Response response) {
@@ -45,10 +44,10 @@ public class Download {
             
             @Override
             public InputStream getStream() throws IOException {
-                return downloadService.download(file, transfer, new DownloadService.ProgressCallback() {
+                return downloadService.download(file, new DownloadService.ProgressCallback() {
                     @Override
                     public void update(long current, long total) {
-                        progress.setValue((float) current / total);
+                        file.setProgress((float) current / total);
                     }
                 });
             }

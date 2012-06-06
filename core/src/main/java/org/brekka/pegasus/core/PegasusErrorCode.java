@@ -24,6 +24,8 @@ public enum PegasusErrorCode implements ErrorCode {
     
     PG401,
     
+    PG500,
+    
     PG600,
     
     PG900,

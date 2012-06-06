@@ -10,14 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tapestry5.ComponentResources;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
-import org.apache.tapestry5.annotations.SessionAttribute;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.commons.lang.ByteLengthFormat;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.AnonymousService;
-import org.brekka.pegasus.web.support.Transfers;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
@@ -39,14 +36,8 @@ public class FetchDirect {
     private AnonymousService anonymousService;
     
     @Inject
-    private AllocationService allocationService;
-    
-    @Inject
     private ComponentResources resources;
 
-    @SessionAttribute("transfers")
-    private Transfers transfers;
-    
     @Property
     private String token;
     
@@ -64,18 +55,11 @@ public class FetchDirect {
     Object onActivate(String token) {
         this.token = token;
         
-        if (transfers == null) {
-            unlockPage.onActivate(token);
-            return unlockPage;
-        }
-        
-        Transfers transfers = this.transfers;
-        transfer = (AnonymousTransfer) transfers.get(token);
+        transfer = anonymousService.retrieveTransfer(token);
         if (transfer == null) {
             unlockPage.onActivate(token);
             return unlockPage;
         }
-        allocationService.refreshAllocation(transfer);
         AllocationType xml = transfer.getXml();
         if (xml.isSetAgreement() 
                 && !anonymousService.isAccepted(transfer)) {
