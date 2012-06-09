@@ -41,7 +41,7 @@ public class Dispatch extends Allocation {
      * The key safe that contains the key
      */
     @ManyToOne
-    @JoinColumn(name="`KeySafeID`", nullable=false, updatable=false)
+    @JoinColumn(name="`KeySafeID`")
     private KeySafe keySafe;
     
 

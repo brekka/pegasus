@@ -15,11 +15,11 @@
     <packaging>war</packaging>
 
     <dependencies>
-		<dependency>
-			<groupId>org.brekka.phalanx</groupId>
-			<artifactId>phalanx-client</artifactId>
-			<version>2.1.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.brekka.phalanx</groupId>
+            <artifactId>phalanx-client</artifactId>
+            <version>2.1.0</version>
+        </dependency>
         <dependency>
             <groupId>org.brekka.pegasus</groupId>
             <artifactId>pegasus-core</artifactId>
@@ -52,17 +52,17 @@
             <artifactId>tapestry-spring</artifactId>
             <version>${tapestry-release-version}</version>
         </dependency>
-		<dependency>
-			<groupId>org.apache.tapestry</groupId>
-			<artifactId>tapestry-upload</artifactId>
-			<version>${tapestry-release-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tapestry</groupId>
-			<artifactId>tapestry-func</artifactId>
-			<version>${tapestry-release-version}</version>
-		</dependency>
-        
+        <dependency>
+            <groupId>org.apache.tapestry</groupId>
+            <artifactId>tapestry-upload</artifactId>
+            <version>${tapestry-release-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tapestry</groupId>
+            <artifactId>tapestry-func</artifactId>
+            <version>${tapestry-release-version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.got5</groupId>
             <artifactId>tapestry5-jquery</artifactId>
@@ -176,6 +176,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <archiveClasses>true</archiveClasses>
+                </configuration>
             </plugin>
         </plugins>
     </build>

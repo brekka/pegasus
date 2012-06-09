@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<appender name="Pegasus" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{ISO8601} %5p %32c{1} - %m%n" />
+		</layout>
+	</appender>
+
+	<logger name="org.apache.tapestry5">
+		<level value="warn" />
+	</logger>
+	<logger name="org.apache.tapestry5.TapestryFilter">
+		<level value="info" />
+	</logger>
+	<logger name="org.brekka">
+		<level value="info" />
+	</logger>
+	<logger name="org.springframework">
+		<level value="warn" />
+	</logger>
+	<logger name="org.hibernate">
+		<level value="warn" />
+	</logger>
+
+	<root>
+		<priority value="warn" />
+		<appender-ref ref="Pegasus" />
+	</root>
+
+</log4j:configuration>
