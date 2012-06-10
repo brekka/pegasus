@@ -6,11 +6,15 @@ package org.brekka.pegasus.web.pages.member;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.tapestry5.annotations.Component;
 import org.apache.tapestry5.annotations.InjectComponent;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
+import org.apache.tapestry5.corelib.components.Form;
 import org.apache.tapestry5.corelib.components.Zone;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
@@ -52,6 +56,9 @@ public class MemberIndex {
     @InjectComponent
     private Zone openVaultZone;
     
+    @Component
+    private Form openVault;
+    
     @Property
     private Inbox loopInbox;
     
@@ -89,10 +96,25 @@ public class MemberIndex {
         return retVal;
     }
     
-    Object onSuccessFromOpenVault(String vaultIdStr) {
+    Object onValidateFromOpenVault(String vaultIdStr) {
         UUID vaultId = UUID.fromString(vaultIdStr);
         Vault vault = vaultService.retrieveById(vaultId);
-        vaultService.openVault(vault, vaultPassword);
+        selectedVault = vault;
+        try {
+            vaultService.openVault(vault, vaultPassword);
+        } catch (PegasusException e) {
+            if (e.getErrorCode() == PegasusErrorCode.PG302) {
+                openVault.recordError("The code is incorrect for this vault");
+                return openVaultZone;
+            } else {
+                throw e;
+            }
+        }
+        return Boolean.TRUE;
+    }
+    
+    Object onSuccessFromOpenVault(String vaultIdStr) {
+        UUID vaultId = UUID.fromString(vaultIdStr);
         AuthenticatedMember current = memberService.getCurrent();
         Vault defaultVault = current.getMember().getDefaultVault();
         if (defaultVault.getId().equals(vaultId)) {

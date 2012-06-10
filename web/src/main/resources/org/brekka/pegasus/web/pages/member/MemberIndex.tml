@@ -3,7 +3,7 @@
 
     <h2>Member</h2>
     
-    <h3>Vaults</h3>
+    <h3>Vaults <t:pagelink page="vault/create">Create a new vault</t:pagelink></h3>
     <t:zone t:id="openVaultZone">
         <ul id="vaults">
             <t:loop source="vaultList" value="loopVault">
@@ -61,6 +61,7 @@
                                         <t:label for="vaultPassword">Enter password: </t:label>
                                         <t:passwordfield t:id="vaultPassword" />
                                         <t:submit value="Unlock" />
+                                        <t:errors />
                                     </t:form>
                                 </div>
                                 <p:else>
@@ -75,5 +76,4 @@
             </t:loop>
         </ul>
     </t:zone>
-    <t:pagelink page="vault/create">Create a new vault</t:pagelink>
 </html>

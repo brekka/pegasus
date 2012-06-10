@@ -46,6 +46,17 @@ h3 em {
 	font-weight: normal;
 }
 
+h3 a, h4 a {
+	color: #000080;
+	font-size: 12px;
+	font-weight: normal;
+	padding: 0 0 0 10px
+}
+
+h3 a:hover, h4 a:hover {
+	color: #008000;
+}
+
 #alerts {
 	position: relative;
 }
@@ -228,19 +239,34 @@ input.code {
 
 #vaults .vault {
 	border: 1px solid #A0A0A0;
+	border-radius: 8px 8px 8px 8px;
 	padding: 5px;
 	background-color: #F0F0F0;
-	margin-bottom: 5px;
+	margin: 0 10px 5px 10px;
 }
 
-.shelves {
-	background-color: #FFFFFF;
+.vault span {
+	display: block;
+	font-weight: bold;
+	color: #606060;
+}
+
+.code {
+	margin: 10px 30px;
+}
+
+.code input[type="password"] {
+	font-family: monospace;
+	width: 250px; 
+}
+	
+.shelves { 
+	background-color : #FFFFFF;
 	border: 1px solid #A0A0A0;
 	padding: 5px;
 }
 
 .shelf {
-	background-color: #FFFFFF;
 	border-bottom: 1px dashed #A0A0A0;
 	padding: 5px;
 	margin: 0px 0 5px;

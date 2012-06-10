@@ -18,6 +18,7 @@ import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.core.utils.SlugUtils;
+import org.brekka.phalanx.api.PhalanxException;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
@@ -106,7 +107,13 @@ public class VaultServiceImpl implements VaultService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void openVault(Vault vault, String vaultPassword) {
         UUID principalId = vault.getPrincipalId();
-        AuthenticatedPrincipal authenticatedPrincipal = phalanxService.authenticate(new IdentityPrincipal(principalId), vaultPassword);
+        AuthenticatedPrincipal authenticatedPrincipal;
+        try {
+            authenticatedPrincipal = phalanxService.authenticate(new IdentityPrincipal(principalId), vaultPassword);
+        } catch (PhalanxException e) {
+            throw new PegasusException(PegasusErrorCode.PG302, e,
+                    "Unable to unlock vault'%s'", vault.getId());
+        }
         vault.setAuthenticatedPrincipal(authenticatedPrincipal);
         
         AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);

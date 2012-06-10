@@ -20,6 +20,11 @@ public enum PegasusErrorCode implements ErrorCode {
      */
     PG300,
     
+    /**
+     * Incorrect unlock code for vault
+     */
+    PG302,
+    
     PG400,
     
     PG401,
