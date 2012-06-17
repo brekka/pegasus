@@ -8,6 +8,7 @@ import java.util.List;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -34,6 +35,8 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
     public List<Deposit> retrieveByInbox(Inbox inbox) {
         return getCurrentSession().createCriteria(Deposit.class)
                 .add(Restrictions.eq("inbox", inbox))
+                .add(Restrictions.isNull("deleted"))
+                .addOrder(Order.desc("created"))
                 .list();
     }
 }

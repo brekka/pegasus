@@ -93,6 +93,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         phalanxService.deleteCryptedData(new IdentityCryptedData(cryptedDataId));
         resourceStorageService.remove(allocation.getId());
         allocation.setDeleted(new Date());
+        allocation.setCryptedDataId(null);
         allocationDAO.update(allocation);
     }
 

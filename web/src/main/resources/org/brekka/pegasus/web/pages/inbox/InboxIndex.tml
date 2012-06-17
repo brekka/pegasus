@@ -4,18 +4,41 @@
     
     <h2>Inbox '${inbox.name}'</h2>
     
-    <span>${inboxLink}</span>
+    <p> Send the following link to people who you would like to send you files. </p>
+    <form>
+    	<input type="text" class="link" value="${inboxLink}" />
+    </form>
     
     <h3>Deposits</h3>
-    <t:grid source="deposits" row="loopDeposit" add="details">
-        <p:detailsCell>
-            <ul>
-                <t:loop source="deposit.xml.bundle.fileList" value="loopFile">
-                    <li><t:pagelink page="download" context="fileContext">
-                        ${loopFile.name} (${loopFile.length} bytes)</t:pagelink></li>
+    
+    <p> You have received the following deposits. </p>
+    
+    <ol id="inboxfiles">
+    
+    <t:loop source="deposits" value="loopDeposit">
+        <li class="deposit">
+            <span class="deposited"><em>Deposited: </em> 
+                <t:output value="loopDeposit.created" format="elapsedPeriodFormat" />
+            </span>
+            <t:if test="details.reference">
+                <span class="reference"><em>Reference: </em> ${details.reference}</span>
+            </t:if>
+            <ul class="files">
+                <t:loop source="details.bundle.fileList" value="loopFile">
+                    <li>
+                        <t:pagelink page="download" context="fileContext" class="filename" title="${loopFile.name}">${loopFile.name}</t:pagelink>
+                        <span class="size">
+                            <t:output value="loopFile.length" format="byteLengthFormat" />
+                        </span>
+                    </li>
                 </t:loop>
             </ul>
-        </p:detailsCell>
-    </t:grid>
+            <div class="comment">
+                <em>Comment: </em>
+                <span>${details.comment}</span>
+            </div>
+        </li>
+    </t:loop>
 
+    </ol>
 </html>

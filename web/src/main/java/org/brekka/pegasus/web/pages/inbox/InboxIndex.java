@@ -3,14 +3,19 @@
  */
 package org.brekka.pegasus.web.pages.inbox;
 
+import java.text.Format;
 import java.util.List;
 
+import org.apache.tapestry5.ComponentResources;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.commons.lang.ByteLengthFormat;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.support.Configuration;
+import org.brekka.pegasus.web.support.ElapsedPeriodFormat;
+import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.FileType;
 
 /**
@@ -25,14 +30,24 @@ public class InboxIndex {
     @Inject
     private InboxService inboxService;
     
+    @Inject
+    private ComponentResources resources;
+    
     @Property
     private Inbox inbox;
     
-    @Property
     private Deposit loopDeposit;
     
     @Property
     private FileType loopFile;
+    
+    @SuppressWarnings("unused")
+    @Property
+    private Format byteLengthFormat = new ByteLengthFormat(resources.getLocale(), ByteLengthFormat.Mode.SI);
+    
+    @SuppressWarnings("unused")
+    @Property
+    private Format elapsedPeriodFormat = ElapsedPeriodFormat.getDateTimeInstance(resources.getLocale(), resources.getMessages());
     
     Object onActivate(String token) {
         inbox = inboxService.retrieveForToken(token);
@@ -55,7 +70,21 @@ public class InboxIndex {
         return new String[]{ loopFile.getUUID(), loopFile.getName() };
     }
     
-    public Deposit getDeposit() {
-        return inboxService.retrieveDeposit(loopDeposit.getId());
+    /**
+     * @param loopDeposit the loopDeposit to set
+     */
+    public void setLoopDeposit(Deposit loopDeposit) {
+        this.loopDeposit = inboxService.retrieveDeposit(loopDeposit.getId());
+    }
+    
+    /**
+     * @return the loopDeposit
+     */
+    public Deposit getLoopDeposit() {
+        return loopDeposit;
+    }
+    
+    public AllocationType getDetails() {
+        return loopDeposit.getXml();
     }
 }

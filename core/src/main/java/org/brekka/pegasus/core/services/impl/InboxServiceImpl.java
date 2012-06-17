@@ -209,10 +209,12 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
             // Need to extract the metadata
             deposit = depositDAO.retrieveById(depositId);
             UUID cryptedDataId = deposit.getCryptedDataId();
-            KeySafe keySafe = deposit.getKeySafe();
-            byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-            decryptDocument(deposit, secretKeyBytes);
-            bindToContext(deposit);
+            if (cryptedDataId != null) {
+                KeySafe keySafe = deposit.getKeySafe();
+                byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
+                decryptDocument(deposit, secretKeyBytes);
+                bindToContext(deposit);
+            }
         } else {
             // Already unlocked, just refresh
             refreshAllocation(deposit);

@@ -46,14 +46,14 @@ h3 em {
 	font-weight: normal;
 }
 
-h3 a, h4 a {
+h3 a,h4 a {
 	color: #000080;
 	font-size: 12px;
 	font-weight: normal;
 	padding: 0 0 0 10px
 }
 
-h3 a:hover, h4 a:hover {
+h3 a:hover,h4 a:hover {
 	color: #008000;
 }
 
@@ -251,19 +251,38 @@ input.code {
 	color: #606060;
 }
 
+.vault {
+	position: relative;
+}
+
+#vaults .vault {
+	background-image: -webkit-linear-gradient(top, #F0F0F0, #D0D0D0);
+	background-image: -moz-linear-gradient(top, #F0F0F0, #D0D0D0);
+}
+
+.unlock a {
+	position: absolute;
+	display: block;
+	text-align: right;
+	top: 5px;
+	left: 5px;
+	right: 5px;
+}
+
 .code {
 	margin: 10px 30px;
 }
 
 .code input[type="password"] {
 	font-family: monospace;
-	width: 250px; 
+	width: 250px;
 }
-	
-.shelves { 
-	background-color : #FFFFFF;
+
+.shelves {
+	background-color: #FFFFFF;
 	border: 1px solid #A0A0A0;
 	padding: 5px;
+	margin: 5px 0 0 0;
 }
 
 .shelf {
@@ -388,4 +407,47 @@ input.code {
 	border: 1px dotted #808080;
 	padding: 0.5em;
 	margin: 0.2em 0 0 0;
+}
+
+#inboxfiles {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+#inboxfiles li {
+	border: 1px solid #808080;
+	margin: 10px 0;
+	padding: 6px;
+}
+
+#inboxfiles .deposited {
+	padding: 0 24px 0 0;
+}
+
+#inboxfiles .files {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	width: 640px;
+}
+
+#inboxfiles .files li {
+	position: relative;
+	border: 1px solid #808080;
+	width: 300px;
+	float: left;
+	margin: 3px;
+	padding: 6px;
+	background-color: #F0F0FF;
+}
+
+#inboxfiles .files .filename {
+	float: left;
+	width: 250px;
+}
+
+#inboxfiles .files .size {
+	float: left;
+	width: 50px;
 }
