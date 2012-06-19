@@ -16,7 +16,9 @@
         <intercept-url pattern="/member/setup**" access="ROLE_MEMBER_SIGNUP"/>
         <intercept-url pattern="/member/**"   access="ROLE_USER"/>
         <intercept-url pattern="/inbox/**"    access="ROLE_USER"/>
-        <intercept-url pattern="/direct/**"   access="ROLE_USER,ROLE_ANONYMOUS_TRANSFER"/>
+        <intercept-url pattern="/direct/make**"   access="ROLE_USER,ROLE_ANONYMOUS_TRANSFER"/>
+        <intercept-url pattern="/direct/done**"   access="ROLE_USER,ROLE_ANONYMOUS_TRANSFER"/>
+        <intercept-url pattern="/direct/**"   access="ROLE_USER,ROLE_ANONYMOUS"/>
         <intercept-url pattern="/**"          access="ROLE_USER,ROLE_ANONYMOUS"/>
         <logout logout-url="/logout"/>
         <openid-login login-page="/login" authentication-failure-url="/login?error=true" default-target-url="/authenticated"
