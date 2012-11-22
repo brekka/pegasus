@@ -3,10 +3,13 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -15,6 +18,7 @@ import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.hibernate.annotations.Type;
 
 /**
  * An inbox allows an individual on the internet to send a file to a {@link Member}. The public key of the vault will be
@@ -24,13 +28,21 @@ import org.brekka.pegasus.core.PegasusConstants;
  */
 @Entity
 @Table(name="`Inbox`", schema=PegasusConstants.SCHEMA)
-public class Inbox extends LongevousEntity {
+public class Inbox extends LongevousEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 5531713690260375934L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The token that identifies this inbox to the outside world.
      */
@@ -86,6 +98,22 @@ public class Inbox extends LongevousEntity {
     @Transient
     private transient String name;
     
+    
+    
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public KeySafe getKeySafe() {
         return keySafe;
     }

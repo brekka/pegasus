@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -25,7 +26,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`XmlEntity`", schema=PegasusConstants.SCHEMA)
-public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
+public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> {
 
     /**
      * The maximum length of data that this entity can store.
@@ -36,7 +37,15 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
      * Serial UID
      */
     private static final long serialVersionUID = 1708978401887395862L;
-
+    
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * If the XML should be encrypted, then this field should be set to the id of the key store.
      */
@@ -77,7 +86,19 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity {
     private transient T bean;
     
     
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
 
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public KeySafe getKeySafe() {
         return keySafe;

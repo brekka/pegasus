@@ -80,15 +80,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<V
         return profile;
     }
     
-    private ProfileDocument createProfile(Member member) {
-        ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
-        ProfileType profileType = profileDocument.addNewProfile();
-
-        if (member instanceof Person) {
-            profileType.setFullName(((Person) member).getFullName());
-        }
-        return profileDocument;
-    }
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ProfileService#retrieveProfile(org.brekka.pegasus.core.model.Member)
@@ -171,6 +162,16 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<V
             String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
             ((Person) currentMember.getMember()).setFullName(fullName);
         }
+    }
+
+    private static ProfileDocument createProfile(Member member) {
+        ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
+        ProfileType profileType = profileDocument.addNewProfile();
+
+        if (member instanceof Person) {
+            profileType.setFullName(((Person) member).getFullName());
+        }
+        return profileDocument;
     }
     
     private class ProfileSynchronization extends TransactionSynchronizationAdapter {

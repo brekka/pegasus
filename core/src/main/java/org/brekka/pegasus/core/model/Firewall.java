@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
@@ -23,13 +24,21 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`Firewall`", schema=PegasusConstants.SCHEMA)
-public class Firewall extends SnapshotEntity {
+public class Firewall extends SnapshotEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 4426014107250666833L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The entity that owns this firewall ruleset. 
      * For example a member, division or even the system id.
@@ -51,6 +60,20 @@ public class Firewall extends SnapshotEntity {
     @Column(name="`DefaultAction`", length=5, nullable=false)
     @Enumerated(EnumType.STRING)
     private FirewallAction defaultAction;
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public UUID getOwningEntityId() {
         return owningEntityId;

@@ -3,8 +3,11 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -21,13 +24,21 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`Network`", schema=PegasusConstants.SCHEMA)
-public class Network extends SnapshotEntity {
+public class Network extends SnapshotEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -9155812902107593391L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The group that this network block belongs to.
      */
@@ -57,5 +68,19 @@ public class Network extends SnapshotEntity {
 
     public void setBlock(String block) {
         this.block = block;
+    }
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

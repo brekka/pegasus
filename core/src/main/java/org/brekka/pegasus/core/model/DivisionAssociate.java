@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -30,13 +31,21 @@ import org.hibernate.annotations.Type;
         @UniqueConstraint(columnNames = {"`DivisionID`", "`AssociateID`" }),
     }
 )
-public class DivisionAssociate extends LongevousEntity {
+public class DivisionAssociate extends LongevousEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 4972021130097729646L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The division that the associate is a member of
      */
@@ -58,7 +67,19 @@ public class DivisionAssociate extends LongevousEntity {
     @Type(type="pg-uuid")
     private UUID keyPairId;
     
-    
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public Division getDivision() {
         return division;

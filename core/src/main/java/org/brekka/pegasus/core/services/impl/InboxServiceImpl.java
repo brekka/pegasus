@@ -122,7 +122,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         
         // TODO Expiry, currently fixed at one week, should be configured.
         DateTime now = new DateTime();
-        DateTime expires = now.plusDays(7);
+        DateTime expires = now.plusDays(30);
         deposit.setExpires(expires.toDate());
         
         AllocationDocument document = prepareDocument(bundleType);

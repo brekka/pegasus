@@ -3,6 +3,8 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -10,6 +12,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
@@ -17,6 +20,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.hibernate.annotations.Type;
 
 /**
  * Keeps keys safe.
@@ -38,13 +42,21 @@ import org.brekka.pegasus.core.PegasusConstants;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Base")
-public abstract class KeySafe extends LongevousEntity {
+public abstract class KeySafe extends LongevousEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -621238034501395611L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * Records the current status of this vault
      */
@@ -88,5 +100,19 @@ public abstract class KeySafe extends LongevousEntity {
 
     public final void setStatus(KeySafeStatus status) {
         this.status = status;
+    }
+
+    /**
+     * @return the id
+     */
+    public final UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public final void setId(UUID id) {
+        this.id = id;
     }
 }

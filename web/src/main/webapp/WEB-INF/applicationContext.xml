@@ -4,13 +4,15 @@
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:jee="http://www.springframework.org/schema/jee" 
+	xmlns:stil="http://brekka.org/schema/stillingar/v1"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:stil="http://brekka.org/schema/stillingar"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	xsi:schemaLocation="
+        http://brekka.org/schema/stillingar/v1 http://brekka.org/schema/stillingar/brekka-stillingar-1.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
-        http://brekka.org/schema/stillingar http://brekka.org/schema/stillingar/brekka-stillingar-1.0.xsd">
+        ">
 
     <import resource="classpath:org/brekka/pegasus/core/spring/databaseContext.xml"/>
     <import resource="classpath:org/brekka/pegasus/core/spring/daoContext.xml"/>
@@ -23,10 +25,10 @@
     
 	<context:component-scan base-package="org.brekka.pegasus.web.support" />
 
-    <stil:configuration id="pegasus-config" application-name="pegasus" reload-interval="5000" type="xmlbeans"> 
+    <stil:configuration-service id="pegasus-config" name="pegasus" reload-interval="5000" engine="xmlbeans"> 
+        <stil:property-placeholder />
         <stil:namespace prefix="c"     url="http://brekka.org/xml/pegasus/v1/config" />
-        <stil:property-placeholder prefix="$pegasus{" suffix="}" />
-    </stil:configuration> 
+    </stil:configuration-service> 
     
     <bean id="config" class="org.brekka.pegasus.web.support.Configuration" />
 </beans>

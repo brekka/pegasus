@@ -3,7 +3,7 @@
  */
 package org.brekka.pegasus.web.support;
 
-import org.brekka.stillingar.annotations.Configured;
+import org.brekka.stillingar.api.annotations.Configured;
 import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus;
 
 /**

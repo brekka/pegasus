@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -33,13 +34,21 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name = "`AllocationFile`", schema=PegasusConstants.SCHEMA)
-public class AllocationFile extends IdentifiableEntity {
+public class AllocationFile implements IdentifiableEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -5007642578887170101L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The transfer that this file is part of
      */
@@ -92,7 +101,7 @@ public class AllocationFile extends IdentifiableEntity {
     }
 
     public AllocationFile(UUID id, Allocation allocation) {
-        super(id);
+        this.id = id;
         this.allocation = allocation;
     }
 
@@ -150,5 +159,19 @@ public class AllocationFile extends IdentifiableEntity {
 
     public void setProgress(float progress) {
         this.progress = progress;
+    }
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

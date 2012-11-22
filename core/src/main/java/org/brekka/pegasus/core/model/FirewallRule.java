@@ -3,16 +3,20 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.hibernate.annotations.Type;
 
 /**
  * A rule within the firewall
@@ -21,13 +25,21 @@ import org.brekka.pegasus.core.PegasusConstants;
  */
 @Entity
 @Table(name="`FirewallRule`", schema=PegasusConstants.SCHEMA)
-public class FirewallRule extends SnapshotEntity {
+public class FirewallRule extends SnapshotEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 294799530375778897L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The firewall this rule belongs to.
      */
@@ -54,6 +66,20 @@ public class FirewallRule extends SnapshotEntity {
      */
     @Column(name="`Priority`")
     private int priority;
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public Firewall getFirewall() {
         return firewall;

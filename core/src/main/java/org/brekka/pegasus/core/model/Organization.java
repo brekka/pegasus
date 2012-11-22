@@ -3,8 +3,11 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -12,6 +15,7 @@ import javax.persistence.Table;
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v1.model.OrganizationDocument;
+import org.hibernate.annotations.Type;
 
 /**
  * Represents an organization such as a company, community etc. The defining characteristic of an organization is that
@@ -21,13 +25,21 @@ import org.brekka.xml.pegasus.v1.model.OrganizationDocument;
  */
 @Entity
 @Table(name="`Organization`", schema=PegasusConstants.SCHEMA)
-public class Organization extends LongevousEntity {
+public class Organization extends LongevousEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 1874104138893719039L; 
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The token that uniquely identifies this organization to the outside world.
      */
@@ -85,5 +97,19 @@ public class Organization extends LongevousEntity {
 
     public void setXml(XmlEntity<OrganizationDocument> xml) {
         this.xml = xml;
+    }
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

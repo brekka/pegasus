@@ -39,6 +39,16 @@ public interface InboxService {
     Deposit createDeposit(Inbox inbox, String reference, 
             String comment, String agreementText, List<FileBuilder> fileBuilders);
     
+    /**
+     * 
+     * @param inbox
+     * @param reference
+     * @param comment
+     * @param agreementText
+     * @param bundleType
+     * @param dispatch
+     * @return
+     */
     Deposit createDeposit(Inbox inbox, String reference, String comment, String agreementText, 
             BundleType bundleType, Dispatch dispatch);
 

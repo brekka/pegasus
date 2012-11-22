@@ -4,11 +4,13 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -19,6 +21,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.hibernate.annotations.Type;
 
 /**
  * Encapsulates an e-mail address owned by a member (who can have more than one address). Note that the address itself is not
@@ -30,12 +33,20 @@ import org.brekka.pegasus.core.PegasusConstants;
 @Table(name="`EMailAddress`", schema=PegasusConstants.SCHEMA, uniqueConstraints={
         @UniqueConstraint(columnNames={ "`Hash`", "`Active`"})
 })
-public class EMailAddress extends SnapshotEntity {
+public class EMailAddress extends SnapshotEntity<UUID> {
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 7519489574234136670L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * A hash of the e-mail address (SHA-256). May also have gone through a number of iterations.
      */
@@ -86,6 +97,21 @@ public class EMailAddress extends SnapshotEntity {
      */
     @Transient
     private transient String address;
+
+    
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public byte[] getHash() {
         return hash;

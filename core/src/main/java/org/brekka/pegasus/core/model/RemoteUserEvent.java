@@ -4,8 +4,10 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -13,6 +15,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.brekka.commons.persistence.model.IdentifiableEntity;
+import org.hibernate.annotations.Type;
 
 /**
  * An event executed by a remote user.
@@ -20,13 +23,21 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @MappedSuperclass
-public abstract class RemoteUserEvent extends IdentifiableEntity {
+public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 497882239907363162L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     /**
      * The moment the event begun
      */
@@ -98,5 +109,19 @@ public abstract class RemoteUserEvent extends IdentifiableEntity {
 
     public void setMember(Member member) {
         this.member = member;
+    }
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

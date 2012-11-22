@@ -4,7 +4,6 @@
 package org.brekka.pegasus.core.model;
 
 
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -25,18 +24,12 @@ public class Person extends Member {
      */
     private static final long serialVersionUID = 4825064100521455268L;
 
-    /**
-     * The open ID of this member
-     * Can't be made non-nullable due to the inheritence of {@link Member}.
-     */
-    @Column(name="`OpenID`", unique=true, length=512)
-    private String openId;
 
     /**
      * The user's default e-mail address
      */
     @OneToOne
-    @JoinColumn(name="`EMailAddress`")
+    @JoinColumn(name="`EMailAddressID`")
     private EMailAddress defaultEmailAddress;
 
     /**
@@ -45,14 +38,6 @@ public class Person extends Member {
     @Transient
     private transient String fullName;
     
-
-    public String getOpenId() {
-        return openId;
-    }
-
-    public void setOpenId(String openId) {
-        this.openId = openId;
-    }
 
     public EMailAddress getDefaultEmailAddress() {
         return defaultEmailAddress;

@@ -16,7 +16,7 @@ import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
-import org.brekka.stillingar.annotations.Configured;
+import org.brekka.stillingar.api.annotations.Configured;
 import org.springframework.stereotype.Service;
 
 /**

@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -28,13 +29,21 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`Invitation`", schema=PegasusConstants.SCHEMA)
-public class Invitation extends SnapshotEntity {
+public class Invitation extends SnapshotEntity<UUID> {
     
     /**
      * Serial UID
      */
     private static final long serialVersionUID = 6635175785485701951L;
 
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
     @ManyToOne
     @JoinColumn(name="`SenderID`", nullable=false)
     private Actor sender;
@@ -112,5 +121,19 @@ public class Invitation extends SnapshotEntity {
 
     public void setCryptedDataId(UUID cryptedDataId) {
         this.cryptedDataId = cryptedDataId;
+    }
+
+    /**
+     * @return the id
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

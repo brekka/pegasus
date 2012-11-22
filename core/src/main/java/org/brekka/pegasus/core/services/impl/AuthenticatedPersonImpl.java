@@ -90,7 +90,7 @@ class AuthenticatedPersonImpl extends AuthenticatedMemberBase implements UserDet
      */
     @Override
     public String getUsername() {
-        return person.getOpenId();
+        return person.getAuthenticationToken().getUsername();
     }
 
     /* (non-Javadoc)

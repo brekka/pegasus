@@ -13,6 +13,7 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -42,12 +43,20 @@ import org.hibernate.annotations.Type;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Allocation")
-public abstract class Allocation extends SnapshotEntity {
+public abstract class Allocation extends SnapshotEntity<UUID> {
 
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -949222719619428451L;
+    
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
     
     /**
      * Crypto profile used for this file
@@ -181,4 +190,20 @@ public abstract class Allocation extends SnapshotEntity {
     public void setDerivedFrom(Dispatch derivedFrom) {
         this.derivedFrom = derivedFrom;
     }
+
+    /**
+     * @return the id
+     */
+    public final UUID getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public final void setId(UUID id) {
+        this.id = id;
+    }
+    
+    
 }
