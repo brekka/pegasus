@@ -13,10 +13,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.ByteSequence;
@@ -37,8 +33,12 @@ import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.phalanx.api.services.PhalanxService;
-import org.brekka.phoenix.CryptoFactory;
-import org.brekka.phoenix.CryptoFactoryRegistry;
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.SecretKey;
+import org.brekka.phoenix.api.StreamCryptor;
+import org.brekka.phoenix.api.SymmetricCryptoSpec;
+import org.brekka.phoenix.api.services.CryptoProfileService;
+import org.brekka.phoenix.api.services.SymmetricCryptoService;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.BundleType;
@@ -61,10 +61,13 @@ class AllocationServiceSupport {
     protected ResourceStorageService resourceStorageService;
     
     @Autowired
+    protected SymmetricCryptoService symmetricCryptoService;
+    
+    @Autowired
     protected ResourceCryptoService resourceCryptoService;
     
     @Autowired
-    protected CryptoFactoryRegistry cryptoFactoryRegistry;
+    protected CryptoProfileService cryptoProfileService;
     
     @Autowired
     protected EventService eventService;
@@ -169,12 +172,12 @@ class AllocationServiceSupport {
     private AllocationType decrypt(Allocation allocation, byte[] secretKeyBytes) throws XmlException, IOException {
         UUID allocationId = allocation.getId();
         ByteSequence byteSequence = resourceStorageService.retrieve(allocationId);
-        IvParameterSpec iv = new IvParameterSpec(allocation.getIv());
-        CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(allocation.getProfile());
-        SecretKey secretKey = new SecretKeySpec(secretKeyBytes, cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
-        
+        CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(allocation.getProfile());
+        SecretKey secretKey = symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
+        allocation.setSecretKey(secretKey);
         try ( InputStream is = byteSequence.getInputStream(); ) {
-            InputStream dis = resourceCryptoService.decryptor(allocation.getProfile(), Compression.GZIP, iv, secretKey, is);
+            StreamCryptor<InputStream, SymmetricCryptoSpec> decryptor = resourceCryptoService.decryptor(allocation, Compression.GZIP);
+            InputStream dis = decryptor.getStream(is);
             AllocationDocument allocationDocument = AllocationDocument.Factory.parse(dis);
             allocation.setXml(allocation.getXml());
             return allocationDocument.getAllocation();
@@ -185,8 +188,8 @@ class AllocationServiceSupport {
     protected void encryptDocument(Allocation allocation, AllocationDocument allocationDoc) {
         allocation.setId(UUID.randomUUID());
         // Fetch the default crypto factory, generate a new secret key
-        CryptoFactory defaultCryptoFactory = cryptoFactoryRegistry.getDefault();
-        SecretKey secretKey = defaultCryptoFactory.getSymmetric().getKeyGenerator().generateKey();
+        CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
+        SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
         
         ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
         ByteSequence byteSequence = resourceStorageService.allocate(allocation.getId());
@@ -197,9 +200,9 @@ class AllocationServiceSupport {
             throw new PegasusException(PegasusErrorCode.PG200, e, 
                     "Failed to store bundle XML");
         }
-        allocation.setProfile(defaultCryptoFactory.getProfileId());
+        allocation.setProfile(cryptoProfile.getNumber());
         allocation.setSecretKey(secretKey);
-        allocation.setIv(encryptor.getIV().getIV());
+        allocation.setIv(encryptor.getSpec().getIV());
         allocation.setXml(allocationDoc.getAllocation());
     }
     

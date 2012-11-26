@@ -13,10 +13,6 @@ import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.SchemaType;
 import org.apache.xmlbeans.XmlBeans;
@@ -33,8 +29,12 @@ import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.phalanx.api.model.CryptedData;
-import org.brekka.phoenix.CryptoFactory;
-import org.brekka.phoenix.CryptoFactoryRegistry;
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.SecretKey;
+import org.brekka.phoenix.api.StreamCryptor;
+import org.brekka.phoenix.api.SymmetricCryptoSpec;
+import org.brekka.phoenix.api.services.CryptoProfileService;
+import org.brekka.phoenix.api.services.SymmetricCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -51,9 +51,11 @@ public class XmlEntityServiceImpl implements XmlEntityService {
     @Autowired
     private XmlEntityDAO xmlEntityDAO;
 
+    @Autowired
+    private SymmetricCryptoService symmetricCryptoService;
     
     @Autowired
-    private CryptoFactoryRegistry cryptoFactoryRegistry;
+    private CryptoProfileService cryptoProfileService;
     
     @Autowired
     private ResourceCryptoService resourceCryptoService;
@@ -90,20 +92,19 @@ public class XmlEntityServiceImpl implements XmlEntityService {
     public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe keySafe) {
         XmlEntity<T> entity = new XmlEntity<>();
         entity.setBean(xml);
-        CryptoFactory cryptoFactory = cryptoFactoryRegistry.getDefault();
-        SecretKey secretKey = cryptoFactory.getSymmetric().getKeyGenerator().generateKey();
+        CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
+        SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
-        OutputStream saveOs = encryptor.encrypt(baos);
         
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         
-        entity.setIv(encryptor.getIV().getIV());
+        entity.setIv(encryptor.getSpec().getIV());
         entity.setCryptedDataId(cryptedData.getId());
         entity.setKeySafe(keySafe);
-        entity.setProfile(cryptoFactory.getProfileId());
+        entity.setProfile(cryptoProfile.getNumber());
         
-        try {
+        try (OutputStream saveOs = encryptor.encrypt(baos)) {
             xml.save(saveOs);
             saveOs.close();
         } catch (IOException e) {
@@ -140,12 +141,12 @@ public class XmlEntityServiceImpl implements XmlEntityService {
             UUID cryptedDataId = xmlEntity.getCryptedDataId();
             if (cryptedDataId != null) {
                 // Decrypt
-                CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(xmlEntity.getProfile());
+                CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(xmlEntity.getProfile());
                 byte[] secretKeyBytes = keySafeService.release(cryptedDataId, xmlEntity.getKeySafe());
-                SecretKey secretKey = new SecretKeySpec(secretKeyBytes, cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
-                int cryptoProfileId = xmlEntity.getProfile();
-                IvParameterSpec iv = new IvParameterSpec(xmlEntity.getIv());
-                is = resourceCryptoService.decryptor(cryptoProfileId, Compression.GZIP, iv, secretKey, is);
+                SecretKey secretKey = symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
+                xmlEntity.setSecretKey(secretKey);
+                StreamCryptor<InputStream, SymmetricCryptoSpec> decryptor = resourceCryptoService.decryptor(xmlEntity, Compression.GZIP);
+                is = decryptor.getStream(is);
             } else {
                 // Plain
                 is = new GZIPInputStream(is);

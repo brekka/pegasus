@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.crypto.SecretKey;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -27,6 +26,9 @@ import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.SecretKey;
+import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.hibernate.annotations.Type;
 
@@ -43,7 +45,7 @@ import org.hibernate.annotations.Type;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Allocation")
-public abstract class Allocation extends SnapshotEntity<UUID> {
+public abstract class Allocation extends SnapshotEntity<UUID> implements SymmetricCryptoSpec {
 
     /**
      * Serial UID
@@ -205,5 +207,19 @@ public abstract class Allocation extends SnapshotEntity<UUID> {
         this.id = id;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.CryptoSpec#getCryptoProfile()
+     */
+    @Override
+    public CryptoProfile getCryptoProfile() {
+        return CryptoProfile.Static.of(getProfile());
+    }
     
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.SymmetricCryptoSpec#getIV()
+     */
+    @Override
+    public byte[] getIV() {
+        return iv;
+    }
 }

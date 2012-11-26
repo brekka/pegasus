@@ -17,6 +17,9 @@ import javax.persistence.Transient;
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.SecretKey;
+import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.hibernate.annotations.Type;
 
 /**
@@ -26,7 +29,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`XmlEntity`", schema=PegasusConstants.SCHEMA)
-public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> {
+public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> implements SymmetricCryptoSpec {
 
     /**
      * The maximum length of data that this entity can store.
@@ -84,6 +87,12 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> {
      */
     @Transient
     private transient T bean;
+    
+    /**
+     * Secret key
+     */
+    @Transient
+    private transient SecretKey secretKey;
     
     
     /**
@@ -148,5 +157,34 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> {
         this.profile = profile;
     }
     
-
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.CryptoSpec#getCryptoProfile()
+     */
+    @Override
+    public CryptoProfile getCryptoProfile() {
+        return CryptoProfile.Static.of(getProfile());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.SymmetricCryptoSpec#getIV()
+     */
+    @Override
+    public byte[] getIV() {
+        return iv;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.SymmetricCryptoSpec#getSecretKey()
+     */
+    @Override
+    public SecretKey getSecretKey() {
+        return secretKey;
+    }
+    
+    /**
+     * @param secretKey the secretKey to set
+     */
+    public void setSecretKey(SecretKey secretKey) {
+        this.secretKey = secretKey;
+    }
 }

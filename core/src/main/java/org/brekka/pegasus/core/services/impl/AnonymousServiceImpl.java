@@ -3,9 +3,8 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.security.SecureRandom;
 import java.util.List;
-
-import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +20,8 @@ import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
+import org.brekka.phoenix.api.SecretKey;
+import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.BundleType;
@@ -46,6 +47,9 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     
     @Autowired
     private PhalanxService phalanxService;
+    
+    @Autowired
+    private RandomCryptoService randomCryptoService;
     
     
     /* (non-Javadoc)
@@ -92,7 +96,8 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
             if (i > 0) {
                 prettyCodeBuilder.append(" ");
             }
-            String codePart = RandomStringUtils.random(2, 0, 0, false, true, null, cryptoFactoryRegistry.getDefault().getSecureRandom());
+            SecureRandom random = randomCryptoService.getSecureRandom();
+            String codePart = RandomStringUtils.random(2, 0, 0, false, true, null, random);
             prettyCodeBuilder.append(codePart);
             codeBuilder.append(codePart);
         }

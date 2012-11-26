@@ -7,9 +7,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.pegasus.core.model.AllocationFile;
@@ -17,8 +14,10 @@ import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.EventService;
-import org.brekka.phoenix.CryptoFactory;
-import org.brekka.phoenix.CryptoFactoryRegistry;
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.SecretKey;
+import org.brekka.phoenix.api.services.CryptoProfileService;
+import org.brekka.phoenix.api.services.SymmetricCryptoService;
 import org.brekka.xml.pegasus.v1.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,10 @@ public class DownloadServiceImpl implements DownloadService {
     private PavewayService pavewayService;
     
     @Autowired
-    private CryptoFactoryRegistry cryptoFactoryRegistry;
+    private CryptoProfileService cryptoProfileService;
+    
+    @Autowired
+    private SymmetricCryptoService symmetricCryptoService;
     
     @Autowired
     private EventService eventService;
@@ -56,10 +58,10 @@ public class DownloadServiceImpl implements DownloadService {
         FileType fileType = file.getXml();
         FileDownloadEvent event = eventService.beginFileDownloadEvent(file);
         CryptedFile cryptedFile = pavewayService.retrieveCryptedFileById(file.getCryptedFileId());
-        CryptoFactory cryptoFactory = cryptoFactoryRegistry.getFactory(cryptedFile.getProfile());
-        SecretKey secretKey = new SecretKeySpec(fileType.getKey(), 
-                cryptoFactory.getSymmetric().getKeyGenerator().getAlgorithm());
-        InputStream is = pavewayService.download(cryptedFile, secretKey);
+        CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(cryptedFile.getProfile());
+        SecretKey secretKey = symmetricCryptoService.toSecretKey(fileType.getKey(), cryptoProfile);
+        cryptedFile.setSecretKey(secretKey);
+        InputStream is = pavewayService.download(cryptedFile);
         return new EventInputStream(is, file, event, cryptedFile.getOriginalLength(), progressCallback);
     }
     

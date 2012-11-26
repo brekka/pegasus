@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.crypto.SecretKey;
-
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.dao.DepositDAO;
@@ -30,6 +28,7 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phoenix.api.SecretKey;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.brekka.xml.pegasus.v1.model.AllocationType;
 import org.brekka.xml.pegasus.v1.model.BundleType;

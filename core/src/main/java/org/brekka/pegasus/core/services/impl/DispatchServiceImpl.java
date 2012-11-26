@@ -5,8 +5,6 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
 
-import javax.crypto.SecretKey;
-
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.dao.DispatchDAO;
@@ -24,6 +22,7 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phoenix.api.SecretKey;
 import org.brekka.xml.pegasus.v1.model.AllocationDocument;
 import org.brekka.xml.pegasus.v1.model.BundleType;
 import org.joda.time.DateTime;
