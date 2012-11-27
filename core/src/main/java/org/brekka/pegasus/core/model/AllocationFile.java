@@ -19,7 +19,7 @@ import javax.persistence.Transient;
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.PegasusConstants;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 

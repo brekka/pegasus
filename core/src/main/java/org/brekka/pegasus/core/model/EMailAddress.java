@@ -75,7 +75,6 @@ public class EMailAddress extends SnapshotEntity<UUID> {
      * Should never be set to false, just true or null (so that multiple validations can take place at a time).
      */
     @Column(name="`Active`")
-    @Enumerated(EnumType.STRING)
     private Boolean active;
     
     /**

@@ -31,7 +31,7 @@
         <xmlbeans-version>2.5.0</xmlbeans-version>
         <spring-version>3.1.2.RELEASE</spring-version>
         <spring-security-version>3.1.2.RELEASE</spring-security-version>
-        <hibernate-version>4.1.6.Final</hibernate-version>
+        <hibernate-version>4.1.7.Final</hibernate-version>
         <tapestry-release-version>5.3.6</tapestry-release-version>
         <servlet-api-release-version>2.5</servlet-api-release-version>
         <stillingar-core-version>1.0.0-SNAPSHOT</stillingar-core-version>

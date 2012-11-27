@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://brekka.org/xml/pegasus/v1/model"
-	xmlns:pgm="http://brekka.org/xml/pegasus/v1/model" elementFormDefault="qualified"
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://brekka.org/xml/pegasus/v2/model"
+	xmlns:pgm="http://brekka.org/xml/pegasus/v2/model" elementFormDefault="qualified"
 	attributeFormDefault="unqualified">
 
 	<xsd:element name="Bundle"              type="pgm:BundleType" />

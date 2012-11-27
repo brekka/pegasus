@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.brekka.pegasus.core.model.Invitation;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Vault;
-import org.brekka.xml.pegasus.v1.model.InvitationDocument;
+import org.brekka.xml.pegasus.v2.model.InvitationDocument;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

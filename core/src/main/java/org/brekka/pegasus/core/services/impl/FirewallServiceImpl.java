@@ -18,7 +18,7 @@ import org.brekka.pegasus.core.model.Network;
 import org.brekka.pegasus.core.model.NetworkGroup;
 import org.brekka.pegasus.core.model.NetworkGroupCategory;
 import org.brekka.pegasus.core.services.FirewallService;
-import org.brekka.xml.pegasus.v1.config.FirewallType;
+import org.brekka.xml.pegasus.v2.config.FirewallType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

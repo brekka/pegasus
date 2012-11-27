@@ -67,6 +67,7 @@ public class PegasusModule {
         configuration.add(SymbolConstants.COMPACT_JSON, "false"); 
         configuration.add(SymbolConstants.COMBINE_SCRIPTS, "false"); 
         configuration.add(SymbolConstants.MINIFICATION_ENABLED, "false"); 
+        configuration.add(SymbolConstants.HMAC_PASSPHRASE, "fbuWWoLF3ebQADzdkFThashzNfXKJfLn");
     }
     
 

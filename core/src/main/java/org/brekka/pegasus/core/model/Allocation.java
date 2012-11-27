@@ -29,7 +29,7 @@ import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
-import org.brekka.xml.pegasus.v1.model.AllocationType;
+import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.hibernate.annotations.Type;
 
 /**

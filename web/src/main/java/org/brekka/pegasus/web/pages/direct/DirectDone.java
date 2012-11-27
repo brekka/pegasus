@@ -18,7 +18,7 @@ import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.session.AllocationMaker;
 import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.Configuration;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 
 /**
  * @author Andrew Taylor

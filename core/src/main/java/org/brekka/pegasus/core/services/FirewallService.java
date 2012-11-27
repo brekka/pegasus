@@ -12,7 +12,7 @@ import org.brekka.pegasus.core.model.FirewallRule;
 import org.brekka.pegasus.core.model.Network;
 import org.brekka.pegasus.core.model.NetworkGroup;
 import org.brekka.pegasus.core.model.NetworkGroupCategory;
-import org.brekka.xml.pegasus.v1.config.FirewallType;
+import org.brekka.xml.pegasus.v2.config.FirewallType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

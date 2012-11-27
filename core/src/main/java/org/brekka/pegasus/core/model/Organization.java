@@ -14,7 +14,7 @@ import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
-import org.brekka.xml.pegasus.v1.model.OrganizationDocument;
+import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 import org.hibernate.annotations.Type;
 
 /**

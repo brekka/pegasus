@@ -13,7 +13,7 @@ import org.apache.tapestry5.services.Response;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.DownloadService;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 
 /**
  * @author Andrew Taylor

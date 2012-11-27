@@ -15,8 +15,8 @@ import org.brekka.commons.lang.ByteLengthFormat;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.services.AnonymousService;
-import org.brekka.xml.pegasus.v1.model.AllocationType;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.AllocationType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 
 /**
  * @author Andrew Taylor

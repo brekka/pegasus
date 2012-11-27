@@ -39,10 +39,10 @@ import org.brekka.phoenix.api.StreamCryptor;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.brekka.phoenix.api.services.CryptoProfileService;
 import org.brekka.phoenix.api.services.SymmetricCryptoService;
-import org.brekka.xml.pegasus.v1.model.AllocationDocument;
-import org.brekka.xml.pegasus.v1.model.AllocationType;
-import org.brekka.xml.pegasus.v1.model.BundleType;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.AllocationDocument;
+import org.brekka.xml.pegasus.v2.model.AllocationType;
+import org.brekka.xml.pegasus.v2.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

@@ -20,7 +20,7 @@ import javax.persistence.TemporalType;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
-import org.brekka.xml.pegasus.v1.model.InvitationDocument;
+import org.brekka.xml.pegasus.v2.model.InvitationDocument;
 import org.hibernate.annotations.Type;
 
 /**

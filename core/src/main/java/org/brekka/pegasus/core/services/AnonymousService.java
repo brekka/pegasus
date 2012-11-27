@@ -8,7 +8,7 @@ import java.util.List;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.BundleType;
 
 /**
  * @author Andrew Taylor

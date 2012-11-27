@@ -13,7 +13,7 @@ import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.xml.pegasus.v1.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.BundleType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

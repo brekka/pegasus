@@ -31,7 +31,7 @@ import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.web.pages.deposit.MakeDeposit;
 import org.brekka.pegasus.web.pages.direct.UnlockDirect;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 

@@ -15,8 +15,8 @@ import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.pegasus.web.support.ElapsedPeriodFormat;
-import org.brekka.xml.pegasus.v1.model.AllocationType;
-import org.brekka.xml.pegasus.v1.model.FileType;
+import org.brekka.xml.pegasus.v2.model.AllocationType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 
 /**
  * List the deposits in the index

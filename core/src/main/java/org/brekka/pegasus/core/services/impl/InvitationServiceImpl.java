@@ -15,7 +15,7 @@ import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.InvitationService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.XmlEntityService;
-import org.brekka.xml.pegasus.v1.model.InvitationDocument;
+import org.brekka.xml.pegasus.v2.model.InvitationDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

@@ -14,7 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.brekka.phalanx.api.model.PrivateKeyToken;
-import org.brekka.xml.pegasus.v1.model.DivisionDocument;
+import org.brekka.xml.pegasus.v2.model.DivisionDocument;
 import org.hibernate.annotations.Type;
 
 /**

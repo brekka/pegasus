@@ -17,8 +17,8 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.utils.EntityUnlockKeyCache;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
-import org.brekka.xml.pegasus.v1.model.ProfileDocument;
-import org.brekka.xml.pegasus.v1.model.ProfileType;
+import org.brekka.xml.pegasus.v2.model.ProfileDocument;
+import org.brekka.xml.pegasus.v2.model.ProfileType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

@@ -30,7 +30,7 @@ import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus.Administration;
+import org.brekka.xml.pegasus.v2.config.PegasusDocument.Pegasus.Administration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

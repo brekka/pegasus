@@ -4,7 +4,7 @@
 package org.brekka.pegasus.web.support;
 
 import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus;
+import org.brekka.xml.pegasus.v2.config.PegasusDocument.Pegasus;
 
 /**
  * @author Andrew Taylor

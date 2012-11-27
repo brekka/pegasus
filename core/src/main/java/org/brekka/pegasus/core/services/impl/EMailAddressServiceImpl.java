@@ -16,7 +16,7 @@ import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v1.config.PegasusDocument.Pegasus.EMailAddresses.Hashing;
+import org.brekka.xml.pegasus.v2.config.PegasusDocument.Pegasus.EMailAddresses.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

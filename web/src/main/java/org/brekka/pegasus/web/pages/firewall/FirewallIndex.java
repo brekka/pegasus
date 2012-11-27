@@ -9,7 +9,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Firewall;
 import org.brekka.pegasus.core.services.FirewallService;
 import org.brekka.pegasus.web.support.Configuration;
-import org.brekka.xml.pegasus.v1.config.FirewallType;
+import org.brekka.xml.pegasus.v2.config.FirewallType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

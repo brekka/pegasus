@@ -3,7 +3,7 @@
  */
 package org.brekka.pegasus.core.model;
 
-import org.brekka.xml.pegasus.v1.model.ProfileType;
+import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
