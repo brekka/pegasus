@@ -26,9 +26,9 @@ public class UsernamePasswordHibernateDAO extends AbstractPegasusHibernateDAO<Us
      * @see org.brekka.pegasus.core.dao.MemberDAO#retrieveByOpenId(java.lang.String)
      */
     @Override
-    public UsernamePassword retrieveByUsername(String username) {
+    public UsernamePassword retrieveByUsernameDigest(byte[] usernameDigest) {
         return (UsernamePassword) getCurrentSession().createCriteria(UsernamePassword.class)
-                .add(Restrictions.eq("username", username))
+                .add(Restrictions.eq("usernameDigest", usernameDigest))
                 .uniqueResult();
     }
 }

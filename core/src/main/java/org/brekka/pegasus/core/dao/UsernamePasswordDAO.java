@@ -15,5 +15,5 @@ import org.brekka.pegasus.core.model.UsernamePassword;
  */
 public interface UsernamePasswordDAO extends EntityDAO<UUID, UsernamePassword> {
 
-    UsernamePassword retrieveByUsername(String username);
+    UsernamePassword retrieveByUsernameDigest(byte[] usernameDigest);
 }

@@ -52,7 +52,7 @@ public class SetupMember {
     
     Object onSuccess() {
         String email = OpenIDUtils.identifyEmail();
-        memberService.setupMember(name, email, vaultPassword, encryptProfile);
+        memberService.setupPerson(name, email, vaultPassword, encryptProfile);
         return MemberIndex.class;
     }
 }

@@ -19,6 +19,7 @@ package org.brekka.pegasus.core.model;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 /**
  * Username and Password based authentication token
@@ -35,10 +36,10 @@ public class UsernamePassword extends AuthenticationToken {
     private static final long serialVersionUID = -5091518838128894183L;
 
     /**
-     * The username, which must be unique
+     * The username digest
      */
     @Column(name="`Username`", unique=true, length=255)
-    private String username;
+    private byte[] usernameDigest;
     
     /**
      * The password digest
@@ -64,12 +65,25 @@ public class UsernamePassword extends AuthenticationToken {
     @Column(name="`Profile`")
     private int profile;
     
+    /**
+     * The un-digested username
+     */
+    @Transient
+    private transient String username;
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
      */
     @Override
     public String getUsername() {
         return username;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
+     */
+    public byte[] getUsernameDigest() {
+        return usernameDigest;
     }
 
     /**
@@ -129,12 +143,16 @@ public class UsernamePassword extends AuthenticationToken {
     }
 
     /**
+     * @param usernameDigest the usernameDigest to set
+     */
+    public void setUsernameDigest(byte[] usernameDigest) {
+        this.usernameDigest = usernameDigest;
+    }
+    
+    /**
      * @param username the username to set
      */
     public void setUsername(String username) {
         this.username = username;
     }
-    
-    
-
 }

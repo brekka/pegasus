@@ -13,6 +13,8 @@ public enum PegasusErrorCode implements ErrorCode {
     PG101,
     PG102,
     
+    PG103,
+    
     PG200,
     
     /**

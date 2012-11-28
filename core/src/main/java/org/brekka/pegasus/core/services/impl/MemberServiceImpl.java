@@ -14,6 +14,7 @@ import org.brekka.pegasus.core.dao.OpenIdDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
+import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.OpenID;
@@ -150,39 +151,26 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void setupMember(String fullName, String email, String vaultPassword, boolean encryptedProfile) {
+    public void setupPerson(String fullName, String email, String vaultPassword, boolean encryptedProfile) {
         Person managed = (Person) getManaged();
-        managed.setFullName(fullName);
-        managed.setStatus(ActorStatus.ACTIVE);
-        
-        // Binding to context
-        AuthenticatedMember current = getCurrent();
-        AuthenticatedPersonImpl authenticatedPersonImpl = (AuthenticatedPersonImpl) current;
-        authenticatedPersonImpl.setPerson(managed);
-        
-        // Vault
-        Vault defaultVault = vaultService.createVault("Default", vaultPassword, managed);
-        managed.setDefaultVault(defaultVault);
-        vaultService.openVault(defaultVault, vaultPassword);
-        
-        
-        // Profile
-        Profile profile;
-        if (encryptedProfile) {
-            profile = profileService.createEncryptedProfile(managed, defaultVault);
-        } else {
-            profile = profileService.createPlainProfile(managed);
-        }
-        authenticatedPersonImpl.setActiveProfile(profile);
-        
-        // E-Mail - needs to happen once profile/context are set
-        if (StringUtils.isNotBlank(email)) {
-            EMailAddress emailAddress = eMailAddressService.createEMail(email, managed, false);
-            managed.setDefaultEmailAddress(emailAddress);
-        }
-        
+        populatePerson(managed, fullName, email, vaultPassword, encryptedProfile);
         memberDAO.update(managed);
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#createPerson(org.brekka.pegasus.core.model.AuthenticationToken, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Person createPerson(AuthenticationToken authenticationToken, String fullName, String email,
+            String vaultPassword, boolean encryptProfile) {
+        Person person = new Person();
+        person.setAuthenticationToken(authenticationToken);
+        populatePerson(person, fullName, email, vaultPassword, encryptProfile);
+        memberDAO.create(person);
+        return person;
+    }
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.MemberService#logout(org.springframework.security.core.context.SecurityContext)
@@ -229,6 +217,38 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
             }
         }
         return authMember;
+    }
+    
+
+    protected void populatePerson(Person person, String fullName, String email, String vaultPassword, boolean encryptProfile) {
+        person.setFullName(fullName);
+        person.setStatus(ActorStatus.ACTIVE);
+        
+        // Binding to context
+        AuthenticatedMember current = getCurrent();
+        AuthenticatedPersonImpl authenticatedPersonImpl = (AuthenticatedPersonImpl) current;
+        authenticatedPersonImpl.setPerson(person);
+        
+        // Vault
+        Vault defaultVault = vaultService.createVault("Default", vaultPassword, person);
+        person.setDefaultVault(defaultVault);
+        vaultService.openVault(defaultVault, vaultPassword);
+        
+        
+        // Profile
+        Profile profile;
+        if (encryptProfile) {
+            profile = profileService.createEncryptedProfile(person, defaultVault);
+        } else {
+            profile = profileService.createPlainProfile(person);
+        }
+        authenticatedPersonImpl.setActiveProfile(profile);
+        
+        // E-Mail - needs to happen once profile/context are set
+        if (StringUtils.isNotBlank(email)) {
+            EMailAddress emailAddress = eMailAddressService.createEMail(email, person, false);
+            person.setDefaultEmailAddress(emailAddress);
+        }
     }
     
     private static AuthenticatedPersonImpl getAuthenticatedMember(SecurityContext securityContext) {

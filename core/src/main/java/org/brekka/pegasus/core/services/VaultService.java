@@ -68,4 +68,11 @@ public interface VaultService {
      * @param fromString
      */
     void closeVault(UUID fromString);
+
+    /**
+     * @param defaultVault
+     * @param oldPassword
+     * @param newPassword
+     */
+    void changePassword(Vault defaultVault, String oldPassword, String newPassword);
 }

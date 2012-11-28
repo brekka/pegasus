@@ -182,9 +182,20 @@ public class VaultServiceImpl implements VaultService {
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.VaultService#changePassword(org.brekka.pegasus.core.model.Vault, java.lang.String, java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void changePassword(Vault defaultVault, String oldPassword, String newPassword) {
+        UUID principalId = defaultVault.getPrincipalId();
+        phalanxService.changePassword(new IdentityPrincipal(principalId), oldPassword, newPassword);
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.VaultService#closeVault(java.util.UUID)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public void closeVault(UUID vaultId) {
         AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
         AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);

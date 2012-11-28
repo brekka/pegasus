@@ -4,8 +4,6 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,8 +13,12 @@ import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.services.EMailAddressService;
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.DerivedKey;
+import org.brekka.phoenix.api.services.DerivedKeyCryptoService;
 import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v2.config.PegasusDocument.Pegasus.EMailAddresses.Hashing;
+import org.brekka.xml.pegasus.v2.config.EMailAddressesType;
+import org.brekka.xml.pegasus.v2.config.SystemDerivedKeySpecType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,12 +39,15 @@ public class EMailAddressServiceImpl implements EMailAddressService {
     @Autowired
     private DomainNameDAO domainNameDAO;
     
+    @Autowired
+    private DerivedKeyCryptoService derivedKeyCryptoService;
+    
     /**
      * Will be combined with all e-mail hashes. Ensures that an attacked with access to the database will not be
      * able to identify addresses without access to this salt.
      */
-    @Configured("//c:EMailAddresses/c:Hashing")
-    private Hashing hashingConfig;
+    @Configured
+    private EMailAddressesType config;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailAddressService#createEMail(java.lang.String)
@@ -100,18 +105,9 @@ public class EMailAddressServiceImpl implements EMailAddressService {
     }
 
     protected byte[] hash(String value) {
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance(hashingConfig.getAlgorithm());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
+        SystemDerivedKeySpecType spec = config.getSystemDerivedKeySpec();
         byte[] data = value.getBytes(Charset.forName("UTF-8"));
-        messageDigest.update(data);
-        messageDigest.update(hashingConfig.getSalt());
-        for (int i = 1; i < hashingConfig.getIterations(); i++) {
-            data = messageDigest.digest(data);
-        }
-        return data;
+        DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), spec.getIterations(), CryptoProfile.Static.of(spec.getCryptoProfile()));
+        return derivedKey.getDerivedKey();
     }
 }
