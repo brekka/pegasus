@@ -32,6 +32,8 @@ public interface XmlEntityService {
      */
     <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe keySafe);
     
+    <T extends XmlObject> XmlEntity<T> updateEntity(XmlEntity<T> updated, XmlEntity<T> lockedCurrent, Class<T> xmlType);
+    
     /**
      * Determine whether the entity is encrypted or not
      * @param xmlEntityId

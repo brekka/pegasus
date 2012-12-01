@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.dao.OpenIdDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
@@ -127,6 +129,20 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         Associate associate = organizationService.retrieveAssociate(organization, member);
         associate.setMember(member);
         current.setActiveActor(associate);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#retrievePerson(org.brekka.pegasus.core.model.AuthenticationToken)
+     */
+    @Override
+    public Person retrievePerson(AuthenticationToken token) {
+        Member member = memberDAO.retrieveByAuthenticationToken(token);
+        if (member instanceof Person) {
+            Person person = (Person) member;
+            return person;
+        }
+        throw new PegasusException(PegasusErrorCode.PG901, 
+                "Not a person '%s'", member.getClass().getName());
     }
     
     /* (non-Javadoc)

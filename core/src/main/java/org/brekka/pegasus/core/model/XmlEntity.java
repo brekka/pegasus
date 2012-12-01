@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.commons.persistence.model.SnapshotEntity;
@@ -28,7 +29,8 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`XmlEntity`", schema=PegasusConstants.SCHEMA)
+@Table(name="`XmlEntity`", schema=PegasusConstants.SCHEMA, uniqueConstraints=
+    @UniqueConstraint(columnNames={"`SerialID`", "`Version`"}))
 public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> implements SymmetricCryptoSpec {
 
     /**
@@ -48,6 +50,18 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
+    
+    /**
+     * A common key between versions
+     */
+    @Column(name="`SerialID`")
+    private UUID serial;
+    
+    /**
+     * Version number
+     */
+    @Column(name="`Version`")
+    private int version;
     
     /**
      * If the XML should be encrypted, then this field should be set to the id of the key store.
@@ -187,4 +201,34 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     public void setSecretKey(SecretKey secretKey) {
         this.secretKey = secretKey;
     }
+
+    /**
+     * @return the serial
+     */
+    public UUID getSerial() {
+        return serial;
+    }
+
+    /**
+     * @param serial the serial to set
+     */
+    public void setSerial(UUID serial) {
+        this.serial = serial;
+    }
+
+    /**
+     * @return the version
+     */
+    public int getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(int version) {
+        this.version = version;
+    }
+    
+    
 }
