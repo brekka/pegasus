@@ -17,7 +17,7 @@ import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.DerivedKey;
 import org.brekka.phoenix.api.services.DerivedKeyCryptoService;
 import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v2.config.EMailAddressesType;
+import org.brekka.xml.pegasus.v2.config.EMailAddressServiceDocument;
 import org.brekka.xml.pegasus.v2.config.SystemDerivedKeySpecType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class EMailAddressServiceImpl implements EMailAddressService {
      * able to identify addresses without access to this salt.
      */
     @Configured
-    private EMailAddressesType config;
+    private EMailAddressServiceDocument.EMailAddressService config;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailAddressService#createEMail(java.lang.String)

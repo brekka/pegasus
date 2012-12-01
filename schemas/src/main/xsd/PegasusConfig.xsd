@@ -19,7 +19,7 @@
                         </xsd:sequence>
                     </xsd:complexType>
                 </xsd:element>
-                <xsd:element name="EMailAddresses" type="plxc:EMailAddressesType" />
+                <xsd:element ref="plxc:EMailAddressService" />
                 <xsd:element name="AnonymousTransfer">
                     <xsd:complexType>
                         <xsd:sequence>
@@ -46,17 +46,33 @@
 		</xsd:complexType>
 	</xsd:element>
     
-    <xsd:complexType name="EMailAddressesType">
-        <xsd:sequence>
-            <xsd:element name="SystemDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
-        </xsd:sequence>
-    </xsd:complexType>
+    <xsd:element name="EMailAddressService">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="SystemDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
     
-    <xsd:complexType name="UsernamePasswordType">
-        <xsd:sequence>
-            <xsd:element name="SystemDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
-        </xsd:sequence>
-    </xsd:complexType>
+    <xsd:element name="UsernamePasswordService">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="SystemDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="CertificateAuthenticationService">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="SubjectDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
+                <xsd:element name="SubjectDistinguishedNamePattern" type="xsd:string" maxOccurs="unbounded">
+                    <xsd:annotation>
+                        <xsd:documentation>The pattern used to identify allowed certificates based on their subject distinguished name. A single capturing group can be specified that will be used to resolve the common name that will be returned as a username.</xsd:documentation>
+                    </xsd:annotation></xsd:element>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
     
     <xsd:complexType name="SystemDerivedKeySpecType">
         <xsd:sequence>

@@ -16,7 +16,6 @@
 
 package org.brekka.pegasus.core.services.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -26,14 +25,12 @@ import org.brekka.pegasus.core.model.UsernamePassword;
 import org.brekka.pegasus.core.services.UsernamePasswordService;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.DerivedKey;
-import org.brekka.phoenix.api.DigestResult;
 import org.brekka.phoenix.api.services.CryptoProfileService;
 import org.brekka.phoenix.api.services.DerivedKeyCryptoService;
 import org.brekka.phoenix.api.services.DigestCryptoService;
 import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v2.config.EMailAddressesType;
 import org.brekka.xml.pegasus.v2.config.SystemDerivedKeySpecType;
-import org.brekka.xml.pegasus.v2.config.UsernamePasswordsType;
+import org.brekka.xml.pegasus.v2.config.UsernamePasswordServiceDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
+@Transactional
+@Configured
 public class UsernamePasswordServiceImpl implements UsernamePasswordService {
 
     @Autowired
@@ -60,7 +59,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     private CryptoProfileService cryptoProfileService;
     
     @Configured
-    private UsernamePasswordsType config;
+    private UsernamePasswordServiceDocument.UsernamePasswordService config;
     
     
     /* (non-Javadoc)

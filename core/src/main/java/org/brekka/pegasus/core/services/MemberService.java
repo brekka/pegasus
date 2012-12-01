@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
+import org.brekka.pegasus.core.model.DigitalCertificate;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
@@ -48,6 +49,12 @@ public interface MemberService {
      * @return
      */
     boolean hasAccess(GrantedAuthority anonymousTransfer);
+
+    /**
+     * @param digitalCertificate
+     * @return
+     */
+    Person retrievePerson(AuthenticationToken token);
 
 }
 

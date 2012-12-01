@@ -16,26 +16,140 @@
 
 package org.brekka.pegasus.core.model;
 
-import javax.persistence.DiscriminatorValue;
+import java.util.Date;
+import java.util.UUID;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+
+import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.hibernate.annotations.Type;
 
 /**
- * TODO Description of DigitalCertificate
+ * Captures the details of a digital certificate used to authenticate a user.
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@DiscriminatorValue("DigiCert")
-public class DigitalCertificate extends AuthenticationToken {
-
+@Table(name="`DigitalCertificate`", uniqueConstraints=
+    @UniqueConstraint(columnNames={"`CertificateSubjectID`", "`Signature`"})
+)
+public class DigitalCertificate extends SnapshotEntity<UUID> {
+    /**
+     * Serial UID
+     */
+    private static final long serialVersionUID = -4869048281179726403L;
     
+    /**
+     * Unique id
+     */
+    @Id
+    @Type(type="pg-uuid")
+    @Column(name="`ID`")
+    private UUID id;
+    
+    /**
+     * The signature of this certificate - surrogate key in combination with certificate authentication.
+     */
+    @Column(name="`Signature`")
+    private byte[] signature;
+    
+    /**
+     * The certificate authentication that this certificate belongs to.
+     */
+    @ManyToOne
+    @JoinColumn(name="`CertificateSubjectID`", nullable=false)
+    private CertificateSubject certificateSubject;
+    
+    /**
+     * The moment this certificate is due to expire
+     */
+    @Column(name="`Expires`", nullable=false, updatable=false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expires;
+    
+    /**
+     * Is this certificate currently active? Setting to false essentially acts as certificate revocation.
+     */
+    @Column(name="`Active`")
+    private Boolean active;
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
+     * @see org.brekka.commons.persistence.model.IdentifiableEntity#getId()
      */
     @Override
-    public String getUsername() {
-        // TODO Auto-generated method stub
-        return null;
+    public UUID getId() {
+        return id;
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.commons.persistence.model.IdentifiableEntity#setId(java.io.Serializable)
+     */
+    @Override
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the expires
+     */
+    public Date getExpires() {
+        return expires;
+    }
+
+    /**
+     * @param expires the expires to set
+     */
+    public void setExpires(Date expires) {
+        this.expires = expires;
+    }
+
+    /**
+     * @return the active
+     */
+    public Boolean getActive() {
+        return active;
+    }
+
+    /**
+     * @param active the active to set
+     */
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    /**
+     * @return the signature
+     */
+    public byte[] getSignature() {
+        return signature;
+    }
+
+    /**
+     * @param signature the signature to set
+     */
+    public void setSignature(byte[] signature) {
+        this.signature = signature;
+    }
+
+    /**
+     * @return the certificateSubject
+     */
+    public CertificateSubject getCertificateSubject() {
+        return certificateSubject;
+    }
+
+    /**
+     * @param certificateSubject the certificateSubject to set
+     */
+    public void setCertificateSubject(CertificateSubject certificateSubject) {
+        this.certificateSubject = certificateSubject;
     }
 }
