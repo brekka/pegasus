@@ -23,6 +23,7 @@ import org.brekka.pegasus.web.pages.NoSession;
 import org.brekka.pegasus.web.session.AllocationMaker;
 import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -97,7 +98,10 @@ public class MakeDeposit extends AbstractMakePage {
         AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            Allocation transferKey = inboxService.createDeposit(inbox, reference, comment, null, fileBuilderList);
+            DetailsType detailsType = DetailsType.Factory.newInstance();
+            detailsType.setReference(reference);
+            detailsType.setComment(comment);
+            Allocation transferKey = inboxService.createDeposit(inbox, detailsType, fileBuilderList);
             bundleMaker.setAllocation(transferKey);
             depositDonePage.init(makeKey);
             retVal = depositDonePage;

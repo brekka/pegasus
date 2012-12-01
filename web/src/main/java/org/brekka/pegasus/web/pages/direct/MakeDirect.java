@@ -20,6 +20,7 @@ import org.brekka.pegasus.web.pages.NoSession;
 import org.brekka.pegasus.web.session.AllocationMaker;
 import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -76,7 +77,9 @@ public class MakeDirect extends AbstractMakePage {
         AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            Allocation transferKey = anonymousService.createTransfer(comment, null, 1, fileBuilderList);
+            DetailsType detailsType = DetailsType.Factory.newInstance();
+            detailsType.setComment(comment);
+            Allocation transferKey = anonymousService.createTransfer(detailsType, 1, fileBuilderList);
             bundleMaker.setAllocation(transferKey);
             directDonePage.init(makeKey);
             retVal = directDonePage;

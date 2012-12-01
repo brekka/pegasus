@@ -7,7 +7,6 @@ import java.security.SecureRandom;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
@@ -25,6 +24,7 @@ import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,15 +57,23 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(String comment, String agreementText, int maxDownloads, 
+    public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
             List<FileBuilder> fileBuilders) {
         BundleType bundleType = completeFiles(maxDownloads, fileBuilders);
-        return createTransfer(comment, agreementText, bundleType, null);
+        return createTransfer(details, maxUnlockAttempts, null, bundleType);
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#createTransfer(org.brekka.xml.pegasus.v2.model.DetailsType, org.brekka.pegasus.core.model.Dispatch)
+     */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(String comment, String agreementText, BundleType bundleType, Dispatch dispatch) {
+    public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts, Dispatch dispatch) {
+        BundleType dispatchBundle = copyDispatchBundle(dispatch, maxDownloads);
+        return createTransfer(details, maxUnlockAttempts, dispatch, dispatchBundle);
+    }
+    
+    protected AnonymousTransfer createTransfer(DetailsType details, Integer maxUnlockAttempts, Dispatch dispatch, BundleType bundleType) {
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setDerivedFrom(dispatch);
         
@@ -73,15 +81,11 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         DateTime now = new DateTime();
         DateTime expires = now.plusHours(12);
         anonTransfer.setExpires(expires.toDate());
+        anonTransfer.setMaxUnlockAttempts(maxUnlockAttempts);
         
         AllocationDocument document = prepareDocument(bundleType);
         AllocationType allocationType = document.getAllocation();
-        if (StringUtils.isNotBlank(comment)) {
-            allocationType.setComment(comment);
-        }
-        if (StringUtils.isNotEmpty(agreementText)) {
-            allocationType.setAgreement(agreementText);
-        }
+        allocationType.setDetails(details);
         
         // Encrypt the document
         encryptDocument(anonTransfer, document);

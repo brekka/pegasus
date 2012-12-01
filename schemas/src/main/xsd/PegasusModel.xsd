@@ -18,12 +18,19 @@
     
     <xsd:complexType name="AllocationType">
 		<xsd:sequence>
-			<xsd:element name="Reference"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
-			<xsd:element name="Comment"     type="xsd:string"       minOccurs="0" maxOccurs="1" />
-			<xsd:element name="Agreement"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
+			<xsd:element name="Details"     type="pgm:DetailsType" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Bundle"      type="pgm:BundleType"   minOccurs="1" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
+    
+    <xsd:complexType name="DetailsType">
+        <xsd:sequence>
+            <xsd:element name="Reference"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
+            <xsd:element name="Description" type="xsd:string"       minOccurs="0" maxOccurs="1" />
+            <xsd:element name="Comment"     type="xsd:string"       minOccurs="0" maxOccurs="1" />
+            <xsd:element name="Agreement"   type="xsd:string"       minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="FileType">
 		<xsd:sequence>

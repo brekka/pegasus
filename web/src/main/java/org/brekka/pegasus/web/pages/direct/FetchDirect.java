@@ -47,7 +47,6 @@ public class FetchDirect {
     @Property
     private AllocationFile file;
     
-    @SuppressWarnings("unused")
     @Property
     private Format byteLengthFormat = new ByteLengthFormat(resources.getLocale(), ByteLengthFormat.Mode.SI);
     
@@ -61,7 +60,7 @@ public class FetchDirect {
             return unlockPage;
         }
         AllocationType xml = transfer.getXml();
-        if (xml.isSetAgreement() 
+        if (xml.getDetails().isSetAgreement() 
                 && !anonymousService.isAccepted(transfer)) {
             agreementDirectPage.init(token);
             return agreementDirectPage;

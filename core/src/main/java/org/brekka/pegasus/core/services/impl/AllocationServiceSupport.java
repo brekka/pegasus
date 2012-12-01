@@ -13,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.model.Compression;
@@ -30,8 +29,10 @@ import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.services.EventService;
+import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
@@ -71,12 +72,16 @@ class AllocationServiceSupport {
     
     @Autowired
     protected EventService eventService;
+    
+    @Autowired
+    protected KeySafeService keySafeService;
 
     @Autowired
     private AllocationDAO allocationDAO;
     
     @Autowired
     private AllocationFileDAO allocationFileDAO;
+    
     
 
     protected BundleType completeFiles(int maxDownloads, List<FileBuilder> fileBuilders) {
@@ -103,7 +108,7 @@ class AllocationServiceSupport {
      * @param bundleType
      * @return
      */
-    protected BundleType copyBundle(int maxDownloads, BundleType bundleType) {
+    protected BundleType copyBundle(Integer maxDownloads, BundleType bundleType) {
         BundleType b = BundleType.Factory.newInstance();
         List<FileType> fileList = bundleType.getFileList();
         for (FileType file : fileList) {
@@ -113,9 +118,26 @@ class AllocationServiceSupport {
             f.setMimeType(file.getMimeType());
             f.setName(file.getName());
             f.setUUID(file.getUUID());
-            f.setMaxDownloads(maxDownloads);
+            if (maxDownloads != null) {
+                f.setMaxDownloads(maxDownloads);
+            }
         }
         return b;
+    }
+    /**
+     * @param dispatch
+     * @return
+     */
+    protected BundleType copyDispatchBundle(Dispatch dispatch, Integer maxDownloads) {
+        AllocationType dispatchXml = dispatch.getXml();
+        if (dispatchXml == null) {
+            // Need to decrypt
+            byte[] secretKeyBytes = keySafeService.release(dispatch.getCryptedDataId(), dispatch.getKeySafe());
+            decryptDocument(dispatch, secretKeyBytes);
+            dispatchXml = dispatch.getXml();
+        }
+        BundleType dispatchBundle = copyBundle(maxDownloads, dispatchXml.getBundle());
+        return dispatchBundle;
     }
     
     /**
@@ -133,6 +155,10 @@ class AllocationServiceSupport {
     }
     
     protected void decryptDocument(Allocation allocation, byte[] secretKeyBytes) {
+        if (allocation.getXml() != null) {
+            // Already decrypted
+            return;
+        }
         try {
             AllocationType allocationType = decrypt(allocation, secretKeyBytes);
             allocation.setXml(allocationType);
@@ -225,36 +251,5 @@ class AllocationServiceSupport {
     protected void refreshAllocation(Allocation allocation) {
         allocationDAO.refresh(allocation);
         assignFileXml(allocation);
-    }
-    
-
-    /**
-     * @param reference
-     * @param allocationDocument
-     */
-    protected void setReference(String reference, AllocationDocument allocationDocument) {
-        if (StringUtils.isNotBlank(reference)) {
-            allocationDocument.getAllocation().setReference(reference);
-        }
-    }
-
-    /**
-     * @param agreementText
-     * @param allocationDocument
-     */
-    protected void setAgreementText(String agreementText, AllocationDocument allocationDocument) {
-        if (StringUtils.isNotBlank(agreementText)) {
-            allocationDocument.getAllocation().setAgreement(agreementText);
-        }
-    }
-
-    /**
-     * @param comment
-     * @param allocationDocument
-     */
-    protected void setComment(String comment, AllocationDocument allocationDocument) {
-        if (StringUtils.isNotBlank(comment)) {
-            allocationDocument.getAllocation().setComment(comment);
-        }
     }
 }

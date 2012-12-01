@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 
 /**
  * Represents a file which has been deposited with a member via their public key. Essentially it links
- * together a {@link Bundle}, {@link Inbox} and {@link Vault}.
+ * together an {@link Inbox} and {@link KeySafe}.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */

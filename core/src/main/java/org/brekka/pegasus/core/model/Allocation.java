@@ -109,6 +109,13 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
     @JoinColumn(name="DerivedFromID")
     private Dispatch derivedFrom;
     
+    
+    /**
+     * If set to to true, this allocation will be purged upon successful download.
+     */
+    @Column(name="PurgeOnDownload")
+    private Boolean purgeOnDownload;
+    
     /**
      * Secret key for the allocation XML (transient).
      */

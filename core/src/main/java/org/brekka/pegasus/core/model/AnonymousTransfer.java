@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.model;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,6 +32,12 @@ public class AnonymousTransfer extends Transfer {
     @JoinColumn(name="`TokenID`")
     private Token token;
     
+    /**
+     * The creator can specify how man unlock attempts can be made.
+     */
+    @Column(name="MaxUnlockAttempts")
+    private Integer maxUnlockAttempts;
+    
     @Transient
     private transient String code;
     
@@ -48,5 +55,19 @@ public class AnonymousTransfer extends Transfer {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    /**
+     * @return the maxUnlockAttempts
+     */
+    public Integer getMaxUnlockAttempts() {
+        return maxUnlockAttempts;
+    }
+
+    /**
+     * @param maxUnlockAttempts the maxUnlockAttempts to set
+     */
+    public void setMaxUnlockAttempts(Integer maxUnlockAttempts) {
+        this.maxUnlockAttempts = maxUnlockAttempts;
     }
 }

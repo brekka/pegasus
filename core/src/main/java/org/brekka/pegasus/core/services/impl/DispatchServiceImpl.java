@@ -25,6 +25,7 @@ import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,36 +59,26 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     private DispatchDAO dispatchDAO;
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#createDispatch(java.lang.String, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.KeySafe, java.lang.String, java.lang.String, java.lang.String, java.util.List)
+     * @see org.brekka.pegasus.core.services.DispatchService#createDispatch(org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, java.lang.Integer, java.util.List)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Allocation createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
-            String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList) {
+    public Dispatch createDispatch(KeySafe keySafe, DetailsType details, Integer maxDownloads,
+            List<FileBuilder> fileBuilderList) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
         Actor activeActor = authenticatedMember.getActiveActor();
-        
-        Inbox inbox = null;
-        if (StringUtils.isNotBlank(recipientEMail)) {
-            EMailAddress address = eMailAddressService.retrieveByAddress(recipientEMail);
-            if (address != null) {
-                // Known to the system.
-                inbox = inboxService.retrieveForEMailAddress(address);
-            }
-        }
         
         BundleType bundleType = completeFiles(0, fileBuilderList);
         
         // Copy the allocation to
         AllocationDocument allocationDocument = prepareDocument(bundleType);
-        setComment(comment, allocationDocument);
-        setAgreementText(agreementText, allocationDocument);
-        setReference(reference, allocationDocument);
+        allocationDocument.getAllocation().setDetails(details);
         encryptDocument(dispatch, allocationDocument);
         
-        
-        dispatch.setDivision(division);
+        if (keySafe instanceof Division) {
+            dispatch.setDivision((Division) keySafe);
+        }
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
         
@@ -99,14 +90,31 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         
         dispatchDAO.create(dispatch);
         createAllocationFiles(dispatch);
+        return dispatch;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DispatchService#createDispatchAndAllocate(java.lang.String, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, int, java.util.List)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Allocation createDispatchAndAllocate(String recipientEMail, Division division, KeySafe keySafe,
+            DetailsType details, int maxDownloads, List<FileBuilder> fileBuilderList) {
+        Dispatch dispatch = createDispatch(keySafe, details, maxDownloads, fileBuilderList);
         
-        BundleType cloneBundle = copyBundle(maxDownloads, bundleType);
-        
+        Inbox inbox = null;
+        if (StringUtils.isNotBlank(recipientEMail)) {
+            EMailAddress address = eMailAddressService.retrieveByAddress(recipientEMail);
+            if (address != null) {
+                // Known to the system.
+                inbox = inboxService.retrieveForEMailAddress(address);
+            }
+        }
         Allocation allocation;
         if (inbox != null) {
-            allocation = inboxService.createDeposit(inbox, reference, comment, agreementText, cloneBundle, dispatch);
+            allocation = inboxService.createDeposit(inbox, details, dispatch);
         } else {
-            allocation = anonymousService.createTransfer(comment, agreementText, cloneBundle, dispatch);
+            allocation = anonymousService.createTransfer(details, maxDownloads, null, dispatch);
         }
         return allocation;
     }
@@ -116,6 +124,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#retrieveCurrentForInterval(org.joda.time.DateTime, org.joda.time.DateTime)
      */
     @Override
+    @Transactional(propagation=Propagation.SUPPORTS)
     public List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until) {
         AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
         Actor activeActor = authenticatedMember.getActiveActor();

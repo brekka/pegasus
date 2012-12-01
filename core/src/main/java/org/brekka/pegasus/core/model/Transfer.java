@@ -20,4 +20,5 @@ public abstract class Transfer extends Allocation {
      */
     private static final long serialVersionUID = -6144176815399227699L;
 
+
 }

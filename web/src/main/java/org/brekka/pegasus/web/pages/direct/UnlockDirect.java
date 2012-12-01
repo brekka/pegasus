@@ -43,7 +43,7 @@ public class UnlockDirect {
     Object onSuccess() {
         AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
         fetchPage.init(token);
-        if (anonymousTransfer.getXml().isSetAgreement()) {
+        if (anonymousTransfer.getXml().getDetails().isSetAgreement()) {
             agreementDirectPage.init(token);
             return agreementDirectPage;
         }

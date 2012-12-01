@@ -10,6 +10,7 @@ import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 
 /**
@@ -19,17 +20,14 @@ import org.joda.time.DateTime;
 public interface DispatchService {
 
     /**
-     * @param recipientEMail
-     * @param division
+     * 
      * @param keySafe
-     * @param reference
-     * @param comment
-     * @param agreementText
+     * @param details
+     * @param maxDownloads
      * @param fileBuilderList
      * @return
      */
-    Allocation createDispatch(String recipientEMail, Division division, KeySafe keySafe, String reference,
-            String comment, String agreementText, int maxDownloads, List<FileBuilder> fileBuilderList);
+    Dispatch createDispatch(KeySafe keySafe, DetailsType details, Integer maxDownloads, List<FileBuilder> fileBuilderList);
     
     
 
@@ -39,6 +37,20 @@ public interface DispatchService {
      * @return
      */
     List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until);
+
+
+
+    /**
+     * @param recipientEMail
+     * @param division
+     * @param keySafe
+     * @param detailsType
+     * @param maxDownloads
+     * @param fileBuilderList
+     * @return
+     */
+    Allocation createDispatchAndAllocate(String recipientEMail, Division division, KeySafe keySafe,
+            DetailsType detailsType, int maxDownloads, List<FileBuilder> fileBuilderList);
 
 
 }

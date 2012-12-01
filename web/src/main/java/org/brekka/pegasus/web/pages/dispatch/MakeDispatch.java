@@ -31,6 +31,7 @@ import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.direct.DirectDone;
 import org.brekka.pegasus.web.session.AllocationMaker;
 import org.brekka.pegasus.web.session.AllocationMakerContext;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 
 /**
  * 
@@ -116,9 +117,12 @@ public class MakeDispatch extends AbstractMakePage {
         AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
         if (!bundleMaker.isDone()) {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            Allocation transferKey = dispatchService.createDispatch(
-                    recipientEMail, division, keySafe, reference, comment, 
-                    agreementText, maxDownloads, fileBuilderList);
+            DetailsType detailsType = DetailsType.Factory.newInstance();
+            detailsType.setAgreement(agreementText);
+            detailsType.setReference(reference);
+            detailsType.setComment(comment);
+            Allocation transferKey = dispatchService.createDispatchAndAllocate(
+                    recipientEMail, division, keySafe, detailsType, maxDownloads, fileBuilderList);
             bundleMaker.setAllocation(transferKey);
             if (transferKey instanceof Deposit) {
                 dispatchDepositPage.init(makeKey);
