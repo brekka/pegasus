@@ -2,6 +2,8 @@ package org.brekka.pegasus.web.services;
 
 import java.io.File;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.internal.services.PageResponseRenderer;
@@ -29,6 +31,8 @@ import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.web.upload.EncryptedFileItemFactory;
 import org.brekka.pegasus.core.services.UploadPolicyService;
 import org.brekka.pegasus.web.services.impl.PegasusExceptionHandler;
+import org.brekka.stillingar.core.ConfigurationService;
+import org.got5.tapestry5.jquery.JQuerySymbolConstants;
 import org.got5.tapestry5.jquery.services.AjaxUploadDecoder;
 import org.got5.tapestry5.jquery.services.AjaxUploadDecoderImpl;
 import org.slf4j.Logger;
@@ -40,18 +44,13 @@ import org.slf4j.Logger;
  */
 public class PegasusModule {
 
-    public static final ModuleVersion APP_VERSION = ModuleVersion.getVersion(
-            "org.brekka.pegasus", "pegasus-web", PegasusModule.class.getClassLoader(), ModuleVersion.TIMESTAMP);
+    public static ModuleVersion pegasusVersion;
     
 
-    public static void contributeFactoryDefaults(MappedConfiguration<String, Object> configuration) {
-        // The application version number is incorprated into URLs for some
-        // assets. Web browsers will cache assets because of the far future expires
-        // header. If existing assets are changed, the version number should also
-        // change, to force the browser to download new versions. This overrides Tapesty's default
-        // (a random hexadecimal number), but may be further overriden by DevelopmentModule or
-        // QaModule.
-        configuration.override(SymbolConstants.APPLICATION_VERSION, APP_VERSION.getVersion());
+    public static void contributeFactoryDefaults(MappedConfiguration<String, Object> configuration, ServletContext servletContext) {
+        pegasusVersion = ModuleVersion.getVersion("org.brekka.pegasus", "pegasus-web", 
+                servletContext, ModuleVersion.TIMESTAMP);
+        configuration.override(SymbolConstants.APPLICATION_VERSION, pegasusVersion.getVersion());
     }
 
     public static void contributeApplicationDefaults(MappedConfiguration<String, Object> configuration) {
@@ -68,6 +67,7 @@ public class PegasusModule {
         configuration.add(SymbolConstants.COMBINE_SCRIPTS, "false"); 
         configuration.add(SymbolConstants.MINIFICATION_ENABLED, "false"); 
         configuration.add(SymbolConstants.HMAC_PASSPHRASE, "fbuWWoLF3ebQADzdkFThashzNfXKJfLn");
+//        configuration.add(JQuerySymbolConstants.SUPPRESS_PROTOTYPE, "true");
     }
     
 

@@ -107,7 +107,7 @@ public class EMailAddressServiceImpl implements EMailAddressService {
     protected byte[] hash(String value) {
         SystemDerivedKeySpecType spec = config.getSystemDerivedKeySpec();
         byte[] data = value.getBytes(Charset.forName("UTF-8"));
-        DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), spec.getIterations(), CryptoProfile.Static.of(spec.getCryptoProfile()));
+        DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), null, CryptoProfile.Static.of(spec.getCryptoProfile()));
         return derivedKey.getDerivedKey();
     }
 }

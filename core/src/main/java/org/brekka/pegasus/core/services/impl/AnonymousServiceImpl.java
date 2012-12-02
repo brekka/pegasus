@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.brekka.paveway.core.model.FileBuilder;
@@ -39,6 +40,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AnonymousServiceImpl extends AllocationServiceSupport implements AnonymousService {
     
+    /**
+     * 
+     */
+    private static final Pattern CODE_CLEAN_PATTERN = Pattern.compile("[^\\w]+", Pattern.UNICODE_CHARACTER_CLASS);
+
     @Autowired
     private AnonymousTransferDAO anonymousTransferDAO;
     
@@ -58,9 +64,9 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
-            List<FileBuilder> fileBuilders) {
+            List<FileBuilder> fileBuilders, String code) {
         BundleType bundleType = completeFiles(maxDownloads, fileBuilders);
-        return createTransfer(details, maxUnlockAttempts, null, bundleType);
+        return createTransfer(details, maxUnlockAttempts, null, bundleType, code);
     }
     
     /* (non-Javadoc)
@@ -68,12 +74,14 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts, Dispatch dispatch) {
+    public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts, 
+            Dispatch dispatch, String code) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, maxDownloads);
-        return createTransfer(details, maxUnlockAttempts, dispatch, dispatchBundle);
+        return createTransfer(details, maxUnlockAttempts, dispatch, dispatchBundle, code);
     }
     
-    protected AnonymousTransfer createTransfer(DetailsType details, Integer maxUnlockAttempts, Dispatch dispatch, BundleType bundleType) {
+    protected AnonymousTransfer createTransfer(DetailsType details, Integer maxUnlockAttempts, Dispatch dispatch, 
+            BundleType bundleType, String code) {
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setDerivedFrom(dispatch);
         
@@ -94,23 +102,31 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         
         
         // Allocate a code
-        StringBuilder codeBuilder = new StringBuilder();
-        StringBuilder prettyCodeBuilder = new StringBuilder();
-        for (int i = 0; i < 4; i++) {
-            if (i > 0) {
-                prettyCodeBuilder.append(" ");
+        String prettyCode;
+        if (code == null) {
+            StringBuilder codeBuilder = new StringBuilder();
+            StringBuilder prettyCodeBuilder = new StringBuilder();
+            for (int i = 0; i < 4; i++) {
+                if (i > 0) {
+                    prettyCodeBuilder.append(" ");
+                }
+                SecureRandom random = randomCryptoService.getSecureRandom();
+                String codePart = RandomStringUtils.random(2, 0, 0, false, true, null, random);
+                prettyCodeBuilder.append(codePart);
+                codeBuilder.append(codePart);
             }
-            SecureRandom random = randomCryptoService.getSecureRandom();
-            String codePart = RandomStringUtils.random(2, 0, 0, false, true, null, random);
-            prettyCodeBuilder.append(codePart);
-            codeBuilder.append(codePart);
+            code = codeBuilder.toString();
+            prettyCode = prettyCodeBuilder.toString();
+        } else {
+            prettyCode = code;
+            code = CODE_CLEAN_PATTERN.matcher(prettyCode).replaceAll("");
         }
-        anonTransfer.setCode(prettyCodeBuilder.toString());
+        anonTransfer.setCode(prettyCode);
         
         /*
          * Use phalanx to store the secret key for the bundle XML, encrypted with the code.
          */
-        CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), codeBuilder.toString());
+        CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), code);
         anonTransfer.setCryptedDataId(pbeEncryptedData.getId());
         
         /*
@@ -166,7 +182,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public AnonymousTransfer unlock(String token, String code) {
-        String codeClean = code.replaceAll("[^0-9]+", "");
+        String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), codeClean);
         decryptDocument(transfer, secretKeyBytes);

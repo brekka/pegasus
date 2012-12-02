@@ -39,7 +39,7 @@ public class CertificateSubject extends AuthenticationToken {
     /**
      * The DistinguishedName digest
      */
-    @Column(name="`DistinguishedName`", unique=true, length=255, nullable=false)
+    @Column(name="`DistinguishedName`", unique=true, length=255)
     private byte[] distinguishedNameDigest;
     
     /**

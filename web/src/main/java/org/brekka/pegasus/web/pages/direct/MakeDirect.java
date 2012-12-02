@@ -79,7 +79,7 @@ public class MakeDirect extends AbstractMakePage {
             List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
             DetailsType detailsType = DetailsType.Factory.newInstance();
             detailsType.setComment(comment);
-            Allocation transferKey = anonymousService.createTransfer(detailsType, 1, fileBuilderList);
+            Allocation transferKey = anonymousService.createTransfer(detailsType, 1, 5, fileBuilderList, null);
             bundleMaker.setAllocation(transferKey);
             directDonePage.init(makeKey);
             retVal = directDonePage;

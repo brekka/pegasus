@@ -114,7 +114,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         if (inbox != null) {
             allocation = inboxService.createDeposit(inbox, details, dispatch);
         } else {
-            allocation = anonymousService.createTransfer(details, maxDownloads, null, dispatch);
+            allocation = anonymousService.createTransfer(details, maxDownloads, null, dispatch, null);
         }
         return allocation;
     }

@@ -87,7 +87,7 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
         SystemDerivedKeySpecType spec = config.getSubjectDerivedKeySpec();
         
         DerivedKey derivedKey = derivedKeyCryptoService.apply(subjectDNBytes, spec.getSalt(), 
-                                       spec.getIterations(), CryptoProfile.Static.of(spec.getCryptoProfile()));
+                                       null, CryptoProfile.Static.of(spec.getCryptoProfile()));
         byte[] distinguishedNameDigest = derivedKey.getDerivedKey();
         CertificateSubject certificateSubject = certificateSubjectDAO.retrieveByDistinguishedNameDigest(distinguishedNameDigest);
         if (certificateSubject == null) {

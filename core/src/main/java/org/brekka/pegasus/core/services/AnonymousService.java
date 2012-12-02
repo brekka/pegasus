@@ -17,10 +17,10 @@ import org.brekka.xml.pegasus.v2.model.DetailsType;
 public interface AnonymousService {
 
     AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
-            List<FileBuilder> fileBuilders);
+            List<FileBuilder> fileBuilders, String code);
 
     AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
-            Dispatch dispatch);
+            Dispatch dispatch, String code);
 
     AnonymousTransfer unlock(String token, String code);
 

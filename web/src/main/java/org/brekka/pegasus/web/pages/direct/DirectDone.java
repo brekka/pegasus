@@ -83,7 +83,7 @@ public class DirectDone {
     }
     
     public boolean isAgreement() {
-        return transfer.getXml().isSetAgreement();
+        return transfer.getXml().getDetails().isSetAgreement();
     }
     
     private String getPath() {

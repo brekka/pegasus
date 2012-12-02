@@ -20,6 +20,8 @@
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element ref="plxc:EMailAddressService" />
+                <xsd:element ref="plxc:UsernamePasswordService" minOccurs="0" />
+                <xsd:element ref="plxc:CertificateAuthenticationService" minOccurs="0" />
                 <xsd:element name="AnonymousTransfer">
                     <xsd:complexType>
                         <xsd:sequence>
@@ -66,7 +68,7 @@
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="SubjectDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
-                <xsd:element name="SubjectDistinguishedNamePattern" type="xsd:string" maxOccurs="unbounded">
+                <xsd:element name="SubjectDistinguishedNamePattern" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
                     <xsd:annotation>
                         <xsd:documentation>The pattern used to identify allowed certificates based on their subject distinguished name. A single capturing group can be specified that will be used to resolve the common name that will be returned as a username.</xsd:documentation>
                     </xsd:annotation></xsd:element>
@@ -77,7 +79,6 @@
     <xsd:complexType name="SystemDerivedKeySpecType">
         <xsd:sequence>
             <xsd:element name="CryptoProfile"  type="plxc:CryptoProfileRefType" />
-            <xsd:element name="Iterations" type="xsd:int" />
             <xsd:element name="Salt"       type="xsd:base64Binary" />
         </xsd:sequence>
     </xsd:complexType>

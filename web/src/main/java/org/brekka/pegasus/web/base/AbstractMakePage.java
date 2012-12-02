@@ -24,18 +24,18 @@ import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.web.upload.EncryptedFileItem;
 import org.brekka.pegasus.core.services.UploadPolicyService;
 import org.brekka.pegasus.web.session.AllocationMaker;
-import org.got5.tapestry5.jquery.JQuerySymbolConstants;
+import org.got5.tapestry5.jquery.ImportJQueryUI;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
  * 
  */
+@ImportJQueryUI()
 @Import(library = {
-    "${" + JQuerySymbolConstants.JQUERY_CORE_PATH + "}",
-    "context:js/vendor/jquery.ui.widget.js",
-    "context:js/jquery.iframe-transport.js",
-    "context:js/jquery.fileupload.js",
-    "context:js/upload.js"
+    "classpath:org/brekka/pegasus/web/upload/vendor/jquery.ui.widget.js",
+    "classpath:org/brekka/pegasus/web/upload/jquery.iframe-transport.js",
+    "classpath:org/brekka/pegasus/web/upload/jquery.fileupload.js",
+    "classpath:org/brekka/pegasus/web/upload/upload.js"
 })
 public abstract class AbstractMakePage {
     @Inject

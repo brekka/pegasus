@@ -7,11 +7,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.brekka.pegasus.core.security.WebAuthenticationDetails;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Andrew Taylor
  *
  */
+@Component("authenticationDetailsSource")
 public class WebAuthenticationDetailsSource implements AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> {
 
     /* (non-Javadoc)

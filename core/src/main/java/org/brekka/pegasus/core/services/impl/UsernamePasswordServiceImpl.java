@@ -134,7 +134,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     protected byte[] deriveUsername(String username) {
         SystemDerivedKeySpecType spec = config.getSystemDerivedKeySpec();
         byte[] data = toBytes(username);
-        DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), spec.getIterations(), CryptoProfile.Static.of(spec.getCryptoProfile()));
+        DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), null, CryptoProfile.Static.of(spec.getCryptoProfile()));
         return derivedKey.getDerivedKey();
     }
 
