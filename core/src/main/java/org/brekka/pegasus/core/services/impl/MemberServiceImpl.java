@@ -84,6 +84,8 @@ public class MemberServiceImpl implements MemberService {
         if (member instanceof Person) {
             Person person = (Person) member;
             return person;
+        } else if (member == null) {
+            return null;
         }
         throw new PegasusException(PegasusErrorCode.PG901, 
                 "Not a person '%s'", member.getClass().getName());

@@ -44,7 +44,7 @@
     
     <servlet>
         <servlet-name>upload</servlet-name>
-        <servlet-class>org.brekka.pegasus.web.servlet.UploadServlet</servlet-class>
+        <servlet-class>org.brekka.paveway.web.servlet.UploadServlet</servlet-class>
     </servlet>
     
     <servlet-mapping>
@@ -53,7 +53,7 @@
     </servlet-mapping>
     
     <listener>
-        <listener-class>org.brekka.pegasus.web.session.AllocationMakerContextListener</listener-class>
+        <listener-class>org.brekka.paveway.web.listener.AllocationMakerContextListener</listener-class>
     </listener>
     <listener>
     	<listener-class>org.brekka.pegasus.web.session.HttpSessionEventPublisher</listener-class>

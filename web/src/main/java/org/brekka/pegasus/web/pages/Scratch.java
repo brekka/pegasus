@@ -18,7 +18,7 @@ package org.brekka.pegasus.web.pages;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tapestry5.annotations.Component;
-import org.brekka.pegasus.web.components.MultiUpload;
+import org.brekka.paveway.tapestry.components.Upload;
 
 /**
  * TODO Description of Scratch
@@ -28,9 +28,9 @@ import org.brekka.pegasus.web.components.MultiUpload;
 public class Scratch {
 
     @Component
-    protected MultiUpload tester;
+    protected Upload tester;
     @Component
-    protected MultiUpload other;
+    protected Upload other;
     
     private String makeKey;
     

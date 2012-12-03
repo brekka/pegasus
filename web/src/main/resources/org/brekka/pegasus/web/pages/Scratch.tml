@@ -1,4 +1,4 @@
-<html t:type="layout" xmlns:p="tapestry:parameter"
+<html t:type="layout" xmlns:p="tapestry:parameter" xmlns:pw="tapestry-library:pw"
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
     
     <h1>Scratch</h1>  
@@ -8,12 +8,12 @@
 	    <h3><em>1.</em> Files to send</h3>
         <div class="field">
             <t:label for="tester">Select file(s)</t:label>
-            <t:multiupload t:id="tester" description="Desc" multiDescription="Multi" />
+            <pw:upload t:id="tester" description="Desc" multiDescription="Multi" />
         </div>
 		
         <div class="field">
             <t:label for="other">Some other file(s)</t:label>
-            <t:multiupload t:id="other" />
+            <pw:upload t:id="other" />
             <p>Choose the file you wish to transfer using the selection box immediately above this text</p>
         </div>
 		

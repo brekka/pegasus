@@ -1,46 +1,15 @@
-<html t:type="layout" xmlns:p="tapestry:parameter"
+<html t:type="layout" xmlns:p="tapestry:parameter" xmlns:pw="tapestry-library:pw"
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
     
     <h2>Send file(s)</h2>
     
-    <h3><em>1.</em> Files to send</h3>
-    <div id="enhanced" class="hidden">
-	    <div class="field">
-			<label for="comment">Select file(s)</label>
-			<span class="add_files"></span>
-		    <p>Click 'Browse...' above to add one or more files, or drag the files onto this window. The files will begin to upload
-		       immediately but will not become available for download until "Make available" is clicked in section 3.
-               You can upload up to <em>${uploadPolicy.maxFiles}</em> files, where each file can be at most <em><t:output value="uploadPolicy.maxFileSize" format="byteLengthFormat" /></em>.  
-            </p>
-		</div>
-    </div>
-    <div id="files_outer">
-	    <table id="files" class="hidden">
-	   		<thead>
-	    		<tr>
-	    			<th>Filename</th>
-	    			<th>Size</th>
-	    			<th>Progress</th>
-	    		</tr>
-	   		</thead>
-	   		<tbody>
-	   			<t:loop source="files" value="loopFile">
-	   				<tr>
-	    				<td>${loopFile.fileName}</td>
-	    				<td>${loopFile.length}</td>
-	    				<td>100%</td>
-	    			</tr>
-	   			</t:loop>
-	   		</tbody>
-	   	</table>
-    </div>
-   	
 	<t:form>
-		<div id="normal_filefield" class="field">
-			<t:label for="file">Select file</t:label>
-			<t:upload t:id="file" file="file" />
-			<p>Choose the file you wish to transfer using the selection box immediately above this text</p>
-		</div>
+	    <h3><em>1.</em> Files to send</h3>
+        <div class="field">
+            <t:label for="upload">Select file(s)</t:label>
+            <pw:upload t:id="upload" description="${description}" 
+                                   multiDescription="${multiDescription}" />
+        </div>
         
         <h3><em>2.</em> Recipient</h3>
         <div class="field">
@@ -82,5 +51,4 @@
 		</div>
 	</t:form>
 	
-	<t:outputRaw value="uploadLinkScript" />
 </html>

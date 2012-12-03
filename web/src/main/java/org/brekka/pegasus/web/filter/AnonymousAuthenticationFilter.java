@@ -89,7 +89,7 @@ public class AnonymousAuthenticationFilter extends GenericFilterBean implements 
         List<GrantedAuthority> granted = new ArrayList<>(3);
         granted.add(ANONYMOUS);
         if (firewallService.isAccessAllowed(anonymousAccess, ipAddress)) {
-            // Can send files anonymously
+            // Can send uploadedFiles anonymously
             granted.add(ANONYMOUS_TRANSFER);
         }
         if (firewallService.isAccessAllowed(memberSignup, ipAddress)) {

@@ -7,21 +7,17 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.tapestry5.alerts.Duration;
-import org.apache.tapestry5.alerts.Severity;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.web.model.Files;
+import org.brekka.paveway.web.session.UploadsContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
-import org.brekka.pegasus.web.pages.Index;
-import org.brekka.pegasus.web.pages.NoSession;
-import org.brekka.pegasus.web.session.AllocationMaker;
-import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 
@@ -52,34 +48,19 @@ public class MakeDeposit extends AbstractMakePage {
      * @return
      */
     Object onActivate(String inboxToken) {
-        Inbox inbox = inboxService.retrieveForToken(inboxToken);
+        this.inbox = inboxService.retrieveForToken(inboxToken);
         String makeKey = MakeKeyUtils.newKey();
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
-        bundleMakerContext.get(makeKey, inbox);
+        UploadsContext bundleMakerContext = UploadsContext.get(req, true);
+        bundleMakerContext.get(makeKey);
         init(inbox, makeKey);
-        return this;
+        return super.activate();
     }
     
     Object onActivate(String inboxToken, String makeKey) {
         this.inbox = inboxService.retrieveForToken(inboxToken);
         this.makeKey = makeKey;
-        HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, false);
-        if (bundleMakerContext == null) {
-            return NoSession.class;
-        }
-        if (!bundleMakerContext.contains(makeKey)) {
-            alertManager.alert(Duration.SINGLE, Severity.WARN, "Sorry, but the uploaded files are no longer available. Please try again.");
-            return onActivate(inboxToken);
-        }
-        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
-        if (bundleMaker.isDone()) {
-            return Index.class;
-        }
-        files = bundleMaker.previewCompleted();
-        
-        return Boolean.TRUE;
+        return super.activate(makeKey);
     }
     
     public void init(Inbox inbox, String makeKey) {
@@ -88,27 +69,19 @@ public class MakeDeposit extends AbstractMakePage {
     }
 
     String[] onPassivate() {
-        return new String[] { inbox.getToken().getPath(), makeKey };
+        return new String[] { inbox.getToken().getPath(), super.passivate() };
     }
-
-    Object onSuccess() throws Exception {
-        Object retVal;
-        HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
-        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
-        if (!bundleMaker.isDone()) {
-            List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            DetailsType detailsType = DetailsType.Factory.newInstance();
-            detailsType.setReference(reference);
-            detailsType.setComment(comment);
-            Allocation transferKey = inboxService.createDeposit(inbox, detailsType, fileBuilderList);
-            bundleMaker.setAllocation(transferKey);
-            depositDonePage.init(makeKey);
-            retVal = depositDonePage;
-        } else {
-            // TODO bad handling
-            throw new IllegalStateException();
-        }
-        return retVal;
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.web.base.AbstractMakePage#onSuccess(java.util.List, java.lang.String)
+     */
+    @Override
+    protected Object onSuccess(List<FileBuilder> fileBuilderList, String comment, Files filesContext) {
+        DetailsType detailsType = DetailsType.Factory.newInstance();
+        detailsType.setReference(reference);
+        detailsType.setComment(comment);
+        Allocation allocation = inboxService.createDeposit(inbox, detailsType, fileBuilderList);
+        depositDonePage.init(makeKey, allocation);
+        return depositDonePage;
     }
 }

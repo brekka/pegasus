@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service("openIdService")
 @Transactional
+@Configured
 public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
 
     @Autowired

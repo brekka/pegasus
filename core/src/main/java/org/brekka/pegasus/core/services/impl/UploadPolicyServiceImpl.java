@@ -4,8 +4,8 @@
 package org.brekka.pegasus.core.services.impl;
 
 import org.brekka.paveway.core.model.UploadPolicy;
+import org.brekka.paveway.core.services.UploadPolicyService;
 import org.brekka.pegasus.core.services.MemberService;
-import org.brekka.pegasus.core.services.UploadPolicyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

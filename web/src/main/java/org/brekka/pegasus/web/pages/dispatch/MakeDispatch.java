@@ -17,6 +17,8 @@ import org.apache.tapestry5.internal.OptionModelImpl;
 import org.apache.tapestry5.internal.SelectModelImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.web.model.Files;
+import org.brekka.paveway.web.session.UploadsContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Deposit;
@@ -29,8 +31,6 @@ import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.direct.DirectDone;
-import org.brekka.pegasus.web.session.AllocationMaker;
-import org.brekka.pegasus.web.session.AllocationMakerContext;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 
 /**
@@ -99,10 +99,11 @@ public class MakeDispatch extends AbstractMakePage {
         this.division = division;
         this.keySafe = keySafe;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
-        bundleMakerContext.get(makeKey);
+        UploadsContext uploadsContext = UploadsContext.get(req, true);
+        Files filesContext = uploadsContext.get(makeKey);
         this.context = ArrayUtils.add(context, makeKey);
         super.init(makeKey);
+        setPolicy(filesContext.getPolicy());
         return Boolean.TRUE;
     }
     
@@ -110,32 +111,27 @@ public class MakeDispatch extends AbstractMakePage {
         return context;
     }
     
-    Object onSuccess() throws Exception {
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.web.base.AbstractMakePage#onSuccess(java.util.List, java.lang.String)
+     */
+    @Override
+    protected Object onSuccess(List<FileBuilder> fileBuilderList, String comment, Files filesContext) {
         Object retVal;
-        HttpServletRequest req = requestGlobals.getHTTPServletRequest();
-        AllocationMakerContext bundleMakerContext = AllocationMakerContext.get(req, true);
-        AllocationMaker bundleMaker = bundleMakerContext.get(makeKey);
-        if (!bundleMaker.isDone()) {
-            List<FileBuilder> fileBuilderList = processFiles(bundleMaker);
-            DetailsType detailsType = DetailsType.Factory.newInstance();
-            detailsType.setAgreement(agreementText);
-            detailsType.setReference(reference);
-            detailsType.setComment(comment);
-            Allocation transferKey = dispatchService.createDispatchAndAllocate(
-                    recipientEMail, division, keySafe, detailsType, maxDownloads, fileBuilderList);
-            bundleMaker.setAllocation(transferKey);
-            if (transferKey instanceof Deposit) {
-                dispatchDepositPage.init(makeKey);
-                retVal = dispatchDepositPage;
-            } else if (transferKey instanceof AnonymousTransfer) {
-                directDonePage.init(makeKey);
-                retVal = directDonePage;
-            } else {
-                // TODO
-                throw new IllegalStateException();
-            }
+        DetailsType detailsType = DetailsType.Factory.newInstance();
+        detailsType.setAgreement(agreementText);
+        detailsType.setReference(reference);
+        detailsType.setComment(comment);
+        Allocation allocation = dispatchService.createDispatchAndAllocate(
+                recipientEMail, division, keySafe, detailsType, maxDownloads, fileBuilderList);
+        filesContext.addAttribute(Allocation.class.getName(), allocation);
+        if (allocation instanceof Deposit) {
+            dispatchDepositPage.init(makeKey, allocation);
+            retVal = dispatchDepositPage;
+        } else if (allocation instanceof AnonymousTransfer) {
+            directDonePage.init(makeKey, allocation);
+            retVal = directDonePage;
         } else {
-            // TODO bad handling
+            // TODO
             throw new IllegalStateException();
         }
         return retVal;
