@@ -16,6 +16,7 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.pegasus.web.support.ElapsedPeriodFormat;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 
 /**
@@ -84,7 +85,7 @@ public class InboxIndex {
         return loopDeposit;
     }
     
-    public AllocationType getDetails() {
+    public AllocationType getXml() {
         return loopDeposit.getXml();
     }
 }

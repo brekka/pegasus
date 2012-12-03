@@ -6,11 +6,11 @@
     
     <p> Your file(s) are now ready to be downloaded. </p>
     
-    <t:if test="transfer.xml.comment">
+    <t:if test="transfer.xml.details.comment">
         <div class="comment">
             <h4>Comment from sender</h4>
             <pre>
-${transfer.xml.comment}
+${transfer.xml.details.comment}
             </pre>
         </div>
     </t:if>

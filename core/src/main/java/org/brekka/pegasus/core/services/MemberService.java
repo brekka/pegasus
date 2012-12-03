@@ -7,6 +7,7 @@ import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.DigitalCertificate;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.OpenID;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,6 +56,11 @@ public interface MemberService {
      * @return
      */
     Person retrievePerson(AuthenticationToken token);
+
+    /**
+     * @param openID
+     */
+    Person createPerson(AuthenticationToken authenticationToken);
 
 }
 

@@ -1,0 +1,27 @@
+<html t:type="layout" xmlns:p="tapestry:parameter"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
+    
+    <h1>Scratch</h1>  
+    
+   	
+	<t:form>
+	    <h3><em>1.</em> Files to send</h3>
+        <div class="field">
+            <t:label for="tester">Select file(s)</t:label>
+            <t:multiupload t:id="tester" description="Desc" multiDescription="Multi" />
+        </div>
+		
+        <div class="field">
+            <t:label for="other">Some other file(s)</t:label>
+            <t:multiupload t:id="other" />
+            <p>Choose the file you wish to transfer using the selection box immediately above this text</p>
+        </div>
+		
+		<h3><em>3.</em> Make files available for secure download</h3>
+		<div class="field">
+			<label>Submit</label>
+			<t:submit value="Submit"/>
+		</div>
+	</t:form>
+	
+</html>

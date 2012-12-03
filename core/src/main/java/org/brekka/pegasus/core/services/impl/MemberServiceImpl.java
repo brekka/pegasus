@@ -4,27 +4,22 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.MemberDAO;
-import org.brekka.pegasus.core.dao.OpenIdDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.OpenID;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
-import org.brekka.pegasus.core.security.PegasusAuthority;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
@@ -32,16 +27,11 @@ import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
-import org.brekka.stillingar.api.annotations.Configured;
-import org.brekka.xml.pegasus.v2.config.PegasusDocument.Pegasus.Administration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,14 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@Configured
-public class MemberServiceImpl implements UserDetailsService, MemberService {
+public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private MemberDAO memberDAO;
-    
-    @Autowired
-    private OpenIdDAO openIdDAO;
 
     @Autowired
     private VaultService vaultService; 
@@ -76,48 +62,6 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
     @Autowired
     private OrganizationService organizationService;
     
-    @Configured
-    private Administration administrationConfig;
-    
-    
-    /* (non-Javadoc)
-     * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public UserDetails loadUserByUsername(String openIdUri) throws UsernameNotFoundException {
-        Set<PegasusAuthority> authorities = EnumSet.noneOf(PegasusAuthority.class);
-        OpenID openId = openIdDAO.retrieveByURI(openIdUri);
-        Person person = null;
-        if (openId != null) {
-            person = (Person) memberDAO.retrieveByAuthenticationToken(openId);
-        }
-        if (person != null 
-                && person.getStatus() != ActorStatus.NEW) {
-            List<String> userOpenIDList = administrationConfig.getUserOpenIDList();
-            for (String adminOpenId : userOpenIDList) {
-                if (adminOpenId.equals(openId)) {
-                    authorities.add(PegasusAuthority.ADMIN);
-                    break;
-                }
-            }
-            authorities.add(PegasusAuthority.USER);
-        } else {
-            // Not a member yet, create a new entry
-            if (person == null) {
-                person = new Person();
-                OpenID openID = new OpenID();
-                openID.setUri(openIdUri);
-                openIdDAO.create(openID);
-                person.setAuthenticationToken(openID);
-                memberDAO.create(person);
-            }
-            authorities.add(PegasusAuthority.MEMBER_SIGNUP);
-            authorities.add(PegasusAuthority.ANONYMOUS);
-        }
-        AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person, authorities);
-        return authMember;
-    }
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.MemberService#activateOrganization(org.brekka.pegasus.core.model.Organization)
@@ -183,6 +127,17 @@ public class MemberServiceImpl implements UserDetailsService, MemberService {
         Person person = new Person();
         person.setAuthenticationToken(authenticationToken);
         populatePerson(person, fullName, email, vaultPassword, encryptProfile);
+        memberDAO.create(person);
+        return person;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#preparePerson(org.brekka.pegasus.core.model.OpenID)
+     */
+    @Override
+    public Person createPerson(AuthenticationToken authenticationToken) {
+        Person person = new Person();
+        person.setAuthenticationToken(authenticationToken);
         memberDAO.create(person);
         return person;
     }

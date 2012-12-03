@@ -17,12 +17,15 @@ class UploadPolicyImpl implements UploadPolicy {
     
     private final int maxSize;
     
+    private final int clusterSize;
     
     
-    public UploadPolicyImpl(int maxFiles, int maxFileSize, int maxSize) {
+    
+    public UploadPolicyImpl(int maxFiles, int maxFileSize, int maxSize,int clusterSize) {
         this.maxFiles = maxFiles;
         this.maxFileSize = maxFileSize;
         this.maxSize = maxSize;
+        this.clusterSize = clusterSize;
     }
 
     /* (non-Javadoc)
@@ -47,6 +50,14 @@ class UploadPolicyImpl implements UploadPolicy {
     @Override
     public int getMaxSize() {
         return maxSize;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.paveway.core.model.UploadPolicy#getClusterSize()
+     */
+    @Override
+    public int getClusterSize() {
+        return clusterSize;
     }
 
 }

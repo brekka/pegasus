@@ -1,20 +1,23 @@
-$(function () {
-	
-	if (window.File && window.FileReader && window.FileList && window.Blob) {
-		// Must have the api
-		$('#normal_filefield').remove();
-		
-		var multiple = (navigator.userAgent.indexOf("Firefox") == -1);
-		var cnt = 0, total = 0;
-		$('#enhanced .field .add_files').html('<input id="fileupload" type="file" name="files[]" multiple="' + multiple + '" />');
-		$('#enhanced').removeClass("hidden");
-		$('#send_button').attr("disabled", "disabled");
-		if ($('#files tbody tr').size() == 0) {
-			$('#files').hide();
+var PegasusUpload = {
+    ready : {},
+	apply : function (id, uploadLink, pMaxFiles, pMaxFileSize, pMaxChunkSize) {
+		if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+			return;
 		}
-		$('#files').removeClass("hidden");
-	    $('#fileupload').fileupload({
-	    	maxChunkSize: 2000000,
+		var inputId = 'fileupload_' + id;
+		var context = $('#' + id);
+		context.find(".failsafe-input").remove();
+		var multiple = (navigator.userAgent.indexOf("Firefox") == -1);
+		context.find('span.add_files').html('<input id="' + inputId + '" type="file" name="files[]" multiple="' + multiple + '" />');
+		context.find('div.multi-upload').removeClass("hidden");
+		var table = context.find('table');
+		if (table.find('tbody tr').size() == 0) {
+			table.hide();
+		}
+		table.removeClass("hidden");
+		var cnt = 0, total = 0;
+		$('#' + inputId).fileupload({
+	    	maxChunkSize: pMaxChunkSize,
 	        dataType: 'json',
 	        url: uploadLink,
 	        done: function (e, data) {
@@ -23,23 +26,22 @@ $(function () {
 	        		cnt --;
 	            });
 	        	if (cnt == 0) {
-	        		$('#send_button').removeAttr("disabled");
-	        		$('#prepare_to_send').html("Ready to make these files available.");
+	        		PegasusUpload.ready[inputId] = true;
 	        	}
 	        },
 	        add: function (e, data) {
-	        	if (total >= maxFiles) {
+	        	if (total >= pMaxFiles) {
 	        		return false;
 	        	}
-	        	$('#files').show();
+	        	table.show();
 	        	//$('#files tbody').empty();
 	        	for (var i = 0; i < data.files.length; i++) {
 	        		var file = data.files[i];
-	        		if (file.size > maxFileSize) {
+	        		if (file.size > pMaxFileSize) {
 	        			return false;
 	        		}
-	        		$('#files tbody').append('<tr><td>' + file.name + '</td><td>' + file.size + '</td><td class="progress">0%</td></tr>');
-	        		file.progress = $('#files tr:last .progress');
+	        		table.find('tbody').append('<tr><td>' + file.name + '</td><td>' + file.size + '</td><td class="progress">0%</td></tr>');
+	        		file.progress = table.find('tr:last .progress');
 	        		cnt ++;
 	        		total++;
 	        	}
@@ -52,8 +54,8 @@ $(function () {
 	            });
 	        },
 	        start: function (e) {
-	        	$('#send_button').attr("disabled", "disabled");
+	        	PegasusUpload.ready[inputId] = false;
 	        },
 	    });
-	}
-});
+	}	
+};

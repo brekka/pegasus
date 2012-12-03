@@ -124,7 +124,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#retrieveCurrentForInterval(org.joda.time.DateTime, org.joda.time.DateTime)
      */
     @Override
-    @Transactional(propagation=Propagation.SUPPORTS)
+    @Transactional(propagation=Propagation.REQUIRED)
     public List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until) {
         AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
         Actor activeActor = authenticatedMember.getActiveActor();

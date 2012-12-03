@@ -57,11 +57,27 @@ public class TokenFilter implements Filter {
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
      */
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
-        downloadService = applicationContext.getBean(DownloadService.class);
-        anonymousService = applicationContext.getBean(AnonymousService.class);
-        tokenService = applicationContext.getBean(TokenService.class);
+    public void init(final FilterConfig filterConfig) throws ServletException {
+        Thread startup = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (TokenFilter.this) {
+                    WebApplicationContext applicationContext = null;
+                    while (applicationContext == null) {
+                        applicationContext = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                    downloadService = applicationContext.getBean(DownloadService.class);
+                    anonymousService = applicationContext.getBean(AnonymousService.class);
+                    tokenService = applicationContext.getBean(TokenService.class);
+                }
+            }
+        });
+        startup.setDaemon(true);
+        startup.start();
     }
 
     /* (non-Javadoc)

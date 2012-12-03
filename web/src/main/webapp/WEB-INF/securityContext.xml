@@ -22,7 +22,7 @@
         <intercept-url pattern="/**"          access="ROLE_USER,ROLE_ANONYMOUS"/>
         <logout logout-url="/logout"/>
         <openid-login login-page="/login" authentication-failure-url="/login?error=true" default-target-url="/authenticated"
-                      authentication-details-source-ref="authenticationDetailsSource" >
+                      authentication-details-source-ref="authenticationDetailsSource" user-service-ref="openIdService">
             <attribute-exchange identifier-match="https://www.google.com/.*">
                 <openid-attribute name="email" type="http://schema.openid.net/contact/email" required="true" />
                 <openid-attribute name="firstName" type="http://axschema.org/namePerson/first" required="true" />

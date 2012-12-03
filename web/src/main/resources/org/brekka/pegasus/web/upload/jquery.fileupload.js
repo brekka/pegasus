@@ -533,11 +533,6 @@
                 // will be dereferenced after data processing:
                 o.chunkSize = o.blob.size;
                 
-                // Added 2012-12-01 AJT
-                o.headers = $.extend(o.headers, {
-                    'X-Part-Offset': i * o.maxChunkSize
-                });
-                
                 // Expose the chunk bytes position range:
                 o.contentRange = 'bytes ' + ub + '-' +
                     (ub + o.chunkSize - 1) + '/' + fs;

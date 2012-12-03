@@ -20,11 +20,11 @@
             <span class="deposited"><em>Deposited: </em> 
                 <t:output value="loopDeposit.created" format="elapsedPeriodFormat" />
             </span>
-            <t:if test="details.reference">
-                <span class="reference"><em>Reference: </em> ${details.reference}</span>
+            <t:if test="xml.details.reference">
+                <span class="reference"><em>Reference: </em> ${xml.details.reference}</span>
             </t:if>
             <ul class="files">
-                <t:loop source="details.bundle.fileList" value="loopFile">
+                <t:loop source="xml.bundle.fileList" value="loopFile">
                     <li>
                         <t:pagelink page="download" context="fileContext" class="filename" title="${loopFile.name}">${loopFile.name}</t:pagelink>
                         <span class="size">
@@ -35,7 +35,7 @@
             </ul>
             <div class="comment">
                 <em>Comment: </em>
-                <span>${details.comment}</span>
+                <span>${xml.details.comment}</span>
             </div>
         </li>
     </t:loop>

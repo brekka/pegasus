@@ -4,7 +4,6 @@
 package org.brekka.pegasus.core.services.impl;
 
 import org.brekka.paveway.core.model.UploadPolicy;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.UploadPolicyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class UploadPolicyServiceImpl implements UploadPolicyService {
 //            return new UploadPolicyImpl(200, 1_000_000_000, 2_000_000_000);
 //        }
         // Same policy for all - for now
-        return new UploadPolicyImpl(200, 1_000_000_000, 2_000_000_000);
+        return new UploadPolicyImpl(200, 1_000_000_000, 2_000_000_000, 1_000_000);
     }
 
 }

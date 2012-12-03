@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.tapestry5.ComponentResources;
 import org.apache.tapestry5.alerts.AlertManager;
+import org.apache.tapestry5.annotations.Component;
 import org.apache.tapestry5.annotations.Import;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -23,6 +24,7 @@ import org.brekka.paveway.core.model.FileInfo;
 import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.web.upload.EncryptedFileItem;
 import org.brekka.pegasus.core.services.UploadPolicyService;
+import org.brekka.pegasus.web.components.MultiUpload;
 import org.brekka.pegasus.web.session.AllocationMaker;
 import org.got5.tapestry5.jquery.ImportJQueryUI;
 
