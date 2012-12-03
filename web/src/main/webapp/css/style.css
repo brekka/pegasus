@@ -167,26 +167,26 @@ h3 a:hover,h4 a:hover {
     padding: 0pt;
 }
 
-.multi-upload .table-outer {
+.pw-upload .table-outer {
     max-height: 180px;
     margin-left: 160px;
     overflow: auto;
     width: 525px;
 }
 
-.multi-upload table {
+.pw-upload table {
     border-collapse: collapse;
     width: 500px;
 }
 
-.multi-upload th {
+.pw-upload th {
     border-bottom: 1px solid #A0A0A0;
     color: #808080;
     font-size: 14px;
     text-align: left;
 }
 
-.multi-upload td {
+.pw-upload td {
     border-bottom: 1px dotted #A0A0A0;
     padding: 6px 10px;
     text-align: left;
