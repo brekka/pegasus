@@ -7,8 +7,7 @@
 	    <h3><em>1.</em> Files to send</h3>
         <div class="field">
             <t:label for="upload">Select file(s)</t:label>
-            <pw:upload t:id="upload" description="${description}" 
-                                   multiDescription="${multiDescription}" />
+            <pw:upload t:id="upload" />
         </div>
         
         <h3><em>2.</em> Recipient</h3>

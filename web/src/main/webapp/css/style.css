@@ -141,29 +141,43 @@ h3 a:hover,h4 a:hover {
     clear: both;
 }
 
-.field {
+
+
+.field, .bkc-fielding {
     padding: 12px;
     position: relative;
 }
 
-.field label {
+.field label, .bkc-label {
     color: #000080;
     float: left;
     width: 150px;
 }
 
-.field input {
+.bkc-value {
+	float: left;
+	width: 720px;
+}
+
+.field input, .bkc-value textarea {
     width: 300px;
 }
 
-.field textarea {
+.field textarea, .bkc-value textarea {
     width: 700px;
 }
 
-.field p {
+.field p, .bkc-value p {
     color: #404080;
     font-size: 12px;
     margin: 3px 20px 2px 150px;
+    padding: 0pt;
+}
+
+.bkc-value p {
+    color: #404080;
+    font-size: 12px;
+    margin: 3px 20px 2px 0;
     padding: 0pt;
 }
 

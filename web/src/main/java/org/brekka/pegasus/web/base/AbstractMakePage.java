@@ -108,16 +108,4 @@ public abstract class AbstractMakePage {
     }
     
     protected abstract Object onSuccess(List<FileBuilder> fileBuilderList, String comment, Files filesContext);
-    
-    public String getDescription() {
-        return "Choose the file you wish to transfer using the selection box immediately above this text";
-    }
-    
-    public String getMultiDescription() {
-        return String.format("Click 'Browse...' above to add one or more uploadedFiles, or drag the uploadedFiles onto this window. " +
-                "The uploadedFiles will begin to upload immediately but will not become available for download until " +
-                "\"Make available\" is clicked in section 3. You can upload up to <em>%d</em> uploadedFiles, where each " +
-                "file can be at most <em>%s</em>", uploadPolicy.getMaxFiles(), 
-                byteLengthFormat.format(uploadPolicy.getMaxFileSize()));
-    }
 }
