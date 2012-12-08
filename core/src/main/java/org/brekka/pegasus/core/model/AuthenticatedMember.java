@@ -10,16 +10,15 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Andrew Taylor
  *
  */
-public interface AuthenticatedMember extends Accessor {
+public interface AuthenticatedMember<T extends Member> extends Accessor {
 
     Actor getActiveActor();
     
-    Member getMember();
+    T getMember();
     
     Vault getActiveVault();
     
     ProfileType getProfile();
     
     boolean hasAccess(GrantedAuthority grantedAuthority);
-    
 }

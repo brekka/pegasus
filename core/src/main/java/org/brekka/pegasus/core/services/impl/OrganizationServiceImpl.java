@@ -136,7 +136,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
     public List<DivisionAssociate> retrieveCurrentDivisions() {
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Associate associate = (Associate) currentMember.getActiveActor();
         return divisionAssociateDAO.retrieveForOrg(associate);
     }

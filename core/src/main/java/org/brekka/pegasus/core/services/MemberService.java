@@ -5,9 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
-import org.brekka.pegasus.core.model.DigitalCertificate;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.OpenID;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,7 +26,9 @@ public interface MemberService {
     
     Person createPerson(AuthenticationToken authenticationToken, String fullName, String email, String vaultPassword, boolean encryptProfile);
     
-    AuthenticatedMember getCurrent();
+    <T extends Member> AuthenticatedMember<T> getCurrent(Class<T> expectedType);
+    
+    AuthenticatedMember<Member> getCurrent();
 
     /**
      * @param securityContext

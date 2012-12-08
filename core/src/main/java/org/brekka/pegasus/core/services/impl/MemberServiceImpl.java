@@ -68,7 +68,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public void activateOrganization(Organization organization) {
-        AuthenticatedMemberBase current = (AuthenticatedMemberBase) getCurrent();
+        AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
         Member member = current.getMember();
         Associate associate = organizationService.retrieveAssociate(organization, member);
         associate.setMember(member);
@@ -96,7 +96,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public void activateMember() {
-        AuthenticatedMemberBase current = (AuthenticatedMemberBase) getCurrent();
+        AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
         Member member = current.getMember();
         current.setActiveActor(member);
     }
@@ -106,7 +106,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public boolean isNewMember() {
-        AuthenticatedMember authMem = getCurrent();
+        AuthenticatedMember<Member> authMem = getCurrent(Member.class);
         return authMem != null 
              && authMem.getMember().getStatus() == ActorStatus.NEW;
     }
@@ -150,7 +150,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public void logout(SecurityContext securityContext) {
-        AuthenticatedPersonImpl authenticatedMember = getAuthenticatedMember(securityContext);
+        AuthenticatedMemberBase<Member> authenticatedMember = getAuthenticatedMember(securityContext, Member.class);
         if (authenticatedMember != null) {
             List<AuthenticatedPrincipal> authenticatedPrincipals = authenticatedMember.clearVaults();
             for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
@@ -171,15 +171,15 @@ public class MemberServiceImpl implements MemberService {
     }
     
     protected Member getManaged() {
-        AuthenticatedMember current = getCurrent();
+        AuthenticatedMember<Member> current = getCurrent(Member.class);
         Member member = current.getMember();
         return memberDAO.retrieveById(member.getId());
     }
     
     @Override
-    public AuthenticatedMember getCurrent() {
+    public <T extends Member> AuthenticatedMember<T> getCurrent(Class<T> expectedType) {
         SecurityContext context = SecurityContextHolder.getContext();
-        AuthenticatedPersonImpl authMember = getAuthenticatedMember(context);
+        AuthenticatedMemberBase<T> authMember = getAuthenticatedMember(context, expectedType);
         if (authMember != null) {
             Member member = authMember.getMember();
             // Attempt to locate the user profile
@@ -192,15 +192,23 @@ public class MemberServiceImpl implements MemberService {
         return authMember;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#getCurrent()
+     */
+    @Override
+    public AuthenticatedMember<Member> getCurrent() {
+        return getCurrent(Member.class);
+    }
+    
 
     protected void populatePerson(Person person, String fullName, String email, String vaultPassword, boolean encryptProfile) {
         person.setFullName(fullName);
         person.setStatus(ActorStatus.ACTIVE);
         
         // Binding to context
-        AuthenticatedMember current = getCurrent();
-        AuthenticatedPersonImpl authenticatedPersonImpl = (AuthenticatedPersonImpl) current;
-        authenticatedPersonImpl.setPerson(person);
+        AuthenticatedMember<Person> current = getCurrent(Person.class);
+        AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase) current;
+        authenticatedPersonImpl.setMember(person);
         
         // Vault
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, person);
@@ -224,14 +232,21 @@ public class MemberServiceImpl implements MemberService {
         }
     }
     
-    private static AuthenticatedPersonImpl getAuthenticatedMember(SecurityContext securityContext) {
+    @SuppressWarnings("unchecked")
+    private static <T extends Member> AuthenticatedMemberBase<T> getAuthenticatedMember(SecurityContext securityContext, Class<T> expectedType) {
         Authentication authentication = securityContext.getAuthentication();
         if (authentication == null) {
             return null;
         }
         Object principal = authentication.getPrincipal();
-        if (principal instanceof AuthenticatedPersonImpl) {
-            return (AuthenticatedPersonImpl) principal;
+        if (principal instanceof AuthenticatedMemberBase) {
+            AuthenticatedMemberBase<?> base = (AuthenticatedMemberBase<?>) principal;
+            Member member = base.getMember();
+            if (!expectedType.isAssignableFrom(member.getClass())) {
+                throw new PegasusException(PegasusErrorCode.PG902, 
+                        "Member is '%s' not the expected '%s'", member.getClass().getName(), expectedType.getName());
+            }
+            return (AuthenticatedMemberBase<T>) principal;
         }
         return null;
     }

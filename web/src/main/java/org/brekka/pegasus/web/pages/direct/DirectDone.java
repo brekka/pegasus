@@ -14,8 +14,8 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.support.AllocationContext;
 import org.brekka.pegasus.web.pages.Index;
-import org.brekka.pegasus.web.support.AllocationContext;
 import org.brekka.pegasus.web.support.Configuration;
 import org.brekka.xml.pegasus.v2.model.FileType;
 

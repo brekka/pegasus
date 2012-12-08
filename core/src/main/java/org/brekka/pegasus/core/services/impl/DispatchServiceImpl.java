@@ -15,6 +15,7 @@ import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.DispatchService;
 import org.brekka.pegasus.core.services.EMailAddressService;
@@ -66,7 +67,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     public Dispatch createDispatch(KeySafe keySafe, DetailsType details, Integer maxDownloads,
             List<FileBuilder> fileBuilderList) {
         Dispatch dispatch = new Dispatch();
-        AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
         
         BundleType bundleType = completeFiles(0, fileBuilderList);
@@ -126,7 +127,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until) {
-        AuthenticatedMemberBase authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
         return dispatchDAO.retrieveForInterval(keySafe, activeActor, from.toDate(), until.toDate());
     }

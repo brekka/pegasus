@@ -43,7 +43,7 @@ public class InvitationServiceImpl implements InvitationService {
     public Invitation createInvitation(InvitationDocument document, Member recipient, UUID invitedResourceCryptedDataId) {
         Invitation invitation = new Invitation();
         
-        AuthenticatedMember current = memberService.getCurrent();
+        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         
         Vault defaultVault = recipient.getDefaultVault();
         XmlEntity<InvitationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(document, defaultVault);
@@ -61,7 +61,7 @@ public class InvitationServiceImpl implements InvitationService {
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
     public List<Invitation> retrieveCurrent(Vault vault) {
-        AuthenticatedMember current = memberService.getCurrent();
+        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         return invitationDAO.retrieveForVault(current.getMember(), vault);
     }
 }

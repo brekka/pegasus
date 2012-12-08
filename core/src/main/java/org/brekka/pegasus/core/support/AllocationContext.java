@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.web.support;
+package org.brekka.pegasus.core.support;
 
 import java.util.HashMap;
 import java.util.Map;

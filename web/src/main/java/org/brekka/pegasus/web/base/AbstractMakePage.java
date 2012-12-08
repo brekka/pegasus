@@ -70,6 +70,7 @@ public abstract class AbstractMakePage {
     
     protected Object activate(String makeKey) {
         this.makeKey = makeKey;
+        upload.init(makeKey);
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
         UploadsContext bundleMakerContext = UploadsContext.get(req, false);
         if (bundleMakerContext == null) {

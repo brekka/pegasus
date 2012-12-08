@@ -6,7 +6,7 @@ package org.brekka.pegasus.web.security;
 import java.util.Collection;
 
 import org.brekka.pegasus.core.model.Accessor;
-import org.brekka.pegasus.core.model.AccessorContext;
+import org.brekka.pegasus.core.services.impl.AccessorContextImpl;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -23,7 +23,7 @@ public class AnonymousAuthenticationToken extends AbstractAuthenticationToken im
     
     private final Object principal;
     
-    private final AccessorContext context = new AccessorContext();
+    private final AccessorContextImpl context = new AccessorContextImpl();
     
     
     public AnonymousAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
@@ -51,7 +51,7 @@ public class AnonymousAuthenticationToken extends AbstractAuthenticationToken im
      * @see org.brekka.pegasus.core.model.Accessor#getContext()
      */
     @Override
-    public AccessorContext getContext() {
+    public AccessorContextImpl getContext() {
         return context;
     }
 }

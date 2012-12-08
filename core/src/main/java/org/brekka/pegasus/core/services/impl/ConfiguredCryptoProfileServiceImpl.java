@@ -1,4 +1,4 @@
-package org.brekka.pegasus.web.support;
+package org.brekka.pegasus.core.services.impl;
 
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.services.CryptoProfileService;
@@ -6,11 +6,9 @@ import org.brekka.phoenix.core.services.impl.CryptoProfileServiceImpl;
 import org.brekka.stillingar.api.annotations.ConfigurationListener;
 import org.brekka.stillingar.api.annotations.Configured;
 import org.brekka.xml.phoenix.v2.model.CryptoProfileRegistryDocument.CryptoProfileRegistry;
-import org.springframework.stereotype.Component;
 
 @Configured
-@Component
-public class ConfiguredCryptoProfileService implements CryptoProfileService {
+public class ConfiguredCryptoProfileServiceImpl implements CryptoProfileService {
     
     private CryptoProfileService delegate;
     
@@ -33,7 +31,8 @@ public class ConfiguredCryptoProfileService implements CryptoProfileService {
 
 
     @ConfigurationListener
-    public void configure(@Configured CryptoProfileRegistry cryptoProfileRegistry) {
+    public void configure(@Configured 
+                             CryptoProfileRegistry cryptoProfileRegistry) {
         delegate = new CryptoProfileServiceImpl(cryptoProfileRegistry);
     }
 }

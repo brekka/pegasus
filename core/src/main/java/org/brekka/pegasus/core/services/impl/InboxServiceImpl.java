@@ -22,7 +22,6 @@ import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.InboxService;
-import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
@@ -76,7 +75,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         inbox.setIntroduction(introduction);
         inbox.setKeySafe(keySafe);
         inbox.setName(name);
-        AuthenticatedMember authenticatedMember = memberService.getCurrent();
+        AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
         Member member = authenticatedMember.getMember();
         if (keySafe instanceof Division) {
             inbox.setDivision((Division) keySafe);
@@ -195,7 +194,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Deposit retrieveDeposit(UUID depositId) {
-        AccessorContext current = AccessorContext.getCurrent();
+        AccessorContext current = AccessorContextImpl.getCurrent();
         Deposit deposit = current.retrieve(depositId, Deposit.class);
         if (deposit == null) {
             // Need to extract the metadata
@@ -220,7 +219,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public List<Inbox> retrieveForMember() {
-        AuthenticatedMember authenticatedMember = memberService.getCurrent();
+        AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
         List<Inbox> inboxList = inboxDAO.retrieveForMember(authenticatedMember.getMember());
         populateNames(inboxList);
         return inboxList;
@@ -237,7 +236,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
     
     private void populateNames(List<Inbox> inboxList) {
-        AuthenticatedMember authenticatedMember = memberService.getCurrent();
+        AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
         if (authenticatedMember == null) {
             return;
         }

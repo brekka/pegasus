@@ -107,7 +107,9 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     public UsernamePassword retrieveByUsername(String username) {
         byte[] derivedUsername = deriveUsername(username);
         UsernamePassword usernamePassword = usernamePasswordDAO.retrieveByUsernameDigest(derivedUsername);
-        usernamePassword.setUsername(username);
+        if (usernamePassword != null) {
+            usernamePassword.setUsername(username);
+        }
         return usernamePassword;
     }
     

@@ -33,5 +33,5 @@
     
     <bean id="config" class="org.brekka.pegasus.web.support.Configuration" />
     
-    <bean id="cryptoProfileService" class="org.brekka.pegasus.web.support.ConfiguredCryptoProfileService" />
+    <bean id="cryptoProfileService" class="org.brekka.pegasus.core.services.impl.ConfiguredCryptoProfileServiceImpl" />
 </beans>

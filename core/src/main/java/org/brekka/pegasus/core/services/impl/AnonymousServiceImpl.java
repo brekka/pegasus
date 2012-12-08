@@ -148,7 +148,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     public AnonymousTransfer retrieveTransfer(String token) {
-        AccessorContext accessorContext = AccessorContext.getCurrent();
+        AccessorContext accessorContext = AccessorContextImpl.getCurrent();
         AnonymousTransfer transfer = accessorContext.retrieve(token, AnonymousTransfer.class);
         if (transfer != null) {
             refreshAllocation(transfer);

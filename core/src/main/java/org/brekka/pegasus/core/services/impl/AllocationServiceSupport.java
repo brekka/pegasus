@@ -237,7 +237,7 @@ class AllocationServiceSupport {
     }
     
     protected void bindToContext(Serializable key, Allocation allocation) {
-        AccessorContext accessorContext = AccessorContext.getCurrent();
+        AccessorContext accessorContext = AccessorContextImpl.getCurrent();
         accessorContext.retain(key, allocation);
         Set<Entry<UUID,AllocationFile>> fileEntrySet = allocation.getFiles().entrySet();
         for (Entry<UUID, AllocationFile> entry : fileEntrySet) {

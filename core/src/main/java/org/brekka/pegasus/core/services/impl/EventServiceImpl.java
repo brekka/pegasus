@@ -13,6 +13,7 @@ import org.brekka.pegasus.core.model.AgreementAcceptedEvent;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.RemoteUserEvent;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.TransferCreatedEvent;
@@ -141,7 +142,7 @@ public class EventServiceImpl implements EventService {
             throw new IllegalStateException("No web authentication details found.");
         }
         
-        AuthenticatedMember current = memberService.getCurrent();
+        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         if (current != null) {
             remoteUserEvent.setMember(current.getMember());
         }

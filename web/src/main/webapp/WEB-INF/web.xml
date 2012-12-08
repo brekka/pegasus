@@ -56,7 +56,7 @@
         <listener-class>org.brekka.paveway.web.listener.AllocationMakerContextListener</listener-class>
     </listener>
     <listener>
-    	<listener-class>org.brekka.pegasus.web.session.HttpSessionEventPublisher</listener-class>
+    	<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
     </listener>
 </web-app>
       

@@ -11,6 +11,7 @@ import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -50,6 +51,9 @@ public class KeySafeServiceImpl implements KeySafeService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public CryptedData protect(byte[] keyData, KeySafe keySafe) {
+        if (keySafe == null) {
+            throw new IllegalArgumentException("A keySafe must be specified");
+        }
         CryptedData cryptedData;
         if (keySafe instanceof Vault) {
             Vault vault = (Vault) keySafe;
@@ -60,7 +64,7 @@ public class KeySafeServiceImpl implements KeySafeService {
             cryptedData = phalanxService.asymEncrypt(keyData, 
                     new IdentityKeyPair(division.getKeyPairId()));
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Unknown keySafe type: " + keySafe.getClass().getName());
         }
         return cryptedData;
     }
@@ -71,8 +75,11 @@ public class KeySafeServiceImpl implements KeySafeService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public byte[] release(UUID cryptedDataId, KeySafe keySafe) {
+        if (keySafe == null) {
+            throw new IllegalArgumentException("A keySafe must be specified");
+        }
         byte[] data;
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         PrivateKeyToken privateKey;
         if (keySafe instanceof Vault) {
             AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(keySafe.getId());
@@ -81,7 +88,7 @@ public class KeySafeServiceImpl implements KeySafeService {
             Division division = (Division) keySafe;
             privateKey = identifyPrivateKey(division, currentMember);
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Unknown keySafe type: " + keySafe.getClass().getName());
         }
         data = phalanxService.asymDecrypt(new IdentityCryptedData(cryptedDataId), privateKey);
         return data;
@@ -92,7 +99,7 @@ public class KeySafeServiceImpl implements KeySafeService {
      * @param currentMember
      * @return
      */
-    private PrivateKeyToken identifyPrivateKey(Division division, AuthenticatedMemberBase currentMember) {
+    private PrivateKeyToken identifyPrivateKey(Division division, AuthenticatedMemberBase<?> currentMember) {
         Actor activeActor = currentMember.getActiveActor();
         if (activeActor instanceof Associate == false) {
             // TODO
@@ -102,7 +109,7 @@ public class KeySafeServiceImpl implements KeySafeService {
         return resolvePrivateKeyFor(division, associate, currentMember);
     }
     
-    private PrivateKeyToken resolvePrivateKeyFor(Division division, Associate associate, AuthenticatedMemberBase currentMember) {
+    private PrivateKeyToken resolvePrivateKeyFor(Division division, Associate associate, AuthenticatedMemberBase<?> currentMember) {
         PrivateKeyToken privateKeyToken;
         DivisionAssociate divisionAssociate = divisionAssociateDAO.retrieveBySurrogateKey(division, associate);
         if (divisionAssociate != null) {

@@ -142,7 +142,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<V
                 return;
             }
         }
-        AuthenticatedPersonImpl current = (AuthenticatedPersonImpl) memberService.getCurrent();
+        AuthenticatedMemberBase<Member> current = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Profile activeProfile = current.getActiveProfile();
         TransactionSynchronizationManager.registerSynchronization(new ProfileSynchronization(activeProfile));
     }
@@ -152,7 +152,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<V
      */
     @Override
     public void onApplicationEvent(VaultOpenEvent event) {
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
 
         // Check the profile, release it if necessary
         Profile activeProfile = currentMember.getActiveProfile();

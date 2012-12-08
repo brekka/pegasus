@@ -113,7 +113,7 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
             throw new DisabledException(String.format(
                     "The certficate with id '%s' has been disabled", digitalCertificate.getId()));
         }
-        if (digitalCertificate.getExpires().after(new Date())) {
+        if (digitalCertificate.getExpires().before(new Date())) {
             throw new CredentialsExpiredException(String.format(
                     "The certficate with id '%s' expired %tF", digitalCertificate.getId(), digitalCertificate.getExpires()));
         }
@@ -152,6 +152,7 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
         for (String patternString : subjectDistinguishedNamePatternList) {
             allowedSubjectDistinguishedNamePatterns.add(Pattern.compile(patternString));
         }
+        this.allowedSubjectDistinguishedNamePatterns = allowedSubjectDistinguishedNamePatterns;
     }
     
 

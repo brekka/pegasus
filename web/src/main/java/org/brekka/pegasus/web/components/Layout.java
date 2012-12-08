@@ -35,7 +35,7 @@ public class Layout {
     private MemberService memberService;
     
     @Property
-    private AuthenticatedMember user;
+    private AuthenticatedMember<Member> user;
     
     @Inject
     @Property
@@ -44,7 +44,7 @@ public class Layout {
     
     @SetupRender
     void initialize() {
-        user = memberService.getCurrent();
+        user = memberService.getCurrent(Member.class);
         if (user != null) {
             user.getProfile();
         }

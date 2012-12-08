@@ -84,7 +84,7 @@ public class VaultServiceImpl implements VaultService {
      */
     @Override
     public List<Vault> retrieveForUser() {
-        AuthenticatedMember current = memberService.getCurrent();
+        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         List<Vault> vaultList = vaultDAO.retrieveForMember(current.getMember());
         final Vault defaultVault = current.getMember().getDefaultVault();
         // Sort so that the default appears first, then the rest by name
@@ -116,7 +116,7 @@ public class VaultServiceImpl implements VaultService {
         }
         vault.setAuthenticatedPrincipal(authenticatedPrincipal);
         
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         currentMember.retainVaultKey(vault.getId(), authenticatedPrincipal);
         
         applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
@@ -164,7 +164,7 @@ public class VaultServiceImpl implements VaultService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Vault retrieveBySlug(String vaultSlug) {
-        AuthenticatedMember current = memberService.getCurrent();
+        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         Member member = current.getMember();
         Vault vault = vaultDAO.retrieveBySlug(vaultSlug, member);
         return vault;
@@ -176,7 +176,7 @@ public class VaultServiceImpl implements VaultService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public boolean isOpen(Vault vault) {
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault.getId());
         return (vaultKey != null);
     }
@@ -197,14 +197,14 @@ public class VaultServiceImpl implements VaultService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public void closeVault(UUID vaultId) {
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);
         phalanxService.logout(authenticatedPrincipal);
         currentMember.clearVault(vaultId);
     }
     
     private AuthenticatedPrincipal getVaultKey(UUID vaultId) {
-        AuthenticatedMemberBase currentMember = AuthenticatedMemberBase.getCurrent(memberService);
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);
         if (authenticatedPrincipal == null) {
             // not unlocked

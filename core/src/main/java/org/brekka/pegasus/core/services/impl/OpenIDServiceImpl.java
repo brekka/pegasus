@@ -17,6 +17,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import org.brekka.pegasus.core.services.OpenIDService;
 import org.brekka.stillingar.api.annotations.Configured;
 import org.brekka.xml.pegasus.v2.config.OpenIDServiceDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -62,7 +64,7 @@ public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public UserDetails loadUserByUsername(String openIdUri) throws UsernameNotFoundException {
-        Set<PegasusAuthority> authorities = EnumSet.noneOf(PegasusAuthority.class);
+        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
         OpenID openID = openIdDAO.retrieveByURI(openIdUri);
         if (openID == null) {
             openID = new OpenID();
@@ -86,7 +88,7 @@ public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
             authorities.add(PegasusAuthority.MEMBER_SIGNUP);
             authorities.add(PegasusAuthority.ANONYMOUS);
         }
-        AuthenticatedPersonImpl authMember = new AuthenticatedPersonImpl(person, authorities);
+        AuthenticatedMemberBase<Person> authMember = new AuthenticatedPersonImpl(person, authorities);
         return authMember;
     }
     

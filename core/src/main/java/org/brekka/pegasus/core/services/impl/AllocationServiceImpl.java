@@ -65,7 +65,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      */
     @Override
     public AllocationFile retrieveFile(UUID allocationFileId) {
-        AccessorContext currentContext = AccessorContext.getCurrent();
+        AccessorContext currentContext = AccessorContextImpl.getCurrent();
         AllocationFile allocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
         if (allocationFile == null) {
             allocationFile = allocationFileDAO.retrieveById(allocationFileId);

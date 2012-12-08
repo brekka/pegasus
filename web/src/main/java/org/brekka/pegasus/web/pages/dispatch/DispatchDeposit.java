@@ -11,8 +11,8 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.support.AllocationContext;
 import org.brekka.pegasus.web.pages.Index;
-import org.brekka.pegasus.web.support.AllocationContext;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
