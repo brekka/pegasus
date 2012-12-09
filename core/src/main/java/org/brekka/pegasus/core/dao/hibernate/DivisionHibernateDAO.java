@@ -33,4 +33,15 @@ public class DivisionHibernateDAO extends AbstractPegasusHibernateDAO<Division> 
                 .add(Restrictions.eq("slug", divisionSlug))
                 .uniqueResult();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DivisionDAO#retrieveRootDivision(org.brekka.pegasus.core.model.Organization)
+     */
+    @Override
+    public Division retrieveRootDivision(Organization organization) {
+        return (Division) getCurrentSession().createCriteria(Division.class)
+                .add(Restrictions.eq("organization", organization))
+                .add(Restrictions.isNull("parent"))
+                .uniqueResult();
+    }
 }

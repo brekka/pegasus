@@ -6,10 +6,12 @@ package org.brekka.pegasus.web.pages.org;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
+import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 
 /**
  * Create a new Organization
@@ -46,9 +48,11 @@ public class CreateOrg {
     
     Object onSuccess() {
         Member member = memberService.getCurrent().getMember();
-        Organization organization = organizationService.createOrganization(
-                name, orgToken, domainName, orgOwnerEmail, member);
-        orgIndex.init(organization);
+        OrganizationDocument orgDoc = OrganizationDocument.Factory.newInstance();
+        orgDoc.addNewOrganization();
+        DivisionAssociate divisionAssociate = organizationService.createOrganization(
+                name, orgToken, domainName, orgOwnerEmail, orgDoc, member.getDefaultVault(), null);
+        orgIndex.init(divisionAssociate.getDivision().getOrganization());
         return orgIndex;
     }
 }

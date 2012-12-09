@@ -50,8 +50,7 @@ public class Associate extends Actor {
     private EMailAddress primaryEMailAddress;
     
     /**
-     * The associate copy of the organization-wide key pair. Needed to decrypt the protected organization
-     * details.
+     * The associate copy of the organization-wide key pair.
      */
     @Column(name="`KeyPairID`")
     @Type(type="pg-uuid")

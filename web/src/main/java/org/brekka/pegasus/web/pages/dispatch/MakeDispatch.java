@@ -24,8 +24,10 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.DispatchService;
+import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -56,6 +58,9 @@ public class MakeDispatch extends AbstractMakePage {
     private OrganizationService organizationService;
     
     @Inject
+    private DivisionService divisionService;
+    
+    @Inject
     private DispatchService dispatchService;
     
     @Property
@@ -81,7 +86,8 @@ public class MakeDispatch extends AbstractMakePage {
     private Object[] context;
     
     Object onActivate(String orgToken, String divisionSlug, String makeKey) {
-        Division division = organizationService.retrieveDivision(orgToken, divisionSlug);
+        Organization organization = organizationService.retrieveByToken(orgToken);
+        Division division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(makeKey, division, division, orgToken, divisionSlug);
     }
     

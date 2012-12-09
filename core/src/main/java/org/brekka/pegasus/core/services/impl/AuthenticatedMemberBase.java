@@ -142,7 +142,7 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     /**
      * @param activeVault the activeVault to set
      */
-    void setActiveVault(Vault activeVault) {
+    protected void setActiveVault(Vault activeVault) {
         this.activeVault = activeVault;
     }
     

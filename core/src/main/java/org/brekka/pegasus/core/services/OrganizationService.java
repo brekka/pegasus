@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
@@ -11,6 +12,8 @@ import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -26,11 +29,14 @@ public interface OrganizationService {
      * @param ownerEmail
      * @param owner
      * @param toMemberVault
+     * @param idToAssign entirely optional
      * @return
      */
-    Organization createOrganization(String name, String tokenStr, String domainNameStr, 
-            String ownerEmail, Member owner);
+    DivisionAssociate createOrganization(String name, String tokenStr, String domainNameStr, 
+            String ownerEmail, OrganizationDocument organizationDocument, Vault connectedTo, UUID idToAssign);
 
+    void updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml);
+    
     /**
      * Retrieve the list of associates for the current user which are stored in the key safe.
      * @param loopVault
@@ -45,13 +51,6 @@ public interface OrganizationService {
     Organization retrieveByToken(String token);
 
     /**
-     * @param orgToken
-     * @param divisionToken
-     * @return
-     */
-    Division retrieveDivision(String orgToken, String divisionSlug);
-
-    /**
      * @param organization
      * @param member
      * @return
@@ -59,9 +58,16 @@ public interface OrganizationService {
     Associate retrieveAssociate(Organization organization, Member member);
 
     /**
-     * @param organization
+     * @param primaryCompanyId
      * @return
      */
-    List<DivisionAssociate> retrieveCurrentDivisions();
+    Organization retrieveById(UUID orgId, boolean releaseXml);
+
+    /**
+     * Does an organization with this ID exist?
+     * @param orgId
+     * @return
+     */
+    boolean exists(UUID orgId);
 
 }

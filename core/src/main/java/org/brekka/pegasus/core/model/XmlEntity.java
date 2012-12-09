@@ -43,6 +43,20 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     private static final long serialVersionUID = 1708978401887395862L;
     
+    
+    /**
+     * 
+     */
+    public XmlEntity() {
+    }
+    
+    /**
+     * @param bean
+     */
+    public XmlEntity(T bean) {
+        this.bean = bean;
+    }
+
     /**
      * Unique id
      */

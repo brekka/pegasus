@@ -48,7 +48,7 @@ public class Organization extends LongevousEntity<UUID> {
     private Token token;
     
     /**
-     * The name of this organization.
+     * The name of this organization. Can be null
      */
     @Column(name="`Name`")
     private String name;

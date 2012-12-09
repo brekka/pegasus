@@ -13,6 +13,7 @@ import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
@@ -27,6 +28,9 @@ public class OrgIndex {
 
     @Inject
     private MemberService memberService;
+    
+    @Inject
+    private DivisionService divisionService;
     
     @Inject
     private OrganizationService organizationService;
@@ -61,7 +65,7 @@ public class OrgIndex {
     }
     
     public List<DivisionAssociate> getDivisions() {
-        return organizationService.retrieveCurrentDivisions();
+        return divisionService.retrieveCurrentDivisions();
     }
     
     public List<Inbox> getInboxList() {

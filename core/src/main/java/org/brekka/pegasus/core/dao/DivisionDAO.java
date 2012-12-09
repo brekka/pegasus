@@ -21,4 +21,10 @@ public interface DivisionDAO extends EntityDAO<UUID, Division> {
      * @return
      */
     Division retrieveBySlug(Organization organization, String divisionSlug);
+
+    /**
+     * @param organization
+     * @return
+     */
+    Division retrieveRootDivision(Organization organization);
 }

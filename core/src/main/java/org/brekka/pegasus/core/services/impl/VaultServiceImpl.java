@@ -15,7 +15,6 @@ import org.brekka.pegasus.core.event.VaultOpenEvent;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Vault;
-import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.core.utils.SlugUtils;
 import org.brekka.phalanx.api.PhalanxException;
@@ -26,7 +25,6 @@ import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.Principal;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
-import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -39,16 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class VaultServiceImpl implements VaultService {
+public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements VaultService {
 
     @Autowired
     private VaultDAO vaultDAO;
-    
-    @Autowired
-    private PhalanxService phalanxService;
-    
-    @Autowired
-    private MemberService memberService;
     
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -139,6 +131,7 @@ public class VaultServiceImpl implements VaultService {
      * @see org.brekka.pegasus.core.services.VaultService#createKeyPair(org.brekka.pegasus.core.model.Vault)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public KeyPair createKeyPair(Vault vault) {
         AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault.getId());
         KeyPair keyPair = authenticatedPrincipal.getDefaultPrivateKey().getKeyPair();
@@ -150,6 +143,7 @@ public class VaultServiceImpl implements VaultService {
      * @see org.brekka.pegasus.core.services.VaultService#releaseKeyPair(org.brekka.phalanx.api.model.KeyPair, org.brekka.pegasus.core.model.Vault)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public PrivateKeyToken releaseKeyPair(KeyPair keyPair, Vault vault) {
         AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault.getId());
         PrivateKeyToken privateKey = authenticatedPrincipal.getDefaultPrivateKey();

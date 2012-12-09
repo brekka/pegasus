@@ -10,8 +10,10 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.DispatchService;
+import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.joda.time.DateTime;
@@ -29,6 +31,9 @@ public class DispatchListing {
     private OrganizationService organizationService;
     
     @Inject
+    private DivisionService divisionService;
+    
+    @Inject
     private DispatchService dispatchService;
     
     @Property
@@ -38,7 +43,8 @@ public class DispatchListing {
     private Dispatch loopDispatch;
     
     Object onActivate(String orgToken, String divisionSlug, String interval) {
-        Division division = organizationService.retrieveDivision(orgToken, divisionSlug);
+        Organization organization = organizationService.retrieveByToken(orgToken);
+        Division division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(division, interval);
     }
     

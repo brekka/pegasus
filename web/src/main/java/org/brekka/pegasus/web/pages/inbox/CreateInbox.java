@@ -12,8 +12,10 @@ import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Division;
+import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
@@ -32,6 +34,9 @@ public class CreateInbox {
     
     @Inject
     private OrganizationService organizationService;
+    
+    @Inject
+    private DivisionService divisionService;
     
     @Inject
     private InboxService inboxService;
@@ -82,7 +87,8 @@ public class CreateInbox {
     }
     
     Object onActivate(String orgToken, String divisionSlug) {
-        division = organizationService.retrieveDivision(orgToken, divisionSlug);
+        Organization organization = organizationService.retrieveByToken(orgToken);
+        division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(orgToken, divisionSlug);
     }
     
