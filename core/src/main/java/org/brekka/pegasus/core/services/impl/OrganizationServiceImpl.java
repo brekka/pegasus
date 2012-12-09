@@ -94,6 +94,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organization;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#createOrganizationAndDivisionAssociate(java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.brekka.xml.pegasus.v2.model.OrganizationDocument, org.brekka.pegasus.core.model.Vault)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public DivisionAssociate createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
+            String orgOwnerEmail, OrganizationDocument orgDoc, Vault toVault) {
+        Organization organization = createOrganization(name, orgToken, domainName, null);
+        Associate associate = createAssociate(organization, toVault.getOwner(), orgOwnerEmail);
+        DivisionAssociate divisionAssociate = divisionService.createRootDivision(associate, toVault, "top", "Top");
+        return divisionAssociate;
+    }
+    
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Associate createAssociate(Organization organization, Member owner, String ownerEmailStr) {

@@ -50,8 +50,8 @@ public class CreateOrg {
         Member member = memberService.getCurrent().getMember();
         OrganizationDocument orgDoc = OrganizationDocument.Factory.newInstance();
         orgDoc.addNewOrganization();
-        DivisionAssociate divisionAssociate = organizationService.createOrganization(
-                name, orgToken, domainName, orgOwnerEmail, orgDoc, member.getDefaultVault(), null);
+        DivisionAssociate divisionAssociate = organizationService.createOrganizationDivisionAssociate(
+                name, orgToken, domainName, orgOwnerEmail, orgDoc, member.getDefaultVault());
         orgIndex.init(divisionAssociate.getDivision().getOrganization());
         return orgIndex;
     }

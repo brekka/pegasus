@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
@@ -60,5 +61,17 @@ public interface OrganizationService {
      * @return
      */
     boolean organizationExists(UUID orgId);
+
+    /**
+     * @param name
+     * @param orgToken
+     * @param domainName
+     * @param orgOwnerEmail
+     * @param orgDoc
+     * @param toVault
+     * @return
+     */
+    DivisionAssociate createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
+            String orgOwnerEmail, OrganizationDocument orgDoc, Vault toVault);
     
 }
