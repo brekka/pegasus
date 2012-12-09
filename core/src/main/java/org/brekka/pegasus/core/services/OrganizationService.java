@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Associate;
-import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
@@ -20,22 +19,14 @@ import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
  */
 public interface OrganizationService {
 
-    /**
-     * Organizations must be created by an administrator
-     * 
-     * @param name
-     * @param tokenStr
-     * @param domainNameStr
-     * @param ownerEmail
-     * @param owner
-     * @param toMemberVault
-     * @param idToAssign entirely optional
-     * @return
-     */
-    DivisionAssociate createOrganization(String name, String tokenStr, String domainNameStr, 
-            String ownerEmail, OrganizationDocument organizationDocument, Vault connectedTo, UUID idToAssign);
 
-    void updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml);
+    Associate createAssociate(Organization organization, Member owner, String ownerEmailStr);
+    
+    Organization createOrganization(String name, String tokenStr, String domainNameStr, UUID idToAssign);
+    
+    XmlEntity<OrganizationDocument> updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml);
+    
+    XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, KeySafe keySafe);
     
     /**
      * Retrieve the list of associates for the current user which are stored in the key safe.
@@ -68,6 +59,6 @@ public interface OrganizationService {
      * @param orgId
      * @return
      */
-    boolean exists(UUID orgId);
-
+    boolean organizationExists(UUID orgId);
+    
 }

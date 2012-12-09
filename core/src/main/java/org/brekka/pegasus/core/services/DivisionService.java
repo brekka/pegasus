@@ -21,8 +21,10 @@ import java.util.List;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.phalanx.api.model.KeyPair;
 
 /**
  * TODO Description of DivisionService
@@ -31,6 +33,8 @@ import org.brekka.pegasus.core.model.Vault;
  */
 public interface DivisionService {
     DivisionAssociate createRootDivision(Associate associate, Vault connectedTo, String slug, String name);
+    
+    Division createRootDivision(Organization organization, KeyPair keyPair, String slug, String name);
     
     Division createDivision(Division parent, String slug, String name);
     

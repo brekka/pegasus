@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -60,6 +61,15 @@ public class DivisionAssociate extends LongevousEntity<UUID> {
     @JoinColumn(name="`AssociateID`")
     private Associate associate;
     
+    
+    /**
+     * The vault that is storing the keyPair.
+     */
+    @OneToOne
+    @JoinColumn(name="`VaultID`")
+    private Vault vault;
+
+    
     /**
      * The key pair that gives the associate access to the contents of this division.
      */
@@ -103,5 +113,19 @@ public class DivisionAssociate extends LongevousEntity<UUID> {
 
     public void setKeyPairId(UUID keyPairId) {
         this.keyPairId = keyPairId;
+    }
+
+    /**
+     * @return the vault
+     */
+    public Vault getVault() {
+        return vault;
+    }
+
+    /**
+     * @param vault the vault to set
+     */
+    public void setVault(Vault vault) {
+        this.vault = vault;
     }
 }

@@ -17,7 +17,6 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.model.Associate;
@@ -31,9 +30,7 @@ import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
-import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.KeyPair;
-import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -74,10 +71,19 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         DivisionAssociate divisionAssociate = new DivisionAssociate();
         divisionAssociate.setAssociate(associate);
         divisionAssociate.setDivision(division);
+        divisionAssociate.setVault(connectedTo);
         divisionAssociate.setKeyPairId(associateDivisionKeyPair.getId());
         divisionAssociateDAO.create(divisionAssociate);
         
         return divisionAssociate;
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Division createRootDivision(Organization organization, KeyPair protectedByKeyPair, String slug, String name) {
+        KeyPair rootDivisionKeyPair = phalanxService.generateKeyPair(protectedByKeyPair);
+        Division division = createDivision(organization, null, rootDivisionKeyPair, slug, name);
+        return division;
     }
     
     /* (non-Javadoc)

@@ -29,6 +29,13 @@ public abstract class Member extends Actor {
     @OneToOne
     @JoinColumn(name="`AuthenticationTokenID`")
     private AuthenticationToken authenticationToken;
+    
+    /**
+     * The default vault for this member (normally contains the profile).
+     */
+    @OneToOne
+    @JoinColumn(name="`DefaultVaultID`")
+    private Vault defaultVault;
 
     /**
      * @return the authenticationToken
@@ -42,5 +49,13 @@ public abstract class Member extends Actor {
      */
     public void setAuthenticationToken(AuthenticationToken authenticationToken) {
         this.authenticationToken = authenticationToken;
+    }
+
+    public final Vault getDefaultVault() {
+        return defaultVault;
+    }
+
+    public final void setDefaultVault(Vault defaultVault) {
+        this.defaultVault = defaultVault;
     }
 }

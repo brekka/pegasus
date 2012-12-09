@@ -13,9 +13,11 @@ import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.OrganizationDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.DivisionAssociate;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Token;
@@ -73,13 +75,10 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private DivisionService divisionService;
     
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.OrganizationService#createOrganization(java.lang.String, java.lang.String, java.lang.String, org.brekka.pegasus.core.model.Vault)
-     */
+    
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public DivisionAssociate createOrganization(String name, String tokenStr, String domainNameStr, 
-            String ownerEmailStr, OrganizationDocument organizationDocument, Vault connectedTo, UUID idToAssign) {
+    public Organization createOrganization(String name, String tokenStr, String domainNameStr, UUID idToAssign) {
         Organization organization = new Organization();
         organization.setId(idToAssign);
         organization.setName(name);
@@ -91,17 +90,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         Token token = tokenService.createToken(tokenStr, TokenType.ORG);
         organization.setToken(token);
         
-        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, connectedTo);
-        organization.setXml(entity);
-        
         organizationDAO.create(organization);
-        
-        Member owner = connectedTo.getOwner();
-        
-        
-        // Create a new key pair (not currently used for anything).
-        KeyPair organizationKeyPair = vaultService.createKeyPair(connectedTo);
-        
+        return organization;
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Associate createAssociate(Organization organization, Member owner, String ownerEmailStr) {
         // Add current user as an associate
         Associate associate = new Associate();
         associate.setOrganization(organization);
@@ -111,22 +106,31 @@ public class OrganizationServiceImpl implements OrganizationService {
             EMailAddress ownerEMail = eMailAddressService.createEMail(ownerEmailStr, owner, false);
             associate.setPrimaryEMailAddress(ownerEMail);
         }
-        associate.setDefaultVault(connectedTo);
-        associate.setKeyPairId(organizationKeyPair.getId());
         associateDAO.create(associate);
-        
-        DivisionAssociate divisionAssociate = divisionService.createRootDivision(associate, connectedTo, "top", "Top");
-        return divisionAssociate;
+        return associate;
     }
-    
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml) {
+    public XmlEntity<OrganizationDocument> updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml) {
         Organization organization = organizationDAO.retrieveById(orgId);
         XmlEntity<OrganizationDocument> entity = xmlEntityService.updateEntity(orgXml, organization.getXml(), OrganizationDocument.class);
         organization.setXml(entity);
         organizationDAO.update(organization);
+        return entity;
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, KeySafe keySafe) {
+        Organization organization = organizationDAO.retrieveById(orgId);
+        if (organization.getXml() != null) {
+            throw new IllegalStateException(); // TODO
+        }
+        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, keySafe);
+        organization.setXml(entity);
+        organizationDAO.update(organization);
+        return entity;
     }
     
     /* (non-Javadoc)
@@ -150,7 +154,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#exists(java.util.UUID)
      */
     @Override
-    public boolean exists(UUID orgId) {
+    public boolean organizationExists(UUID orgId) {
         return organizationDAO.retrieveById(orgId) != null;
     }
     

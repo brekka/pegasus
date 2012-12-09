@@ -15,8 +15,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -57,13 +55,6 @@ public abstract class Actor extends LongevousEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
-    /**
-     * The default vault for this member (normally contains the profile).
-     */
-    @OneToOne
-    @JoinColumn(name="`DefaultVaultID`")
-    private Vault defaultVault;
 
     /**
      * The current status of this actor.
@@ -79,14 +70,6 @@ public abstract class Actor extends LongevousEntity<UUID> {
 
     public final void setStatus(ActorStatus status) {
         this.status = status;
-    }
-
-    public final Vault getDefaultVault() {
-        return defaultVault;
-    }
-
-    public final void setDefaultVault(Vault defaultVault) {
-        this.defaultVault = defaultVault;
     }
 
     /**

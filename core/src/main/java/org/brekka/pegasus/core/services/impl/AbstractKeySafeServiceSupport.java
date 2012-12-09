@@ -72,7 +72,7 @@ abstract class AbstractKeySafeServiceSupport {
             privateKeyToken = currentMember.getPrivateKey(divisionAssociate.getId());
             if (privateKeyToken == null) {
                 UUID keyPairId = divisionAssociate.getKeyPairId();
-                Vault vault = associate.getDefaultVault();
+                Vault vault = divisionAssociate.getVault();
                 AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault.getId());
                 PrivateKeyToken userPrivateKey = vaultKey.getDefaultPrivateKey();
                 privateKeyToken = phalanxService.decryptKeyPair(new IdentityKeyPair(keyPairId), userPrivateKey);
