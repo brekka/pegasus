@@ -26,7 +26,7 @@ public interface InboxService {
      * @param keySafe
      * @return
      */
-    Inbox createInbox(String name, String introduction, String inboxToken, KeySafe keySafe);
+    Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<?> keySafe);
     
     /**
      * Create a deposit in the specified inbox. 
@@ -85,13 +85,13 @@ public interface InboxService {
      * @param keySafe
      * @return
      */
-    List<Inbox> retrieveForKeySafe(KeySafe keySafe);
+    List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe);
 
     /**
      * @param loopDivision
      * @return
      */
-    List<Inbox> retrieveForDivision(Division division);
+    List<Inbox> retrieveForDivision(Division<?> division);
 
 
 }

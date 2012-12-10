@@ -10,7 +10,7 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.services.DivisionService;
@@ -42,7 +42,7 @@ public class OrgIndex {
     private Organization organization;
     
     @Property
-    private DivisionAssociate loopDivision;
+    private Enlistment loopDivision;
     
     @Property
     private Inbox loopInbox;
@@ -64,7 +64,7 @@ public class OrgIndex {
         return organization.getToken().getPath();
     }
     
-    public List<DivisionAssociate> getDivisions() {
+    public List<Enlistment> getDivisions() {
         return divisionService.retrieveCurrentDivisions();
     }
     

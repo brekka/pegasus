@@ -14,10 +14,9 @@ import org.brekka.pegasus.core.dao.OrganizationDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
-import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Token;
@@ -31,7 +30,6 @@ import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.core.services.XmlEntityService;
-import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,11 +97,11 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public DivisionAssociate createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
+    public Enlistment createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
             String orgOwnerEmail, OrganizationDocument orgDoc, Vault toVault) {
         Organization organization = createOrganization(name, orgToken, domainName, null);
         Associate associate = createAssociate(organization, toVault.getOwner(), orgOwnerEmail);
-        DivisionAssociate divisionAssociate = divisionService.createRootDivision(associate, toVault, "top", "Top");
+        Enlistment divisionAssociate = divisionService.createRootDivision(associate, toVault, "top", "Top");
         return divisionAssociate;
     }
     
@@ -135,12 +133,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, KeySafe keySafe) {
+    public XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, Division<Organization> division) {
         Organization organization = organizationDAO.retrieveById(orgId);
         if (organization.getXml() != null) {
             throw new IllegalStateException(); // TODO
         }
-        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, keySafe);
+        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, division);
         organization.setXml(entity);
         organizationDAO.update(organization);
         return entity;

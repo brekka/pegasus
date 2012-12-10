@@ -24,6 +24,6 @@ public interface DispatchDAO extends EntityDAO<UUID, Dispatch> {
      * @param date2
      * @return
      */
-    List<Dispatch> retrieveForInterval(KeySafe keySafe, Actor activeActor, Date date, Date date2);
+    List<Dispatch> retrieveForInterval(KeySafe<?> keySafe, Actor activeActor, Date date, Date date2);
 
 }

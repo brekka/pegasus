@@ -19,9 +19,10 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.DivisionDAO;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.KeySafeStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
@@ -61,28 +62,28 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public DivisionAssociate createRootDivision(Associate associate, Vault connectedTo, String slug, String name) {
+    public Enlistment createRootDivision(Associate associate, Vault connectedTo, String slug, String name) {
         KeyPair associateDivisionKeyPair = vaultService.createKeyPair(connectedTo);
         
         KeyPair anonKeyPair = phalanxService.cloneKeyPairPublic(associateDivisionKeyPair);
         
-        Division division = createDivision(associate.getOrganization(), null, anonKeyPair, slug, name);
+        Division<Organization> division = createDivision(associate.getOrganization(), null, anonKeyPair, slug, name);
         
-        DivisionAssociate divisionAssociate = new DivisionAssociate();
-        divisionAssociate.setAssociate(associate);
-        divisionAssociate.setDivision(division);
-        divisionAssociate.setVault(connectedTo);
-        divisionAssociate.setKeyPairId(associateDivisionKeyPair.getId());
-        divisionAssociateDAO.create(divisionAssociate);
+        Enlistment enlistment = new Enlistment();
+        enlistment.setAssociate(associate);
+        enlistment.setDivision(division);
+        enlistment.setSource(connectedTo);
+        enlistment.setKeyPairId(associateDivisionKeyPair.getId());
+        divisionAssociateDAO.create(enlistment);
         
-        return divisionAssociate;
+        return enlistment;
     }
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Division createRootDivision(Organization organization, KeyPair protectedByKeyPair, String slug, String name) {
+    public <T extends Actor> Division<T> createRootDivision(T owner, KeyPair protectedByKeyPair, String slug, String name) {
         KeyPair rootDivisionKeyPair = phalanxService.generateKeyPair(protectedByKeyPair);
-        Division division = createDivision(organization, null, rootDivisionKeyPair, slug, name);
+        Division<T> division = createDivision(owner, null, rootDivisionKeyPair, slug, name);
         return division;
     }
     
@@ -91,10 +92,10 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Division createDivision(Division parent, String slug, String name) {
+    public <T extends Actor> Division<T> createDivision(Division<T> parent, String slug, String name) {
         IdentityKeyPair identityKeyPair = new IdentityKeyPair(parent.getKeyPairId());
         KeyPair protectedBy = phalanxService.generateKeyPair(identityKeyPair);
-        Division division = createDivision(parent.getOrganization(), parent, protectedBy, slug, name);
+        Division<T> division = createDivision(parent.getOwner(), parent, protectedBy, slug, name);
         return division;
     }
 
@@ -103,8 +104,8 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Division retrieveDivision(Organization organization, String divisionSlug) {
-        Division division = divisionDAO.retrieveBySlug(organization, divisionSlug);
+    public <T extends Actor> Division<T> retrieveDivision(T organization, String divisionSlug) {
+        Division<T> division = divisionDAO.retrieveBySlug(organization, divisionSlug);
         return division;
     }
     
@@ -113,17 +114,17 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
-    public List<DivisionAssociate> retrieveCurrentDivisions() {
+    public List<Enlistment> retrieveCurrentDivisions() {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Associate associate = (Associate) currentMember.getActiveActor();
         return divisionAssociateDAO.retrieveForOrg(associate);
     }
     
-    protected Division createDivision(Organization organization, Division parent, 
+    protected <T extends Actor> Division<T> createDivision(T owner, Division<T> parent, 
             KeyPair protectedBy, String slug, String name) {
        
-        Division division = new Division();
-        division.setOrganization(organization);
+        Division<T> division = new Division<>();
+        division.setOwner(owner);
         division.setParent(parent);
         division.setKeyPairId(protectedBy.getId());
         division.setName(name);

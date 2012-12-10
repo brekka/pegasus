@@ -18,11 +18,10 @@ package org.brekka.pegasus.core.services;
 
 import java.util.List;
 
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.DivisionAssociate;
-import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.phalanx.api.model.KeyPair;
 
@@ -32,22 +31,22 @@ import org.brekka.phalanx.api.model.KeyPair;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface DivisionService {
-    DivisionAssociate createRootDivision(Associate associate, Vault connectedTo, String slug, String name);
+    Enlistment createRootDivision(Associate associate, Vault connectedTo, String slug, String name);
     
-    Division createRootDivision(Organization organization, KeyPair keyPair, String slug, String name);
+    <T extends Actor> Division<T> createRootDivision(T organization, KeyPair keyPair, String slug, String name);
     
-    Division createDivision(Division parent, String slug, String name);
+    <T extends Actor> Division<T> createDivision(Division<T> parent, String slug, String name);
     
     /**
      * @param orgToken
      * @param divisionToken
      * @return
      */
-    Division retrieveDivision(Organization organization, String divisionSlug);
+    <T extends Actor> Division<T> retrieveDivision(T organization, String divisionSlug);
     
     /**
      * @param organization
      * @return
      */
-    List<DivisionAssociate> retrieveCurrentDivisions();
+    List<Enlistment> retrieveCurrentDivisions();
 }

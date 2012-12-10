@@ -15,6 +15,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -42,7 +44,7 @@ import org.hibernate.annotations.Type;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Base")
-public abstract class KeySafe extends LongevousEntity<UUID> {
+public abstract class KeySafe<Owner extends Actor> extends LongevousEntity<UUID> {
 
     /**
      * Serial UID
@@ -68,14 +70,21 @@ public abstract class KeySafe extends LongevousEntity<UUID> {
      * URL-safe version of the name that can be used as part of a surrogate key to 
      * identify this instance.
      */
-    @Column(name="`Slug`", nullable=false)
+    @Column(name="`Slug`")
     private String slug;
     
     /**
      * The friendly name given to the vault.
      */
-    @Column(name="`Name`", nullable=false)
+    @Column(name="`Name`")
     private String name;
+    
+    /**
+     * The owner that this division belongs to
+     */
+    @ManyToOne
+    @JoinColumn(name="`ActorID`")
+    private Owner owner;
     
 
     public final String getSlug() {
@@ -100,6 +109,14 @@ public abstract class KeySafe extends LongevousEntity<UUID> {
 
     public final void setStatus(KeySafeStatus status) {
         this.status = status;
+    }
+    
+    public final Owner getOwner() {
+        return owner;
+    }
+
+    public final void setOwner(Owner owner) {
+        this.owner = owner;
     }
 
     /**

@@ -11,7 +11,6 @@ import org.apache.xmlbeans.XmlObject;
 import org.brekka.pegasus.core.dao.XmlEntityDAO;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.hibernate.Hibernate;
-import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.jdbc.LobCreator;

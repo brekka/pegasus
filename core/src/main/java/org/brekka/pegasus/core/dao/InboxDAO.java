@@ -31,7 +31,7 @@ public interface InboxDAO extends EntityDAO<UUID, Inbox> {
      * @param vault
      * @return
      */
-    List<Inbox> retrieveForKeySafe(KeySafe keySafe);
+    List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe);
 
     /**
      * @param eMailAddress
@@ -43,5 +43,5 @@ public interface InboxDAO extends EntityDAO<UUID, Inbox> {
      * @param division
      * @return
      */
-    List<Inbox> retrieveForDivision(Division division);
+    List<Inbox> retrieveForDivision(Division<?> division);
 }

@@ -6,25 +6,25 @@ package org.brekka.pegasus.core.dao;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.Organization;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public interface DivisionDAO extends EntityDAO<UUID, Division> {
+public interface DivisionDAO extends EntityDAO<UUID, Division<?>> {
 
     /**
      * @param organization
      * @param divisionSlug
      * @return
      */
-    Division retrieveBySlug(Organization organization, String divisionSlug);
+    <Owner extends Actor> Division<Owner> retrieveBySlug(Owner owner, String divisionSlug);
 
     /**
      * @param organization
      * @return
      */
-    Division retrieveRootDivision(Organization organization);
+    <Owner extends Actor> Division<Owner> retrieveRootDivision(Owner owner);
 }

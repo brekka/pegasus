@@ -34,7 +34,7 @@ public class DispatchHibernateDAO extends AbstractPegasusHibernateDAO<Dispatch> 
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Dispatch> retrieveForInterval(KeySafe keySafe, Actor actor, Date from, Date until) {
+    public List<Dispatch> retrieveForInterval(KeySafe<?> keySafe, Actor actor, Date from, Date until) {
         return getCurrentSession().createCriteria(Dispatch.class)
                 .add(Restrictions.eq("keySafe", keySafe))
                 .add(Restrictions.eq("actor", actor))

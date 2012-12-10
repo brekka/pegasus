@@ -6,7 +6,7 @@ package org.brekka.pegasus.web.pages.org;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.services.MemberService;
@@ -50,9 +50,9 @@ public class CreateOrg {
         Member member = memberService.getCurrent().getMember();
         OrganizationDocument orgDoc = OrganizationDocument.Factory.newInstance();
         orgDoc.addNewOrganization();
-        DivisionAssociate divisionAssociate = organizationService.createOrganizationDivisionAssociate(
+        Enlistment divisionAssociate = organizationService.createOrganizationDivisionAssociate(
                 name, orgToken, domainName, orgOwnerEmail, orgDoc, member.getDefaultVault());
-        orgIndex.init(divisionAssociate.getDivision().getOrganization());
+        orgIndex.init(divisionAssociate.getDivision().getOwner());
         return orgIndex;
     }
 }

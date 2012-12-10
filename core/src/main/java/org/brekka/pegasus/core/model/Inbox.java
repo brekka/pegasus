@@ -56,7 +56,7 @@ public class Inbox extends LongevousEntity<UUID> {
      */
     @ManyToOne
     @JoinColumn(name="`KeySafeID`", nullable = false)
-    private KeySafe keySafe;
+    private KeySafe<?> keySafe;
     
     /**
      * The owner of this inbox. One of owner or division should be set.
@@ -70,7 +70,7 @@ public class Inbox extends LongevousEntity<UUID> {
      */
     @ManyToOne
     @JoinColumn(name="`DivisionID`")
-    private Division division;
+    private Division<?> division;
     
     /**
      * Text to be displayed to the person when depositing a file.
@@ -114,11 +114,11 @@ public class Inbox extends LongevousEntity<UUID> {
         this.id = id;
     }
 
-    public KeySafe getKeySafe() {
+    public KeySafe<?> getKeySafe() {
         return keySafe;
     }
 
-    public void setKeySafe(KeySafe keySafe) {
+    public void setKeySafe(KeySafe<?> keySafe) {
         this.keySafe = keySafe;
     }
 
@@ -162,11 +162,11 @@ public class Inbox extends LongevousEntity<UUID> {
         this.status = status;
     }
 
-    public Division getDivision() {
+    public Division<?> getDivision() {
         return division;
     }
 
-    public void setDivision(Division division) {
+    public void setDivision(Division<?> division) {
         this.division = division;
     }
 

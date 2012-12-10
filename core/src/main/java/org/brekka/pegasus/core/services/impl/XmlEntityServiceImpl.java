@@ -89,7 +89,7 @@ public class XmlEntityServiceImpl implements XmlEntityService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe keySafe) {
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe) {
         CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
         SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
         XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), keySafe, cryptoProfile, secretKey);
@@ -120,7 +120,7 @@ public class XmlEntityServiceImpl implements XmlEntityService {
         XmlEntity<T> newEntity;
         UUID serial = lockedCurrent.getSerial();
         int newVersion = lockedCurrent.getVersion() + 1;
-        KeySafe keySafe = lockedCurrent.getKeySafe();
+        KeySafe<?> keySafe = lockedCurrent.getKeySafe();
         
         if (keySafe == null) {
             newEntity = createPlainEntity(xmlBean, newVersion, serial);
@@ -174,7 +174,7 @@ public class XmlEntityServiceImpl implements XmlEntityService {
      * @param cryptoProfile
      * @param secretKey
      */
-    protected <T extends XmlObject> XmlEntity<T> createEncrypted(T xml, int version, UUID serial, KeySafe keySafe, CryptoProfile cryptoProfile, SecretKey secretKey) {
+    protected <T extends XmlObject> XmlEntity<T> createEncrypted(T xml, int version, UUID serial, KeySafe<?> keySafe, CryptoProfile cryptoProfile, SecretKey secretKey) {
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         
         ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);

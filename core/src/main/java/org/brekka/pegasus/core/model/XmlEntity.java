@@ -82,7 +82,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @ManyToOne
     @JoinColumn(name="`KeySafeID`", updatable=false)
-    private KeySafe keySafe;
+    private KeySafe<?> keySafe;
     
     /**
      * Crypto profile used for this file
@@ -137,11 +137,11 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
         this.id = id;
     }
 
-    public KeySafe getKeySafe() {
+    public KeySafe<?> getKeySafe() {
         return keySafe;
     }
 
-    public void setKeySafe(KeySafe keySafe) {
+    public void setKeySafe(KeySafe<?> keySafe) {
         this.keySafe = keySafe;
     }
 

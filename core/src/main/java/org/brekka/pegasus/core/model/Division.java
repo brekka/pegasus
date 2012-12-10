@@ -18,13 +18,13 @@ import org.brekka.xml.pegasus.v2.model.DivisionDocument;
 import org.hibernate.annotations.Type;
 
 /**
- * A partition within an organization which has its own encryption key pair
+ * A partition within an owner which has its own encryption key pair
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @DiscriminatorValue("Division")
-public class Division extends KeySafe {
+public class Division<Owner extends Actor> extends KeySafe<Owner> {
 
     /**
      * Serial UID
@@ -36,15 +36,8 @@ public class Division extends KeySafe {
      * division via the key pair.
      */
     @ManyToOne
-    @JoinColumn(name="`ParentDivisionID`")
-    private Division parent;
-    
-    /**
-     * The organization that this division belongs to
-     */
-    @ManyToOne
-    @JoinColumn(name="`OrganizationID`")
-    private Organization organization;
+    @JoinColumn(name="`ParentID`")
+    private KeySafe<Owner> parent;
 
     /**
      * Additional division details that can be encrypted (ie only associates with access can view/edit the details).
@@ -67,11 +60,11 @@ public class Division extends KeySafe {
     private transient PrivateKeyToken privateKeyToken;
 
 
-    public Division getParent() {
+    public KeySafe<Owner> getParent() {
         return parent;
     }
 
-    public void setParent(Division parent) {
+    public void setParent(KeySafe<Owner> parent) {
         this.parent = parent;
     }
 
@@ -81,14 +74,6 @@ public class Division extends KeySafe {
 
     public void setKeyPairId(UUID keyPairId) {
         this.keyPairId = keyPairId;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
     }
 
     public XmlEntity<DivisionDocument> getXml() {

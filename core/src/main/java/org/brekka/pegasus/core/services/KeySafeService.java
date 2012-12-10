@@ -19,7 +19,7 @@ public interface KeySafeService {
      * @param keySafe
      * @return
      */
-    CryptedData protect(byte[] keyData, KeySafe keySafe);
+    CryptedData protect(byte[] keyData, KeySafe<?> keySafe);
     
     /**
      * Release the key identified by <code>cryptedDataId</code> which is protected
@@ -29,5 +29,5 @@ public interface KeySafeService {
      * @param keySafe
      * @return
      */
-    byte[] release(UUID cryptedDataId, KeySafe keySafe);
+    byte[] release(UUID cryptedDataId, KeySafe<?> keySafe);
 }

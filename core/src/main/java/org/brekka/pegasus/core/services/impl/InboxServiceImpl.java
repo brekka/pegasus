@@ -67,7 +67,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe keySafe) {
+    public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<?> keySafe) {
         Inbox inbox = new Inbox();
         inbox.setId(UUID.randomUUID());
         Token token = tokenService.createToken(inboxToken, TokenType.INBOX);
@@ -78,7 +78,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
         Member member = authenticatedMember.getMember();
         if (keySafe instanceof Division) {
-            inbox.setDivision((Division) keySafe);
+            inbox.setDivision((Division<?>) keySafe);
         } else {
             inbox.setOwner(member);
             InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
@@ -117,7 +117,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
-        KeySafe keySafe = inbox.getKeySafe();
+        KeySafe<?> keySafe = inbox.getKeySafe();
         
         // TODO Expiry, currently fixed at one week, should be configured.
         DateTime now = new DateTime();
@@ -163,7 +163,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public List<Inbox> retrieveForKeySafe(KeySafe keySafe) {
+    public List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe) {
         List<Inbox> inboxList = inboxDAO.retrieveForKeySafe(keySafe);
         populateNames(inboxList);
         return inboxList;
@@ -180,11 +180,11 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveForDivision(org.brekka.pegasus.core.model.DivisionAssociate)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForDivision(org.brekka.pegasus.core.model.Enlistment)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public List<Inbox> retrieveForDivision(Division division) {
+    public List<Inbox> retrieveForDivision(Division<?> division) {
         return inboxDAO.retrieveForDivision(division);
     }
     
@@ -201,7 +201,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
             deposit = depositDAO.retrieveById(depositId);
             UUID cryptedDataId = deposit.getCryptedDataId();
             if (cryptedDataId != null) {
-                KeySafe keySafe = deposit.getKeySafe();
+                KeySafe<?> keySafe = deposit.getKeySafe();
                 byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
                 decryptDocument(deposit, secretKeyBytes);
                 bindToContext(deposit);

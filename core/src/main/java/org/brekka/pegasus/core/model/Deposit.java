@@ -35,7 +35,7 @@ public class Deposit extends Transfer {
      */
     @ManyToOne
     @JoinColumn(name="`KeySafeID`", updatable=false)
-    private KeySafe keySafe;
+    private KeySafe<?> keySafe;
     
     
     public Inbox getInbox() {
@@ -46,11 +46,11 @@ public class Deposit extends Transfer {
         this.inbox = inbox;
     }
 
-    public KeySafe getKeySafe() {
+    public KeySafe<?> getKeySafe() {
         return keySafe;
     }
 
-    public void setKeySafe(KeySafe keySafe) {
+    public void setKeySafe(KeySafe<?> keySafe) {
         this.keySafe = keySafe;
     }
 }

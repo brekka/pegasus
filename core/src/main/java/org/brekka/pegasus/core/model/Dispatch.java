@@ -35,14 +35,14 @@ public class Dispatch extends Allocation {
      */
     @ManyToOne
     @JoinColumn(name="`DivisionID`")
-    private Division division;
+    private Division<?> division;
     
     /**
      * The key safe that contains the key
      */
     @ManyToOne
     @JoinColumn(name="`KeySafeID`")
-    private KeySafe keySafe;
+    private KeySafe<?> keySafe;
     
 
     public Actor getActor() {
@@ -53,19 +53,19 @@ public class Dispatch extends Allocation {
         this.actor = actor;
     }
 
-    public KeySafe getKeySafe() {
+    public KeySafe<?> getKeySafe() {
         return keySafe;
     }
 
-    public void setKeySafe(KeySafe keySafe) {
+    public void setKeySafe(KeySafe<?> keySafe) {
         this.keySafe = keySafe;
     }
 
-    public Division getDivision() {
+    public Division<?> getDivision() {
         return division;
     }
 
-    public void setDivision(Division division) {
+    public void setDivision(Division<?> division) {
         this.division = division;
     }
 }

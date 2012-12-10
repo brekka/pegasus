@@ -194,7 +194,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<V
                 // Plain
                 replacementXml = xmlEntityService.persistPlainEntity(profileDocument);
             } else {
-                KeySafe keySafe = currentXml.getKeySafe();
+                KeySafe<?> keySafe = currentXml.getKeySafe();
                 replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
             }
             xmlEntityService.delete(currentXml.getId());

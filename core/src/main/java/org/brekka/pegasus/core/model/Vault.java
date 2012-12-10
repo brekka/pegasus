@@ -8,8 +8,6 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
@@ -22,7 +20,7 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @DiscriminatorValue("Vault")
-public class Vault extends KeySafe {
+public class Vault extends KeySafe<Member> {
     
     /**
      * Serial UID
@@ -35,13 +33,6 @@ public class Vault extends KeySafe {
     @Type(type="pg-uuid")
     @Column(name="`PrincipalID`")
     private UUID principalId;
-    
-    /**
-     * The owner of this vault
-     */
-    @ManyToOne
-    @JoinColumn(name="`OwnerID`")
-    private Member owner;
     
     /**
      * When the vault has been 'opened' this field will be set to the marker used to 
@@ -59,14 +50,6 @@ public class Vault extends KeySafe {
         this.principalId = principalId;
     }
     
-    public Member getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Member owner) {
-        this.owner = owner;
-    }
-
     public AuthenticatedPrincipal getAuthenticatedPrincipal() {
         return authenticatedPrincipal;
     }

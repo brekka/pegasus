@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Associate;
-import org.brekka.pegasus.core.model.DivisionAssociate;
-import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Division;
+import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
@@ -27,7 +27,7 @@ public interface OrganizationService {
     
     XmlEntity<OrganizationDocument> updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml);
     
-    XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, KeySafe keySafe);
+    XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, Division<Organization> division);
     
     /**
      * Retrieve the list of associates for the current user which are stored in the key safe.
@@ -71,7 +71,7 @@ public interface OrganizationService {
      * @param toVault
      * @return
      */
-    DivisionAssociate createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
+    Enlistment createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
             String orgOwnerEmail, OrganizationDocument orgDoc, Vault toVault);
     
 }

@@ -9,26 +9,27 @@ import java.util.UUID;
 import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.Organization;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public interface DivisionAssociateDAO extends EntityDAO<UUID, DivisionAssociate> {
+public interface DivisionAssociateDAO extends EntityDAO<UUID, Enlistment> {
 
     /**
      * @param division
      * @param associate
      * @return
      */
-    DivisionAssociate retrieveBySurrogateKey(Division division, Associate associate);
+    Enlistment retrieveBySurrogateKey(Division<Organization> division, Associate associate);
 
     /**
      * @param organization
      * @param associate
      * @return
      */
-    List<DivisionAssociate> retrieveForOrg(Associate associate);
+    List<Enlistment> retrieveForOrg(Associate associate);
 
 }

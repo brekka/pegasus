@@ -66,7 +66,7 @@ public class InboxHibernateDAO extends AbstractPegasusHibernateDAO<Inbox> implem
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Inbox> retrieveForDivision(Division division) {
+    public List<Inbox> retrieveForDivision(Division<?> division) {
         return getCurrentSession().createCriteria(Inbox.class)
                 .add(Restrictions.eq("division", division))
                 .list();
@@ -77,7 +77,7 @@ public class InboxHibernateDAO extends AbstractPegasusHibernateDAO<Inbox> implem
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Inbox> retrieveForKeySafe(KeySafe keySafe) {
+    public List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe) {
         return getCurrentSession().createCriteria(Inbox.class)
                 .add(Restrictions.eq("keySafe", keySafe))
                 .list();

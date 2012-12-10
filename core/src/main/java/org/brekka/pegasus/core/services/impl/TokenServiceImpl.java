@@ -36,11 +36,10 @@ public class TokenServiceImpl implements TokenService {
             if (tokenDAO.retrieveByPath(path) != null) {
                 throw new PegasusException(PegasusErrorCode.PG300, 
                         "The inbox token '%s' is already taken", path);
-            } else {
-                token = new Token();
-                token.setType(type);
-                token.setPath(path);
             }
+            token = new Token();
+            token.setType(type);
+            token.setPath(path);
         } else {
             // Use random token, make sure it is not already in use
             token = chooseRandomToken(type);

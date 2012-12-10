@@ -64,7 +64,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Dispatch createDispatch(KeySafe keySafe, DetailsType details, Integer maxDownloads,
+    public Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, Integer maxDownloads,
             List<FileBuilder> fileBuilderList) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
@@ -78,7 +78,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         encryptDocument(dispatch, allocationDocument);
         
         if (keySafe instanceof Division) {
-            dispatch.setDivision((Division) keySafe);
+            dispatch.setDivision((Division<?>) keySafe);
         }
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
@@ -99,7 +99,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Allocation createDispatchAndAllocate(String recipientEMail, Division division, KeySafe keySafe,
+    public Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
             DetailsType details, int maxDownloads, List<FileBuilder> fileBuilderList) {
         Dispatch dispatch = createDispatch(keySafe, details, maxDownloads, fileBuilderList);
         
@@ -126,7 +126,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until) {
+    public List<Dispatch> retrieveCurrentForInterval(KeySafe<?> keySafe, DateTime from, DateTime until) {
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
         return dispatchDAO.retrieveForInterval(keySafe, activeActor, from.toDate(), until.toDate());

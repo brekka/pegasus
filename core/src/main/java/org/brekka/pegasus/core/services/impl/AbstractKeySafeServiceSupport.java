@@ -22,7 +22,8 @@ import org.brekka.pegasus.core.dao.DivisionAssociateDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.DivisionAssociate;
+import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
@@ -55,7 +56,7 @@ abstract class AbstractKeySafeServiceSupport {
      * @param currentMember
      * @return
      */
-    protected PrivateKeyToken identifyPrivateKey(Division division, AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken identifyPrivateKey(Division<?> division, AuthenticatedMemberBase<?> currentMember) {
         Actor activeActor = currentMember.getActiveActor();
         if (activeActor instanceof Associate == false) {
             // TODO
@@ -65,9 +66,9 @@ abstract class AbstractKeySafeServiceSupport {
         return resolvePrivateKeyFor(division, associate, currentMember);
     }
     
-    protected PrivateKeyToken resolvePrivateKeyFor(Division division, Associate associate, AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken resolvePrivateKeyFor(KeySafe<?> keySafe, Associate associate, AuthenticatedMemberBase<?> currentMember) {
         PrivateKeyToken privateKeyToken;
-        DivisionAssociate divisionAssociate = divisionAssociateDAO.retrieveBySurrogateKey(division, associate);
+        Enlistment divisionAssociate = divisionAssociateDAO.retrieveBySurrogateKey(keySafe, associate);
         if (divisionAssociate != null) {
             privateKeyToken = currentMember.getPrivateKey(divisionAssociate.getId());
             if (privateKeyToken == null) {
@@ -79,7 +80,7 @@ abstract class AbstractKeySafeServiceSupport {
                 currentMember.retainPrivateKey(divisionAssociate.getId(), privateKeyToken);
             }
         } else {
-            if (division.getParent() != null) {
+            if (keySafe.getParent() != null) {
                 privateKeyToken = currentMember.getPrivateKey(division.getId());
                 if (privateKeyToken == null) {
                     PrivateKeyToken parentPrivateKeyToken = resolvePrivateKeyFor(division.getParent(), associate, currentMember);

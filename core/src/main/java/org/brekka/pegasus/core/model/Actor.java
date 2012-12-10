@@ -26,6 +26,8 @@ import org.hibernate.annotations.Type;
  * An actor can be either a {@link Member} or an {@link Associate}. An employee is simply an association
  * of a member with an organization.
  * 
+ * TODO rename to Entity?
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity

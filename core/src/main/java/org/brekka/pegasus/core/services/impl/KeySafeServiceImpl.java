@@ -15,7 +15,6 @@ import org.brekka.phalanx.api.beans.IdentityKeyPair;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
-import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,7 +33,7 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public CryptedData protect(byte[] keyData, KeySafe keySafe) {
+    public CryptedData protect(byte[] keyData, KeySafe<?> keySafe) {
         if (keySafe == null) {
             throw new IllegalArgumentException("A keySafe must be specified");
         }
@@ -44,7 +43,7 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
             cryptedData = phalanxService.asymEncrypt(keyData, 
                     new IdentityPrincipal(vault.getPrincipalId()));
         } else if (keySafe instanceof Division) {
-            Division division = (Division) keySafe;
+            Division<?> division = (Division<?>) keySafe;
             cryptedData = phalanxService.asymEncrypt(keyData, 
                     new IdentityKeyPair(division.getKeyPairId()));
         } else {
@@ -58,7 +57,7 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public byte[] release(UUID cryptedDataId, KeySafe keySafe) {
+    public byte[] release(UUID cryptedDataId, KeySafe<?> keySafe) {
         if (keySafe == null) {
             throw new IllegalArgumentException("A keySafe must be specified");
         }
@@ -69,7 +68,7 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
             AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(keySafe.getId());
             privateKey = authenticatedPrincipal.getDefaultPrivateKey();
         } else if (keySafe instanceof Division) {
-            Division division = (Division) keySafe;
+            Division<?> division = (Division<?>) keySafe;
             privateKey = identifyPrivateKey(division, currentMember);
         } else {
             throw new IllegalStateException("Unknown keySafe type: " + keySafe.getClass().getName());

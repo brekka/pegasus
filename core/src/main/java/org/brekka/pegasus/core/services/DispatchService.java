@@ -27,7 +27,7 @@ public interface DispatchService {
      * @param fileBuilderList
      * @return
      */
-    Dispatch createDispatch(KeySafe keySafe, DetailsType details, Integer maxDownloads, List<FileBuilder> fileBuilderList);
+    Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, Integer maxDownloads, List<FileBuilder> fileBuilderList);
     
     
 
@@ -36,7 +36,7 @@ public interface DispatchService {
      * @param until
      * @return
      */
-    List<Dispatch> retrieveCurrentForInterval(KeySafe keySafe, DateTime from, DateTime until);
+    List<Dispatch> retrieveCurrentForInterval(KeySafe<?> keySafe, DateTime from, DateTime until);
 
 
 
@@ -49,7 +49,7 @@ public interface DispatchService {
      * @param fileBuilderList
      * @return
      */
-    Allocation createDispatchAndAllocate(String recipientEMail, Division division, KeySafe keySafe,
+    Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
             DetailsType detailsType, int maxDownloads, List<FileBuilder> fileBuilderList);
 
 

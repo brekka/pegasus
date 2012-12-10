@@ -69,7 +69,7 @@ public class CreateInbox {
     private String introduction;
     
     @Property
-    private Division division;
+    private Division<Organization> division;
     
     private Object[] context;
     
@@ -109,7 +109,7 @@ public class CreateInbox {
             retVal = MemberIndex.class;
         } else {
             inboxService.createInbox(name, introduction, inboxToken, division);
-            orgIndexPage.init(division.getOrganization());
+            orgIndexPage.init(division.getOwner());
             retVal = orgIndexPage;
         }
         alertManager.alert(Duration.SINGLE, Severity.INFO, 

@@ -29,7 +29,7 @@ public class FirewallRuleHibernateDAO extends AbstractPegasusHibernateDAO<Firewa
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.FirewallDAO#isAccessAllowed(java.lang.String, org.brekka.pegasus.core.model.Firewall)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "cast" })
     @Override
     public List<FirewallRule> findApplicableRules(Firewall firewall, String ipAddress) {
         SQLQuery query = getCurrentSession().createSQLQuery(
