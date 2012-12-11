@@ -26,7 +26,7 @@ public class Vault extends KeySafe<Member> {
      * Serial UID
      */
     private static final long serialVersionUID = -5208658520688698466L;
-
+    
     /**
      * The principal Id of this vault
      */
@@ -40,6 +40,16 @@ public class Vault extends KeySafe<Member> {
      */
     @Transient
     private transient AuthenticatedPrincipal authenticatedPrincipal;
+    
+    /**
+     * 
+     */
+    public Vault() {
+    }
+    
+    public Vault(UUID id) {
+        setId(id);
+    }
     
 
     public UUID getPrincipalId() {

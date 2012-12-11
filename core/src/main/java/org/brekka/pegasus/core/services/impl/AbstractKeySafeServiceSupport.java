@@ -16,11 +16,17 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.List;
 import java.util.UUID;
 
-import org.brekka.pegasus.core.dao.DivisionAssociateDAO;
+import org.brekka.commons.persistence.support.EntityUtils;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.dao.ConnectionDAO;
+import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -40,6 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 abstract class AbstractKeySafeServiceSupport {
   
+    @Autowired
+    protected ConnectionDAO connectionDAO;
     
     @Autowired
     protected PhalanxService phalanxService;
@@ -47,56 +55,120 @@ abstract class AbstractKeySafeServiceSupport {
     @Autowired
     protected MemberService memberService;
     
-    @Autowired
-    protected DivisionAssociateDAO  divisionAssociateDAO;
-    
-    
-    /**
-     * @param division
-     * @param currentMember
-     * @return
-     */
-    protected PrivateKeyToken identifyPrivateKey(Division<?> division, AuthenticatedMemberBase<?> currentMember) {
-        Actor activeActor = currentMember.getActiveActor();
-        if (activeActor instanceof Associate == false) {
-            // TODO
-            throw new IllegalStateException();
-        }
-        Associate associate = (Associate) activeActor;
-        return resolvePrivateKeyFor(division, associate, currentMember);
-    }
-    
-    protected PrivateKeyToken resolvePrivateKeyFor(KeySafe<?> keySafe, Associate associate, AuthenticatedMemberBase<?> currentMember) {
+        
+    protected PrivateKeyToken resolvePrivateKeyFor(KeySafe<?> keySafe, AuthenticatedMemberBase<?> currentMember) {
         PrivateKeyToken privateKeyToken;
-        Enlistment divisionAssociate = divisionAssociateDAO.retrieveBySurrogateKey(keySafe, associate);
-        if (divisionAssociate != null) {
-            privateKeyToken = currentMember.getPrivateKey(divisionAssociate.getId());
-            if (privateKeyToken == null) {
-                UUID keyPairId = divisionAssociate.getKeyPairId();
-                Vault vault = divisionAssociate.getVault();
-                AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault.getId());
-                PrivateKeyToken userPrivateKey = vaultKey.getDefaultPrivateKey();
-                privateKeyToken = phalanxService.decryptKeyPair(new IdentityKeyPair(keyPairId), userPrivateKey);
-                currentMember.retainPrivateKey(divisionAssociate.getId(), privateKeyToken);
-            }
+        
+        Actor contextMember = currentMember.getMember();
+        Actor keySafeOwner = keySafe.getOwner();
+        if (EntityUtils.identityEquals(keySafeOwner, contextMember)) {
+            /*
+             * The user owns this keySafe that means it is their personal chain.
+             * Simply walk up the chain to get to the vault.
+             */
+            privateKeyToken = traverseChain(keySafe, currentMember);
         } else {
-            if (keySafe.getParent() != null) {
-                privateKeyToken = currentMember.getPrivateKey(division.getId());
-                if (privateKeyToken == null) {
-                    PrivateKeyToken parentPrivateKeyToken = resolvePrivateKeyFor(division.getParent(), associate, currentMember);
-                    UUID keyPairId = division.getKeyPairId();
-                    privateKeyToken = phalanxService.decryptKeyPair(new IdentityKeyPair(keyPairId), parentPrivateKeyToken);
-                    currentMember.retainPrivateKey(division.getId(), privateKeyToken);
+            /*
+             * Not a personal chain. Check to see if there are any connections from this keysafe to the current user
+             * or to organizations they are members of
+             */
+            List<Connection<?,?,?>> connectionList = connectionDAO.identifyConnectionsBetween(keySafe, contextMember);
+            PrivateKeyToken found = null;
+            for (Connection<?, ?, ?> connection : connectionList) {
+                KeySafe<?> source = connection.getSource();
+                found = resolveAndUnlock(source, connection.getKeyPairId(), currentMember);
+                if (found != null) {
+                    // We have found a private key that we can decrypt the connection with
+                    break;
                 }
-            } else {
-                throw new IllegalStateException("The user does not have access to this division");
             }
+            
+            if (found == null) {
+                // Still not found
+                if (keySafe instanceof Division) {
+                    Division<?> division = (Division<?>) keySafe;
+                    /*
+                     * Try the division parent
+                     */
+                    KeySafe<?> parent = division.getParent();
+                    if (parent != null) {
+                        found = resolveAndUnlock(parent, division.getKeyPairId(), currentMember);
+                    }
+                } else {
+                    throw new PegasusException(PegasusErrorCode.PG701, 
+                            "Unable to handle keySafe type '%s' at this location", keySafe.getClass().getName());
+                }
+            }
+            
+            if (found == null) {
+                throw new PegasusException(PegasusErrorCode.PG700, 
+                        "Unable to locate a chain of keys that will unlock the keySafe '%s'", keySafe.getId());
+            }
+            privateKeyToken = found;
         }
         return privateKeyToken;
     }
     
+    /**
+     * @param parent
+     * @param currentMember
+     * @return
+     */
+    private PrivateKeyToken resolveAndUnlock(KeySafe<?> parent, UUID keyPairId, AuthenticatedMemberBase<?> currentMember) {
+        KeyPair keyPair = new IdentityKeyPair(keyPairId);
+        PrivateKeyToken privateKeyToken = currentMember.getPrivateKey(keyPair);
+        if (privateKeyToken == null) {
+            /*
+             * Need to continue the hunt for the key
+             */
+            PrivateKeyToken foundPrivateKeyToken = resolvePrivateKeyFor(parent, currentMember);
+            if (foundPrivateKeyToken != null) {
+                privateKeyToken = phalanxService.decryptKeyPair(keyPair, foundPrivateKeyToken);
+                currentMember.retainPrivateKey(keyPair, privateKeyToken);
+            }
+        }
+        return privateKeyToken;
+    }
+
+    /**
+     * Shortcut for personal chains that avoids the connections lookup.
+     * @param keySafe
+     * @return
+     */
+    private PrivateKeyToken traverseChain(KeySafe<?> keySafe, AuthenticatedMemberBase<?> currentMember) {
+        PrivateKeyToken privateKeyToken;
+        if (keySafe instanceof Vault) {
+            Vault vault = (Vault) keySafe;
+            AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
+            privateKeyToken = vaultKey.getDefaultPrivateKey();
+        } else if (keySafe instanceof Division) {
+            Division<?> division = (Division<?>) keySafe;
+            
+            // Check the parent
+            KeySafe<?> parent = division.getParent();
+            if (parent != null) {
+                KeyPair keyPair = new IdentityKeyPair(division.getKeyPairId());
+                PrivateKeyToken parentPrivateKey = currentMember.getPrivateKey(keyPair);
+                if (parentPrivateKey == null) {
+                    parentPrivateKey = traverseChain(parent, currentMember);
+                    privateKeyToken = phalanxService.decryptKeyPair(keyPair, parentPrivateKey);
+                    currentMember.retainPrivateKey(keyPair, privateKeyToken);
+                } else {
+                    privateKeyToken = parentPrivateKey;
+                }
+            } else {
+                throw new PegasusException(PegasusErrorCode.PG702, 
+                        "Reached end of personal chain for actor '%s' without finding a key", currentMember.getMember().getId());
+            }
+        } else {
+            throw new PegasusException(PegasusErrorCode.PG703, 
+                    "Unable to handle keySafe type '%s' at this location", keySafe.getClass().getName());
+        }
+        return privateKeyToken;
+    }
+
     protected PrivateKeyToken unlockPrivateKey(KeyPair keyPair, Vault vault, AuthenticatedMemberBase<?> currentMember) {
-        AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault.getId());
+        AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
         PrivateKeyToken userPrivateKey = vaultKey.getDefaultPrivateKey();
         PrivateKeyToken privateKeyToken = phalanxService.decryptKeyPair(new IdentityKeyPair(keyPair.getId()), userPrivateKey);
         return privateKeyToken;

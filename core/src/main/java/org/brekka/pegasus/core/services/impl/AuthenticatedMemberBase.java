@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -21,6 +20,7 @@ import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.utils.EntityUnlockKeyCache;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
+import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.xml.pegasus.v2.model.ProfileDocument;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
@@ -164,23 +164,23 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#getVault(java.util.UUID)
      */
-    AuthenticatedPrincipal getVaultKey(UUID vaultId) {
-        return vaultKeyCache.get(vaultId);
+    AuthenticatedPrincipal getVaultKey(Vault vault) {
+        return vaultKeyCache.get(vault.getId());
     }
 
     /**
      * @param openVault
      */
-    void retainVaultKey(UUID vaultId, AuthenticatedPrincipal authenticatedPrincipal) {
-        vaultKeyCache.put(vaultId, authenticatedPrincipal);
+    void retainVaultKey(Vault vault, AuthenticatedPrincipal authenticatedPrincipal) {
+        vaultKeyCache.put(vault.getId(), authenticatedPrincipal);
     }
     
-    PrivateKeyToken getPrivateKey(UUID entityId) {
-        return privateKeyCache.get(entityId);
+    PrivateKeyToken getPrivateKey(KeyPair keyPair) {
+        return privateKeyCache.get(keyPair.getId());
     }
     
-    void retainPrivateKey(UUID entityId, PrivateKeyToken privateKeyToken) {
-        privateKeyCache.put(entityId, privateKeyToken);
+    void retainPrivateKey(KeyPair keyPair, PrivateKeyToken privateKeyToken) {
+        privateKeyCache.put(keyPair.getId(), privateKeyToken);
     }
     
     /**
@@ -198,8 +198,8 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
         return vaultKeyCache.clear();
     }
     
-    synchronized void clearVault(UUID vaultId) {
-        vaultKeyCache.remove(vaultId);
+    synchronized void clearVault(Vault vault) {
+        vaultKeyCache.remove(vault.getId());
     }
     
     /* (non-Javadoc)

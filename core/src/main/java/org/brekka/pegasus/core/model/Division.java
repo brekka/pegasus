@@ -35,7 +35,7 @@ public class Division<Owner extends Actor> extends KeySafe<Owner> {
      * The parent of this division. The parent can open the resources of this 
      * division via the key pair.
      */
-    @ManyToOne
+    @ManyToOne(targetEntity=KeySafe.class)
     @JoinColumn(name="`ParentID`")
     private KeySafe<Owner> parent;
 

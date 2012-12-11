@@ -32,10 +32,8 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name="`KeySafe`", schema=PegasusConstants.SCHEMA,
     uniqueConstraints={ 
-        // Division slugs must be unique within the the organization. 
-        @UniqueConstraint(columnNames = {"`OrganizationID`", "`Slug`"}),
-        // Vault slugs must be unique to the owner. 
-        @UniqueConstraint(columnNames = {"`OwnerID`", "`Slug`"}) 
+        // Owner and slug must be unique
+        @UniqueConstraint(columnNames = {"`ActorID`", "`Slug`"}),
     }
 )
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
@@ -82,7 +80,7 @@ public abstract class KeySafe<Owner extends Actor> extends LongevousEntity<UUID>
     /**
      * The owner that this division belongs to
      */
-    @ManyToOne
+    @ManyToOne(targetEntity=Actor.class)
     @JoinColumn(name="`ActorID`")
     private Owner owner;
     

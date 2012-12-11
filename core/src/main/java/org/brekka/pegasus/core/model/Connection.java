@@ -28,7 +28,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -72,28 +71,28 @@ public class Connection<Owner extends Actor, Source extends KeySafe<?>, Target e
     /**
      * Who owns the connection
      */
-    @OneToOne
-    @JoinColumn(name="`OwnerID`")
+    @ManyToOne(targetEntity=Actor.class)
+    @JoinColumn(name="`OwnerID`", nullable=false)
     private Owner owner;
     
     /**
      * The source
      */
-    @ManyToOne
-    @JoinColumn(name="`SourceID`")
+    @ManyToOne(targetEntity=KeySafe.class)
+    @JoinColumn(name="`SourceID`", nullable=false)
     private Source source;
     
     /**
      * The target
      */
-    @ManyToOne
-    @JoinColumn(name="`TargetID`")
+    @ManyToOne(targetEntity=KeySafe.class)
+    @JoinColumn(name="`TargetID`", nullable=false)
     private Target target;
     
     /**
      * The key pair that gives the source division access to the target. 
      */
-    @Column(name="`KeyPairID`")
+    @Column(name="`KeyPairID`", nullable=false)
     @Type(type="pg-uuid")
     private UUID keyPairId;
 

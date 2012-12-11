@@ -30,7 +30,7 @@ public class Organization extends Actor {
      * The token that uniquely identifies this organization to the outside world.
      */
     @OneToOne
-    @JoinColumn(name="`TokenID`", nullable = false, unique=true)
+    @JoinColumn(name="`TokenID`", unique=true)
     private Token token;
     
     /**

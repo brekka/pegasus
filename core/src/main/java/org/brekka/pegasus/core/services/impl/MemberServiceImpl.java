@@ -214,6 +214,7 @@ public class MemberServiceImpl implements MemberService {
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, person);
         person.setDefaultVault(defaultVault);
         vaultService.openVault(defaultVault, vaultPassword);
+        authenticatedPersonImpl.setActiveVault(defaultVault);
         
         
         // Profile

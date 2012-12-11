@@ -19,6 +19,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.DivisionDAO;
+import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
@@ -56,6 +57,9 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     @Autowired
     private VaultService vaultService;
     
+    @Autowired
+    protected EnlistmentDAO  enlistmentDAO;
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#createDivision(org.brekka.pegasus.core.model.Organization, java.lang.String, java.lang.String)
@@ -74,7 +78,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         enlistment.setDivision(division);
         enlistment.setSource(connectedTo);
         enlistment.setKeyPairId(associateDivisionKeyPair.getId());
-        divisionAssociateDAO.create(enlistment);
+        enlistmentDAO.create(enlistment);
         
         return enlistment;
     }
@@ -114,10 +118,10 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
-    public List<Enlistment> retrieveCurrentDivisions() {
+    public List<Enlistment> retrieveCurrentEnlistments() {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Associate associate = (Associate) currentMember.getActiveActor();
-        return divisionAssociateDAO.retrieveForOrg(associate);
+        return enlistmentDAO.retrieveForAssociate(associate);
     }
     
     protected <T extends Actor> Division<T> createDivision(T owner, Division<T> parent, 

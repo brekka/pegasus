@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.AssociateDAO;
-import org.brekka.pegasus.core.dao.DivisionAssociateDAO;
+import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.OrganizationDAO;
 import org.brekka.pegasus.core.model.ActorStatus;
@@ -53,7 +53,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private AssociateDAO associateDAO;
     
     @Autowired
-    private DivisionAssociateDAO divisionAssociateDAO;
+    private EnlistmentDAO divisionAssociateDAO;
     
     @Autowired
     private EMailAddressService eMailAddressService;

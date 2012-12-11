@@ -48,5 +48,5 @@ public interface DivisionService {
      * @param organization
      * @return
      */
-    List<Enlistment> retrieveCurrentDivisions();
+    List<Enlistment> retrieveCurrentEnlistments();
 }

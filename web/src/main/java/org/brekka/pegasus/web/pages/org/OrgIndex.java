@@ -65,7 +65,7 @@ public class OrgIndex {
     }
     
     public List<Enlistment> getDivisions() {
-        return divisionService.retrieveCurrentDivisions();
+        return divisionService.retrieveCurrentEnlistments();
     }
     
     public List<Inbox> getInboxList() {

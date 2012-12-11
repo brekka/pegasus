@@ -109,7 +109,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
         vault.setAuthenticatedPrincipal(authenticatedPrincipal);
         
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        currentMember.retainVaultKey(vault.getId(), authenticatedPrincipal);
+        currentMember.retainVaultKey(vault, authenticatedPrincipal);
         
         applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
     }
@@ -120,7 +120,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public byte[] releaseKey(UUID cryptedDataId, Vault vault) {
-        AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault.getId());
+        AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault);
         CryptedData cryptedData = new IdentityCryptedData(cryptedDataId);
         PrivateKeyToken privateKey = authenticatedPrincipal.getDefaultPrivateKey();
         byte[] secretKeyBytes = phalanxService.asymDecrypt(cryptedData, privateKey);
@@ -133,7 +133,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public KeyPair createKeyPair(Vault vault) {
-        AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault.getId());
+        AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault);
         KeyPair keyPair = authenticatedPrincipal.getDefaultPrivateKey().getKeyPair();
         KeyPair newKeyPair = phalanxService.generateKeyPair(keyPair, authenticatedPrincipal.getPrincipal());
         return newKeyPair;
@@ -145,7 +145,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public PrivateKeyToken releaseKeyPair(KeyPair keyPair, Vault vault) {
-        AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault.getId());
+        AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault);
         PrivateKeyToken privateKey = authenticatedPrincipal.getDefaultPrivateKey();
         PrivateKeyToken releasedPrivateKey = phalanxService.decryptKeyPair(keyPair, privateKey);
         return releasedPrivateKey;
@@ -171,7 +171,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Transactional(propagation=Propagation.REQUIRED)
     public boolean isOpen(Vault vault) {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault.getId());
+        AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
         return (vaultKey != null);
     }
     
@@ -192,17 +192,18 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Transactional(propagation=Propagation.REQUIRED)
     public void closeVault(UUID vaultId) {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);
+        Vault vault = new Vault(vaultId);
+        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vault);
         phalanxService.logout(authenticatedPrincipal);
-        currentMember.clearVault(vaultId);
+        currentMember.clearVault(vault);
     }
     
-    private AuthenticatedPrincipal getVaultKey(UUID vaultId) {
+    private AuthenticatedPrincipal getVaultKey(Vault vault) {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vaultId);
+        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vault);
         if (authenticatedPrincipal == null) {
             // not unlocked
-            throw new PegasusException(PegasusErrorCode.PG600, "Vault '%s' is locked", vaultId);
+            throw new PegasusException(PegasusErrorCode.PG600, "Vault '%s' is locked", vault.getId());
         }
         return authenticatedPrincipal;
     }
