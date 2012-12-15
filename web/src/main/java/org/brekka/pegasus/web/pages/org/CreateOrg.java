@@ -12,6 +12,7 @@ import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
+import org.brekka.xml.pegasus.v2.model.OrganizationType;
 
 /**
  * Create a new Organization
@@ -48,11 +49,10 @@ public class CreateOrg {
     
     Object onSuccess() {
         Member member = memberService.getCurrent().getMember();
-        OrganizationDocument orgDoc = OrganizationDocument.Factory.newInstance();
-        orgDoc.addNewOrganization();
-        Enlistment divisionAssociate = organizationService.createOrganizationDivisionAssociate(
-                name, orgToken, domainName, orgOwnerEmail, orgDoc, member.getDefaultVault());
-        orgIndex.init(divisionAssociate.getDivision().getOwner());
+        OrganizationType details = OrganizationType.Factory.newInstance();
+        Enlistment enlistment = organizationService.createOrganization(null, 
+                name, orgToken, domainName, details, member, orgOwnerEmail, member.getDefaultVault());
+        orgIndex.init(enlistment.getDivision().getOwner());
         return orgIndex;
     }
 }

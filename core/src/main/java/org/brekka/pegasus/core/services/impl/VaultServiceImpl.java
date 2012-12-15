@@ -197,14 +197,4 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
         phalanxService.logout(authenticatedPrincipal);
         currentMember.clearVault(vault);
     }
-    
-    private AuthenticatedPrincipal getVaultKey(Vault vault) {
-        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vault);
-        if (authenticatedPrincipal == null) {
-            // not unlocked
-            throw new PegasusException(PegasusErrorCode.PG600, "Vault '%s' is locked", vault.getId());
-        }
-        return authenticatedPrincipal;
-    }
 }

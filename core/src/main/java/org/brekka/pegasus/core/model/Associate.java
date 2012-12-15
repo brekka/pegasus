@@ -11,8 +11,11 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SecondaryTable;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
+import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.hibernate.annotations.Type;
 
@@ -21,6 +24,10 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @DiscriminatorValue("Associate")
+@SecondaryTable(name="`Associate`", schema=PegasusConstants.SCHEMA, uniqueConstraints={ 
+    // Associate unique key
+    @UniqueConstraint(columnNames = {"`MemberID`", "`OrganizationID`" }),
+})
 public class Associate extends Actor {
 
     /**
@@ -32,36 +39,22 @@ public class Associate extends Actor {
      * The person who is an employee
      */
     @ManyToOne
-    @JoinColumn(name="`MemberID`")
+    @JoinColumn(name="`MemberID`", table="`Associate`", nullable=false)
     private Member member;
     
     /**
      * The organization this employee belongs to
      */
     @ManyToOne
-    @JoinColumn(name="`OrganizationID`")
+    @JoinColumn(name="`OrganizationID`", table="`Associate`", nullable=false)
     private Organization organization;
     
     /**
      * The main e-mail address used to identify this employee (at the organization).
      */
     @OneToOne
-    @JoinColumn(name="`PrimaryEMailAddressID`")
+    @JoinColumn(name="`PrimaryEMailAddressID`", table="`Associate`")
     private EMailAddress primaryEMailAddress;
-    
-    /**
-     * The associate copy of the organization-wide key pair.
-     */
-    @Column(name="`KeyPairID`")
-    @Type(type="pg-uuid")
-    private UUID keyPairId;
-    
-    /**
-     * The private key token which becomes available when the key pair above is unlocked.
-     */
-    @Transient
-    private transient PrivateKeyToken privateKeyToken;
-
     
     public Member getMember() {
         return member;
@@ -85,21 +78,5 @@ public class Associate extends Actor {
 
     public void setPrimaryEMailAddress(EMailAddress primaryEMailAddress) {
         this.primaryEMailAddress = primaryEMailAddress;
-    }
-
-    public UUID getKeyPairId() {
-        return keyPairId;
-    }
-
-    public void setKeyPairId(UUID keyPairId) {
-        this.keyPairId = keyPairId;
-    }
-
-    public PrivateKeyToken getPrivateKeyToken() {
-        return privateKeyToken;
-    }
-
-    public void setPrivateKeyToken(PrivateKeyToken privateKeyToken) {
-        this.privateKeyToken = privateKeyToken;
     }
 }

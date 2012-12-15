@@ -26,8 +26,8 @@ import javax.persistence.Entity;
  */
 @Entity
 @DiscriminatorValue("Partnership")
-public class Partnership<Owner extends Actor>
-      extends Connection<Owner, Division<Owner>, Division<?>>{
+public class Partnership<Owner extends Actor, Target extends Actor>
+      extends Connection<Owner, Division<Owner>, Division<Target>>{
 
     /**
      * Serial UID

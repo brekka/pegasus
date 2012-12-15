@@ -30,6 +30,8 @@ import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
@@ -38,6 +40,8 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * TODO Description of AbstractKeySafeServiceSupport
@@ -109,6 +113,38 @@ abstract class AbstractKeySafeServiceSupport {
         return privateKeyToken;
     }
     
+    
+    protected <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(Owner owner, Division<Owner> source,
+            Division<Target> target, KeyPair connectionKeyPair) {
+        if (connectionKeyPair == null) {
+            connectionKeyPair = createKeyPair(source);
+        }
+        Partnership<Owner, Target> partnership = new Partnership<>();
+        partnership.setOwner(owner);
+        partnership.setSource(source);
+        partnership.setTarget(target);
+        partnership.setKeyPairId(connectionKeyPair.getId());
+        connectionDAO.create(partnership);
+        return partnership;
+    }
+    
+    protected KeyPair createKeyPair(KeySafe<?> keySafe) {
+        KeyPair keyPair;
+        if (keySafe instanceof Vault) {
+            Vault vault = (Vault) keySafe;
+            AuthenticatedPrincipal vaultKey = getVaultKey(vault);
+            KeyPair vaultKeyPair = vaultKey.getDefaultPrivateKey().getKeyPair();
+            keyPair = phalanxService.generateKeyPair(vaultKeyPair);
+        } else if (keySafe instanceof Division) {
+            Division<?> division = (Division<?>) keySafe;
+            IdentityKeyPair identityKeyPair = new IdentityKeyPair(division.getKeyPairId());
+            keyPair = phalanxService.generateKeyPair(identityKeyPair);
+        } else {
+            throw new IllegalStateException("Unknown keySafe type: " + keySafe.getClass().getName());
+        }
+        return keyPair;
+    }
+    
     /**
      * @param parent
      * @param currentMember
@@ -172,5 +208,15 @@ abstract class AbstractKeySafeServiceSupport {
         PrivateKeyToken userPrivateKey = vaultKey.getDefaultPrivateKey();
         PrivateKeyToken privateKeyToken = phalanxService.decryptKeyPair(new IdentityKeyPair(keyPair.getId()), userPrivateKey);
         return privateKeyToken;
+    }
+    
+    protected AuthenticatedPrincipal getVaultKey(Vault vault) {
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
+        AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vault);
+        if (authenticatedPrincipal == null) {
+            // not unlocked
+            throw new PegasusException(PegasusErrorCode.PG600, "Vault '%s' is locked", vault.getId());
+        }
+        return authenticatedPrincipal;
     }
 }

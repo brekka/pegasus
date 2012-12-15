@@ -20,9 +20,13 @@ import java.util.List;
 
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
-import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.phalanx.api.model.KeyPair;
 
 /**
@@ -31,11 +35,16 @@ import org.brekka.phalanx.api.model.KeyPair;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface DivisionService {
-    Enlistment createRootDivision(Associate associate, Vault connectedTo, String slug, String name);
+    Enlistment createDivisionEnlistment(Associate associate, KeySafe<Member> protectedBy, String slug, String name);
     
-    <T extends Actor> Division<T> createRootDivision(T organization, KeyPair keyPair, String slug, String name);
-    
+    <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> 
+            createDivisionPartnership(Division<Owner> source, Target target, String slug, String name);
+
     <T extends Actor> Division<T> createDivision(Division<T> parent, String slug, String name);
+    
+    
+    Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
+            Connection<Associate, KeySafe<Member>, Division<Organization>> existingEnlistment);
     
     /**
      * @param orgToken

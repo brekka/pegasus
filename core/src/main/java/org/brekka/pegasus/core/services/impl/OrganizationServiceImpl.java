@@ -8,29 +8,35 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.dao.AssociateDAO;
-import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.dao.DivisionDAO;
+import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.dao.OrganizationDAO;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.DomainName;
 import org.brekka.pegasus.core.model.EMailAddress;
+import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
+import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.core.services.XmlEntityService;
+import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
+import org.brekka.xml.pegasus.v2.model.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -73,52 +79,44 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private DivisionService divisionService;
     
+    @Autowired
+    private KeySafeService keySafeService;
     
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Organization createOrganization(String name, String tokenStr, String domainNameStr, UUID idToAssign) {
-        Organization organization = new Organization();
-        organization.setId(idToAssign);
-        organization.setName(name);
-        
-        if (StringUtils.isNotBlank(domainNameStr)) {
-            DomainName domainName = eMailAddressService.toDomainName(domainNameStr);
-            organization.setPrimaryDomainName(domainName);
-        }
-        Token token = tokenService.createToken(tokenStr, TokenType.ORG);
-        organization.setToken(token);
-        
-        organizationDAO.create(organization);
-        return organization;
-    }
+    @Autowired
+    private PhalanxService phalanxService;
+    
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.OrganizationService#createOrganizationAndDivisionAssociate(java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.brekka.xml.pegasus.v2.model.OrganizationDocument, org.brekka.pegasus.core.model.Vault)
+     * @see org.brekka.pegasus.core.services.OrganizationService#createOrganization(java.util.UUID, java.lang.String, java.lang.String, java.lang.String, org.brekka.xml.pegasus.v2.model.OrganizationType, org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Enlistment createOrganizationDivisionAssociate(String name, String orgToken, String domainName,
-            String orgOwnerEmail, OrganizationDocument orgDoc, Vault toVault) {
-        Organization organization = createOrganization(name, orgToken, domainName, null);
-        Associate associate = createAssociate(organization, toVault.getOwner(), orgOwnerEmail);
-        Enlistment divisionAssociate = divisionService.createRootDivision(associate, toVault, "top", "Top");
-        return divisionAssociate;
+    public Enlistment createOrganization(UUID idToAssign, String name, String tokenStr, String domainNameStr,
+            OrganizationType details, Member owner, String associateEMailStr, KeySafe<Member> protectWith) {
+        
+        Organization organization = createOrganization(name, tokenStr, domainNameStr, idToAssign);
+        Associate associate = createAssociate(organization, owner, associateEMailStr);
+        Enlistment enlistment = divisionService.createDivisionEnlistment(associate, protectWith, null, null);
+        Division<Organization> globalDivision = enlistment.getDivision();
+        organization.setGlobalDivision(globalDivision);
+        applyDetailsXML(details, globalDivision);
+        return enlistment;
     }
     
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#createOrganization(java.util.UUID, java.lang.String, java.lang.String, java.lang.String, org.brekka.xml.pegasus.v2.model.OrganizationType, org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division)
+     */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Associate createAssociate(Organization organization, Member owner, String ownerEmailStr) {
-        // Add current user as an associate
-        Associate associate = new Associate();
-        associate.setOrganization(organization);
-        associate.setStatus(ActorStatus.ACTIVE);
-        associate.setMember(owner);
-        if (StringUtils.isNotBlank(ownerEmailStr)) {
-            EMailAddress ownerEMail = eMailAddressService.createEMail(ownerEmailStr, owner, false);
-            associate.setPrimaryEMailAddress(ownerEMail);
-        }
-        associateDAO.create(associate);
-        return associate;
+    public <Owner extends Actor> Partnership<Owner, Organization> createOrganization(UUID idToAssign, String name,
+            String tokenStr, String domainNameStr, OrganizationType details, Owner owner, Division<Owner> owningDivision) {
+        Organization organization = createOrganization(name, tokenStr, domainNameStr, idToAssign);
+        Partnership<Owner, Organization> partnership = divisionService.createDivisionPartnership(owningDivision, organization, null, null);
+        Division<Organization> globalDivision = partnership.getTarget();
+        organization.setGlobalDivision(globalDivision);
+        applyDetailsXML(details, globalDivision);
+        return partnership;
     }
     
     @Override
@@ -133,13 +131,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationDocument organizationDocument, Division<Organization> division) {
+    public XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationType organizationType) {
         Organization organization = organizationDAO.retrieveById(orgId);
-        if (organization.getXml() != null) {
-            throw new IllegalStateException(); // TODO
-        }
-        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, division);
-        organization.setXml(entity);
+        XmlEntity<OrganizationDocument> entity = applyDetailsXML(organizationType, organization.getGlobalDivision());
         organizationDAO.update(organization);
         return entity;
     }
@@ -161,10 +155,27 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organization;
     }
     
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Associate createAssociate(Organization organization, Member owner, String ownerEmailStr) {
+        // Add current user as an associate
+        Associate associate = new Associate();
+        associate.setOrganization(organization);
+        associate.setStatus(ActorStatus.ACTIVE);
+        associate.setMember(owner);
+        if (StringUtils.isNotBlank(ownerEmailStr)) {
+            EMailAddress ownerEMail = eMailAddressService.createEMail(ownerEmailStr, owner, false);
+            associate.setPrimaryEMailAddress(ownerEMail);
+        }
+        associateDAO.create(associate);
+        return associate;
+    }
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#exists(java.util.UUID)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public boolean organizationExists(UUID orgId) {
         return organizationDAO.retrieveById(orgId) != null;
     }
@@ -198,5 +209,38 @@ public class OrganizationServiceImpl implements OrganizationService {
     public List<Associate> retrieveAssociates(Vault vault) {
         List<Associate> asociateList = associateDAO.retrieveAssociatesInVault(vault);
         return asociateList;
+    }
+
+    /**
+     * @param details
+     * @return
+     */
+    protected XmlEntity<OrganizationDocument> applyDetailsXML(OrganizationType organizationType, Division<Organization> globalDivision) {
+        OrganizationDocument organizationDocument = OrganizationDocument.Factory.newInstance();
+        if (organizationType == null) {
+            organizationDocument.addNewOrganization();
+        } else {
+            organizationDocument.setOrganization(organizationType);
+        }
+        Organization organization = globalDivision.getOwner();
+        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, globalDivision);
+        organization.setXml(entity);
+        return entity;
+    }
+    
+
+    protected Organization createOrganization(String name, String tokenStr, String domainNameStr, UUID idToAssign) {
+        Organization organization = new Organization();
+        organization.setId(idToAssign);
+        organization.setName(name);
+        
+        if (StringUtils.isNotBlank(domainNameStr)) {
+            DomainName domainName = eMailAddressService.toDomainName(domainNameStr);
+            organization.setPrimaryDomainName(domainName);
+        }
+        Token token = tokenService.createToken(tokenStr, TokenType.ORG);
+        organization.setToken(token);
+        organizationDAO.create(organization);
+        return organization;
     }
 }

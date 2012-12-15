@@ -7,6 +7,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.SecondaryTable;
+
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * A member of the site, can be either a {@link Person} or a {@link Robot}.
@@ -15,6 +18,7 @@ import javax.persistence.OneToOne;
  */
 @Entity
 @DiscriminatorValue("Member")
+@SecondaryTable(name="`Member`", schema=PegasusConstants.SCHEMA)
 public abstract class Member extends Actor {
 
     /**
@@ -27,14 +31,14 @@ public abstract class Member extends Actor {
      * Authentication token that identifies this member
      */
     @OneToOne
-    @JoinColumn(name="`AuthenticationTokenID`")
+    @JoinColumn(name="`AuthenticationTokenID`", table="`Member`")
     private AuthenticationToken authenticationToken;
     
     /**
      * The default vault for this member (normally contains the profile).
      */
     @OneToOne
-    @JoinColumn(name="`DefaultVaultID`")
+    @JoinColumn(name="`DefaultVaultID`", table="`Member`")
     private Vault defaultVault;
 
     /**

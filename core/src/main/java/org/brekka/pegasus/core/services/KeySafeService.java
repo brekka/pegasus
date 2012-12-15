@@ -8,9 +8,9 @@ import java.util.UUID;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phalanx.api.model.KeyPair;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -36,9 +36,16 @@ public interface KeySafeService {
     byte[] release(UUID cryptedDataId, KeySafe<?> keySafe);
 
     /**
-     * @param organization
-     * @param clientsDivision
-     * @param rootDivision
+     * @param protectWith
+     * @return
      */
-    <Owner extends Actor> Partnership<Owner> createPartnership(Owner owner, Division<Owner> source, Division<?> target);
+    KeyPair createKeyPair(KeySafe<?> protectWith);
+
+    /**
+     * @param assignToKeySafe
+     * @param keyPairToAssign
+     * @return
+     */
+    KeyPair assignKeyPair(KeySafe<?> protectingKeySafe, KeyPair keyPairToAssign, KeySafe<?> assignToKeySafe);
+    
 }

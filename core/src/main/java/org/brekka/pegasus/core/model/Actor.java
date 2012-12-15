@@ -16,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
@@ -31,15 +30,10 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`Actor`", schema=PegasusConstants.SCHEMA,
-    uniqueConstraints={ 
-        // Associate unique key
-        @UniqueConstraint(columnNames = {"`MemberID`", "`OrganizationID`" }),
-    }
-)
+@Table(name="`Actor`", schema=PegasusConstants.SCHEMA)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-    name="`Type`", length=9,
+    name="`Type`", length=12,
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Actor")

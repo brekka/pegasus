@@ -9,15 +9,16 @@ import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
+import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.model.KeyPair;
+import org.brekka.phalanx.api.model.Principal;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -72,23 +73,37 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
         return data;
     }
     
-    
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.KeySafeService#createPartnership(org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Division)
+     * @see org.brekka.pegasus.core.services.KeySafeService#createKeyPair(org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    public <Owner extends Actor> Partnership<Owner> createPartnership(Owner owner, Division<Owner> source,
-            Division<?> target) {
-        IdentityKeyPair sourceKeyPair = new IdentityKeyPair(source.getKeyPairId());
-        KeyPair connectionKeyPair = phalanxService.generateKeyPair(sourceKeyPair);
+    @Transactional(propagation=Propagation.REQUIRED)
+    public KeyPair createKeyPair(KeySafe<?> keySafe) {
+        return super.createKeyPair(keySafe);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.KeySafeService#assignKeyPair(org.brekka.pegasus.core.model.KeySafe, org.brekka.phalanx.api.model.KeyPair)
+     */
+    @Override
+    public KeyPair assignKeyPair(KeySafe<?> protectingKeySafe, KeyPair keyPairToAssign, KeySafe<?> assignToKeySafe) {
+        KeyPair keyPair;
+        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
+        PrivateKeyToken privateKeyToken = resolvePrivateKeyFor(protectingKeySafe, currentMember);
         
-        Partnership<Owner> partnership = new Partnership<>();
-        partnership.setOwner(owner);
-        partnership.setSource(source);
-        partnership.setTarget(target);
-        partnership.setKeyPairId(connectionKeyPair.getId());
-        connectionDAO.create(partnership);
-        return partnership;
+        if (assignToKeySafe instanceof Vault) {
+            Vault vault = (Vault) assignToKeySafe;
+            AuthenticatedPrincipal vaultKey = getVaultKey(vault);
+            Principal identityPrincipal = new IdentityPrincipal(vaultKey.getPrincipal().getId());
+            keyPair = phalanxService.assignKeyPair(privateKeyToken, identityPrincipal);
+        } else if (assignToKeySafe instanceof Division) {
+            Division<?> division = (Division<?>) assignToKeySafe;
+            KeyPair identityKeyPair = new IdentityKeyPair(division.getKeyPairId());
+            keyPair = phalanxService.assignKeyPair(privateKeyToken, identityKeyPair);
+        } else {
+            throw new IllegalStateException("Unknown assignment keySafe type: " + assignToKeySafe.getClass().getName());
+        }
+        return keyPair;
     }
 
 }

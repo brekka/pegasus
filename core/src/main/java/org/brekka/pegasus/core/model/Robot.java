@@ -5,6 +5,9 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.SecondaryTable;
+
+import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * An autonomous member of the system that can act on another users behalf. 
@@ -13,6 +16,7 @@ import javax.persistence.Entity;
  */
 @Entity
 @DiscriminatorValue("Robot")
+@SecondaryTable(name="`Robot`", schema=PegasusConstants.SCHEMA)
 public class Robot extends Member {
 
     /**

@@ -8,7 +8,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.SecondaryTable;
 
+import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 
 /**
@@ -18,7 +20,8 @@ import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@DiscriminatorValue("Org")
+@DiscriminatorValue("Organization")
+@SecondaryTable(name="`Organization`", schema=PegasusConstants.SCHEMA)
 public class Organization extends Actor {
 
     /**
@@ -30,27 +33,34 @@ public class Organization extends Actor {
      * The token that uniquely identifies this organization to the outside world.
      */
     @OneToOne
-    @JoinColumn(name="`TokenID`", unique=true)
+    @JoinColumn(name="`TokenID`", unique=true, table="`Organization`")
     private Token token;
     
     /**
      * The name of this organization. Can be null
      */
-    @Column(name="`Name`")
+    @Column(name="`Name`", table="`Organization`")
     private String name;
     
     /**
      * The primary domain name associated with this organization.
      */
     @OneToOne
-    @JoinColumn(name="`PrimaryDomainNameID`")
+    @JoinColumn(name="`PrimaryDomainNameID`", table="`Organization`")
     private DomainName primaryDomainName;
+    
+    /**
+     * The root division of this organization (which should have NO parent).
+     */
+    @OneToOne
+    @JoinColumn(name="`GlobalDivisionID`", table="`Organization`")
+    private Division<Organization> globalDivision;
     
     /**
      * Additional organization details that can be encrypted (ie only employees can view/edit the details).
      */
     @OneToOne()
-    @JoinColumn(name="`XmlEntityID`")
+    @JoinColumn(name="`XmlEntityID`", table="`Organization`")
     private XmlEntity<OrganizationDocument> xml;
 
     public String getName() {
@@ -83,5 +93,19 @@ public class Organization extends Actor {
 
     public void setXml(XmlEntity<OrganizationDocument> xml) {
         this.xml = xml;
+    }
+
+    /**
+     * @return the globalDivision
+     */
+    public Division<Organization> getGlobalDivision() {
+        return globalDivision;
+    }
+
+    /**
+     * @param globalDivision the globalDivision to set
+     */
+    public void setGlobalDivision(Division<Organization> rootDivision) {
+        this.globalDivision = rootDivision;
     }
 }

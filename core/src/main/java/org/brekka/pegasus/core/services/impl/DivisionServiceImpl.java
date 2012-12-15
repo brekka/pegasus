@@ -17,17 +17,20 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.KeySafeStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
-import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.VaultService;
@@ -66,29 +69,40 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Enlistment createRootDivision(Associate associate, Vault connectedTo, String slug, String name) {
-        KeyPair associateDivisionKeyPair = vaultService.createKeyPair(connectedTo);
-        
-        KeyPair anonKeyPair = phalanxService.cloneKeyPairPublic(associateDivisionKeyPair);
-        
-        Division<Organization> division = createDivision(associate.getOrganization(), null, anonKeyPair, slug, name);
-        
-        Enlistment enlistment = new Enlistment();
-        enlistment.setAssociate(associate);
-        enlistment.setDivision(division);
-        enlistment.setSource(connectedTo);
-        enlistment.setKeyPairId(associateDivisionKeyPair.getId());
-        enlistmentDAO.create(enlistment);
-        
+    public Enlistment createDivisionEnlistment(Associate associate, KeySafe<Member> protectedBy, String slug, String name) {
+        KeyPair memberDivisionKeyPair = keySafeService.createKeyPair(protectedBy);
+        KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(memberDivisionKeyPair);
+        Division<Organization> division = createDivision(associate.getOrganization(), null, publicOnlyKeyPair, slug, name);
+        Enlistment enlistment = createEnlistment(associate, protectedBy, division, memberDivisionKeyPair);
         return enlistment;
     }
-    
+
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public <T extends Actor> Division<T> createRootDivision(T owner, KeyPair protectedByKeyPair, String slug, String name) {
-        KeyPair rootDivisionKeyPair = phalanxService.generateKeyPair(protectedByKeyPair);
-        Division<T> division = createDivision(owner, null, rootDivisionKeyPair, slug, name);
-        return division;
+    public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createDivisionPartnership(Division<Owner> source, Target target, String slug, String name) {
+        Owner owner = source.getOwner();
+        KeyPair newKeyPair = keySafeService.createKeyPair(source);
+        KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(newKeyPair);
+        Division<Target> division = createDivision(target, null, newKeyPair, slug, name);
+        Partnership<Owner, Target> partnership = createPartnership(owner, source, division, newKeyPair);
+        division.setKeyPairId(publicOnlyKeyPair.getId());
+        return partnership;
+    }
+    
+    
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#createAssociate(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.KeySafe, java.lang.String, org.brekka.pegasus.core.model.Associate)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
+            Connection<Associate, KeySafe<Member>, Division<Organization>> existingEnlistment) {
+        Division<Organization> target = existingEnlistment.getTarget();
+        KeyPair identityKeyPair = new IdentityKeyPair(existingEnlistment.getKeyPairId());
+        KeyPair newKeyPair = keySafeService.assignKeyPair(existingEnlistment.getSource(), identityKeyPair, assignToKeySafe);
+        Enlistment enlistment = createEnlistment(toAssign, assignToKeySafe, target, newKeyPair);
+        return enlistment;
     }
     
     /* (non-Javadoc)
@@ -124,13 +138,33 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         return enlistmentDAO.retrieveForAssociate(associate);
     }
     
+    /**
+     * @param associate
+     * @param protectedBy
+     * @param memberDivisionKeyPair
+     * @param division
+     * @return
+     */
+    protected Enlistment createEnlistment(Associate associate, KeySafe<Member> protectedBy, Division<Organization> division, KeyPair memberDivisionKeyPair) {
+        Enlistment enlistment = new Enlistment();
+        enlistment.setId(UUID.randomUUID());
+        enlistment.setAssociate(associate);
+        enlistment.setDivision(division);
+        enlistment.setSource(protectedBy);
+        enlistment.setKeyPairId(memberDivisionKeyPair.getId());
+        enlistmentDAO.create(enlistment);
+        return enlistment;
+    }
+    
     protected <T extends Actor> Division<T> createDivision(T owner, Division<T> parent, 
             KeyPair protectedBy, String slug, String name) {
-       
         Division<T> division = new Division<>();
+        division.setId(UUID.randomUUID());
         division.setOwner(owner);
         division.setParent(parent);
-        division.setKeyPairId(protectedBy.getId());
+        if (protectedBy != null) {
+            division.setKeyPairId(protectedBy.getId());
+        }
         division.setName(name);
         division.setSlug(slug);
         division.setStatus(KeySafeStatus.ACTIVE);

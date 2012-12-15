@@ -1,4 +1,4 @@
-create schema Polaris;
-create schema Pegasus;
-create schema Phalanx;
-create schema Paveway;
+create schema "Polaris";
+create schema "Pegasus";
+create schema "Phalanx";
+create schema "Paveway";
