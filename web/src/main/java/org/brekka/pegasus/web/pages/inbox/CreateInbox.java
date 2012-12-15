@@ -87,7 +87,7 @@ public class CreateInbox {
     }
     
     Object onActivate(String orgToken, String divisionSlug) {
-        Organization organization = organizationService.retrieveByToken(orgToken);
+        Organization organization = organizationService.retrieveByToken(orgToken, false);
         division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(orgToken, divisionSlug);
     }

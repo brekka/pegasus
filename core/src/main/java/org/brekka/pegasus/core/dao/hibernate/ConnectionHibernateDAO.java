@@ -50,10 +50,12 @@ public class ConnectionHibernateDAO extends AbstractPegasusHibernateDAO<Connecti
         return getCurrentSession().createQuery(
             "select conn " +
             "  from Connection as conn " +
-            " left outer join conn.owner as owner " +
+            " join conn.owner as owner " +
+            " join conn.source as source " +
             " where conn.target = :target" +
             "   and (owner = :member" +
-            "    or owner in (from Associate as assoc where assoc.member = :member))")
+            "    or owner in (from Associate as assoc where assoc.member = :member)" +
+            "    or owner in (select assoc.organization from Associate as assoc where assoc.member = :member))")
             .setEntity("target", keySafe)
             .setEntity("member", contextMember)
             .list();

@@ -9,7 +9,6 @@ import org.brekka.pegasus.core.dao.AssociateDAO;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
-import org.brekka.pegasus.core.model.Vault;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -33,9 +32,9 @@ public class AssociateHibernateDAO extends AbstractPegasusHibernateDAO<Associate
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Associate> retrieveAssociatesInVault(Vault vault) {
+    public List<Associate> retrieveAssociates(Member member) {
         return getCurrentSession().createCriteria(Associate.class)
-                .add(Restrictions.eq("defaultVault", vault))
+                .add(Restrictions.eq("member", member))
                 .list();
     }
 

@@ -17,6 +17,7 @@
 package org.brekka.pegasus.core.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
@@ -27,7 +28,6 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
-import org.brekka.phalanx.api.model.KeyPair;
 
 /**
  * TODO Description of DivisionService
@@ -43,8 +43,8 @@ public interface DivisionService {
     <T extends Actor> Division<T> createDivision(Division<T> parent, String slug, String name);
     
     
-    Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
-            Connection<Associate, KeySafe<Member>, Division<Organization>> existingEnlistment);
+    <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
+            Connection<Owner, Source, Division<Organization>> existingEnlistment);
     
     /**
      * @param orgToken
@@ -58,4 +58,11 @@ public interface DivisionService {
      * @return
      */
     List<Enlistment> retrieveCurrentEnlistments();
+    
+
+    /**
+     * @param partnershipId
+     * @return
+     */
+    <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> retrievePartnershipById(UUID partnershipId);
 }

@@ -24,7 +24,6 @@ import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
-import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
@@ -59,7 +58,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private AssociateDAO associateDAO;
     
     @Autowired
-    private EnlistmentDAO divisionAssociateDAO;
+    private EnlistmentDAO enlistmentDAO;
     
     @Autowired
     private EMailAddressService eMailAddressService;
@@ -94,8 +93,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Enlistment createOrganization(UUID idToAssign, String name, String tokenStr, String domainNameStr,
             OrganizationType details, Member owner, String associateEMailStr, KeySafe<Member> protectWith) {
         
+        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(associateEMailStr);
+        if (eMailAddress == null) {
+            eMailAddress = eMailAddressService.createEMail(associateEMailStr, owner, false);
+        }
+        
         Organization organization = createOrganization(name, tokenStr, domainNameStr, idToAssign);
-        Associate associate = createAssociate(organization, owner, associateEMailStr);
+        Associate associate = createAssociate(organization, owner, eMailAddress);
         Enlistment enlistment = divisionService.createDivisionEnlistment(associate, protectWith, null, null);
         Division<Organization> globalDivision = enlistment.getDivision();
         organization.setGlobalDivision(globalDivision);
@@ -148,25 +152,31 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (organization == null) {
             return null;
         }
-        if (organization.getXml() != null && releaseXml) {
-            XmlEntity<OrganizationDocument> entity = xmlEntityService.retrieveEntity(organization.getXml().getId(), OrganizationDocument.class);
-            organization.setXml(entity);
-        }
+        releaseXml(releaseXml, organization);
+        return organization;
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveByToken(java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Organization retrieveByToken(String tokenPath, boolean releaseXml) {
+        Token token = tokenService.retrieveByPath(tokenPath);
+        Organization organization = organizationDAO.retrieveByToken(token);
+        releaseXml(releaseXml, organization);
         return organization;
     }
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Associate createAssociate(Organization organization, Member owner, String ownerEmailStr) {
+    public Associate createAssociate(Organization organization, Member owner, EMailAddress eMailAddress) {
         // Add current user as an associate
         Associate associate = new Associate();
         associate.setOrganization(organization);
         associate.setStatus(ActorStatus.ACTIVE);
         associate.setMember(owner);
-        if (StringUtils.isNotBlank(ownerEmailStr)) {
-            EMailAddress ownerEMail = eMailAddressService.createEMail(ownerEmailStr, owner, false);
-            associate.setPrimaryEMailAddress(ownerEMail);
-        }
+        associate.setPrimaryEMailAddress(eMailAddress);
         associateDAO.create(associate);
         return associate;
     }
@@ -180,16 +190,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationDAO.retrieveById(orgId) != null;
     }
     
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveByToken(java.lang.String)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Organization retrieveByToken(String tokenPath) {
-        Token token = tokenService.retrieveByPath(tokenPath);
-        return organizationDAO.retrieveByToken(token);
-    }
+   
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveAssociate(org.brekka.pegasus.core.model.Organization, org.brekka.pegasus.core.model.Member)
@@ -206,9 +207,19 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public List<Associate> retrieveAssociates(Vault vault) {
-        List<Associate> asociateList = associateDAO.retrieveAssociatesInVault(vault);
+    public List<Associate> retrieveAssociates(Member member) {
+        List<Associate> asociateList = associateDAO.retrieveAssociates(member);
         return asociateList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#retrieveEnlistment(org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    public Enlistment retrieveEnlistment(Member member, Division<Organization> target) {
+        Associate associate = retrieveAssociate(target.getOwner(), member);
+        Enlistment enlistment = enlistmentDAO.retrieveEnlistmentByTarget(target, associate);
+        return enlistment;
     }
 
     /**
@@ -229,6 +240,18 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     
 
+    /**
+     * @param releaseXml
+     * @param organization
+     */
+    protected void releaseXml(boolean releaseXml, Organization organization) {
+        if (organization.getXml() != null && releaseXml) {
+            XmlEntity<OrganizationDocument> entity = xmlEntityService.retrieveEntity(organization.getXml().getId(), OrganizationDocument.class);
+            organization.setXml(entity);
+        }
+    }
+    
+    
     protected Organization createOrganization(String name, String tokenStr, String domainNameStr, UUID idToAssign) {
         Organization organization = new Organization();
         organization.setId(idToAssign);

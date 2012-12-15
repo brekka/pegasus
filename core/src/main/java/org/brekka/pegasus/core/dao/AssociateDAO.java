@@ -22,7 +22,7 @@ public interface AssociateDAO extends EntityDAO<UUID, Associate> {
      * @param keySafe
      * @return
      */
-    List<Associate> retrieveAssociatesInVault(Vault vault);
+    List<Associate> retrieveAssociates(Member member);
 
     /**
      * @param organization

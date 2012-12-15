@@ -86,7 +86,7 @@ public class MakeDispatch extends AbstractMakePage {
     private Object[] context;
     
     Object onActivate(String orgToken, String divisionSlug, String makeKey) {
-        Organization organization = organizationService.retrieveByToken(orgToken);
+        Organization organization = organizationService.retrieveByToken(orgToken, false);
         Division division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(makeKey, division, division, orgToken, divisionSlug);
     }

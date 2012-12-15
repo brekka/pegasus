@@ -171,8 +171,8 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     /**
      * @param openVault
      */
-    void retainVaultKey(Vault vault, AuthenticatedPrincipal authenticatedPrincipal) {
-        vaultKeyCache.put(vault.getId(), authenticatedPrincipal);
+    void retainVaultKey(Vault vault) {
+        vaultKeyCache.put(vault.getId(), vault.getAuthenticatedPrincipal());
     }
     
     PrivateKeyToken getPrivateKey(KeyPair keyPair) {
@@ -186,7 +186,7 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     /**
      * @param activeActor the activeActor to set
      */
-    void setActiveActor(Actor activeActor) {
+    protected void setActiveActor(Actor activeActor) {
         this.activeActor = activeActor;
     }
 
@@ -291,6 +291,10 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
         }
         throw new PegasusException(PegasusErrorCode.PG102, "'%s' is not a managed instance of '%s'",
                 current.getClass().getName(), AuthenticatedMemberBase.class.getName());
+    }
+    
+    public static boolean isAvailable(MemberService memberService) {
+        return memberService.getCurrent() != null;
     }
 
 

@@ -56,7 +56,7 @@ public class OrgIndex {
         if (authenticatedMember.getActiveActor() instanceof Associate == false) {
             return MemberIndex.class;
         }
-        this.organization = organizationService.retrieveByToken(token);
+        this.organization = organizationService.retrieveByToken(token, false);
         return Boolean.TRUE;
     }
     

@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.web.pages.member;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -159,7 +160,9 @@ public class MemberIndex {
     }
     
     public List<Associate> getAssociateList() {
-        return organizationService.retrieveAssociates(loopVault);
+        return Collections.emptyList();
+        // TODO need to dissassociate organizations from vaults
+        //return organizationService.retrieveAssociates(loopVault);
     }
     
     public List<Invitation> getInvistationList() {

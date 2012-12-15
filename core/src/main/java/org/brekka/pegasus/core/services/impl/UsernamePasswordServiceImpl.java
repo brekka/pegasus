@@ -93,10 +93,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     @Transactional(propagation=Propagation.SUPPORTS)
     public boolean verify(UsernamePassword usernamePassword, String password) {
         byte[] passwordBytes = toBytes(password);
-        CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(usernamePassword.getProfile());
-        DerivedKey derivedKey = derivedKeyCryptoService.apply(passwordBytes, 
-                usernamePassword.getSalt(), usernamePassword.getIterations(), cryptoProfile);
-        return derivedKeyCryptoService.check(usernamePassword.getPassword(), derivedKey);
+        return derivedKeyCryptoService.check(passwordBytes, usernamePassword);
     }
 
     /* (non-Javadoc)

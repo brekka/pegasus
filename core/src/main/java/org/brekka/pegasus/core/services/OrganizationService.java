@@ -11,14 +11,13 @@ import javax.annotation.Nullable;
 
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
-import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
-import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 import org.brekka.xml.pegasus.v2.model.OrganizationType;
@@ -80,7 +79,7 @@ public interface OrganizationService {
             @Nullable String name, @Nullable String tokenStr, @Nullable String domainNameStr,
             @Nullable OrganizationType details, @Nonnull Owner owner, @Nonnull Division<Owner> owningDivision);
 
-    Associate createAssociate(Organization organization, Member owner, String ownerEmailStr);
+    Associate createAssociate(Organization organization, Member owner, EMailAddress eMailAddress);
     
     XmlEntity<OrganizationDocument> updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml);
     
@@ -92,13 +91,13 @@ public interface OrganizationService {
      * @param loopVault
      * @return
      */
-    List<Associate> retrieveAssociates(Vault vault);
+    List<Associate> retrieveAssociates(Member member);
 
     /**
      * @param token
      * @return
      */
-    Organization retrieveByToken(String token);
+    Organization retrieveByToken(String token, boolean releaseXml);
 
     /**
      * @param organization
@@ -119,5 +118,12 @@ public interface OrganizationService {
      * @return
      */
     boolean organizationExists(UUID orgId);
+
+    /**
+     * @param globalDivision
+     * @param activePerson
+     * @return
+     */
+    Enlistment retrieveEnlistment(Member member, Division<Organization> globalDivision);
     
 }

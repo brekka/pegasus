@@ -25,7 +25,7 @@ public class ActivateOrg {
     
 
     Object onActivate(String orgToken) {
-        Organization organization = organizationService.retrieveByToken(orgToken);
+        Organization organization = organizationService.retrieveByToken(orgToken, false);
         memberService.activateOrganization(organization);
         orgIndex.init(organization);
         return orgIndex;

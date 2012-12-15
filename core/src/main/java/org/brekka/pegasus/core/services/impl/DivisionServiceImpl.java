@@ -89,15 +89,25 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         return partnership;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DivisionService#retrievePartnershipById(java.util.UUID)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> retrievePartnershipById(
+            UUID partnershipId) {
+        return (Partnership<Owner, Target>) connectionDAO.retrieveById(partnershipId);
+    }
+    
     
     
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.OrganizationService#createAssociate(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.KeySafe, java.lang.String, org.brekka.pegasus.core.model.Associate)
+     * @see org.brekka.pegasus.core.services.impl.DivisionServiceImpl#createEnlistment(org.brekka.pegasus.core.model.Associate, org.brekka.pegasus.core.model.KeySafe, org.brekka.pegasus.core.model.Connection)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
-            Connection<Associate, KeySafe<Member>, Division<Organization>> existingEnlistment) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
+            Connection<Owner, Source, Division<Organization>> existingEnlistment) {
         Division<Organization> target = existingEnlistment.getTarget();
         KeyPair identityKeyPair = new IdentityKeyPair(existingEnlistment.getKeyPairId());
         KeyPair newKeyPair = keySafeService.assignKeyPair(existingEnlistment.getSource(), identityKeyPair, assignToKeySafe);

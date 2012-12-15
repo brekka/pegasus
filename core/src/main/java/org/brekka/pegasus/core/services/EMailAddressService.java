@@ -19,6 +19,8 @@ public interface EMailAddressService {
      * @return
      */
     EMailAddress createEMail(String email, Member owner, boolean requiresVerification);
+    
+    
 
     /**
      * Retrieve or create a domain name entry

@@ -7,7 +7,9 @@ import java.util.List;
 
 import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.Organization;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -35,5 +37,16 @@ public class EnlistmentHibernateDAO extends AbstractPegasusHibernateDAO<Enlistme
         return getCurrentSession().createCriteria(Enlistment.class)
                 .add(Restrictions.eq("associate", associate))
                 .list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.EnlistmentDAO#retrieveEnlistmentByTarget(org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    public Enlistment retrieveEnlistmentByTarget(Division<Organization> target, Associate associate) {
+        return (Enlistment) getCurrentSession().createCriteria(Enlistment.class)
+                .add(Restrictions.eq("target", target))
+                .add(Restrictions.eq("owner", associate))
+                .uniqueResult();
     }
 }

@@ -43,7 +43,7 @@ public class DispatchListing {
     private Dispatch loopDispatch;
     
     Object onActivate(String orgToken, String divisionSlug, String interval) {
-        Organization organization = organizationService.retrieveByToken(orgToken);
+        Organization organization = organizationService.retrieveByToken(orgToken, false);
         Division division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(division, interval);
     }

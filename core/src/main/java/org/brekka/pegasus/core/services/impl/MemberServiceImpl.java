@@ -71,6 +71,8 @@ public class MemberServiceImpl implements MemberService {
         AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
         Member member = current.getMember();
         Associate associate = organizationService.retrieveAssociate(organization, member);
+        Organization managedOrganization = organizationService.retrieveById(associate.getOrganization().getId(), true);
+        associate.setOrganization(managedOrganization);
         associate.setMember(member);
         current.setActiveActor(associate);
     }
@@ -115,7 +117,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void setupPerson(String fullName, String email, String vaultPassword, boolean encryptedProfile) {
         Person managed = (Person) getManaged();
-        populatePerson(managed, fullName, email, vaultPassword, encryptedProfile);
+        populatePerson(managed, fullName, email, vaultPassword, encryptedProfile, false, true);
         memberDAO.update(managed);
     }
     
@@ -128,8 +130,7 @@ public class MemberServiceImpl implements MemberService {
             String vaultPassword, boolean encryptProfile) {
         Person person = new Person();
         person.setAuthenticationToken(authenticationToken);
-        populatePerson(person, fullName, email, vaultPassword, encryptProfile);
-        memberDAO.create(person);
+        populatePerson(person, fullName, email, vaultPassword, encryptProfile, true, false);
         return person;
     }
     
@@ -201,20 +202,20 @@ public class MemberServiceImpl implements MemberService {
     }
     
 
-    protected void populatePerson(Person person, String fullName, String email, String vaultPassword, boolean encryptProfile) {
+    protected void populatePerson(Person person, String fullName, String email, String vaultPassword, boolean encryptProfile, boolean create, boolean currentUser) {
         person.setFullName(fullName);
         person.setStatus(ActorStatus.ACTIVE);
-        
-        // Binding to context
-        AuthenticatedMember<Person> current = getCurrent(Person.class);
-        AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase) current;
-        authenticatedPersonImpl.setMember(person);
+        if (create) {
+            // Need to save now, person is reference
+            memberDAO.create(person);
+        }
+
         
         // Vault
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, person);
         person.setDefaultVault(defaultVault);
         vaultService.openVault(defaultVault, vaultPassword);
-        authenticatedPersonImpl.setActiveVault(defaultVault);
+        
         
         
         // Profile
@@ -224,12 +225,21 @@ public class MemberServiceImpl implements MemberService {
         } else {
             profile = profileService.createPlainProfile(person);
         }
-        authenticatedPersonImpl.setActiveProfile(profile);
+        
         
         // E-Mail - needs to happen once profile/context are set
         if (StringUtils.isNotBlank(email)) {
             EMailAddress emailAddress = eMailAddressService.createEMail(email, person, false);
             person.setDefaultEmailAddress(emailAddress);
+        }
+        
+        if (currentUser) {
+            // Binding to context
+            AuthenticatedMember<Person> current = getCurrent(Person.class);
+            AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase) current;
+            authenticatedPersonImpl.setMember(person);
+            authenticatedPersonImpl.setActiveVault(defaultVault);
+            authenticatedPersonImpl.setActiveProfile(profile);
         }
     }
     

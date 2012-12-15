@@ -21,6 +21,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
+import org.brekka.phoenix.api.CryptoProfile;
+import org.brekka.phoenix.api.DerivedKey;
+
 /**
  * Username and Password based authentication token
  *
@@ -28,7 +31,7 @@ import javax.persistence.Transient;
  */
 @Entity
 @DiscriminatorValue("UserPass")
-public class UsernamePassword extends AuthenticationToken {
+public class UsernamePassword extends AuthenticationToken implements DerivedKey {
 
     /**
      * Serial UID
@@ -117,7 +120,7 @@ public class UsernamePassword extends AuthenticationToken {
     /**
      * @return the iterations
      */
-    public int getIterations() {
+    public Integer getIterations() {
         return iterations;
     }
 
@@ -154,5 +157,21 @@ public class UsernamePassword extends AuthenticationToken {
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.DerivedKey#getDerivedKey()
+     */
+    @Override
+    public byte[] getDerivedKey() {
+        return getPassword();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.phoenix.api.CryptoSpec#getCryptoProfile()
+     */
+    @Override
+    public CryptoProfile getCryptoProfile() {
+        return CryptoProfile.Static.of(getProfile());
     }
 }
