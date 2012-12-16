@@ -144,14 +144,22 @@ abstract class AbstractKeySafeServiceSupport {
         }
         return keyPair;
     }
+    /**
+     * @param parent
+     * @param currentMember
+     * @return
+     */
+    protected PrivateKeyToken resolveAndUnlock(KeySafe<?> parent, UUID keyPairId, AuthenticatedMemberBase<?> currentMember) {
+        KeyPair keyPair = new IdentityKeyPair(keyPairId);
+        return resolveAndUnlock(parent, keyPair, currentMember);
+    }
     
     /**
      * @param parent
      * @param currentMember
      * @return
      */
-    private PrivateKeyToken resolveAndUnlock(KeySafe<?> parent, UUID keyPairId, AuthenticatedMemberBase<?> currentMember) {
-        KeyPair keyPair = new IdentityKeyPair(keyPairId);
+    protected PrivateKeyToken resolveAndUnlock(KeySafe<?> parent, KeyPair keyPair, AuthenticatedMemberBase<?> currentMember) {
         PrivateKeyToken privateKeyToken = currentMember.getPrivateKey(keyPair);
         if (privateKeyToken == null) {
             /*

@@ -72,7 +72,7 @@ public interface InboxService {
      * @param inbox
      * @return
      */
-    List<Deposit> retrieveDeposits(Inbox inbox);
+    List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml);
     
     /**
      * Retrieve the specified deposit which will contain the file decryption key metadata.
@@ -92,6 +92,11 @@ public interface InboxService {
      * @return
      */
     List<Inbox> retrieveForDivision(Division<?> division);
+
+    /**
+     * @param actionDeposit
+     */
+    void deleteDeposit(Deposit actionDeposit);
 
 
 }

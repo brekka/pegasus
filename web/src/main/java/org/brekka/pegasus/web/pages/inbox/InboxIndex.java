@@ -60,7 +60,7 @@ public class InboxIndex {
     }
     
     public List<Deposit> getDeposits() {
-        return inboxService.retrieveDeposits(inbox);
+        return inboxService.retrieveDeposits(inbox, false);
     }
     
     public String getInboxLink() {

@@ -3,6 +3,8 @@
  */
 package org.brekka.pegasus.core.services;
 
+import java.util.UUID;
+
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
@@ -61,6 +63,13 @@ public interface MemberService {
      * @param openID
      */
     Person createPerson(AuthenticationToken authenticationToken);
+
+    /**
+     * @param fromString
+     * @param class1
+     * @return
+     */
+    <T extends Member> T retrieveById(UUID memberId, Class<T> expected);
 
 }
 

@@ -120,10 +120,10 @@ public interface OrganizationService {
     boolean organizationExists(UUID orgId);
 
     /**
-     * @param globalDivision
-     * @param activePerson
+     * @param member
+     * @param division
      * @return
      */
-    Enlistment retrieveEnlistment(Member member, Division<Organization> globalDivision);
+    Enlistment retrieveEnlistment(Member member, Division<Organization> division);
     
 }

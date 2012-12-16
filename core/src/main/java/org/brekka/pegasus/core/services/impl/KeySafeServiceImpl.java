@@ -86,15 +86,15 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
      * @see org.brekka.pegasus.core.services.KeySafeService#assignKeyPair(org.brekka.pegasus.core.model.KeySafe, org.brekka.phalanx.api.model.KeyPair)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public KeyPair assignKeyPair(KeySafe<?> protectingKeySafe, KeyPair keyPairToAssign, KeySafe<?> assignToKeySafe) {
         KeyPair keyPair;
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        PrivateKeyToken privateKeyToken = resolvePrivateKeyFor(protectingKeySafe, currentMember);
+        PrivateKeyToken privateKeyToken = resolveAndUnlock(protectingKeySafe, keyPairToAssign, currentMember);
         
         if (assignToKeySafe instanceof Vault) {
             Vault vault = (Vault) assignToKeySafe;
-            AuthenticatedPrincipal vaultKey = getVaultKey(vault);
-            Principal identityPrincipal = new IdentityPrincipal(vaultKey.getPrincipal().getId());
+            Principal identityPrincipal = new IdentityPrincipal(vault.getPrincipalId());
             keyPair = phalanxService.assignKeyPair(privateKeyToken, identityPrincipal);
         } else if (assignToKeySafe instanceof Division) {
             Division<?> division = (Division<?>) assignToKeySafe;

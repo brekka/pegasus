@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -231,8 +232,30 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public List<Deposit> retrieveDeposits(Inbox inbox) {
-        return depositDAO.retrieveByInbox(inbox);
+    public List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml) {
+        List<Deposit> depositList = depositDAO.retrieveByInbox(inbox);
+        if (releaseXml) {
+            for (Deposit deposit : depositList) {
+                UUID cryptedDataId = deposit.getCryptedDataId();
+                if (cryptedDataId != null) {
+                    KeySafe<?> keySafe = deposit.getKeySafe();
+                    byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
+                    decryptDocument(deposit, secretKeyBytes);
+                    bindToContext(deposit);
+                }
+            }
+        }
+        return depositList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void deleteDeposit(Deposit deposit) {
+        deposit.setExpires(new Date());
+        depositDAO.update(deposit);
     }
     
     private void populateNames(List<Inbox> inboxList) {

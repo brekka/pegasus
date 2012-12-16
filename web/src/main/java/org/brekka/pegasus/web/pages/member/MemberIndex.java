@@ -152,7 +152,7 @@ public class MemberIndex {
     }
     
     public List<Deposit> getDepositList() {
-        return inboxService.retrieveDeposits(loopInbox);
+        return inboxService.retrieveDeposits(loopInbox, false);
     }
     
     public List<Vault> getVaultList() {

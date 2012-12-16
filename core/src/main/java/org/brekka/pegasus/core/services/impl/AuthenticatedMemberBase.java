@@ -180,6 +180,11 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     }
     
     void retainPrivateKey(KeyPair keyPair, PrivateKeyToken privateKeyToken) {
+        if (!keyPair.getId().equals(privateKeyToken.getKeyPair().getId())) {
+            throw new PegasusException(PegasusErrorCode.PG104, 
+                    "Private key token does not belong to keyPair '%s'. It instead belongs to '%s'",
+                    keyPair.getId(), privateKeyToken.getKeyPair().getId());
+        }
         privateKeyCache.put(keyPair.getId(), privateKeyToken);
     }
     

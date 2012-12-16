@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.Date;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.DepositDAO;
@@ -35,6 +36,7 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
     public List<Deposit> retrieveByInbox(Inbox inbox) {
         return getCurrentSession().createCriteria(Deposit.class)
                 .add(Restrictions.eq("inbox", inbox))
+                .add(Restrictions.gt("expires", new Date()))
                 .add(Restrictions.isNull("deleted"))
                 .addOrder(Order.desc("created"))
                 .list();
