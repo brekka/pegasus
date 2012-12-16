@@ -100,18 +100,16 @@ public class MemberServiceImpl implements MemberService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.MemberService#retrievePerson(org.brekka.pegasus.core.model.AuthenticationToken)
      */
+    @SuppressWarnings("unchecked")
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Person retrievePerson(AuthenticationToken token) {
+    public <T extends Member> T retrieveMember(AuthenticationToken token, Class<T> expectedType) {
         Member member = memberDAO.retrieveByAuthenticationToken(token);
-        if (member instanceof Person) {
-            Person person = (Person) member;
-            return person;
-        } else if (member == null) {
-            return null;
+        if (!expectedType.isAssignableFrom(member.getClass())) {
+            throw new PegasusException(PegasusErrorCode.PG905, 
+                    "Member is '%s' not the expected '%s'", member.getClass().getName(), expectedType.getName());
         }
-        throw new PegasusException(PegasusErrorCode.PG901, 
-                "Not a person '%s'", member.getClass().getName());
+        return (T) member;
     }
     
     /* (non-Javadoc)

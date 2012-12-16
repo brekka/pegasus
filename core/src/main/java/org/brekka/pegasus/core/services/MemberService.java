@@ -54,10 +54,11 @@ public interface MemberService {
     boolean hasAccess(GrantedAuthority anonymousTransfer);
 
     /**
-     * @param digitalCertificate
+     * @param token
+     * @param expected
      * @return
      */
-    Person retrievePerson(AuthenticationToken token);
+    <T extends Member> T retrieveMember(AuthenticationToken token, Class<T> expected);
 
     /**
      * @param openID

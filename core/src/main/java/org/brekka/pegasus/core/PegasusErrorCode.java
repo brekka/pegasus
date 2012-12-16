@@ -52,6 +52,7 @@ public enum PegasusErrorCode implements ErrorCode {
     PG902,
     PG903,
     PG904,
+    PG905,
     ;
     
     private static final Area AREA = ErrorCode.Utils.createArea("PG");

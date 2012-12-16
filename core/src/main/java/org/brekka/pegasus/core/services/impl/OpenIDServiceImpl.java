@@ -71,7 +71,7 @@ public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
             openIdDAO.create(openID);
         }
         
-        Person person = memberService.retrievePerson(openID);
+        Person person = memberService.retrieveMember(openID, Person.class);
         if (person != null 
                 && person.getStatus() != ActorStatus.NEW) {
             List<String> userOpenIDList = config.getAdminOpenIDList();

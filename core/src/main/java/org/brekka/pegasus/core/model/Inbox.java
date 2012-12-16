@@ -47,7 +47,7 @@ public class Inbox extends LongevousEntity<UUID> {
      * The token that identifies this inbox to the outside world.
      */
     @OneToOne
-    @JoinColumn(name="`TokenID`", nullable = false, unique=true)
+    @JoinColumn(name="`TokenID`")
     private Token token;
 
     /**
