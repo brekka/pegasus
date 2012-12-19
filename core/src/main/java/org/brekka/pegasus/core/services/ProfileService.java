@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.services;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.xml.pegasus.v2.model.ProfileType;
 
 /**
  * For manipulating a user's profile.
@@ -39,4 +40,5 @@ public interface ProfileService {
      * @param profile
      */
     void currentUserProfileUpdated();
+
 }

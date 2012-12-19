@@ -20,11 +20,13 @@ public class WebAuthenticationDetails implements Serializable {
     private final String remoteAddress;
     private final String onBehalfOfAddress;
     private final String userAgent;
+    private final String oneTimeCode;
 
-    public WebAuthenticationDetails(String remoteAddress, String onBehalfOfAddress, String userAgent) {
+    public WebAuthenticationDetails(String remoteAddress, String onBehalfOfAddress, String userAgent, String oneTimeCode) {
         this.remoteAddress = remoteAddress;
         this.onBehalfOfAddress = onBehalfOfAddress;
         this.userAgent = userAgent;
+        this.oneTimeCode = oneTimeCode;
     }
 
     public String getRemoteAddress() {
@@ -37,5 +39,12 @@ public class WebAuthenticationDetails implements Serializable {
 
     public String getUserAgent() {
         return userAgent;
+    }
+    
+    /**
+     * @return the totpCode
+     */
+    public String getOneTimeCode() {
+        return oneTimeCode;
     }
 }

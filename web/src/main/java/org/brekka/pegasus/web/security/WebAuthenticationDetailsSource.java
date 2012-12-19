@@ -24,7 +24,7 @@ public class WebAuthenticationDetailsSource implements AuthenticationDetailsSour
         String remoteAddress = req.getRemoteAddr();
         String userAgent = req.getHeader("User-Agent");
         String onBehalfOfAddress = req.getHeader("X-Forwarded-For");
-        return new WebAuthenticationDetails(remoteAddress, onBehalfOfAddress, userAgent);
+        return new WebAuthenticationDetails(remoteAddress, onBehalfOfAddress, userAgent, null);
     }
     
 }

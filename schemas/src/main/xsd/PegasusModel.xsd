@@ -48,6 +48,7 @@
             <xsd:element name="FullName"    type="xsd:string"       minOccurs="0" maxOccurs="1" />
             <xsd:element name="EMail"       type="pgm:EMailType"    minOccurs="0" maxOccurs="unbounded" />
 			<xsd:element name="Inbox"       type="pgm:InboxType"    minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="TOTPSecret"  type="xsd:base64Binary" minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
     
