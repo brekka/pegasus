@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import java.util.List;
 
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Dispatch;
@@ -27,7 +28,7 @@ public interface DispatchService {
      * @param fileBuilderList
      * @return
      */
-    Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, Integer maxDownloads, List<FileBuilder> fileBuilderList);
+    Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, Integer maxDownloads, List<CompletableFile> files);
     
     
 
@@ -50,7 +51,7 @@ public interface DispatchService {
      * @return
      */
     Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
-            DetailsType detailsType, int maxDownloads, List<FileBuilder> fileBuilderList);
+            DetailsType detailsType, int maxDownloads, List<CompletableFile> files);
 
 
 }

@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.model.ByteSequence;
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.paveway.core.model.FileBuilder;
@@ -84,17 +85,17 @@ class AllocationServiceSupport {
     
     
 
-    protected BundleType completeFiles(int maxDownloads, List<FileBuilder> fileBuilders) {
+    protected BundleType completeFiles(int maxDownloads, List<CompletableFile> files) {
         BundleType bundleType = BundleType.Factory.newInstance();
-        for (FileBuilder fileBuilder : fileBuilders) {
-            CryptedFile file = pavewayService.complete(fileBuilder);
+        for (CompletableFile file : files) {
+            CryptedFile cryptedFile = pavewayService.complete(file);
             
             FileType fileXml = bundleType.addNewFile();
-            fileXml.setName(file.getFileName());
-            fileXml.setMimeType(file.getMimeType());
-            fileXml.setUUID(file.getId().toString());
-            fileXml.setKey(file.getSecretKey().getEncoded());
-            fileXml.setLength(file.getOriginalLength());
+            fileXml.setName(cryptedFile.getFileName());
+            fileXml.setMimeType(cryptedFile.getMimeType());
+            fileXml.setUUID(cryptedFile.getId().toString());
+            fileXml.setKey(cryptedFile.getSecretKey().getEncoded());
+            fileXml.setLength(cryptedFile.getOriginalLength());
             if (maxDownloads > 0) {
                 fileXml.setMaxDownloads(maxDownloads);
             }

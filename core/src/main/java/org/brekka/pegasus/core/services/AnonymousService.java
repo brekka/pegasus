@@ -5,7 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import java.util.List;
 
-import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
@@ -17,7 +17,7 @@ import org.brekka.xml.pegasus.v2.model.DetailsType;
 public interface AnonymousService {
 
     AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
-            List<FileBuilder> fileBuilders, String code);
+            List<CompletableFile> files, String code);
 
     AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
             Dispatch dispatch, String code);

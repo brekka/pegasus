@@ -17,6 +17,7 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.commons.lang.ByteLengthFormat;
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.tapestry.components.Upload;
@@ -103,10 +104,10 @@ public abstract class AbstractMakePage {
     
 
     Object onSuccess() throws Exception {
-        List<FileBuilder> fileBuilderList = upload.getValue();
+        List<CompletableFile> fileBuilderList = upload.getValue();
         Files filesContext = upload.getFilesContext();
         return onSuccess(fileBuilderList, comment, filesContext);
     }
     
-    protected abstract Object onSuccess(List<FileBuilder> fileBuilderList, String comment, Files filesContext);
+    protected abstract Object onSuccess(List<CompletableFile> fileBuilderList, String comment, Files filesContext);
 }

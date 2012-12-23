@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.tapestry5.alerts.AlertManager;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.web.model.Files;
 import org.brekka.pegasus.core.model.Allocation;
@@ -45,10 +46,10 @@ public class MakeDirect extends AbstractMakePage {
      * @see org.brekka.pegasus.web.base.AbstractMakePage#onSuccess(java.util.List, java.lang.String)
      */
     @Override
-    protected Object onSuccess(List<FileBuilder> fileBuilderList, String comment, Files filesContext) {
+    protected Object onSuccess(List<CompletableFile> files, String comment, Files filesContext) {
         DetailsType detailsType = DetailsType.Factory.newInstance();
         detailsType.setComment(comment);
-        Allocation allocation = anonymousService.createTransfer(detailsType, 1, 5, fileBuilderList, null);
+        Allocation allocation = anonymousService.createTransfer(detailsType, 1, 5, files, null);
         directDonePage.init(makeKey, allocation);
         return directDonePage;
     }

@@ -6,7 +6,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.pegasus.core.dao.DispatchDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Allocation;
@@ -65,12 +65,12 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, Integer maxDownloads,
-            List<FileBuilder> fileBuilderList) {
+            List<CompletableFile> files) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
         
-        BundleType bundleType = completeFiles(0, fileBuilderList);
+        BundleType bundleType = completeFiles(0, files);
         
         // Copy the allocation to
         AllocationDocument allocationDocument = prepareDocument(bundleType);
@@ -100,8 +100,8 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
-            DetailsType details, int maxDownloads, List<FileBuilder> fileBuilderList) {
-        Dispatch dispatch = createDispatch(keySafe, details, maxDownloads, fileBuilderList);
+            DetailsType details, int maxDownloads, List<CompletableFile> files) {
+        Dispatch dispatch = createDispatch(keySafe, details, maxDownloads, files);
         
         Inbox inbox = null;
         if (StringUtils.isNotBlank(recipientEMail)) {

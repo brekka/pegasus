@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.services;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
@@ -36,7 +37,7 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    Deposit createDeposit(Inbox inbox, DetailsType details, List<FileBuilder> fileBuilders);
+    Deposit createDeposit(Inbox inbox, DetailsType details, List<CompletableFile> files);
     
     /**
      * 
