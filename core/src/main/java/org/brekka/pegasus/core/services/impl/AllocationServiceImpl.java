@@ -7,13 +7,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.paveway.core.dao.CryptedFileDAO;
+import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.Deposit;
+import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.services.AllocationService;
+import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
+import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +42,12 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     
     @Autowired
     private AllocationDAO allocationDAO;
+    
+    @Autowired
+    private KeySafeService keySafeService;
+    
+    @Autowired
+    private CryptedFileDAO cryptedFileDAO;
     
     
     /* (non-Javadoc)
@@ -64,15 +77,46 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @see org.brekka.pegasus.core.services.AllocationService#retrieveFile(java.util.UUID)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public AllocationFile retrieveFile(UUID allocationFileId) {
         AccessorContext currentContext = AccessorContextImpl.getCurrent();
-        AllocationFile allocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
-        if (allocationFile == null) {
-            allocationFile = allocationFileDAO.retrieveById(allocationFileId);
-            Allocation allocation = allocationFile.getAllocation();
-            // TODO How do we unlock it?
-            throw new IllegalStateException("Need to unlock allocation");
+        AllocationFile unlockedAllocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
+        if (unlockedAllocationFile != null) {
+            return unlockedAllocationFile;
         }
+        
+        AllocationFile allocationFile = allocationFileDAO.retrieveById(allocationFileId);
+        Allocation allocation = allocationFile.getAllocation();
+               
+        Allocation unlockedAllocation = currentContext.retrieve(allocation.getId(), Allocation.class);
+        if (unlockedAllocation == null) {
+            // Allocation has not yet been unlocked
+            
+            // Fine the keySafe
+            KeySafe<?> keySafe;
+            if (allocation instanceof Dispatch) {
+                keySafe = ((Dispatch) allocation).getKeySafe();
+            } else if (allocation instanceof Deposit) {
+                keySafe = ((Deposit) allocation).getKeySafe();
+            } else {
+                throw new IllegalStateException("Unable to automatically unlock allocation, it will need to be unlocked directly.");
+            }
+            UUID cryptedDataId = allocation.getCryptedDataId();
+            byte[] secretKey = keySafeService.release(cryptedDataId, keySafe);
+            decryptDocument(allocation, secretKey);
+            currentContext.retain(allocation.getId(), allocation);
+            unlockedAllocation = allocation;
+        }
+        allocationFile.setAllocation(unlockedAllocation);
+        BundleType bundle = unlockedAllocation.getXml().getBundle();
+        List<FileType> fileList = bundle.getFileList();
+        for (FileType fileType : fileList) {
+            if (allocationFile.getCryptedFileId().toString().equals(fileType.getUUID())) {
+                allocationFile.setXml(fileType);
+                break;
+            }
+        }
+        currentContext.retain(allocationFile.getId(), allocationFile);
         return allocationFile;
     }
     

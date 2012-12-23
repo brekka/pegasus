@@ -33,4 +33,19 @@ public class Robot extends Member {
     @ManyToOne
     @JoinColumn(name="`OwnerID`", table="`Robot`")
     private Actor owner;
+
+    /**
+     * @return the owner
+     */
+    public Actor getOwner() {
+        return owner;
+    }
+
+
+    /**
+     * @param owner the owner to set
+     */
+    public void setOwner(Actor owner) {
+        this.owner = owner;
+    }
 }

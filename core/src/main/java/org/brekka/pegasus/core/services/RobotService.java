@@ -16,11 +16,23 @@
 
 package org.brekka.pegasus.core.services;
 
+import java.util.UUID;
+
+import org.brekka.pegasus.core.model.Actor;
+import org.brekka.pegasus.core.model.Robot;
+
 /**
  * TODO Description of RobotService
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface RobotService {
+
+    /**
+     * @param username
+     * @param password
+     * @return
+     */
+    Robot createRobot(UUID username, String password, Actor owner);
 
 }
