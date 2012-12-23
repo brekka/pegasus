@@ -8,10 +8,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
@@ -22,6 +24,7 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
@@ -68,28 +71,30 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<?> keySafe) {
+    public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<? extends Actor> keySafe) {
         Inbox inbox = new Inbox();
         inbox.setId(UUID.randomUUID());
-        Token token = tokenService.createToken(inboxToken, TokenType.INBOX);
-        inbox.setToken(token);
+        if (inboxToken != null) {
+            Token token = tokenService.createToken(inboxToken, TokenType.INBOX);
+            inbox.setToken(token);
+        }
         inbox.setIntroduction(introduction);
         inbox.setKeySafe(keySafe);
         inbox.setName(name);
-        AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
-        Member member = authenticatedMember.getMember();
+        inbox.setOwner(keySafe.getOwner());
         if (keySafe instanceof Division) {
             inbox.setDivision((Division<?>) keySafe);
-        } else {
-            inbox.setOwner(member);
-            InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
-            newXmlInbox.setUUID(inbox.getId().toString());
-            newXmlInbox.setName(name);
-            profileService.currentUserProfileUpdated();
+        } else if (keySafe instanceof Vault) {
+            AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
+            if (authenticatedMember != null
+                    && EntityUtils.identityEquals(authenticatedMember.getMember(), keySafe.getOwner())) {
+                InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
+                newXmlInbox.setUUID(inbox.getId().toString());
+                newXmlInbox.setName(name);
+                profileService.currentUserProfileUpdated();
+            }
         }
         inboxDAO.create(inbox);
-        
-        
         return inbox;
     }
     

@@ -105,6 +105,9 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(propagation=Propagation.REQUIRED)
     public <T extends Member> T retrieveMember(AuthenticationToken token, Class<T> expectedType) {
         Member member = memberDAO.retrieveByAuthenticationToken(token);
+        if (member == null) {
+            return null;
+        }
         if (!expectedType.isAssignableFrom(member.getClass())) {
             throw new PegasusException(PegasusErrorCode.PG905, 
                     "Member is '%s' not the expected '%s'", member.getClass().getName(), expectedType.getName());
