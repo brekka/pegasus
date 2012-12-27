@@ -23,12 +23,9 @@ import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.ConnectionDAO;
-import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.Enlistment;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Partnership;
@@ -40,11 +37,9 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * TODO Description of AbstractKeySafeServiceSupport
+ * Common {@link KeySafe} operations shared among various service implementations.
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -184,6 +179,10 @@ abstract class AbstractKeySafeServiceSupport {
         if (keySafe instanceof Vault) {
             Vault vault = (Vault) keySafe;
             AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
+            if (vaultKey == null) {
+                throw new PegasusException(PegasusErrorCode.PG704, 
+                        "Vault '%s' is not currently available. Most likely it needs to be unlocked.", vault.getId());
+            }
             privateKeyToken = vaultKey.getDefaultPrivateKey();
         } else if (keySafe instanceof Division) {
             Division<?> division = (Division<?>) keySafe;

@@ -34,6 +34,7 @@ import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.direct.DirectDone;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
+import org.joda.time.DateTime;
 
 /**
  * 
@@ -101,7 +102,7 @@ public class MakeDispatch extends AbstractMakePage {
         return activate(makeKey, null, activeVault);
     }
     
-    Object activate(String makeKey, Division division, KeySafe keySafe, Object... context) {
+    Object activate(String makeKey, Division<?> division, KeySafe<?> keySafe, Object... context) {
         this.division = division;
         this.keySafe = keySafe;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
@@ -127,8 +128,11 @@ public class MakeDispatch extends AbstractMakePage {
         detailsType.setAgreement(agreementText);
         detailsType.setReference(reference);
         detailsType.setComment(comment);
+        // TODO Picked some numbers out of a hat
+        DateTime dispatchExpires = new DateTime().plusDays(31);
+        DateTime allocationExpires = new DateTime().plusDays(7);
         Allocation allocation = dispatchService.createDispatchAndAllocate(
-                recipientEMail, division, keySafe, detailsType, maxDownloads, fileBuilderList);
+                recipientEMail, division, keySafe, detailsType, dispatchExpires, allocationExpires, maxDownloads, fileBuilderList);
         filesContext.addAttribute(Allocation.class.getName(), allocation);
         if (allocation instanceof Deposit) {
             dispatchDepositPage.init(makeKey, allocation);

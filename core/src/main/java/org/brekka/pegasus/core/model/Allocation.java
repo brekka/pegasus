@@ -4,7 +4,7 @@
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -17,7 +17,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -96,13 +95,6 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
     private Date deleted;
     
     /**
-     * The list of files contained in the allocation
-     */
-    @OneToMany(mappedBy="allocation")
-    @MapKey(name="cryptedFileId")
-    private Map<UUID, AllocationFile> files;
-    
-    /**
      * An allocation could be derived from a dispatch (in the case of a file sent by a member).
      */
     @ManyToOne
@@ -115,6 +107,12 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
      */
     @Column(name="PurgeOnDownload")
     private Boolean purgeOnDownload;
+    
+    /**
+     * Associated files
+     */
+    @OneToMany(mappedBy="allocation")
+    private List<AllocationFile> files;
     
     /**
      * Secret key for the allocation XML (transient).
@@ -152,11 +150,11 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
         this.iv = iv;
     }
     
-    public Map<UUID, AllocationFile> getFiles() {
+    public List<AllocationFile> getFiles() {
         return files;
     }
 
-    public void setFiles(Map<UUID, AllocationFile> files) {
+    public void setFiles(List<AllocationFile> files) {
         this.files = files;
     }
 

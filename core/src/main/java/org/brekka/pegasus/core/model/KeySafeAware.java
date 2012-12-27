@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.services;
-
-import java.util.UUID;
-
-import org.brekka.pegasus.core.model.Connection;
+package org.brekka.pegasus.core.model;
 
 /**
- * TODO Description of ConnectionService
+ * Marks a class as have an associated {@link KeySafe}.
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface ConnectionService {
+public interface KeySafeAware {
 
-    /**
-     * @param enlistmentId
-     * @param class1
-     * @return
-     */
-    <T extends Connection<?, ?, ?>> T retrieveById(UUID connectionId, Class<T> expectedType);
-
+    
+    KeySafe<?> getKeySafe();
 }

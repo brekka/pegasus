@@ -5,8 +5,8 @@ package org.brekka.pegasus.core.dao.hibernate;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.UUID;
 
+import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
@@ -59,9 +59,9 @@ public class AllocationFileHibernateDAO extends AbstractPegasusHibernateDAO<Allo
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<AllocationFile> retrieveActiveForCryptedFile(UUID cryptedFileId) {
+    public List<AllocationFile> retrieveActiveForCryptedFile(CryptedFile cryptedFile) {
         return getCurrentSession().createCriteria(AllocationFile.class)
-                .add(Restrictions.eq("cryptedFileId", cryptedFileId))
+                .add(Restrictions.eq("cryptedFile", cryptedFile))
                 .add(Restrictions.isNull("deleted"))
                 .list();
     }

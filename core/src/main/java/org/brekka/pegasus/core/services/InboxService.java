@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.paveway.core.model.CompletableFile;
-import org.brekka.paveway.core.model.FileBuilder;
-import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
@@ -16,6 +14,7 @@ import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
+import org.joda.time.DateTime;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -38,7 +37,7 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    Deposit createDeposit(Inbox inbox, DetailsType details, List<CompletableFile> files);
+    Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, List<CompletableFile> files);
     
     /**
      * 
@@ -48,7 +47,7 @@ public interface InboxService {
      * @param dispatch
      * @return
      */
-    Deposit createDeposit(Inbox inbox, DetailsType details, Dispatch dispatch);
+    Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, Dispatch dispatch);
 
     /**
      * Retrieve the inboxes owned by this member.
@@ -98,7 +97,7 @@ public interface InboxService {
     /**
      * @param actionDeposit
      */
-    void deleteDeposit(Deposit actionDeposit);
+    void deleteDeposit(Deposit deposit);
 
 
 }

@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 @DiscriminatorValue("Deposit")
-public class Deposit extends Transfer {
+public class Deposit extends Transfer implements KeySafeAware {
 
     /**
      * Serial UID
@@ -46,6 +46,7 @@ public class Deposit extends Transfer {
         this.inbox = inbox;
     }
 
+    @Override
     public KeySafe<?> getKeySafe() {
         return keySafe;
     }

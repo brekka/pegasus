@@ -64,7 +64,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, Integer maxDownloads,
+    public Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, DateTime expires, Integer maxDownloads,
             List<CompletableFile> files) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
@@ -88,6 +88,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         
         CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
         dispatch.setCryptedDataId(cryptedData.getId());
+        dispatch.setExpires(expires.toDate());
         
         dispatchDAO.create(dispatch);
         createAllocationFiles(dispatch);
@@ -100,8 +101,8 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
-            DetailsType details, int maxDownloads, List<CompletableFile> files) {
-        Dispatch dispatch = createDispatch(keySafe, details, maxDownloads, files);
+            DetailsType details, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads, List<CompletableFile> files) {
+        Dispatch dispatch = createDispatch(keySafe, details, dispatchExpires, null, files);
         
         Inbox inbox = null;
         if (StringUtils.isNotBlank(recipientEMail)) {
@@ -113,9 +114,9 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         }
         Allocation allocation;
         if (inbox != null) {
-            allocation = inboxService.createDeposit(inbox, details, dispatch);
+            allocation = inboxService.createDeposit(inbox, details, allocationExpires, dispatch);
         } else {
-            allocation = anonymousService.createTransfer(details, maxDownloads, null, dispatch, null);
+            allocation = anonymousService.createTransfer(details, allocationExpires, maxDownloads, null, dispatch, null);
         }
         return allocation;
     }

@@ -117,9 +117,8 @@ public class TokenFilter implements Filter {
                 }
                 // Redirect token to unlock.
                 return;
-            } else {
-                dispatchBundle(token, code, resp);
             }
+            dispatchBundle(token, code, resp);
         } else {
             chain.doFilter(request, response);
         }
@@ -133,7 +132,7 @@ public class TokenFilter implements Filter {
      */
     private void dispatchBundle(String token, String code, HttpServletResponse resp) throws ServletException, IOException {
         AnonymousTransfer anonymousTransfer = anonymousService.unlock(token, code);
-        List<AllocationFile> fileList = new ArrayList<>(anonymousTransfer.getFiles().values());
+        List<AllocationFile> fileList = anonymousTransfer.getFiles();
         if (fileList.size() == 1) {
             // Just one file, return it.
             AllocationFile file = fileList.get(0);

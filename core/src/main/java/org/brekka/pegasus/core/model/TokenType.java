@@ -31,8 +31,14 @@ public enum TokenType {
     
     /**
      * An organization. Will normally be chosen rather than auto-generated.
+     * 923k combinations
      */
     ORG(4),
+    
+    /**
+     * Some other purpose - 831m combinations of random
+     */
+    OTHER(8),
 
     ;
 
@@ -48,9 +54,10 @@ public enum TokenType {
     /**
      * The characters that can be used to auto-generate a token. Only upper case and numbers without
      * vowels. The exclusion of vowels is a simple attempt to avoid auto-generated profanity in URLs.
+     * (31 chars).
      */
     private static final char[] ALLOWED = "BCDFGHJKLMNPQRSTVWXYZ1234567890".toCharArray();
-
+    
     /**
      * The default length of tokens for the given type (though they don't have to be that length).
      */

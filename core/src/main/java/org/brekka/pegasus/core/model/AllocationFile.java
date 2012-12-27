@@ -20,7 +20,6 @@ import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v2.model.FileType;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 /**
@@ -57,12 +56,11 @@ public class AllocationFile implements IdentifiableEntity<UUID> {
     private Allocation allocation;
     
     /**
-     * The corresponding crypted file.
+     * The corresponding crypted file. Multiple AllocationFiles may reference the same crypted file.
      */
-    @Type(type="pg-uuid")
-    @Index(name="IDX_AF_CryptedFile")
-    @Column(name="`CryptedFileID`", updatable=false, nullable=false)
-    private UUID cryptedFileId;
+    @ManyToOne
+    @JoinColumn(name="`CryptedFileID`", updatable=false, nullable=false)
+    private CryptedFile cryptedFile;
     
     /**
      * When did this bundle file expire?
@@ -145,12 +143,18 @@ public class AllocationFile implements IdentifiableEntity<UUID> {
         this.allocation = allocation;
     }
 
-    public UUID getCryptedFileId() {
-        return cryptedFileId;
+    /**
+     * @return the cryptedFile
+     */
+    public CryptedFile getCryptedFile() {
+        return cryptedFile;
     }
 
-    public void setCryptedFileId(UUID cryptedFileId) {
-        this.cryptedFileId = cryptedFileId;
+    /**
+     * @param cryptedFile the cryptedFile to set
+     */
+    public void setCryptedFile(CryptedFile cryptedFile) {
+        this.cryptedFile = cryptedFile;
     }
 
     public float getProgress() {

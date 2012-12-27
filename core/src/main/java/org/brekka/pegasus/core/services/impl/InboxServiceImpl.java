@@ -106,31 +106,27 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit createDeposit(Inbox inbox, DetailsType details, 
+    public Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, 
             List<CompletableFile> fileBuilders) {
         BundleType bundleType = completeFiles(0, fileBuilders);
-        return createDeposit(inbox, details, null, bundleType);
+        return createDeposit(inbox, details, expires, null, bundleType);
     }
     
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit createDeposit(Inbox inbox, DetailsType details, Dispatch dispatch) {
+    public Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, Dispatch dispatch) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, null);
-        return createDeposit(inbox, details, dispatch, dispatchBundle);
+        return createDeposit(inbox, details, expires, dispatch, dispatchBundle);
     }
 
-    protected Deposit createDeposit(Inbox inbox, DetailsType details, Dispatch dispatch, BundleType newBundleType) {   
+    protected Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, Dispatch dispatch, BundleType newBundleType) {   
         Deposit deposit = new Deposit();
         deposit.setDerivedFrom(dispatch);
         
         // Bring the inbox under management
         inbox = inboxDAO.retrieveById(inbox.getId());
         KeySafe<?> keySafe = inbox.getKeySafe();
-        
-        // TODO Expiry, currently fixed at one week, should be configured.
-        DateTime now = new DateTime();
-        DateTime expires = now.plusDays(30);
         deposit.setExpires(expires.toDate());
         
         AllocationDocument document = prepareDocument(newBundleType);

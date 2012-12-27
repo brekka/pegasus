@@ -17,6 +17,7 @@ import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.KeySafeAware;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
@@ -111,7 +112,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         BundleType bundle = unlockedAllocation.getXml().getBundle();
         List<FileType> fileList = bundle.getFileList();
         for (FileType fileType : fileList) {
-            if (allocationFile.getCryptedFileId().toString().equals(fileType.getUUID())) {
+            if (allocationFile.getCryptedFile().getId().toString().equals(fileType.getUUID())) {
                 allocationFile.setXml(fileType);
                 break;
             }
@@ -140,6 +141,26 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         allocation.setCryptedDataId(null);
         allocationDAO.update(allocation);
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#releaseDetails(java.util.List)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends Allocation & KeySafeAware> void releaseDetails(List<T> allocationList) {
+        for (T allocation : allocationList) {
+            if (allocation == null) {
+                continue;
+            }
+            UUID cryptedDataId = allocation.getCryptedDataId();
+            if (cryptedDataId != null) {
+                KeySafe<?> keySafe = allocation.getKeySafe();
+                byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
+                decryptDocument(allocation, secretKeyBytes);
+                bindToContext(allocation);
+            }
+        }
+    }
 
     /**
      * @param file
@@ -156,12 +177,11 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             // Already deleted
             return;
         }
-        List<AllocationFile> active = allocationFileDAO.retrieveActiveForCryptedFile(file.getCryptedFileId());
+        CryptedFile cryptedFile = file.getCryptedFile();
+        List<AllocationFile> active = allocationFileDAO.retrieveActiveForCryptedFile(cryptedFile);
         if (active.size() == 1) {
             // This is the only file. Safe to obliterate the crypted file
-            UUID cryptedFileId = file.getCryptedFileId();
-            pavewayService.removeFile(cryptedFileId); 
-            file.setCryptedFileId(null);
+            pavewayService.removeFile(cryptedFile); 
         }
         // Check whether we can delete the rest of the allocation also
         if (deleteAllocationIfPossible) {

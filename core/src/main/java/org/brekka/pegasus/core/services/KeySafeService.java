@@ -5,10 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import java.util.UUID;
 
-import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.model.KeyPair;
 

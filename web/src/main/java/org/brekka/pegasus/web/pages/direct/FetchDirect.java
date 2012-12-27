@@ -69,7 +69,7 @@ public class FetchDirect {
     }
     
     public Collection<AllocationFile> getFiles() {
-        return transfer.getFiles().values();
+        return transfer.getFiles();
     }
     
     public boolean isLastAttempt() {

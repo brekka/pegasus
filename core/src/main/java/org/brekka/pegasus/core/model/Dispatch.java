@@ -17,7 +17,7 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 @DiscriminatorValue("Dispatch")
-public class Dispatch extends Allocation {
+public class Dispatch extends Allocation implements KeySafeAware {
     /**
      * Serial UID
      */
@@ -53,6 +53,7 @@ public class Dispatch extends Allocation {
         this.actor = actor;
     }
 
+    @Override
     public KeySafe<?> getKeySafe() {
         return keySafe;
     }

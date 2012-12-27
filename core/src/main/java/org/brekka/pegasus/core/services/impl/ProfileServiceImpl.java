@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.ProfileDAO;
-import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.event.VaultOpenEvent;
 import org.brekka.pegasus.core.event.XmlEntityDeleteEvent;
 import org.brekka.pegasus.core.model.KeySafe;

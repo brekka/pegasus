@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 
@@ -33,7 +34,7 @@ public interface AllocationFileDAO extends EntityDAO<UUID, AllocationFile> {
      * @param cryptedFileId
      * @return
      */
-    List<AllocationFile> retrieveActiveForCryptedFile(UUID cryptedFileId);
+    List<AllocationFile> retrieveActiveForCryptedFile(CryptedFile cryptedFile);
 
     /**
      * @param cryptedFileId

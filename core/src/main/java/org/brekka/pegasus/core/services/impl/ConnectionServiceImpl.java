@@ -16,13 +16,19 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.UUID;
+
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.ConnectionDAO;
 import org.brekka.pegasus.core.event.VaultDeleteEvent;
+import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.services.ConnectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -46,5 +52,23 @@ public class ConnectionServiceImpl implements ConnectionService, ApplicationList
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
             connectionDAO.deleteWithSourceKeySafe(vaultDeleteEvent.getVault());
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.ConnectionService#retrieveById(java.util.UUID, java.lang.Class)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends Connection<?, ?, ?>> T retrieveById(UUID connectionId, Class<T> expectedType) {
+        Connection<?, ?, ?> connection = connectionDAO.retrieveById(connectionId);
+        if (connection == null) {
+            return null;
+        }
+        if (expectedType.isAssignableFrom(connection.getClass()) == false) {
+            throw new PegasusException(PegasusErrorCode.PG444, "Expected '%s', actual '%s'", 
+                    expectedType.getName(), connection.getClass().getName());
+        }
+        return (T) connection;
     }
 }

@@ -8,17 +8,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.xmlbeans.XmlException;
+import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.CryptedFile;
-import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.core.services.ResourceCryptoService;
 import org.brekka.paveway.core.services.ResourceEncryptor;
@@ -82,6 +79,9 @@ class AllocationServiceSupport {
     
     @Autowired
     private AllocationFileDAO allocationFileDAO;
+    
+    @Autowired
+    private CryptedFileDAO cryptedFileDAO;
     
     
 
@@ -178,7 +178,8 @@ class AllocationServiceSupport {
         for (FileType fileType : fileList) {
             AllocationFile allocationFile = new AllocationFile();
             allocationFile.setAllocation(allocation);
-            allocationFile.setCryptedFileId(UUID.fromString(fileType.getUUID()));
+            CryptedFile cryptedFile = cryptedFileDAO.retrieveById(UUID.fromString(fileType.getUUID()));
+            allocationFile.setCryptedFile(cryptedFile);
             allocationFile.setXml(fileType);
             allocationFileDAO.create(allocationFile);
         }
@@ -187,11 +188,18 @@ class AllocationServiceSupport {
     
     protected void assignFileXml(Allocation allocation) {
         AllocationType allocationType = allocation.getXml();
-        Map<UUID, AllocationFile> files = allocation.getFiles();
+        List<AllocationFile> files = allocation.getFiles();
         List<FileType> fileList = allocationType.getBundle().getFileList();
+        // Use nested loops as there should never be that many files.
         for (FileType fileType : fileList) {
-            AllocationFile allocationFile = files.get(UUID.fromString(fileType.getUUID()));
-            allocationFile.setXml(fileType);
+            UUID cryptedFileID = UUID.fromString(fileType.getUUID());
+            for (AllocationFile allocationFile : files) {
+                UUID id = allocationFile.getCryptedFile().getId();
+                if (id.equals(cryptedFileID)) {
+                    allocationFile.setXml(fileType);
+                    break; // Break out of this loop
+                }
+            }
         }
     }
     
@@ -240,9 +248,9 @@ class AllocationServiceSupport {
     protected void bindToContext(Serializable key, Allocation allocation) {
         AccessorContext accessorContext = AccessorContextImpl.getCurrent();
         accessorContext.retain(key, allocation);
-        Set<Entry<UUID,AllocationFile>> fileEntrySet = allocation.getFiles().entrySet();
-        for (Entry<UUID, AllocationFile> entry : fileEntrySet) {
-            accessorContext.retain(entry.getKey(), entry.getValue());
+        List<AllocationFile> files = allocation.getFiles();
+        for (AllocationFile allocationFile : files) {
+            accessorContext.retain(allocationFile.getCryptedFile().getId(), allocationFile);
         }
     }
     

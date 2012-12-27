@@ -20,6 +20,7 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
+import org.joda.time.DateTime;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -80,7 +81,9 @@ public class MakeDeposit extends AbstractMakePage {
         DetailsType detailsType = DetailsType.Factory.newInstance();
         detailsType.setReference(reference);
         detailsType.setComment(comment);
-        Allocation allocation = inboxService.createDeposit(inbox, detailsType, fileBuilderList);
+        // TODO Expiry for deposits
+        DateTime expires = new DateTime().plusDays(14);
+        Allocation allocation = inboxService.createDeposit(inbox, detailsType, expires, fileBuilderList);
         depositDonePage.init(makeKey, allocation);
         return depositDonePage;
     }

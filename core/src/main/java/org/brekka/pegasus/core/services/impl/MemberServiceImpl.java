@@ -289,7 +289,7 @@ public class MemberServiceImpl implements MemberService {
         if (currentUser) {
             // Binding to context
             AuthenticatedMember<Person> current = getCurrent(Person.class);
-            AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase) current;
+            AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase<Person>) current;
             authenticatedPersonImpl.setMember(person);
             authenticatedPersonImpl.setActiveVault(defaultVault);
             authenticatedPersonImpl.setActiveProfile(profile);

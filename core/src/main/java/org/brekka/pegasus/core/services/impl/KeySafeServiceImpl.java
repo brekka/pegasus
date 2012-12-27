@@ -5,17 +5,14 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.UUID;
 
-import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
 import org.brekka.phalanx.api.beans.IdentityPrincipal;
-import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.Principal;

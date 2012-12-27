@@ -63,10 +63,10 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts,
+    public AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
             List<CompletableFile> files, String code) {
         BundleType bundleType = completeFiles(maxDownloads, files);
-        return createTransfer(details, maxUnlockAttempts, null, bundleType, code);
+        return createTransfer(details, expires, maxUnlockAttempts, null, bundleType, code);
     }
     
     /* (non-Javadoc)
@@ -74,20 +74,16 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(DetailsType details, Integer maxDownloads, Integer maxUnlockAttempts, 
+    public AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts, 
             Dispatch dispatch, String code) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, maxDownloads);
-        return createTransfer(details, maxUnlockAttempts, dispatch, dispatchBundle, code);
+        return createTransfer(details, expires, maxUnlockAttempts, dispatch, dispatchBundle, code);
     }
     
-    protected AnonymousTransfer createTransfer(DetailsType details, Integer maxUnlockAttempts, Dispatch dispatch, 
+    protected AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxUnlockAttempts, Dispatch dispatch, 
             BundleType bundleType, String code) {
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setDerivedFrom(dispatch);
-        
-        // TODO Expiry, currently fixed at 12 hours, should be configured.
-        DateTime now = new DateTime();
-        DateTime expires = now.plusHours(12);
         anonTransfer.setExpires(expires.toDate());
         anonTransfer.setMaxUnlockAttempts(maxUnlockAttempts);
         
