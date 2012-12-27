@@ -14,33 +14,13 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.dao;
-
-import java.util.List;
-import java.util.UUID;
-
-import org.brekka.commons.persistence.dao.EntityDAO;
-import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.Connection;
-import org.brekka.pegasus.core.model.KeySafe;
+package org.brekka.pegasus.core.services;
 
 /**
- * TODO Description of ConnectionDAO
+ * TODO Description of ConnectionService
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface ConnectionDAO extends EntityDAO<UUID, Connection<?, ?, ?>>  {
+public interface ConnectionService {
 
-    /**
-     * @param keySafe
-     * @param contextMember
-     * @return
-     */
-    List<Connection<?, ?, ?>> identifyConnectionsBetween(KeySafe<?> keySafe, Actor contextMember);
-
-    /**
-     * @param vault
-     */
-    void deleteWithSourceKeySafe(KeySafe<?> keySafe);
-    
 }

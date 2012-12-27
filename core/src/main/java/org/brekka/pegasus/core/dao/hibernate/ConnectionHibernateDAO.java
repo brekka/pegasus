@@ -60,5 +60,15 @@ public class ConnectionHibernateDAO extends AbstractPegasusHibernateDAO<Connecti
             .setEntity("member", contextMember)
             .list();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.ConnectionDAO#deleteForKeySafe(org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    public void deleteWithSourceKeySafe(KeySafe<?> keySafe) {
+        getCurrentSession().createQuery("delete from Connection where source=:source")
+            .setEntity("source", keySafe)
+            .executeUpdate();
+    }
 
 }

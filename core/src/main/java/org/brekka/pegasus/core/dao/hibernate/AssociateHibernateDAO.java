@@ -48,4 +48,15 @@ public class AssociateHibernateDAO extends AbstractPegasusHibernateDAO<Associate
                 .add(Restrictions.eq("organization", organization))
                 .uniqueResult();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.AssociateDAO#retrieveByMember(org.brekka.pegasus.core.model.Member)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Associate> retrieveByMember(Member member) {
+        return getCurrentSession().createCriteria(Associate.class)
+                .add(Restrictions.eq("member", member))
+                .list();
+    }
 }

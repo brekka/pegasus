@@ -216,10 +216,24 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveEnlistment(org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Member)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public Enlistment retrieveEnlistment(Member member, Division<Organization> target) {
         Associate associate = retrieveAssociate(target.getOwner(), member);
         Enlistment enlistment = enlistmentDAO.retrieveEnlistmentByTarget(target, associate);
         return enlistment;
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.OrganizationService#deleteAssociates(org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void deleteAssociates(Member member) {
+        List<Associate> associates = associateDAO.retrieveByMember(member);
+        for (Associate associate : associates) {
+            associateDAO.delete(associate.getId());
+        }
     }
 
     /**

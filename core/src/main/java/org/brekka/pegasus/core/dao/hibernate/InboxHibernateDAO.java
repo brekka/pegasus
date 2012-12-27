@@ -82,4 +82,14 @@ public class InboxHibernateDAO extends AbstractPegasusHibernateDAO<Inbox> implem
                 .add(Restrictions.eq("keySafe", keySafe))
                 .list();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.InboxDAO#deleteWithKeySafe(org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    public void deleteWithKeySafe(KeySafe<?> keySafe) {
+        getCurrentSession().createQuery("delete from Inbox where keySafe=:keySafe")
+            .setEntity("keySafe", keySafe)
+            .executeUpdate();
+    }
 }

@@ -51,7 +51,7 @@ public class Profile extends LongevousEntity<UUID> {
     /**
      * The profile XML
      */
-    @OneToOne()
+    @OneToOne
     @JoinColumn(name="`XmlEntityID`", nullable=false)
     private XmlEntity<ProfileDocument> xml;
     

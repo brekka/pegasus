@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.MemberDAO;
@@ -215,6 +216,28 @@ public class MemberServiceImpl implements MemberService {
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#resetMember(org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void resetMember(Member member) {
+        Member managedMember = memberDAO.retrieveById(member.getId());
+        Vault vault = managedMember.getDefaultVault();
+        vaultService.deleteVault(vault);
+        managedMember.setDefaultVault(null);
+        memberDAO.update(managedMember);
+        organizationService.deleteAssociates(member);
+        
+        // Update the context user, if appropriate.
+        AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
+        if (EntityUtils.identityEquals(current.getMember(), managedMember)) {
+            current.setMember(managedMember);
+            current.setActiveActor(null);
+            current.setActiveProfile(null);
+        }
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.MemberService#getCurrent()
      */
     @Override
@@ -255,7 +278,11 @@ public class MemberServiceImpl implements MemberService {
         
         // E-Mail - needs to happen once profile/context are set
         if (StringUtils.isNotBlank(email)) {
-            EMailAddress emailAddress = eMailAddressService.createEMail(email, person, false);
+            // TODO verification
+            EMailAddress emailAddress = eMailAddressService.retrieveByAddress(email);
+            if (emailAddress == null) {
+                emailAddress = eMailAddressService.createEMail(email, person, false);
+            }
             person.setDefaultEmailAddress(emailAddress);
         }
         

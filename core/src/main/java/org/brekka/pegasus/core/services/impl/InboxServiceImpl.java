@@ -12,6 +12,7 @@ import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.paveway.core.model.CompletableFile;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
+import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
@@ -39,6 +40,8 @@ import org.brekka.xml.pegasus.v2.model.InboxType;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class InboxServiceImpl extends AllocationServiceSupport implements InboxService {
+public class InboxServiceImpl extends AllocationServiceSupport implements InboxService, ApplicationListener<ApplicationEvent>  {
 
     @Autowired
     private TokenService tokenService;
@@ -261,6 +264,14 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     public void deleteDeposit(Deposit deposit) {
         deposit.setExpires(new Date());
         depositDAO.update(deposit);
+    }
+    
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof VaultDeleteEvent) {
+            VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
+            inboxDAO.deleteWithKeySafe(vaultDeleteEvent.getVault());
+        }
     }
     
     private void populateNames(List<Inbox> inboxList) {

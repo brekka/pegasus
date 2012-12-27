@@ -75,4 +75,9 @@ public interface VaultService {
      * @param newPassword
      */
     void changePassword(Vault defaultVault, String oldPassword, String newPassword);
+
+    /**
+     * @param vault
+     */
+    void deleteVault(Vault vault);
 }

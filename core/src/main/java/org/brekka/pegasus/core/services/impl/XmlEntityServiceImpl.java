@@ -29,11 +29,15 @@ import org.brekka.paveway.core.services.ResourceEncryptor;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.XmlEntityDAO;
+import org.brekka.pegasus.core.event.VaultDeleteEvent;
+import org.brekka.pegasus.core.event.XmlEntityDeleteEvent;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.XmlEntityService;
+import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
+import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.StreamCryptor;
@@ -41,6 +45,9 @@ import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.brekka.phoenix.api.services.CryptoProfileService;
 import org.brekka.phoenix.api.services.SymmetricCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +61,7 @@ import difflib.PatchFailedException;
  */
 @Service
 @Transactional
-public class XmlEntityServiceImpl implements XmlEntityService {
+public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListener<ApplicationEvent>  {
 
     private static final XmlOptions WRITE_OPTS = new XmlOptions().setSavePrettyPrint();
     
@@ -72,7 +79,12 @@ public class XmlEntityServiceImpl implements XmlEntityService {
     
     @Autowired
     private KeySafeService keySafeService;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
     
+    @Autowired
+    private PhalanxService phalanxService;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.XmlEntityService#persistPlainEntity(org.apache.xmlbeans.XmlObject)
@@ -165,6 +177,22 @@ public class XmlEntityServiceImpl implements XmlEntityService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void delete(UUID xmlEntityId) {
         xmlEntityDAO.delete(xmlEntityId);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
+     */
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof VaultDeleteEvent) {
+            VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
+            List<XmlEntity<?>> xmlEntityList = xmlEntityDAO.retrieveByKeySafe(vaultDeleteEvent.getVault());
+            for (XmlEntity<?> xmlEntity : xmlEntityList) {
+                applicationEventPublisher.publishEvent(new XmlEntityDeleteEvent(xmlEntity));
+                phalanxService.deleteCryptedData(new IdentityCryptedData(xmlEntity.getCryptedDataId()));
+                xmlEntityDAO.delete(xmlEntity.getId());
+            }
+        }
     }
     
     /**

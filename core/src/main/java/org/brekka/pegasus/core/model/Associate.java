@@ -3,21 +3,15 @@
  */
 package org.brekka.pegasus.core.model;
 
-import java.util.UUID;
-
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SecondaryTable;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.brekka.pegasus.core.PegasusConstants;
-import org.brekka.phalanx.api.model.PrivateKeyToken;
-import org.hibernate.annotations.Type;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

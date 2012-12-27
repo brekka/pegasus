@@ -72,5 +72,10 @@ public interface MemberService {
      */
     <T extends Member> T retrieveById(UUID memberId, Class<T> expected);
 
+    /**
+     * @param person
+     */
+    void resetMember(Member member);
+
 }
 

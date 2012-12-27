@@ -8,6 +8,7 @@ import java.util.List;
 import org.brekka.pegasus.core.dao.ProfileDAO;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
+import org.brekka.pegasus.core.model.XmlEntity;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -34,5 +35,15 @@ public class ProfileHibernateDAO  extends AbstractPegasusHibernateDAO<Profile> i
         return getCurrentSession().createCriteria(Profile.class)
                 .add(Restrictions.eq("owner", member))
                 .list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.ProfileDAO#retrieveByXmlEntity(org.brekka.pegasus.core.model.XmlEntity)
+     */
+    @Override
+    public Profile retrieveByXmlEntity(XmlEntity<?> xmlEntity) {
+        return (Profile) getCurrentSession().createCriteria(Profile.class)
+                .add(Restrictions.eq("xml", xmlEntity))
+                .uniqueResult();
     }
 }

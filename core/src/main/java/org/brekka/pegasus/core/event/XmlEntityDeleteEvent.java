@@ -14,33 +14,28 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.dao;
+package org.brekka.pegasus.core.event;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.brekka.commons.persistence.dao.EntityDAO;
-import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.Connection;
-import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.XmlEntity;
+import org.springframework.context.ApplicationEvent;
 
 /**
- * TODO Description of ConnectionDAO
+ * TODO Description of XmlEntityDeleteEvent
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface ConnectionDAO extends EntityDAO<UUID, Connection<?, ?, ?>>  {
+public class XmlEntityDeleteEvent extends ApplicationEvent {
 
     /**
-     * @param keySafe
-     * @param contextMember
-     * @return
+     * Serial UID
      */
-    List<Connection<?, ?, ?>> identifyConnectionsBetween(KeySafe<?> keySafe, Actor contextMember);
+    private static final long serialVersionUID = 7793621162608641660L;
 
-    /**
-     * @param vault
-     */
-    void deleteWithSourceKeySafe(KeySafe<?> keySafe);
+    public XmlEntityDeleteEvent(XmlEntity<?> xmlEntity) {
+        super(xmlEntity);
+    }
     
+    public XmlEntity<?> getXmlEntity() {
+        return (XmlEntity<?>) getSource();
+    }
 }

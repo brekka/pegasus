@@ -6,7 +6,9 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.pegasus.core.dao.ProfileDAO;
+import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.event.VaultOpenEvent;
+import org.brekka.pegasus.core.event.XmlEntityDeleteEvent;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Person;
@@ -19,6 +21,7 @@ import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.xml.pegasus.v2.model.ProfileDocument;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,7 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @Service
 @Transactional
-public class ProfileServiceImpl implements ProfileService, ApplicationListener<VaultOpenEvent> {
+public class ProfileServiceImpl implements ProfileService, ApplicationListener<ApplicationEvent> {
 
     @Autowired
     private ProfileDAO profileDAO;
@@ -151,16 +154,23 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<V
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
-    public void onApplicationEvent(VaultOpenEvent event) {
-        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-
-        // Check the profile, release it if necessary
-        Profile activeProfile = currentMember.getActiveProfile();
-        boolean released = releaseProfile(activeProfile, event.getVault());
-        if (released 
-                && currentMember.getMember() instanceof Person) {
-            String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
-            ((Person) currentMember.getMember()).setFullName(fullName);
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof VaultOpenEvent) {
+            VaultOpenEvent openEvent = (VaultOpenEvent) event;
+            AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
+            
+            // Check the profile, release it if necessary
+            Profile activeProfile = currentMember.getActiveProfile();
+            boolean released = releaseProfile(activeProfile, openEvent.getVault());
+            if (released 
+                    && currentMember.getMember() instanceof Person) {
+                String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
+                ((Person) currentMember.getMember()).setFullName(fullName);
+            }
+        } else if (event instanceof XmlEntityDeleteEvent) {
+            XmlEntityDeleteEvent deleteEvent = (XmlEntityDeleteEvent) event;
+            Profile profile = profileDAO.retrieveByXmlEntity(deleteEvent.getXmlEntity());
+            profileDAO.delete(profile.getId());
         }
     }
 

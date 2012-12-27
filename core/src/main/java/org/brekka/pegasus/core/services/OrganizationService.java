@@ -125,5 +125,10 @@ public interface OrganizationService {
      * @return
      */
     Enlistment retrieveEnlistment(Member member, Division<Organization> division);
+
+    /**
+     * @param member
+     */
+    void deleteAssociates(Member member);
     
 }

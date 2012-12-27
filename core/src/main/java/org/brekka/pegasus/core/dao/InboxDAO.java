@@ -13,6 +13,7 @@ import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
+import org.brekka.pegasus.core.model.Vault;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -44,4 +45,9 @@ public interface InboxDAO extends EntityDAO<UUID, Inbox> {
      * @return
      */
     List<Inbox> retrieveForDivision(Division<?> division);
+
+    /**
+     * @param vault
+     */
+    void deleteWithKeySafe(KeySafe<?> keySafe);
 }

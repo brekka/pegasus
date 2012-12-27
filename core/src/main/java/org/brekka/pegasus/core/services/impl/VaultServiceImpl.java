@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.VaultDAO;
+import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.event.VaultOpenEvent;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
@@ -61,6 +62,15 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
         
         vaultDAO.create(vault);
         return vault;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.VaultService#deleteVault(org.brekka.pegasus.core.model.Vault)
+     */
+    @Override
+    public void deleteVault(Vault vault) {
+        applicationEventPublisher.publishEvent(new VaultDeleteEvent(vault));
+        vaultDAO.delete(vault.getId());
     }
     
     /* (non-Javadoc)

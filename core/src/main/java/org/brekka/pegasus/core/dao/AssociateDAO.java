@@ -10,7 +10,6 @@ import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
-import org.brekka.pegasus.core.model.Vault;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -30,5 +29,11 @@ public interface AssociateDAO extends EntityDAO<UUID, Associate> {
      * @return
      */
     Associate retrieveByOrgAndMember(Organization organization, Member member);
+
+    /**
+     * @param member
+     * @return
+     */
+    List<Associate> retrieveByMember(Member member);
 
 }
