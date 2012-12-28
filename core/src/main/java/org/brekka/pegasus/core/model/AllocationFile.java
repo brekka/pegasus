@@ -59,7 +59,7 @@ public class AllocationFile implements IdentifiableEntity<UUID> {
      * The corresponding crypted file. Multiple AllocationFiles may reference the same crypted file.
      */
     @ManyToOne
-    @JoinColumn(name="`CryptedFileID`", updatable=false, nullable=false)
+    @JoinColumn(name="`CryptedFileID`")
     private CryptedFile cryptedFile;
     
     /**

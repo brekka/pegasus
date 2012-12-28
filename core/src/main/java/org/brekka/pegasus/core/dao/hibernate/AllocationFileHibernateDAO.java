@@ -77,4 +77,13 @@ public class AllocationFileHibernateDAO extends AbstractPegasusHibernateDAO<Allo
                 .add(Restrictions.isNull("deleted"))
                 .list();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.commons.persistence.dao.hibernate.AbstractIdentifiableEntityHibernateDAO#update(org.brekka.commons.persistence.model.IdentifiableEntity)
+     */
+    @Override
+    public void update(AllocationFile entity) {
+        super.update(entity);
+        getCurrentSession().flush();
+    }
 }

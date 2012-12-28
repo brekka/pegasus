@@ -173,19 +173,19 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     
     
     protected void clearAllocationFile(AllocationFile file, boolean deleteAllocationIfPossible) {
-        if (file.getDeleted() != null) {
+        AllocationFile allocationFile = allocationFileDAO.retrieveById(file.getId());
+        
+        if (allocationFile.getDeleted() != null) {
             // Already deleted
             return;
         }
-        CryptedFile cryptedFile = file.getCryptedFile();
+        CryptedFile cryptedFile = allocationFile.getCryptedFile();
         List<AllocationFile> active = allocationFileDAO.retrieveActiveForCryptedFile(cryptedFile);
-        if (active.size() == 1) {
-            // This is the only file. Safe to obliterate the crypted file
-            pavewayService.removeFile(cryptedFile); 
-        }
+        boolean canDeleteCryptedFile = active.size() == 1;
+        
         // Check whether we can delete the rest of the allocation also
         if (deleteAllocationIfPossible) {
-            Allocation allocation = file.getAllocation();
+            Allocation allocation = allocationFile.getAllocation();
             active = allocationFileDAO.retrieveActiveForAllocation(allocation);
             if (active.size() == 1) {
                 // Make the allocation as expired. The reaper will pick it up soon
@@ -193,8 +193,14 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
                 allocationDAO.update(allocation);
             }
         }
-        file.setDeleted(new Date());
-        allocationFileDAO.update(file);
+        allocationFile.setDeleted(new Date());
+        allocationFile.setCryptedFile(null);
+        allocationFileDAO.update(allocationFile);
+        
+        if (canDeleteCryptedFile) {
+            // This is the only file. Safe to obliterate the crypted file
+            pavewayService.removeFile(cryptedFile); 
+        }
     }
 
 //    /**
