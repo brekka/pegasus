@@ -182,6 +182,9 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public boolean isOpen(Vault vault) {
+        if (vault == null) {
+            return false;
+        }
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
         return (vaultKey != null);

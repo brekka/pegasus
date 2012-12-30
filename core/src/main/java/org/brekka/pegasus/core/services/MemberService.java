@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import java.util.UUID;
 
+import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
@@ -76,6 +77,12 @@ public interface MemberService {
      * @param person
      */
     void resetMember(Member member);
+
+    /**
+     * @param actorId
+     * @param status
+     */
+    void updateStatus(UUID actorId, ActorStatus status);
 
 }
 

@@ -16,18 +16,28 @@
 
 package org.brekka.pegasus.core.services.impl;
 
-import java.util.UUID;
+import java.util.List;
 
-import org.brekka.pegasus.core.dao.MemberDAO;
+import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.pegasus.core.dao.RobotDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
+import org.brekka.pegasus.core.model.Associate;
+import org.brekka.pegasus.core.model.AuthenticatedMember;
+import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Robot;
 import org.brekka.pegasus.core.model.UsernamePassword;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.RobotService;
 import org.brekka.pegasus.core.services.UsernamePasswordService;
 import org.brekka.pegasus.core.services.VaultService;
+import org.brekka.pegasus.core.services.XmlEntityService;
+import org.brekka.xml.pegasus.v2.model.RobotDocument;
+import org.brekka.xml.pegasus.v2.model.RobotType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,28 +62,69 @@ public class RobotServiceImpl implements RobotService {
     private MemberService memberService;
     
     @Autowired
-    private MemberDAO memberDAO;
+    private RobotDAO robotDAO;
+    
+    @Autowired
+    private XmlEntityService xmlEntityService;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.RobotService#createRobot(java.util.UUID, java.lang.String)
      */
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
-    public Robot createRobot(UUID username, String password, Actor owner) {
+    public Robot create(String key, String code, Actor owner, RobotType details) {
+        KeySafe<?> detailsProtectedBy;
+        
+        if (owner instanceof Organization) {
+            Organization organizationOwner = (Organization) owner;
+            detailsProtectedBy = organizationOwner.getGlobalDivision();
+        } else if (owner instanceof Associate) {
+            Associate associateOwner = (Associate) owner;
+            detailsProtectedBy = associateOwner.getOrganization().getGlobalDivision();
+        } else if (owner instanceof Person) {
+            Person personOwner = (Person) owner;
+            detailsProtectedBy = personOwner.getDefaultVault();
+        } else {
+            throw new IllegalStateException(String.format(
+                    "Only Organization, Associate or Person based actors can create robots, not '%s'", 
+                    owner.getClass().getName()));
+        }
+        
         Robot robot = new Robot();
         
-        UsernamePassword usernamePassword = usernamePasswordService.create(username.toString(), password);
+        UsernamePassword usernamePassword = usernamePasswordService.create(key, code);
         robot.setAuthenticationToken(usernamePassword);
         
-        Vault vault = vaultService.createVault("Default", password, robot);
+        Vault vault = vaultService.createVault("Default", code, robot);
         robot.setDefaultVault(vault);
         
         robot.setStatus(ActorStatus.ACTIVE);
         robot.setOwner(owner);
         
+        RobotDocument robotDocument = RobotDocument.Factory.newInstance();
+        robotDocument.setRobot(details);
         
-        memberDAO.create(robot);
+        // Robot cannot see its own details, why would it need to?
+        XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy);
+        robot.setXml(encryptedEntity);
+        
+        AuthenticatedMember<Person> current = memberService.getCurrent(Person.class);
+        robot.setCreatedBy(current.getMember());
+        
+        robotDAO.create(robot);
         return robot;
+    }
+    
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public int retrieveListingRowCount(Actor owner) {
+        return robotDAO.retrieveListingRowCount(owner);
+    }
+    
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
+        return robotDAO.retrieveListing(owner, listingCriteria);
     }
 
 }

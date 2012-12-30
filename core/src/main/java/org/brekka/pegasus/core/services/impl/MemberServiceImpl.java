@@ -11,7 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.dao.ActorDAO;
 import org.brekka.pegasus.core.dao.MemberDAO;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
@@ -46,6 +48,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberServiceImpl implements MemberService {
 
+    @Autowired
+    private ActorDAO actorDAO;
+    
     @Autowired
     private MemberDAO memberDAO;
 
@@ -243,6 +248,17 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public AuthenticatedMember<Member> getCurrent() {
         return getCurrent(Member.class);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.MemberService#updateStatus(java.util.UUID, org.brekka.pegasus.core.model.ActorStatus)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void updateStatus(UUID actorId, ActorStatus status) {
+        Actor managed = actorDAO.retrieveById(actorId);
+        managed.setStatus(status);
+        actorDAO.update(managed);
     }
     
     protected Member getManaged() {

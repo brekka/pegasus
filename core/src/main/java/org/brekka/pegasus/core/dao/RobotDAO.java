@@ -14,30 +14,23 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.services;
+package org.brekka.pegasus.core.dao;
 
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Robot;
-import org.brekka.xml.pegasus.v2.model.RobotType;
 
 /**
- * Robot Service
+ * Robot DAO
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface RobotService {
-
-    /**
-     * @param username
-     * @param password
-     * @return
-     */
-    Robot create(String key, String code, Actor owner, RobotType details);
-
+public interface RobotDAO extends EntityDAO<UUID, Robot> {
+    
     int retrieveListingRowCount(Actor owner);
     
     List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria);

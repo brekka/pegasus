@@ -7,6 +7,7 @@
 	<xsd:element name="Allocation"          type="pgm:AllocationType" />
 	<xsd:element name="Profile"             type="pgm:ProfileType" />
 	<xsd:element name="Organization"        type="pgm:OrganizationType" />
+    <xsd:element name="Robot"               type="pgm:RobotType" />
 	<xsd:element name="Division"            type="pgm:DivisionType" />
 	<xsd:element name="Invitation"          type="pgm:InvitationType" />
     
@@ -80,9 +81,38 @@
     
     <xsd:complexType name="OrganizationType">
 		<xsd:sequence>
-            
+            <xsd:element name="Name"      type="xsd:string" minOccurs="0" >
+                <xsd:annotation>
+                    <xsd:documentation>The name of this organization,</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
+    
+    
+    <xsd:complexType name="RobotType">
+        <xsd:annotation>
+            <xsd:documentation>Information that will be retained about the robot.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="Name"      type="xsd:string" minOccurs="0" >
+                <xsd:annotation>
+                    <xsd:documentation>A name assigned for easier reference</xsd:documentation>
+                </xsd:annotation></xsd:element>
+            <xsd:element name="Directive" type="xsd:string" minOccurs="0" >
+                <xsd:annotation>
+                    <xsd:documentation>What is the purpose of this robot? Useful to specify this so others can see what the robot is used for.</xsd:documentation>
+                </xsd:annotation></xsd:element>
+            <xsd:element name="Key"       type="xsd:string" minOccurs="0" >
+                <xsd:annotation>
+                    <xsd:documentation>The key (or 'username') that this robot authenticates with. Provided here since the username will not normally be available from the database.</xsd:documentation>
+                </xsd:annotation></xsd:element>
+            <xsd:element name="Code"      type="xsd:string" minOccurs="0" >
+                <xsd:annotation>
+                    <xsd:documentation>The code (or 'password') the robot will authenticate with. Can be included here for future lookup as it will not be available anywhere else.</xsd:documentation>
+                </xsd:annotation></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="DivisionType">
 		<xsd:sequence>
