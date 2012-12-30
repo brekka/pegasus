@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.DispatchDAO;
 import org.brekka.pegasus.core.model.Actor;
@@ -23,9 +22,6 @@ import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
-import org.brekka.phalanx.api.model.CryptedData;
-import org.brekka.phoenix.api.SecretKey;
-import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.DetailsType;

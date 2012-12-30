@@ -13,7 +13,6 @@ import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.Vault;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)

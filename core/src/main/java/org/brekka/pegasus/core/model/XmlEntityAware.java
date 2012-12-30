@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.services;
+package org.brekka.pegasus.core.model;
 
-import java.util.List;
-
-import org.brekka.commons.persistence.model.ListingCriteria;
-import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.Robot;
-import org.brekka.xml.pegasus.v2.model.RobotType;
+import org.apache.xmlbeans.XmlObject;
 
 /**
- * Robot Service
+ * Marks an entity as XML aware.
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface RobotService {
-
+public interface XmlEntityAware<T extends XmlObject> {
+    
     /**
-     * @param username
-     * @param password
+     * XML
      * @return
      */
-    Robot create(String key, String code, Actor owner, RobotType details);
-
-    int retrieveListingRowCount(Actor owner);
+    XmlEntity<T> getXml();
     
-    List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria);
+    /**
+     * Set the XML
+     * @param xml
+     */
+    void setXml(XmlEntity<T> xml);
 }

@@ -27,10 +27,10 @@ public class UploadPolicyServiceImpl implements UploadPolicyService {
 //        AuthenticatedMember current = memberService.getCurrent();
 //        if (current == null) {
 //            // TODO Return anonymous policy
-//            return new UploadPolicyImpl(3, 5_000_000, 20_000_000);
+//            return new BasicUploadPolicy(3, 5_000_000, 20_000_000);
 //        } else {
 //            // TODO member policy.
-//            return new UploadPolicyImpl(200, 1_000_000_000, 2_000_000_000);
+//            return new BasicUploadPolicy(200, 1_000_000_000, 2_000_000_000);
 //        }
         // Same policy for all - for now
         return new UploadPolicyImpl(200, 1_000_000_000, 2_000_000_000, 1_000_000);

@@ -35,6 +35,7 @@ import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.event.XmlEntityDeleteEvent;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.model.XmlEntityAware;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
@@ -119,6 +120,28 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         }
         XmlEntity<T> entity = retrieveEntity(theEntity.getId(), expectedType);
         return entity;
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends XmlObject> void releaseAll(List<? extends XmlEntityAware<T>> list, Class<T> expectedType) {
+        for (XmlEntityAware<T> xmlEntityAware : list) {
+            // TODO parallel
+            release(xmlEntityAware, expectedType);
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.XmlEntityService#release(org.brekka.pegasus.core.model.XmlEntityAware, java.lang.Class)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends XmlObject> void release(XmlEntityAware<T> entity, Class<T> expectedType) {
+        XmlEntity<?> xml = entity.getXml();
+        if (xml.getBean() == null) {
+            XmlEntity<T> released = retrieveEntity(xml.getId(), expectedType);
+            entity.setXml(released);
+        }
     }
 
     /* (non-Javadoc)

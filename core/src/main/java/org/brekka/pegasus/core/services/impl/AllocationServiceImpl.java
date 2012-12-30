@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.dao.AllocationDAO;
@@ -14,6 +15,7 @@ import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafeAware;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
@@ -196,6 +198,25 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         XmlEntity<AllocationDocument> updatedEntity = xmlEntityService.updateEntity(updatedXml, latest.getXml(), AllocationDocument.class);
         latest.setXml(updatedEntity);
         allocationDAO.update(latest);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListing(org.brekka.pegasus.core.model.Dispatch, org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Allocation> retrieveDerivedFromListing(Dispatch derivedFrom, ListingCriteria listingCriteria) {
+        List<Allocation> listing = allocationDAO.retrieveDerivedFromListing(derivedFrom, listingCriteria);
+        return listing;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListingRowCount(org.brekka.pegasus.core.model.Dispatch)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int retrieveDerivedFromListingRowCount(Dispatch derivedFrom) {
+        return retrieveDerivedFromListingRowCount(derivedFrom);
     }
 
 //    /**

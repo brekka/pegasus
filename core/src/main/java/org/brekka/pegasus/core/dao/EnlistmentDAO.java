@@ -10,7 +10,6 @@ import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
-import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 
 /**

@@ -3,11 +3,13 @@
  */
 package org.brekka.pegasus.core.services;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.model.XmlEntityAware;
 
 /**
  * Manages the storage of XML entities.
@@ -39,6 +41,10 @@ public interface XmlEntityService {
     <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, Class<T> expectedType);
     
     <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, String password, Class<T> expectedType);
+    
+    <T extends XmlObject> void releaseAll(List<? extends XmlEntityAware<T>> list, Class<T> expectedType);
+    
+    <T extends XmlObject> void release(XmlEntityAware<T> entity, Class<T> expectedType);
     
     /**
      * Determine whether the entity is encrypted or not

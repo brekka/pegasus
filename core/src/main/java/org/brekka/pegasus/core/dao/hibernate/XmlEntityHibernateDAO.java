@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.pegasus.core.dao.XmlEntityDAO;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;

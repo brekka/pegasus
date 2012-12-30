@@ -96,7 +96,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> {
     private List<AllocationFile> files;
     
     /**
-     * Additional organization details that can be encrypted (ie only employees can view/edit the details).
+     * The details and bundle for the allocation
      */
     @OneToOne()
     @JoinColumn(name="`XmlEntityID`")
