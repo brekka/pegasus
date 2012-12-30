@@ -17,6 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
@@ -62,19 +63,19 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Id
     @Type(type="pg-uuid")
-    @Column(name="`ID`")
+    @Column(name="`ID`", updatable=false)
     private UUID id;
     
     /**
      * A common key between versions
      */
-    @Column(name="`SerialID`")
+    @Column(name="`SerialID`", updatable=false, nullable=false)
     private UUID serial;
     
     /**
      * Version number
      */
-    @Column(name="`Version`")
+    @Column(name="`Version`", updatable=false, nullable=false)
     private int version;
     
     /**
@@ -104,10 +105,17 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     private UUID cryptedDataId;
     
     /**
-     * Should not be more than 200KB of compressed data. 
-     * Use a blob so that the raw data does not remain in memory.
+     * Is the data external or local? 
      */
-    @Column(name="`Data`", length=MAX_DATA_LENGTH, nullable=false, updatable=false)
+    @Column(name="`ExternalData`", updatable=false)
+    private boolean externalData;
+    
+    /**
+     * Should not be more than 200KB of compressed data. 
+     * Use a blob so that the raw data does not remain in memory. If null then the content will be 
+     * held in the {@link ResourceStorageService}.
+     */
+    @Column(name="`Data`", length=MAX_DATA_LENGTH, updatable=false)
     private Blob data;
     
     /**
@@ -243,6 +251,18 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     public void setVersion(int version) {
         this.version = version;
     }
-    
-    
+
+    /**
+     * @return the externalData
+     */
+    public boolean isExternalData() {
+        return externalData;
+    }
+
+    /**
+     * @param externalData the externalData to set
+     */
+    public void setExternalData(boolean externalData) {
+        this.externalData = externalData;
+    }
 }

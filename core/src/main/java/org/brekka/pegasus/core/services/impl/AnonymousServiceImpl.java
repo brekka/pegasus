@@ -4,11 +4,9 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
@@ -16,12 +14,10 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.TokenService;
-import org.brekka.phalanx.api.beans.IdentityCryptedData;
-import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
-import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
@@ -88,15 +84,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         anonTransfer.setExpires(expires.toDate());
         anonTransfer.setMaxUnlockAttempts(maxUnlockAttempts);
         
-        AllocationDocument document = prepareDocument(bundleType);
-        AllocationType allocationType = document.getAllocation();
-        allocationType.setDetails(details);
-        
-        // Encrypt the document
-        encryptDocument(anonTransfer, document);
-        SecretKey secretKey = anonTransfer.getSecretKey();
-        anonTransfer.setSecretKey(null);
-        
+        AllocationType allocationType = prepareAllocationType(bundleType, details);
         
         // Allocate a code
         String prettyCode;
@@ -120,11 +108,10 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         }
         anonTransfer.setCode(prettyCode);
         
-        /*
-         * Use phalanx to store the secret key for the bundle XML, encrypted with the code.
-         */
-        CryptedData pbeEncryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), code);
-        anonTransfer.setCryptedDataId(pbeEncryptedData.getId());
+        AllocationDocument document = AllocationDocument.Factory.newInstance();
+        document.setAllocation(allocationType);
+        XmlEntity<AllocationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(document, code, true);
+        anonTransfer.setXml(xmlEntity);
         
         /*
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
@@ -181,9 +168,9 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     public AnonymousTransfer unlock(String token, String code) {
         String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
-        byte[] secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(transfer.getCryptedDataId()), codeClean);
-        decryptDocument(transfer, secretKeyBytes);
-        
+        XmlEntity<AllocationDocument> xml = transfer.getXml();
+        XmlEntity<AllocationDocument> release = xmlEntityService.release(xml, codeClean, AllocationDocument.class);
+        transfer.setXml(release);
         bindToContext(token, transfer);
         return transfer;
     }

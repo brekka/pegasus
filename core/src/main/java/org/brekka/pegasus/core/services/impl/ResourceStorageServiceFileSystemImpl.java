@@ -17,6 +17,7 @@ import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.stillingar.api.annotations.Configured;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,13 +27,15 @@ import org.springframework.stereotype.Service;
  */
 @Configured
 @Service
-public class ResourceStorageServiceFileSystemImpl implements ResourceStorageService {
+public class ResourceStorageServiceFileSystemImpl implements ResourceStorageService, InitializingBean {
     
     /**
      * Base location
      */
     @Configured("//c:ResourceStoreDir")
     private URI root;
+    
+    private File rootFile;
 
     /* (non-Javadoc)
      * @see org.brekka.paveway.core.services.ResourceStorageService#allocate(java.util.UUID)
@@ -70,11 +73,22 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
         FileUtils.deleteQuietly(file);
     }
     
+    /* (non-Javadoc)
+     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.rootFile = new File(root);
+        if (!rootFile.exists()) {
+            rootFile.mkdirs();
+        }
+    }
+    
     protected File toFile(UUID uuid) {
         String idStr = uuid.toString();
         
         String part1 = idStr.substring(0, 2);
-        File dir1 = new File(new File(root), part1);
+        File dir1 = new File(rootFile, part1);
         if (!dir1.exists()) {
             dir1.mkdir();
         }

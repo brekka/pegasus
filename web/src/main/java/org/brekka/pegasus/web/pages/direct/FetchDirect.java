@@ -59,7 +59,7 @@ public class FetchDirect {
             unlockPage.onActivate(token);
             return unlockPage;
         }
-        AllocationType xml = transfer.getXml();
+        AllocationType xml = transfer.allocationType();
         if (xml.getDetails().isSetAgreement() 
                 && !anonymousService.isAccepted(transfer)) {
             agreementDirectPage.init(token);

@@ -26,6 +26,7 @@ import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
+import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
@@ -74,21 +75,14 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         BundleType bundleType = completeFiles(0, files);
         
         // Copy the allocation to
-        AllocationDocument allocationDocument = prepareDocument(bundleType);
-        allocationDocument.getAllocation().setDetails(details);
-        encryptDocument(dispatch, allocationDocument);
+        AllocationType allocationType = prepareAllocationType(bundleType, details);
+        encryptDocument(dispatch, allocationType, keySafe);
         
         if (keySafe instanceof Division) {
             dispatch.setDivision((Division<?>) keySafe);
         }
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
-        
-        SecretKey secretKey = dispatch.getSecretKey();
-        dispatch.setSecretKey(null);
-        
-        CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
-        dispatch.setCryptedDataId(cryptedData.getId());
         dispatch.setExpires(expires.toDate());
         
         dispatchDAO.create(dispatch);

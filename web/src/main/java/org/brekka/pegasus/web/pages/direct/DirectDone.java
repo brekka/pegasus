@@ -85,13 +85,13 @@ public class DirectDone {
     }
     
     public boolean isAgreement() {
-        return transfer.getXml().getDetails().isSetAgreement();
+        return transfer.details().isSetAgreement();
     }
     
     private String getPath() {
         String code = transfer.getCode().replaceAll("[^0-9]+", "");
         String path;
-        List<FileType> fileList = transfer.getXml().getBundle().getFileList();
+        List<FileType> fileList = transfer.bundle().getFileList();
         if (fileList.size() == 1) {
             String fileName = fileList.get(0).getName();
             path = code + "/" + transfer.getToken().getPath() + "/" + fileName;

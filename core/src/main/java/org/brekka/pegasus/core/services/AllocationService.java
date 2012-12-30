@@ -32,4 +32,6 @@ public interface AllocationService {
     AllocationFile retrieveFile(UUID allocationFileId);
     
     <T extends Allocation & KeySafeAware> void releaseDetails(List<T> allocationList);
+    
+    void updateDetails(Allocation allocation);
 }

@@ -66,6 +66,6 @@ public class AgreementDirect {
     }
     
     public String getAgreementText() {
-        return transfer.getXml().getDetails().getAgreement();
+        return transfer.details().getAgreement();
     }
 }

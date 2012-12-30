@@ -57,7 +57,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         
         ProfileDocument profileDocument = createProfile(member);
         
-        XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistPlainEntity(profileDocument);
+        XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistPlainEntity(profileDocument, false);
         profile.setXml(xmlEntity);
         
         profileDAO.create(profile);
@@ -75,7 +75,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         
         ProfileDocument profileDocument = createProfile(member);
         
-        XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(profileDocument, vault);
+        XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(profileDocument, vault, false);
         profile.setXml(xmlEntity);
         
         profileDAO.create(profile);
@@ -201,10 +201,10 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             XmlEntity<ProfileDocument> replacementXml;
             if (currentXml.getCryptedDataId() == null) {
                 // Plain
-                replacementXml = xmlEntityService.persistPlainEntity(profileDocument);
+                replacementXml = xmlEntityService.persistPlainEntity(profileDocument, false);
             } else {
                 KeySafe<?> keySafe = currentXml.getKeySafe();
-                replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
+                replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
             }
             xmlEntityService.delete(currentXml.getId());
             activeProfile.setXml(replacementXml);

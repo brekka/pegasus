@@ -21,7 +21,7 @@ public interface XmlEntityService {
      * @param xml
      * @return
      */
-    <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml);
+    <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml, boolean useResourceStorageService);
     
     /**
      * Store the specified XML in the database, making sure to encrypt it and protect the key with
@@ -30,9 +30,15 @@ public interface XmlEntityService {
      * @param keySafe
      * @return
      */
-    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe);
+    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe, boolean useResourceStorageService);
+    
+    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, String password, boolean externalData);
     
     <T extends XmlObject> XmlEntity<T> updateEntity(XmlEntity<T> updated, XmlEntity<T> lockedCurrent, Class<T> xmlType);
+    
+    <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, Class<T> expectedType);
+    
+    <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, String password, Class<T> expectedType);
     
     /**
      * Determine whether the entity is encrypted or not

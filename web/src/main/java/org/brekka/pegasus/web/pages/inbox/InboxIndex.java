@@ -86,6 +86,6 @@ public class InboxIndex {
     }
     
     public AllocationType getXml() {
-        return loopDeposit.getXml();
+        return loopDeposit.allocationType();
     }
 }

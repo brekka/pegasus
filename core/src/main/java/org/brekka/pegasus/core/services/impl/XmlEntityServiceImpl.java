@@ -23,9 +23,11 @@ import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
 import org.brekka.commons.io.IterableStringReader;
 import org.brekka.commons.io.StringListWriter;
+import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.ResourceEncryptor;
 import org.brekka.paveway.core.services.ResourceCryptoService;
+import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.XmlEntityDAO;
@@ -78,6 +80,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     private ResourceCryptoService resourceCryptoService;
     
     @Autowired
+    private ResourceStorageService resourceStorageService;
+    
+    @Autowired
     private KeySafeService keySafeService;
 
     @Autowired
@@ -91,8 +96,28 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml) {
-        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID());
+    public <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml, boolean externalData) {
+        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID(), externalData);
+        return entity;
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, Class<T> expectedType) {
+        if (theEntity.getBean() != null) {
+            return theEntity;
+        }
+        XmlEntity<T> entity = retrieveEntity(theEntity.getId(), expectedType);
+        return entity;
+    }
+    
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, String password, Class<T> expectedType) {
+        if (theEntity.getBean() != null) {
+            return theEntity;
+        }
+        XmlEntity<T> entity = retrieveEntity(theEntity.getId(), expectedType);
         return entity;
     }
 
@@ -101,10 +126,24 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe) {
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe, boolean externalData) {
         CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
         SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
-        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), keySafe, cryptoProfile, secretKey);
+        CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
+        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), keySafe, cryptedData.getId(), cryptoProfile, secretKey, externalData);
+        return entity;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.XmlEntityService#persistEncryptedEntity(org.apache.xmlbeans.XmlObject, org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, String password, boolean externalData) {
+        CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
+        SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
+        CryptedData cryptedData = phalanxService.pbeEncrypt(secretKey.getEncoded(), password);
+        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), null, cryptedData.getId(), cryptoProfile, secretKey, externalData);
         return entity;
     }
 
@@ -115,6 +154,12 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      */
     @Override
     public <T extends XmlObject> XmlEntity<T> updateEntity(XmlEntity<T> updated, XmlEntity<T> lockedCurrent, Class<T> xmlType) {
+        if (lockedCurrent.getKeySafe() == null 
+                && lockedCurrent.getCryptedDataId() != null) {
+            throw new PegasusException(PegasusErrorCode.PG443, 
+                    "Only XML entities encrypted with a keySafe can be updated. " +
+                    "Entity '%s' does not have a keySafe.", lockedCurrent.getId());
+        }
         T xmlBean;
         if (updated.getVersion() == lockedCurrent.getVersion()) {
             // There is no intermediate update.
@@ -124,8 +169,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
             
             // Retrieve the version we expected to be the last, to generate a diff from
             XmlEntity<T> updatedFrom = xmlEntityDAO.retrieveBySerialVersion(updated.getSerial(), updated.getVersion(), xmlType);
-            T base = extractXml(updatedFrom, xmlType);
-            T current = extractXml(lockedCurrent, xmlType);
+            // Passworded entity xml should never be updated.
+            T base = extractXml(updatedFrom, xmlType, null);
+            T current = extractXml(lockedCurrent, xmlType, null);
             xmlBean = threeWayDiff(base, current, updated.getBean(), xmlType);
         }
         
@@ -133,15 +179,17 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         UUID serial = lockedCurrent.getSerial();
         int newVersion = lockedCurrent.getVersion() + 1;
         KeySafe<?> keySafe = lockedCurrent.getKeySafe();
+        boolean externalData = lockedCurrent.isExternalData();
         
         if (keySafe == null) {
-            newEntity = createPlainEntity(xmlBean, newVersion, serial);
+            newEntity = createPlainEntity(xmlBean, newVersion, serial, externalData);
         } else {
             UUID cryptedDataId = lockedCurrent.getCryptedDataId();
             CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(lockedCurrent.getProfile());
             byte[] secretKeyBytes = keySafeService.release(cryptedDataId, lockedCurrent.getKeySafe());
             SecretKey secretKey = symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
-            newEntity = createEncrypted(xmlBean, newVersion, serial, keySafe, cryptoProfile, secretKey);
+            // Currently using the same crypted Id.
+            newEntity = createEncrypted(xmlBean, newVersion, serial, keySafe, cryptedDataId, cryptoProfile, secretKey, externalData);
         }
         return newEntity;
     }
@@ -160,14 +208,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.XmlEntityService#retrieveEntity(java.util.UUID)
      */
-    @SuppressWarnings("unchecked")
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public <T extends XmlObject> XmlEntity<T> retrieveEntity(UUID xmlEntityId, Class<T> expectedType) {
-        XmlEntity<T> xmlEntity = (XmlEntity<T>) xmlEntityDAO.retrieveById(xmlEntityId);
-        T xmlBean = extractXml(xmlEntity, expectedType);
-        xmlEntity.setBean(xmlBean);
-        return xmlEntity;
+        return retrieveEntity(xmlEntityId, expectedType, null);
     }
 
     /* (non-Javadoc)
@@ -176,6 +220,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public void delete(UUID xmlEntityId) {
+        XmlEntity<?> entity = xmlEntityDAO.retrieveById(xmlEntityId);
+        if (entity.isExternalData()) {
+            resourceStorageService.remove(entity.getId());
+        }
         xmlEntityDAO.delete(xmlEntityId);
     }
     
@@ -195,6 +243,17 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.XmlEntityService#retrieveEntity(java.util.UUID)
+     */
+    @SuppressWarnings("unchecked")
+    protected <T extends XmlObject> XmlEntity<T> retrieveEntity(UUID xmlEntityId, Class<T> expectedType, String password) {
+        XmlEntity<T> xmlEntity = (XmlEntity<T>) xmlEntityDAO.retrieveById(xmlEntityId);
+        T xmlBean = extractXml(xmlEntity, expectedType, password);
+        xmlEntity.setBean(xmlBean);
+        return xmlEntity;
+    }
+    
     /**
      * @param xml
      * @param keySafe
@@ -202,26 +261,39 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @param cryptoProfile
      * @param secretKey
      */
-    protected <T extends XmlObject> XmlEntity<T> createEncrypted(T xml, int version, UUID serial, KeySafe<?> keySafe, CryptoProfile cryptoProfile, SecretKey secretKey) {
-        CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
-        
+    protected <T extends XmlObject> XmlEntity<T> createEncrypted(T xml, int version, UUID serial, KeySafe<?> keySafe, UUID cryptedDataId,
+            CryptoProfile cryptoProfile, SecretKey secretKey, boolean externalData) {
+
+
         ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
         XmlEntity<T> entity = new XmlEntity<>();
+        entity.setId(UUID.randomUUID());
         entity.setIv(encryptor.getSpec().getIV());
-        entity.setCryptedDataId(cryptedData.getId());
+        entity.setCryptedDataId(cryptedDataId);
         entity.setKeySafe(keySafe);
         entity.setProfile(cryptoProfile.getNumber());
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (OutputStream saveOs = encryptor.encrypt(baos)) {
-            xml.save(saveOs);
-            saveOs.close();
-        } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
-        }
-        byte[] data = baos.toByteArray();
-        xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+        entity.setExternalData(externalData);
         populate(entity, xml, version, serial);
+        if (externalData) {
+            ByteSequence allocate = resourceStorageService.allocate(entity.getId());
+            try ( OutputStream os = allocate.getOutputStream(); OutputStream saveOs = encryptor.encrypt(os)) {
+                xml.save(saveOs);
+                saveOs.close();
+            } catch (IOException e) {
+                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
+            }
+            xmlEntityDAO.create(entity);
+        } else {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (OutputStream saveOs = encryptor.encrypt(baos)) {
+                xml.save(saveOs);
+                saveOs.close();
+            } catch (IOException e) {
+                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
+            }
+            byte[] data = baos.toByteArray();
+            xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+        }
         return entity;
     }
     
@@ -229,18 +301,33 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @param xml
      * @param entity
      */
-    protected <T extends XmlObject> XmlEntity<T> createPlainEntity(T xml, int version, UUID serial) {
+    protected <T extends XmlObject> XmlEntity<T> createPlainEntity(T xml, int version, UUID serial, boolean externalData) {
         XmlEntity<T> entity = new XmlEntity<>();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try ( GZIPOutputStream gos = new GZIPOutputStream(baos) ) {
-            xml.save(gos);
-            gos.close();
-        } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
-        }
-        byte[] data = baos.toByteArray();
-        xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+        entity.setId(UUID.randomUUID());
         populate(entity, xml, version, serial);
+        entity.setExternalData(externalData);
+        if (externalData) {
+            ByteSequence allocate = resourceStorageService.allocate(entity.getId());
+            try ( OutputStream os = allocate.getOutputStream(); 
+                    GZIPOutputStream gos = new GZIPOutputStream(os) ) {
+                xml.save(gos);
+                gos.close();
+            } catch (IOException e) {
+                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
+            }
+            xmlEntityDAO.create(entity);
+        } else {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try ( GZIPOutputStream gos = new GZIPOutputStream(baos) ) {
+                xml.save(gos);
+                gos.close();
+            } catch (IOException e) {
+                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
+            }
+            byte[] data = baos.toByteArray();
+            xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+        }
+        
         return entity;
     }
     
@@ -257,16 +344,33 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T extends XmlObject> T extractXml(XmlEntity<T> xmlEntity, Class<T> expectedType) {
+    protected <T extends XmlObject> T extractXml(XmlEntity<T> xmlEntity, Class<T> expectedType, String password) {
         T xmlBean;
         InputStream is = null;
         try {
-            is = xmlEntity.getData().getBinaryStream();
+            if (xmlEntity.isExternalData()) {
+                ByteSequence byteSequence = resourceStorageService.retrieve(xmlEntity.getId());
+                is = byteSequence.getInputStream();
+            } else {
+                is = xmlEntity.getData().getBinaryStream();
+            }
             UUID cryptedDataId = xmlEntity.getCryptedDataId();
             if (cryptedDataId != null) {
                 // Decrypt
                 CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(xmlEntity.getProfile());
-                byte[] secretKeyBytes = keySafeService.release(cryptedDataId, xmlEntity.getKeySafe());
+                byte[] secretKeyBytes;
+                if (xmlEntity.getKeySafe() == null) {
+                    // Expect password
+                    if (password != null) {
+                        secretKeyBytes = phalanxService.pbeDecrypt(new IdentityCryptedData(xmlEntity.getCryptedDataId()), password);
+                    } else {
+                        throw new PegasusException(PegasusErrorCode.PG423, 
+                                "The XML entity '%s' must be unlocked using a password, which was not specified.", 
+                                xmlEntity.getId());
+                    }
+                } else {
+                    secretKeyBytes = keySafeService.release(cryptedDataId, xmlEntity.getKeySafe());
+                }
                 SecretKey secretKey = symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
                 xmlEntity.setSecretKey(secretKey);
                 StreamCryptor<InputStream, SymmetricCryptoSpec> decryptor = resourceCryptoService.decryptor(xmlEntity, Compression.GZIP);

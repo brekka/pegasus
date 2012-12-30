@@ -18,21 +18,23 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
-import org.brekka.phoenix.api.CryptoProfile;
-import org.brekka.phoenix.api.SecretKey;
-import org.brekka.phoenix.api.SymmetricCryptoSpec;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
+import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
+import org.brekka.xml.pegasus.v2.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.hibernate.annotations.Type;
 
 /**
- * A bundle that has been allocated to something.
+ * An allocation of files.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -44,7 +46,7 @@ import org.hibernate.annotations.Type;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Allocation")
-public abstract class Allocation extends SnapshotEntity<UUID> implements SymmetricCryptoSpec {
+public abstract class Allocation extends SnapshotEntity<UUID> {
 
     /**
      * Serial UID
@@ -58,27 +60,6 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
-    /**
-     * Crypto profile used for this file
-     */
-    @Column(name="`Profile`", nullable=false)
-    private int profile;
-    
-    /**
-     * The encryption initialisation vector use for the bundle XML.
-     * Will be nulled out when the bundle is de-allocated
-     */
-    @Column(name="`IV`")
-    private byte[] iv;
-    
-    /**
-     * Id of the crypted data that contains the key used to encrypt this file's parts.
-     * Will be nulled-out once the bundle is de-allocated.
-     */
-    @Type(type="pg-uuid")
-    @Column(name="`CryptedDataID`")
-    private UUID cryptedDataId;
     
     /**
      * When is this allocation due to expire?
@@ -115,40 +96,12 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
     private List<AllocationFile> files;
     
     /**
-     * Secret key for the allocation XML (transient).
+     * Additional organization details that can be encrypted (ie only employees can view/edit the details).
      */
-    @Transient
-    private transient SecretKey secretKey;
+    @OneToOne()
+    @JoinColumn(name="`XmlEntityID`")
+    private XmlEntity<AllocationDocument> xml;
     
-    /**
-     * The XML that backs this bundle. Transient as it will be encrypted and stored separately
-     */
-    @Transient
-    private transient AllocationType xml;
-
-    public final UUID getCryptedDataId() {
-        return cryptedDataId;
-    }
-
-    public final void setCryptedDataId(UUID cryptedDataId) {
-        this.cryptedDataId = cryptedDataId;
-    }
-    
-    public int getProfile() {
-        return profile;
-    }
-
-    public void setProfile(int profile) {
-        this.profile = profile;
-    }
-
-    public byte[] getIv() {
-        return iv;
-    }
-
-    public void setIv(byte[] iv) {
-        this.iv = iv;
-    }
     
     public List<AllocationFile> getFiles() {
         return files;
@@ -156,22 +109,6 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
 
     public void setFiles(List<AllocationFile> files) {
         this.files = files;
-    }
-
-    public SecretKey getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(SecretKey secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    public AllocationType getXml() {
-        return xml;
-    }
-
-    public void setXml(AllocationType xml) {
-        this.xml = xml;
     }
 
     public Date getExpires() {
@@ -211,20 +148,80 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements Symmetr
     public final void setId(UUID id) {
         this.id = id;
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.phoenix.api.CryptoSpec#getCryptoProfile()
+
+    /**
+     * @return the purgeOnDownload
      */
-    @Override
-    public CryptoProfile getCryptoProfile() {
-        return CryptoProfile.Static.of(getProfile());
+    public Boolean getPurgeOnDownload() {
+        return purgeOnDownload;
+    }
+
+    /**
+     * @param purgeOnDownload the purgeOnDownload to set
+     */
+    public void setPurgeOnDownload(Boolean purgeOnDownload) {
+        this.purgeOnDownload = purgeOnDownload;
+    }
+
+    /**
+     * @return the xml
+     */
+    public XmlEntity<AllocationDocument> getXml() {
+        return xml;
+    }
+
+    /**
+     * @param xml the xml to set
+     */
+    public void setXml(XmlEntity<AllocationDocument> xml) {
+        this.xml = xml;
     }
     
-    /* (non-Javadoc)
-     * @see org.brekka.phoenix.api.SymmetricCryptoSpec#getIV()
+    /**
+     * Retrieve the details contained within the XML. Named without 'get' so as not to be handled as property.
+     * @return
      */
-    @Override
-    public byte[] getIV() {
-        return iv;
+    public DetailsType details() {
+        return details(DetailsType.class);
+    }
+    
+    /**
+     * Retrieve the details contained within the XML. Named without 'get' so as not to be handled as property.
+     * @param expectedType
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends DetailsType> T details(Class<T> expectedType) {
+        DetailsType details = allocationType().getDetails();
+        if (details == null) {
+            // perfectly acceptable to be null.
+            return null;
+        }
+        if (expectedType.isAssignableFrom(details.getClass())) {
+            return (T) details;
+        }
+        throw new PegasusException(PegasusErrorCode.PG853, "Expected details of type '%s', actual '%s'", 
+                expectedType.getName(), details.getClass().getName());
+    }
+    
+    /**
+     * Retrieve the bundle contained within the XML. Named without 'get' so as not to be handled as property.
+     * @return
+     */
+    public BundleType bundle() {
+        return allocationType().getBundle();
+    }
+    
+    public AllocationType allocationType() {
+        AllocationDocument doc = getAllocationDocument();
+        return doc.getAllocation();
+    }
+    
+    private AllocationDocument getAllocationDocument() {
+        AllocationDocument doc = xml.getBean();
+        if (doc == null) {
+            throw new PegasusException(PegasusErrorCode.PG817, "Allocation[%s] XML entity is locked", getId());
+        }
+        return doc;
     }
 }

@@ -105,7 +105,7 @@ public class RobotServiceImpl implements RobotService {
         robotDocument.setRobot(details);
         
         // Robot cannot see its own details, why would it need to?
-        XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy);
+        XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy, false);
         robot.setXml(encryptedEntity);
         
         AuthenticatedMember<Person> current = memberService.getCurrent(Person.class);

@@ -3,45 +3,36 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
-import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.paveway.core.model.CompletableUploadedFile;
-import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.CryptedFile;
-import org.brekka.paveway.core.model.ResourceEncryptor;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.core.services.ResourceCryptoService;
 import org.brekka.paveway.core.services.ResourceStorageService;
-import org.brekka.pegasus.core.PegasusErrorCode;
-import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Transfer;
+import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.KeySafeService;
+import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.phalanx.api.services.PhalanxService;
-import org.brekka.phoenix.api.CryptoProfile;
-import org.brekka.phoenix.api.SecretKey;
-import org.brekka.phoenix.api.StreamCryptor;
-import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.brekka.phoenix.api.services.CryptoProfileService;
 import org.brekka.phoenix.api.services.SymmetricCryptoService;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -83,6 +74,9 @@ class AllocationServiceSupport {
     
     @Autowired
     private CryptedFileDAO cryptedFileDAO;
+    
+    @Autowired
+    protected XmlEntityService xmlEntityService;
     
     
 
@@ -135,13 +129,8 @@ class AllocationServiceSupport {
      * @return
      */
     protected BundleType copyDispatchBundle(Dispatch dispatch, Integer maxDownloads) {
-        AllocationType dispatchXml = dispatch.getXml();
-        if (dispatchXml == null) {
-            // Need to decrypt
-            byte[] secretKeyBytes = keySafeService.release(dispatch.getCryptedDataId(), dispatch.getKeySafe());
-            decryptDocument(dispatch, secretKeyBytes);
-            dispatchXml = dispatch.getXml();
-        }
+        XmlEntity<AllocationDocument> xml = xmlEntityService.retrieveEntity(dispatch.getXml().getId(), AllocationDocument.class);
+        AllocationType dispatchXml = xml.getBean().getAllocation();
         BundleType dispatchBundle = copyBundle(maxDownloads, dispatchXml.getBundle());
         return dispatchBundle;
     }
@@ -149,39 +138,45 @@ class AllocationServiceSupport {
     /**
      * Prepare the XML based structure that will contain the details for this bundle,
      * while will be subsequently encrypted.
-     * @param comment
-     * @param fileBuilders
+     * @param bundleType
      * @return
      */
-    protected AllocationDocument prepareDocument(BundleType bundleType) {
-        AllocationDocument doc = AllocationDocument.Factory.newInstance();
-        AllocationType allocationType = doc.addNewAllocation();
+    protected AllocationType prepareAllocationType(BundleType bundleType, DetailsType detailsType) {
+        AllocationType allocationType = AllocationType.Factory.newInstance();
         if (bundleType != null) {
             allocationType.setBundle(bundleType);
         }
-        return doc;
+        if (detailsType != null) {
+            allocationType.setDetails(detailsType);
+        }
+        return allocationType;
     }
     
-    protected void decryptDocument(Allocation allocation, byte[] secretKeyBytes) {
-        if (allocation.getXml() != null) {
+    protected void decryptDocument(Allocation allocation) {
+        XmlEntity<AllocationDocument> existing = allocation.getXml();
+        if (existing.getBean() != null) {
             // Already decrypted
             return;
         }
-        try {
-            AllocationType allocationType = decrypt(allocation, secretKeyBytes);
-            allocation.setXml(allocationType);
-            assignFileXml(allocation);
-        } catch (XmlException | IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG200, e, 
-                    "Failed to retrieve XML for allocation '%s'", allocation.getId());
-        }
+        XmlEntity<AllocationDocument> xml = xmlEntityService.release(existing, AllocationDocument.class);
+        allocation.setXml(xml);
+        assignFileXml(allocation);
         if (allocation instanceof Transfer) {
             eventService.transferUnlocked((Transfer) allocation);
         }
     }
     
+    protected void encryptDocument(Allocation allocation, AllocationType allocationType, KeySafe<?> keySafe) {
+        AllocationDocument allocationDocument = AllocationDocument.Factory.newInstance();
+        allocationDocument.setAllocation(allocationType);
+        XmlEntity<AllocationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(allocationDocument, keySafe, true);
+        allocation.setXml(xmlEntity);
+    }
+    
     protected void createAllocationFiles(Allocation allocation) {
-        List<FileType> fileList = allocation.getXml().getBundle().getFileList();
+        XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
+        BundleType bundle = xml.getBean().getAllocation().getBundle();
+        List<FileType> fileList = bundle.getFileList();
         for (FileType fileType : fileList) {
             AllocationFile allocationFile = new AllocationFile();
             allocationFile.setAllocation(allocation);
@@ -194,7 +189,8 @@ class AllocationServiceSupport {
     
     
     protected void assignFileXml(Allocation allocation) {
-        AllocationType allocationType = allocation.getXml();
+        XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
+        AllocationType allocationType = xml.getBean().getAllocation();
         List<AllocationFile> files = allocation.getFiles();
         List<FileType> fileList = allocationType.getBundle().getFileList();
         // Use nested loops as there should never be that many files.
@@ -208,44 +204,6 @@ class AllocationServiceSupport {
                 }
             }
         }
-    }
-    
-    
-    private AllocationType decrypt(Allocation allocation, byte[] secretKeyBytes) throws XmlException, IOException {
-        UUID allocationId = allocation.getId();
-        ByteSequence byteSequence = resourceStorageService.retrieve(allocationId);
-        CryptoProfile cryptoProfile = cryptoProfileService.retrieveProfile(allocation.getProfile());
-        SecretKey secretKey = symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
-        allocation.setSecretKey(secretKey);
-        try ( InputStream is = byteSequence.getInputStream(); ) {
-            StreamCryptor<InputStream, SymmetricCryptoSpec> decryptor = resourceCryptoService.decryptor(allocation, Compression.GZIP);
-            InputStream dis = decryptor.getStream(is);
-            AllocationDocument allocationDocument = AllocationDocument.Factory.parse(dis);
-            allocation.setXml(allocation.getXml());
-            return allocationDocument.getAllocation();
-        }
-    }
-    
-    
-    protected void encryptDocument(Allocation allocation, AllocationDocument allocationDoc) {
-        allocation.setId(UUID.randomUUID());
-        // Fetch the default crypto factory, generate a new secret key
-        CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
-        SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
-        
-        ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
-        ByteSequence byteSequence = resourceStorageService.allocate(allocation.getId());
-        OutputStream os = byteSequence.getOutputStream();
-        try ( OutputStream eos = encryptor.encrypt(os) ) {
-            allocationDoc.save(eos);
-        } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG200, e, 
-                    "Failed to store bundle XML");
-        }
-        allocation.setProfile(cryptoProfile.getNumber());
-        allocation.setSecretKey(secretKey);
-        allocation.setIv(encryptor.getSpec().getIV());
-        allocation.setXml(allocationDoc.getAllocation());
     }
     
     protected void bindToContext(Allocation allocation) {

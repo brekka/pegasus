@@ -14,13 +14,11 @@ import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
-import org.brekka.pegasus.core.model.Deposit;
-import org.brekka.pegasus.core.model.Dispatch;
-import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.KeySafeAware;
+import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.KeySafeService;
-import org.brekka.phalanx.api.beans.IdentityCryptedData;
+import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,24 +90,12 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         Allocation unlockedAllocation = currentContext.retrieve(allocation.getId(), Allocation.class);
         if (unlockedAllocation == null) {
             // Allocation has not yet been unlocked
-            
-            // Fine the keySafe
-            KeySafe<?> keySafe;
-            if (allocation instanceof Dispatch) {
-                keySafe = ((Dispatch) allocation).getKeySafe();
-            } else if (allocation instanceof Deposit) {
-                keySafe = ((Deposit) allocation).getKeySafe();
-            } else {
-                throw new IllegalStateException("Unable to automatically unlock allocation, it will need to be unlocked directly.");
-            }
-            UUID cryptedDataId = allocation.getCryptedDataId();
-            byte[] secretKey = keySafeService.release(cryptedDataId, keySafe);
-            decryptDocument(allocation, secretKey);
+            decryptDocument(allocation);
             currentContext.retain(allocation.getId(), allocation);
             unlockedAllocation = allocation;
         }
         allocationFile.setAllocation(unlockedAllocation);
-        BundleType bundle = unlockedAllocation.getXml().getBundle();
+        BundleType bundle = unlockedAllocation.getXml().getBean().getAllocation().getBundle();
         List<FileType> fileList = bundle.getFileList();
         for (FileType fileType : fileList) {
             if (allocationFile.getCryptedFile().getId().toString().equals(fileType.getUUID())) {
@@ -127,19 +113,18 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public void clearAllocation(Allocation allocation) {
-        UUID cryptedDataId = allocation.getCryptedDataId();
-        
         List<AllocationFile> fileList = allocationFileDAO.retrieveByAllocation(allocation);
         for (AllocationFile file : fileList) {
             clearAllocationFile(file, false);
         }
         
-        // Remove the crypted data from phalanx
-        phalanxService.deleteCryptedData(new IdentityCryptedData(cryptedDataId));
-        resourceStorageService.remove(allocation.getId());
+        XmlEntity<AllocationDocument> xml = allocation.getXml();
+        
         allocation.setDeleted(new Date());
-        allocation.setCryptedDataId(null);
+        allocation.setXml(null);
         allocationDAO.update(allocation);
+        
+        xmlEntityService.delete(xml.getId());
     }
     
     /* (non-Javadoc)
@@ -152,13 +137,8 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             if (allocation == null) {
                 continue;
             }
-            UUID cryptedDataId = allocation.getCryptedDataId();
-            if (cryptedDataId != null) {
-                KeySafe<?> keySafe = allocation.getKeySafe();
-                byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-                decryptDocument(allocation, secretKeyBytes);
-                bindToContext(allocation);
-            }
+            decryptDocument(allocation);
+            bindToContext(allocation);
         }
     }
 
@@ -201,6 +181,21 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             // This is the only file. Safe to obliterate the crypted file
             pavewayService.removeFile(cryptedFile); 
         }
+    }
+    
+    
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DispatchService#updateDetails(org.brekka.pegasus.core.model.Dispatch, org.brekka.xml.pegasus.v2.model.DetailsType)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void updateDetails(Allocation allocation) {
+        XmlEntity<AllocationDocument> updatedXml = allocation.getXml();
+        Allocation latest = allocationDAO.retrieveById(allocation.getId());
+        XmlEntity<AllocationDocument> updatedEntity = xmlEntityService.updateEntity(updatedXml, latest.getXml(), AllocationDocument.class);
+        latest.setXml(updatedEntity);
+        allocationDAO.update(latest);
     }
 
 //    /**

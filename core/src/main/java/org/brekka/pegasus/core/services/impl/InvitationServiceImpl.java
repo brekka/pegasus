@@ -46,7 +46,7 @@ public class InvitationServiceImpl implements InvitationService {
         AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         
         Vault defaultVault = recipient.getDefaultVault();
-        XmlEntity<InvitationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(document, defaultVault);
+        XmlEntity<InvitationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(document, defaultVault, false);
         
         invitation.setXml(xmlEntity);
         invitation.setRecipient(recipient);

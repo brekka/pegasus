@@ -27,6 +27,7 @@ import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
@@ -130,21 +131,13 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         KeySafe<?> keySafe = inbox.getKeySafe();
         deposit.setExpires(expires.toDate());
         
-        AllocationDocument document = prepareDocument(newBundleType);
-        AllocationType allocationType = document.getAllocation();
-        allocationType.setDetails(details);
+        AllocationType allocationType = prepareAllocationType(newBundleType, details);
         
         // Encrypt the document
-        encryptDocument(deposit, document);
-        SecretKey secretKey = deposit.getSecretKey();
-        deposit.setSecretKey(null);
-        
-        CryptedData cryptedData = keySafeService.protect(secretKey.getEncoded(), keySafe);
-        deposit.setCryptedDataId(cryptedData.getId());
+        encryptDocument(deposit, allocationType, keySafe);
         
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
-        deposit.setSecretKey(secretKey);
         
         createAllocationFiles(deposit);
         depositDAO.create(deposit);
@@ -205,13 +198,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         if (deposit == null) {
             // Need to extract the metadata
             deposit = depositDAO.retrieveById(depositId);
-            UUID cryptedDataId = deposit.getCryptedDataId();
-            if (cryptedDataId != null) {
-                KeySafe<?> keySafe = deposit.getKeySafe();
-                byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-                decryptDocument(deposit, secretKeyBytes);
-                bindToContext(deposit);
-            }
+            decryptDocument(deposit);
         } else {
             // Already unlocked, just refresh
             refreshAllocation(deposit);
@@ -241,13 +228,8 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         List<Deposit> depositList = depositDAO.retrieveByInbox(inbox);
         if (releaseXml) {
             for (Deposit deposit : depositList) {
-                UUID cryptedDataId = deposit.getCryptedDataId();
-                if (cryptedDataId != null) {
-                    KeySafe<?> keySafe = deposit.getKeySafe();
-                    byte[] secretKeyBytes = keySafeService.release(cryptedDataId, keySafe);
-                    decryptDocument(deposit, secretKeyBytes);
-                    bindToContext(deposit);
-                }
+                decryptDocument(deposit);
+                bindToContext(deposit);
             }
         }
         return depositList;

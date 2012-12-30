@@ -36,6 +36,10 @@ public enum PegasusErrorCode implements ErrorCode {
     
     PG403,
     
+    PG423,
+    
+    PG443,
+    
     PG444,
     
     PG500,
@@ -48,6 +52,9 @@ public enum PegasusErrorCode implements ErrorCode {
     PG702,
     PG703,
     PG704,
+    
+    PG817,
+    PG853,
     
     PG900,
     PG901,
