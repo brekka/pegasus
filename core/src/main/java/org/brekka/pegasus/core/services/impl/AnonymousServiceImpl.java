@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.brekka.paveway.core.model.CompletableFile;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
@@ -64,7 +65,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
-            List<CompletableFile> files, String code) {
+            UploadedFiles files, String code) {
         BundleType bundleType = completeFiles(maxDownloads, files);
         return createTransfer(details, expires, maxUnlockAttempts, null, bundleType, code);
     }

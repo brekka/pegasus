@@ -17,11 +17,11 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.brekka.commons.lang.ByteLengthFormat;
-import org.brekka.paveway.core.model.CompletableFile;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.FileBuilder;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.tapestry.components.Upload;
-import org.brekka.paveway.web.model.Files;
 import org.brekka.paveway.web.session.UploadsContext;
 import org.brekka.pegasus.web.pages.Index;
 import org.brekka.pegasus.web.pages.NoSession;
@@ -81,7 +81,7 @@ public abstract class AbstractMakePage {
             alertManager.alert(Duration.SINGLE, Severity.WARN, "Sorry, but the uploaded uploadedFiles are no longer available. Please try again.");
             return activate();
         }
-        Files bundleMaker = bundleMakerContext.get(makeKey);
+        UploadedFiles bundleMaker = bundleMakerContext.get(makeKey);
         setPolicy(bundleMaker.getPolicy());
         if (bundleMaker.isDone()) {
             // TODO
@@ -104,10 +104,9 @@ public abstract class AbstractMakePage {
     
 
     Object onSuccess() throws Exception {
-        List<CompletableFile> fileBuilderList = upload.getValue();
-        Files filesContext = upload.getFilesContext();
-        return onSuccess(fileBuilderList, comment, filesContext);
+        UploadedFiles files = upload.getValue();
+        return onSuccess(comment, files);
     }
     
-    protected abstract Object onSuccess(List<CompletableFile> fileBuilderList, String comment, Files filesContext);
+    protected abstract Object onSuccess(String comment, UploadedFiles files);
 }

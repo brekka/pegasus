@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.support.EntityUtils;
-import org.brekka.paveway.core.model.CompletableFile;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.event.VaultDeleteEvent;
@@ -107,8 +108,8 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, 
-            List<CompletableFile> fileBuilders) {
-        BundleType bundleType = completeFiles(0, fileBuilders);
+            UploadedFiles files) {
+        BundleType bundleType = completeFiles(0, files);
         return createDeposit(inbox, details, expires, null, bundleType);
     }
     

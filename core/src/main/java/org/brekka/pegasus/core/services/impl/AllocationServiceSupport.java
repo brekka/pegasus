@@ -13,12 +13,13 @@ import java.util.UUID;
 import org.apache.xmlbeans.XmlException;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.ByteSequence;
-import org.brekka.paveway.core.model.CompletableFile;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.Compression;
 import org.brekka.paveway.core.model.CryptedFile;
+import org.brekka.paveway.core.model.ResourceEncryptor;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.core.services.ResourceCryptoService;
-import org.brekka.paveway.core.services.ResourceEncryptor;
 import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -85,9 +86,13 @@ class AllocationServiceSupport {
     
     
 
-    protected BundleType completeFiles(int maxDownloads, List<CompletableFile> files) {
+    protected BundleType completeFiles(int maxDownloads, UploadedFiles files) {
+        if (files == null) {
+            return null;
+        }
         BundleType bundleType = BundleType.Factory.newInstance();
-        for (CompletableFile file : files) {
+        List<CompletableUploadedFile> ready = files.uploadComplete();
+        for (CompletableUploadedFile file : ready) {
             CryptedFile cryptedFile = pavewayService.complete(file);
             
             FileType fileXml = bundleType.addNewFile();
@@ -151,7 +156,9 @@ class AllocationServiceSupport {
     protected AllocationDocument prepareDocument(BundleType bundleType) {
         AllocationDocument doc = AllocationDocument.Factory.newInstance();
         AllocationType allocationType = doc.addNewAllocation();
-        allocationType.setBundle(bundleType);
+        if (bundleType != null) {
+            allocationType.setBundle(bundleType);
+        }
         return doc;
     }
     

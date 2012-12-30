@@ -11,8 +11,8 @@ import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
-import org.brekka.paveway.core.model.CompletableFile;
-import org.brekka.paveway.web.model.Files;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.web.session.UploadsContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Inbox;
@@ -77,13 +77,13 @@ public class MakeDeposit extends AbstractMakePage {
      * @see org.brekka.pegasus.web.base.AbstractMakePage#onSuccess(java.util.List, java.lang.String)
      */
     @Override
-    protected Object onSuccess(List<CompletableFile> fileBuilderList, String comment, Files filesContext) {
+    protected Object onSuccess(String comment, UploadedFiles files) {
         DetailsType detailsType = DetailsType.Factory.newInstance();
         detailsType.setReference(reference);
         detailsType.setComment(comment);
         // TODO Expiry for deposits
         DateTime expires = new DateTime().plusDays(14);
-        Allocation allocation = inboxService.createDeposit(inbox, detailsType, expires, fileBuilderList);
+        Allocation allocation = inboxService.createDeposit(inbox, detailsType, expires, files);
         depositDonePage.init(makeKey, allocation);
         return depositDonePage;
     }

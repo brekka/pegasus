@@ -6,7 +6,8 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.brekka.paveway.core.model.CompletableFile;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.DispatchDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Allocation;
@@ -65,7 +66,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, DateTime expires, Integer maxDownloads,
-            List<CompletableFile> files) {
+            UploadedFiles files) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
@@ -101,7 +102,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
-            DetailsType details, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads, List<CompletableFile> files) {
+            DetailsType details, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads, UploadedFiles files) {
         Dispatch dispatch = createDispatch(keySafe, details, dispatchExpires, null, files);
         
         Inbox inbox = null;

@@ -16,8 +16,8 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.internal.OptionModelImpl;
 import org.apache.tapestry5.internal.SelectModelImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
-import org.brekka.paveway.core.model.CompletableFile;
-import org.brekka.paveway.web.model.Files;
+import org.brekka.paveway.core.model.CompletableUploadedFile;
+import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.web.session.UploadsContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
@@ -107,7 +107,7 @@ public class MakeDispatch extends AbstractMakePage {
         this.keySafe = keySafe;
         HttpServletRequest req = requestGlobals.getHTTPServletRequest();
         UploadsContext uploadsContext = UploadsContext.get(req, true);
-        Files filesContext = uploadsContext.get(makeKey);
+        UploadedFiles filesContext = uploadsContext.get(makeKey);
         this.context = ArrayUtils.add(context, makeKey);
         super.init(makeKey);
         setPolicy(filesContext.getPolicy());
@@ -122,7 +122,7 @@ public class MakeDispatch extends AbstractMakePage {
      * @see org.brekka.pegasus.web.base.AbstractMakePage#onSuccess(java.util.List, java.lang.String)
      */
     @Override
-    protected Object onSuccess(List<CompletableFile> fileBuilderList, String comment, Files filesContext) {
+    protected Object onSuccess(String comment, UploadedFiles files) {
         Object retVal;
         DetailsType detailsType = DetailsType.Factory.newInstance();
         detailsType.setAgreement(agreementText);
@@ -132,8 +132,8 @@ public class MakeDispatch extends AbstractMakePage {
         DateTime dispatchExpires = new DateTime().plusDays(31);
         DateTime allocationExpires = new DateTime().plusDays(7);
         Allocation allocation = dispatchService.createDispatchAndAllocate(
-                recipientEMail, division, keySafe, detailsType, dispatchExpires, allocationExpires, maxDownloads, fileBuilderList);
-        filesContext.addAttribute(Allocation.class.getName(), allocation);
+                recipientEMail, division, keySafe, detailsType, dispatchExpires, allocationExpires, maxDownloads, files);
+        files.addAttribute(Allocation.class.getName(), allocation);
         if (allocation instanceof Deposit) {
             dispatchDepositPage.init(makeKey, allocation);
             retVal = dispatchDepositPage;

@@ -19,8 +19,8 @@
     
     <xsd:complexType name="AllocationType">
 		<xsd:sequence>
-			<xsd:element name="Details"     type="pgm:DetailsType" minOccurs="1" maxOccurs="1" />
-			<xsd:element name="Bundle"      type="pgm:BundleType"   minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Details"     type="pgm:DetailsType"  minOccurs="0" maxOccurs="1" />
+			<xsd:element name="Bundle"      type="pgm:BundleType"   minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
     
