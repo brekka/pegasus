@@ -168,9 +168,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     public AnonymousTransfer unlock(String token, String code) {
         String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
-        XmlEntity<AllocationDocument> xml = transfer.getXml();
-        XmlEntity<AllocationDocument> release = xmlEntityService.release(xml, codeClean, AllocationDocument.class);
-        transfer.setXml(release);
+        decryptDocument(transfer, codeClean);
         bindToContext(token, transfer);
         return transfer;
     }

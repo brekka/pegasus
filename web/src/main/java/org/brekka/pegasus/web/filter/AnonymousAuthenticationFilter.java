@@ -18,9 +18,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.brekka.pegasus.core.model.Firewall;
+import org.brekka.pegasus.core.security.AnonymousAuthenticationToken;
 import org.brekka.pegasus.core.security.WebAuthenticationDetails;
 import org.brekka.pegasus.core.services.FirewallService;
-import org.brekka.pegasus.web.security.AnonymousAuthenticationToken;
 import org.brekka.pegasus.web.security.WebAuthenticationDetailsSource;
 import org.brekka.pegasus.web.support.Configuration;
 import org.springframework.beans.factory.InitializingBean;

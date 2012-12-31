@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.security;
+package org.brekka.pegasus.core.security;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -31,7 +31,5 @@ public class AnonymousAuthenticationProvider implements AuthenticationProvider {
     public boolean supports(Class<?> authentication) {
         return authentication == AnonymousAuthenticationToken.class;
     }
-
-    
     
 }

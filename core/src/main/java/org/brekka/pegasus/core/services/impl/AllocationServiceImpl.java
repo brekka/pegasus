@@ -83,6 +83,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         AccessorContext currentContext = AccessorContextImpl.getCurrent();
         AllocationFile unlockedAllocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
         if (unlockedAllocationFile != null) {
+            allocationFileDAO.refresh(unlockedAllocationFile);
             return unlockedAllocationFile;
         }
         

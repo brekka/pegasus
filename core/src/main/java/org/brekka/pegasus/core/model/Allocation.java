@@ -46,7 +46,7 @@ import org.hibernate.annotations.Type;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Allocation")
-public abstract class Allocation extends SnapshotEntity<UUID> {
+public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEntityAware<AllocationDocument> {
 
     /**
      * Serial UID

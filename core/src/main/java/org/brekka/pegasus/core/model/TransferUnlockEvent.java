@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -30,6 +31,12 @@ public class TransferUnlockEvent extends RemoteUserEvent {
     @ManyToOne
     @JoinColumn(name="`TransferID`", nullable=false)
     private Transfer transfer;
+    
+    /**
+     * Was the unlock successful
+     */
+    @Column(name="`Success`", nullable=false)
+    private boolean success;
 
     public Transfer getTransfer() {
         return transfer;
@@ -37,5 +44,19 @@ public class TransferUnlockEvent extends RemoteUserEvent {
 
     public void setTransfer(Transfer transfer) {
         this.transfer = transfer;
+    }
+
+    /**
+     * @return the success
+     */
+    public boolean isSuccess() {
+        return success;
+    }
+
+    /**
+     * @param success the success to set
+     */
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }

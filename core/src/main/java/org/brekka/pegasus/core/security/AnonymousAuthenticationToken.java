@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.brekka.pegasus.web.security;
+package org.brekka.pegasus.core.security;
 
 import java.util.Collection;
 

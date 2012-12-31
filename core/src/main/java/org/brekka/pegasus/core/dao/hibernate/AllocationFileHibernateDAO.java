@@ -28,6 +28,14 @@ public class AllocationFileHibernateDAO extends AbstractPegasusHibernateDAO<Allo
     protected Class<AllocationFile> type() {
         return AllocationFile.class;
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.AllocationFileDAO#refresh(org.brekka.pegasus.core.model.AllocationFile)
+     */
+    @Override
+    public void refresh(AllocationFile allocationFile) {
+        getCurrentSession().refresh(allocationFile);
+    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.AllocationFileDAO#retrieveByBundle(org.brekka.pegasus.core.model.Bundle)

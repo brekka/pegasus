@@ -19,6 +19,7 @@ import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Transfer;
@@ -153,17 +154,32 @@ class AllocationServiceSupport {
     }
     
     protected void decryptDocument(Allocation allocation) {
+        decryptDocument(allocation, null);
+    }
+    
+    protected void decryptDocument(Allocation allocation, String password) {
         XmlEntity<AllocationDocument> existing = allocation.getXml();
         if (existing.getBean() != null) {
             // Already decrypted
             return;
         }
-        XmlEntity<AllocationDocument> xml = xmlEntityService.release(existing, AllocationDocument.class);
-        allocation.setXml(xml);
-        assignFileXml(allocation);
-        if (allocation instanceof Transfer) {
-            eventService.transferUnlocked((Transfer) allocation);
+        boolean unlockSuccess = false;
+        try {
+            XmlEntity<AllocationDocument> xml;
+            if (password == null) {
+                xml = xmlEntityService.release(existing, AllocationDocument.class);
+            } else {
+                xml = xmlEntityService.release(existing, password, AllocationDocument.class);
+            }
+            allocation.setXml(xml);
+            assignFileXml(allocation);
+            unlockSuccess = true;
+        } finally {
+            if (allocation instanceof Transfer) {
+                eventService.transferUnlock((Transfer) allocation, unlockSuccess);
+            }
         }
+        
     }
     
     protected void encryptDocument(Allocation allocation, AllocationType allocationType, KeySafe<?> keySafe) {
@@ -215,7 +231,7 @@ class AllocationServiceSupport {
         accessorContext.retain(key, allocation);
         List<AllocationFile> files = allocation.getFiles();
         for (AllocationFile allocationFile : files) {
-            accessorContext.retain(allocationFile.getCryptedFile().getId(), allocationFile);
+            accessorContext.retain(allocationFile.getId(), allocationFile);
         }
     }
     
@@ -223,7 +239,16 @@ class AllocationServiceSupport {
      * @see org.brekka.pegasus.core.services.AllocationService#refreshAllocation(org.brekka.pegasus.core.model.AnonymousTransfer)
      */
     protected void refreshAllocation(Allocation allocation) {
-        allocationDAO.refresh(allocation);
+        if (allocation instanceof AnonymousTransfer) {
+            AnonymousTransfer anonTrans = (AnonymousTransfer) allocation;
+            // Need to keep the XML as we have no way to re-extract at this point (+ it should never change).
+            XmlEntity<AllocationDocument> xml = anonTrans.getXml();
+            allocationDAO.refresh(allocation);
+            allocation.setXml(xml);
+        } else {
+            allocationDAO.refresh(allocation);
+            xmlEntityService.release(allocation, AllocationDocument.class);
+        }
         assignFileXml(allocation);
     }
 }

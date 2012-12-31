@@ -118,7 +118,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         if (theEntity.getBean() != null) {
             return theEntity;
         }
-        XmlEntity<T> entity = retrieveEntity(theEntity.getId(), expectedType);
+        XmlEntity<T> entity = retrieveEntity(theEntity.getId(), expectedType, password);
         return entity;
     }
     

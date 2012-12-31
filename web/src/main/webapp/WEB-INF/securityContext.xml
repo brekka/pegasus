@@ -61,7 +61,7 @@
     
     
     
-    <beans:bean id="anonymousAuthenticationProvider" class="org.brekka.pegasus.web.security.AnonymousAuthenticationProvider" />
+    <beans:bean id="anonymousAuthenticationProvider" class="org.brekka.pegasus.core.security.AnonymousAuthenticationProvider" />
     
     <beans:bean id="anonymousFilter" class="org.brekka.pegasus.web.filter.AnonymousAuthenticationFilter">
     </beans:bean>

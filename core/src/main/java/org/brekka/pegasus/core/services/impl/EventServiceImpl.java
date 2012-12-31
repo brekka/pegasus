@@ -57,9 +57,10 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void transferUnlocked(Transfer transfer) {
+    public void transferUnlock(Transfer transfer, boolean success) {
         TransferUnlockEvent event = new TransferUnlockEvent();
         event.setTransfer(transfer);
+        event.setSuccess(success);
         populate(event);
         bundleUnlockEventDAO.create(event);
     }

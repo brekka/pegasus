@@ -42,4 +42,6 @@ public interface AllocationFileDAO extends EntityDAO<UUID, AllocationFile> {
      */
     List<AllocationFile> retrieveActiveForAllocation(Allocation allocation);
 
+    
+    void refresh(AllocationFile allocationFile);
 }

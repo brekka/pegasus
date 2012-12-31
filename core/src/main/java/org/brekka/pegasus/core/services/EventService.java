@@ -15,7 +15,7 @@ public interface EventService {
 
     void transferCreated(Transfer transfer);
     
-    void transferUnlocked(Transfer transfer);
+    void transferUnlock(Transfer transfer, boolean success);
     
     FileDownloadEvent beginFileDownloadEvent(AllocationFile transferFile);
     
