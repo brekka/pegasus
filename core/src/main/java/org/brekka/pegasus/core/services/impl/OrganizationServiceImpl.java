@@ -23,7 +23,7 @@ import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
@@ -275,7 +275,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             DomainName domainName = eMailAddressService.toDomainName(domainNameStr);
             organization.setPrimaryDomainName(domainName);
         }
-        Token token = tokenService.createToken(tokenStr, TokenType.ORG);
+        Token token = tokenService.createToken(tokenStr, PegasusTokenType.ORG);
         organization.setToken(token);
         organizationDAO.create(organization);
         return organization;

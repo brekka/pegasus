@@ -35,7 +35,7 @@ public class AgreementDirect {
     Object onActivate(String token) {
         this.token = token;
         
-        transfer = anonymousService.retrieveTransfer(token);
+        transfer = anonymousService.retrieveUnlockedTransfer(token);
         
         if (transfer == null) {
             unlockPage.onActivate(token);

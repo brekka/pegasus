@@ -13,7 +13,7 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Organization;
-import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.InboxService;
@@ -94,7 +94,7 @@ public class CreateInbox {
     
     Object activate(Object... context) {
         this.context = context;
-        this.inboxToken = TokenType.INBOX.generateRandom().getPath();
+        this.inboxToken = PegasusTokenType.INBOX.generateRandom().getPath();
         return Boolean.TRUE;
     }
     

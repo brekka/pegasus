@@ -38,6 +38,11 @@ public interface AnonymousService {
      * @param token
      * @return
      */
+    AnonymousTransfer retrieveUnlockedTransfer(String token);
+    
+    /**
+     * @param token
+     * @return
+     */
     AnonymousTransfer retrieveTransfer(String token);
-
 }

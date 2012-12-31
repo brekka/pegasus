@@ -3,9 +3,11 @@
  */
 package org.brekka.pegasus.core.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.Transfer;
@@ -23,4 +25,5 @@ public interface FileDownloadEventDAO extends EntityDAO<UUID, FileDownloadEvent>
      */
     int fileDownloadCount(AllocationFile bundleFile, Transfer transfer);
 
+    List<FileDownloadEvent> retrieveFileDownloads(Allocation allocation);
 }

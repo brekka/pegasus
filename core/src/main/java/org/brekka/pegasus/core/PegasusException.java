@@ -31,5 +31,5 @@ public class PegasusException extends BaseException {
     public PegasusException(PegasusErrorCode errorCode, Throwable cause, String message, Object... messageArgs) {
         super(errorCode, cause, message, messageArgs);
     }
-
+    
 }

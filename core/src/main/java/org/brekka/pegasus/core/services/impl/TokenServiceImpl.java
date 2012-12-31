@@ -7,7 +7,7 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TokenDAO;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Token createToken(String path, TokenType type) {
+    public Token createToken(String path, PegasusTokenType type) {
         Token token;
         if (path != null) {
             if (tokenDAO.retrieveByPath(path) != null) {
@@ -53,14 +53,14 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Token generateToken(TokenType tokenType) {
+    public Token generateToken(PegasusTokenType tokenType) {
         // For now just keep generating random tokens
         Token token = chooseRandomToken(tokenType);
         tokenDAO.create(token);
         return token;
     }
 
-    private Token chooseRandomToken(TokenType type) {
+    private Token chooseRandomToken(PegasusTokenType type) {
         Token token = type.generateRandom();
         while (tokenDAO.retrieveByPath(token.getPath()) != null) {
             token = type.generateRandom();

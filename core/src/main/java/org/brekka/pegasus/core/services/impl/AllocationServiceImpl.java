@@ -144,6 +144,22 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             bindToContext(allocation);
         }
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#forceExpireAllocation(org.brekka.pegasus.core.model.Allocation)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void forceExpireAllocation(Allocation allocation) {
+        Date expiryDate = new Date();
+        // Update the incoming reference with the date
+        allocation.setExpires(expiryDate);
+        
+        Allocation managed = allocationDAO.retrieveById(allocation.getId());
+        managed.setExpires(expiryDate);
+        
+        allocationDAO.update(managed);
+    }
 
     /**
      * @param file

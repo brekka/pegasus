@@ -5,7 +5,6 @@ package org.brekka.pegasus.web.filter;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,8 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.AnonymousService;
@@ -45,7 +45,7 @@ public class TokenFilter implements Filter {
     
     private static final Pattern TOKEN_PATTERN = Pattern.compile(String.format(
             "^(?:/([0-9]+))?/([A-Z0-9][A-Za-z0-9_]{%d,%d})(?:\\.zip|/[^/]+)?$",
-            TokenType.MIN_LENGTH, TokenType.MAX_LENGTH));
+            PegasusTokenType.MIN_LENGTH, PegasusTokenType.MAX_LENGTH));
     
     private AnonymousService anonymousService;
     
@@ -101,18 +101,21 @@ public class TokenFilter implements Filter {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 } else {
                     TokenType tokenType = tokenObj.getType();
-                    switch (tokenType) {
-                        case ANON:
-                            resp.sendRedirect(String.format("%s/%s/%s", 
-                                    req.getContextPath(), UnlockDirect.PATH, token));
-                            break;
-                        case INBOX:
-                            resp.sendRedirect(String.format("%s/%s/%s", 
-                                    req.getContextPath(), MakeDeposit.PATH, token));
-                            break;
-                        default:
-                            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            break;
+                    if (tokenType instanceof PegasusTokenType) {
+                        PegasusTokenType ptt = (PegasusTokenType) tokenType;
+                        switch (ptt) {
+                            case ANON:
+                                resp.sendRedirect(String.format("%s/%s/%s", 
+                                        req.getContextPath(), UnlockDirect.PATH, token));
+                                break;
+                            case INBOX:
+                                resp.sendRedirect(String.format("%s/%s/%s", 
+                                        req.getContextPath(), MakeDeposit.PATH, token));
+                                break;
+                            default:
+                                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                                break;
+                        }
                     }
                 }
                 // Redirect token to unlock.

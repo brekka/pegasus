@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.dao;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.TransferUnlockEvent;
 
 /**
@@ -14,4 +15,5 @@ import org.brekka.pegasus.core.model.TransferUnlockEvent;
  */
 public interface BundleUnlockEventDAO extends EntityDAO<UUID, TransferUnlockEvent> {
 
+    int retrieveFailedUnlockAttempts(Transfer transfer);
 }

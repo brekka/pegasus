@@ -3,7 +3,11 @@
  */
 package org.brekka.pegasus.core.services;
 
+import java.util.List;
+
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.Transfer;
 
@@ -34,4 +38,18 @@ public interface EventService {
      * @return
      */
     int fileDownloadCount(AllocationFile transferFile, Transfer transfer);
+    
+    /**
+     * Retrieve the number of failed attempts to unlock a file.
+     * @param transfer
+     * @return
+     */
+    int retrieveFailedUnlockAttempts(Transfer transfer);
+
+    /**
+     * Retrieve all file download events for the specified allocation.
+     * @param allocation
+     * @return
+     */
+    List<FileDownloadEvent> retrieveFileDownloads(Allocation allocation);
 }

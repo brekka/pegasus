@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
+import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafeAware;
 
@@ -41,4 +42,10 @@ public interface AllocationService {
     int retrieveDerivedFromListingRowCount(Dispatch derivedFrom);
     
     List<Allocation> retrieveDerivedFromListing(Dispatch derivedFrom, ListingCriteria listingCriteria);
+
+    /**
+     * Expire an allocation in a separate transaction.
+     * @param transfer
+     */
+    void forceExpireAllocation(Allocation allocation);
 }

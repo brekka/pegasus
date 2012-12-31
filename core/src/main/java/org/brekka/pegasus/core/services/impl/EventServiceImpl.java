@@ -4,12 +4,14 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import org.brekka.pegasus.core.dao.AgreementAcceptedEventDAO;
 import org.brekka.pegasus.core.dao.BundleCreatedEventDAO;
 import org.brekka.pegasus.core.dao.BundleUnlockEventDAO;
 import org.brekka.pegasus.core.dao.FileDownloadEventDAO;
 import org.brekka.pegasus.core.model.AgreementAcceptedEvent;
+import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
@@ -127,6 +129,24 @@ public class EventServiceImpl implements EventService {
         event.setTransfer(transfer);
         populate(event);
         agreementAcceptedEventDAO.create(event);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EventService#retrieveFailedUnlockAttempts(org.brekka.pegasus.core.model.Transfer)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int retrieveFailedUnlockAttempts(Transfer transfer) {
+        return bundleUnlockEventDAO.retrieveFailedUnlockAttempts(transfer);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EventService#retrieveFileDownloads(org.brekka.pegasus.core.model.Allocation)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<FileDownloadEvent> retrieveFileDownloads(Allocation allocation) {
+        return fileDownloadEventDAO.retrieveFileDownloads(allocation);
     }
     
     protected void populate(RemoteUserEvent remoteUserEvent) {

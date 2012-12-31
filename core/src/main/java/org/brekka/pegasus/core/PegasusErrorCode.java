@@ -18,6 +18,8 @@ public enum PegasusErrorCode implements ErrorCode {
     
     PG200,
     
+    PG265,
+    
     /**
      * Token already in use
      */
@@ -43,6 +45,7 @@ public enum PegasusErrorCode implements ErrorCode {
     PG444,
     
     PG500,
+    PG595,
     
     PG600,
     PG601,
@@ -54,6 +57,7 @@ public enum PegasusErrorCode implements ErrorCode {
     PG704,
     
     PG817,
+    PG831,
     PG853,
     
     PG900,

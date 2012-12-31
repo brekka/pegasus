@@ -14,6 +14,8 @@ import javax.persistence.Table;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.hibernate.annotations.Type;
 
 /**
@@ -49,7 +51,7 @@ public class Token extends SnapshotEntity<UUID> {
      * The type of this token
      */
     @Column(name="`Type`", nullable=false, length=8)
-    @Enumerated(EnumType.STRING)
+    @Type(type="org.brekka.pegasus.core.support.TokenTypeUserType")
     private TokenType type;
 
     
@@ -87,6 +89,19 @@ public class Token extends SnapshotEntity<UUID> {
 
     public TokenType getType() {
         return type;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T extends TokenType> T getType(Class<T> expectedType) {
+        TokenType type = getType();
+        if (type == null) {
+            return null;
+        }
+        if (expectedType.isAssignableFrom(type.getClass())) {
+            return (T) type;
+        }
+        throw new PegasusException(PegasusErrorCode.PG265, 
+                "Expected '%s' actual '%s'", expectedType.getName(), type.getClass().getName());
     }
 
     public void setType(TokenType type) {

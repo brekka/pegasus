@@ -24,7 +24,7 @@ import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -75,7 +75,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         Inbox inbox = new Inbox();
         inbox.setId(UUID.randomUUID());
         if (inboxToken != null) {
-            Token token = tokenService.createToken(inboxToken, TokenType.INBOX);
+            Token token = tokenService.createToken(inboxToken, PegasusTokenType.INBOX);
             inbox.setToken(token);
         }
         inbox.setIntroduction(introduction);

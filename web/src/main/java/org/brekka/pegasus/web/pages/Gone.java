@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.model;
+package org.brekka.pegasus.web.pages;
 
 /**
- * A type of token. 
+ * TODO Description of Gone
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface TokenType {
+public class Gone {
 
-    String getKey();
 }

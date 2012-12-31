@@ -12,11 +12,15 @@ import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.TokenService;
+import org.brekka.phalanx.api.PhalanxErrorCode;
+import org.brekka.phalanx.api.PhalanxException;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
@@ -54,6 +58,12 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     @Autowired
     private RandomCryptoService randomCryptoService;
     
+    @Autowired
+    private EventService eventService;
+    
+    @Autowired
+    private AllocationService allocationService;
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.AnonymousService#createBundle(java.util.List)
@@ -77,6 +87,68 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         return createTransfer(details, expires, maxUnlockAttempts, dispatch, dispatchBundle, code);
     }
     
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#retrieveTransfer(java.lang.String)
+     */
+    @Override
+    public AnonymousTransfer retrieveUnlockedTransfer(String token) {
+        AccessorContext accessorContext = AccessorContextImpl.getCurrent();
+        AnonymousTransfer transfer = accessorContext.retrieve(token, AnonymousTransfer.class);
+        if (transfer != null) {
+            refreshAllocation(transfer);
+        }
+        // If the transfer is not unlocked, null will be returned.
+        return transfer;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#retrieveTransfer(java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public AnonymousTransfer retrieveTransfer(String token) {
+        return anonymousTransferDAO.retrieveByToken(token);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#agreementAccepted(java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void agreementAccepted(String token) {
+        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
+        eventService.agreementAccepted(transfer);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#isAccepted(org.brekka.pegasus.core.model.Bundle)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public boolean isAccepted(AnonymousTransfer anonymousTransfer) {
+        return eventService.isAccepted(anonymousTransfer);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#unlock(java.lang.String, java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public AnonymousTransfer unlock(String token, String code) {
+        String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
+        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
+        try {
+            decryptDocument(transfer, codeClean);
+        } catch (PhalanxException e) {
+            checkAttempts(e, transfer);
+            throw e;
+        }
+        bindToContext(token, transfer);
+        return transfer;
+    }
+    
+
     protected AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxUnlockAttempts, Dispatch dispatch, 
             BundleType bundleType, String code) {
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
@@ -117,7 +189,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
          * the third party.
          */
-        Token token = tokenService.generateToken(TokenType.ANON);
+        Token token = tokenService.generateToken(PegasusTokenType.ANON);
         anonTransfer.setToken(token);
         
         anonymousTransferDAO.create(anonTransfer);
@@ -127,49 +199,20 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         return anonTransfer;
     }
     
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousService#retrieveTransfer(java.lang.String)
+    /**
+     * Determine whether this transfer has more attempts left, expiring the transfer if it does not.
+     * @param e
+     * @param transfer
+     * @return
      */
-    @Override
-    public AnonymousTransfer retrieveTransfer(String token) {
-        AccessorContext accessorContext = AccessorContextImpl.getCurrent();
-        AnonymousTransfer transfer = accessorContext.retrieve(token, AnonymousTransfer.class);
-        if (transfer != null) {
-            refreshAllocation(transfer);
+    private void checkAttempts(PhalanxException e, AnonymousTransfer transfer) {
+        if (e.getErrorCode() == PhalanxErrorCode.CP302) {
+            if (transfer.getMaxUnlockAttempts() != null) {
+                int failedUnlockAttempts = eventService.retrieveFailedUnlockAttempts(transfer);
+                if (failedUnlockAttempts >= transfer.getMaxUnlockAttempts()) {
+                    allocationService.forceExpireAllocation(transfer);
+                }
+            }
         }
-        // If the transfer is not unlocked, null will be returned.
-        return transfer;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousService#agreementAccepted(java.lang.String)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public void agreementAccepted(String token) {
-        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
-        eventService.agreementAccepted(transfer);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousService#isAccepted(org.brekka.pegasus.core.model.Bundle)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public boolean isAccepted(AnonymousTransfer anonymousTransfer) {
-        return eventService.isAccepted(anonymousTransfer);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousService#unlock(java.lang.String, java.lang.String)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer unlock(String token, String code) {
-        String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
-        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
-        decryptDocument(transfer, codeClean);
-        bindToContext(token, transfer);
-        return transfer;
     }
 }
