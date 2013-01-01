@@ -40,4 +40,6 @@ public interface RobotService {
     int retrieveListingRowCount(Actor owner);
     
     List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria);
+    
+    void delete(Robot robot);
 }

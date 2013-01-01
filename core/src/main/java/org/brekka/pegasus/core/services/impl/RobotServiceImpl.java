@@ -19,6 +19,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.dao.RobotDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
@@ -126,5 +127,14 @@ public class RobotServiceImpl implements RobotService {
     public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
         return robotDAO.retrieveListing(owner, listingCriteria);
     }
-
+    
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public void delete(Robot robot) {
+        Robot managed = robotDAO.retrieveById(robot.getId());
+        vaultService.deleteVault(managed.getDefaultVault());
+        usernamePasswordService.delete(managed.getAuthenticationToken());
+        xmlEntityService.delete(managed.getXml().getId());
+        robotDAO.delete(managed.getId());
+    }
 }

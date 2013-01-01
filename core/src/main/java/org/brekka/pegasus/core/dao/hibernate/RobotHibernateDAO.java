@@ -22,6 +22,7 @@ import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.support.HibernateUtils;
 import org.brekka.pegasus.core.dao.RobotDAO;
 import org.brekka.pegasus.core.model.Actor;
+import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Robot;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -52,6 +53,7 @@ public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implem
     public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
         Criteria criteria = getCurrentSession().createCriteria(Robot.class);
         criteria.add(Restrictions.eq("owner", owner));
+        criteria.add(Restrictions.in("status", new Object[] { ActorStatus.ACTIVE, ActorStatus.DISABLED } ));
         HibernateUtils.applyCriteria(criteria, listingCriteria);
         return criteria.list();
     }
@@ -63,8 +65,11 @@ public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implem
     public int retrieveListingRowCount(Actor owner) {
         Query query = getCurrentSession().createQuery(
                 "select count(r) from Robot r" +
-                " where r.owner=:owner");
+                " where r.owner=:owner" +
+                "   and r.status in (:active, :disabled)");
         query.setEntity("owner", owner);
+        query.setParameter("active", ActorStatus.ACTIVE);
+        query.setParameter("disabled", ActorStatus.DISABLED);
         return ((Number) query.uniqueResult()).intValue();
     }
 

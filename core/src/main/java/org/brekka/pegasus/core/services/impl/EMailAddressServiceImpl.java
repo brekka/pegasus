@@ -55,6 +55,7 @@ public class EMailAddressServiceImpl implements EMailAddressService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public EMailAddress createEMail(String email, Member owner, boolean requiresVerification) {
+        email = email.toLowerCase();
         String domain = StringUtils.substringAfterLast(email, "@");
         
         DomainName domainName = toDomainName(domain);
@@ -105,6 +106,7 @@ public class EMailAddressServiceImpl implements EMailAddressService {
     }
 
     protected byte[] hash(String value) {
+        value = value.toLowerCase();
         SystemDerivedKeySpecType spec = config.getSystemDerivedKeySpec();
         byte[] data = value.getBytes(Charset.forName("UTF-8"));
         DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), null, CryptoProfile.Static.of(spec.getCryptoProfile()));

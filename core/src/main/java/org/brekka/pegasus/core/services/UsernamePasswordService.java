@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.services;
 
+import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.UsernamePassword;
 
 /**
@@ -37,4 +38,9 @@ public interface UsernamePasswordService {
      * @param newPassword
      */
     void changePassword(UsernamePassword usernamePassword, String oldPassword, String newPassword);
+
+    /**
+     * @param authenticationToken
+     */
+    void delete(AuthenticationToken authenticationToken);
 }

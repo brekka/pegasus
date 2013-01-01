@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.UsernamePasswordDAO;
+import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.UsernamePassword;
 import org.brekka.pegasus.core.services.UsernamePasswordService;
 import org.brekka.phoenix.api.CryptoProfile;
@@ -130,8 +131,20 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.UsernamePasswordService#delete(org.brekka.pegasus.core.model.AuthenticationToken)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void delete(AuthenticationToken authenticationToken) {
+        usernamePasswordDAO.delete(authenticationToken.getId());
+    }
+    
     protected byte[] deriveUsername(String username) {
         SystemDerivedKeySpecType spec = config.getSystemDerivedKeySpec();
+        if (!config.getUserNameCaseSensitive()) {
+            username = username.toUpperCase();
+        }
         byte[] data = toBytes(username);
         DerivedKey derivedKey = derivedKeyCryptoService.apply(data, spec.getSalt(), null, CryptoProfile.Static.of(spec.getCryptoProfile()));
         return derivedKey.getDerivedKey();

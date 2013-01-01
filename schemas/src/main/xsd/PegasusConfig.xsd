@@ -53,6 +53,7 @@
     <xsd:element name="UsernamePasswordService">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="UserNameCaseSensitive" type="xsd:boolean" default="false" />
                 <xsd:element name="SystemDerivedKeySpec" type="plxc:SystemDerivedKeySpecType" />
             </xsd:sequence>
         </xsd:complexType>
