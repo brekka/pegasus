@@ -110,6 +110,9 @@ class AllocationServiceSupport {
      * @return
      */
     protected BundleType copyBundle(Integer maxDownloads, BundleType bundleType) {
+        if (bundleType == null) {
+            return null;
+        }
         BundleType b = BundleType.Factory.newInstance();
         List<FileType> fileList = bundleType.getFileList();
         for (FileType file : fileList) {
@@ -192,6 +195,9 @@ class AllocationServiceSupport {
     protected void createAllocationFiles(Allocation allocation) {
         XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
         BundleType bundle = xml.getBean().getAllocation().getBundle();
+        if (bundle == null) {
+            return;
+        }
         List<FileType> fileList = bundle.getFileList();
         for (FileType fileType : fileList) {
             AllocationFile allocationFile = new AllocationFile();
@@ -208,7 +214,11 @@ class AllocationServiceSupport {
         XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
         AllocationType allocationType = xml.getBean().getAllocation();
         List<AllocationFile> files = allocation.getFiles();
-        List<FileType> fileList = allocationType.getBundle().getFileList();
+        BundleType bundle = allocationType.getBundle();
+        if (bundle == null) {
+            return;
+        }
+        List<FileType> fileList = bundle.getFileList();
         // Use nested loops as there should never be that many files.
         for (FileType fileType : fileList) {
             UUID cryptedFileID = UUID.fromString(fileType.getUUID());

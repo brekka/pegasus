@@ -10,6 +10,8 @@ import java.util.UUID;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CryptedFile;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
@@ -88,6 +90,10 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         }
         
         AllocationFile allocationFile = allocationFileDAO.retrieveById(allocationFileId);
+        if (allocationFile == null) {
+            return null;
+        }
+        
         Allocation allocation = allocationFile.getAllocation();
                
         Allocation unlockedAllocation = currentContext.retrieve(allocation.getId(), Allocation.class);
