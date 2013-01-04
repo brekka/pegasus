@@ -50,9 +50,6 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     private AnonymousTransferDAO anonymousTransferDAO;
     
     @Autowired
-    private TokenService tokenService;
-    
-    @Autowired
     private PhalanxService phalanxService;
     
     @Autowired

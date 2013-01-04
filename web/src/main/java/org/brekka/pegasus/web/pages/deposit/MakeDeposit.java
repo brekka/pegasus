@@ -3,19 +3,17 @@
  */
 package org.brekka.pegasus.web.pages.deposit;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.RequestGlobals;
-import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.web.session.UploadsContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Inbox;
+import org.brekka.pegasus.core.model.PegasusAllocationDisposition;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
@@ -83,7 +81,7 @@ public class MakeDeposit extends AbstractMakePage {
         detailsType.setComment(comment);
         // TODO Expiry for deposits
         DateTime expires = new DateTime().plusDays(14);
-        Allocation allocation = inboxService.createDeposit(inbox, detailsType, expires, files);
+        Allocation allocation = inboxService.createDeposit(inbox, PegasusAllocationDisposition.TRANSFER, detailsType, expires, files);
         depositDonePage.init(makeKey, allocation);
         return depositDonePage;
     }

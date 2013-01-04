@@ -16,6 +16,8 @@ import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.PegasusTokenType;
+import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.DispatchService;
 import org.brekka.pegasus.core.services.EMailAddressService;
@@ -81,6 +83,9 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         dispatch.setActor(activeActor);
         dispatch.setExpires(expires.toDate());
         
+        Token token = tokenService.generateToken(PegasusTokenType.DISPATCH);
+        dispatch.setToken(token);
+        
         dispatchDAO.create(dispatch);
         createAllocationFiles(dispatch);
         return dispatch;
@@ -105,7 +110,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         }
         Allocation allocation;
         if (inbox != null) {
-            allocation = inboxService.createDeposit(inbox, details, allocationExpires, dispatch);
+            allocation = inboxService.createDeposit(inbox, null, details, allocationExpires, dispatch);
         } else {
             allocation = anonymousService.createTransfer(details, allocationExpires, maxDownloads, null, dispatch, null);
         }

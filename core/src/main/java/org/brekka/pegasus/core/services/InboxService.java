@@ -6,7 +6,9 @@ package org.brekka.pegasus.core.services;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.paveway.core.model.UploadedFiles;
+import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
@@ -37,7 +39,7 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, UploadedFiles files);
+    Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, UploadedFiles files);
     
     /**
      * 
@@ -47,7 +49,7 @@ public interface InboxService {
      * @param dispatch
      * @return
      */
-    Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, Dispatch dispatch);
+    Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, Dispatch dispatch);
 
     /**
      * Retrieve the inboxes owned by this member.
@@ -83,6 +85,14 @@ public interface InboxService {
     Deposit retrieveDeposit(UUID depositId);
     
     /**
+     * Retrieve the specified deposit and verify that it belongs to the specified inbox.
+     * @param inbox
+     * @param depositId
+     * @return
+     */
+    Deposit retrieveDeposit(Inbox inbox, UUID depositId);
+    
+    /**
      * @param keySafe
      * @return
      */
@@ -98,6 +108,16 @@ public interface InboxService {
      * @param actionDeposit
      */
     void deleteDeposit(Deposit deposit);
+    
+    int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired);
+    
+    List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired, ListingCriteria listingCriteria);
+
+    /**
+     * @param fromString
+     * @return
+     */
+    Inbox retrieveById(UUID inboxId);
 
 
 }

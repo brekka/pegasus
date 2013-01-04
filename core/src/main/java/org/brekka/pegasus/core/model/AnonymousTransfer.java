@@ -6,9 +6,6 @@ package org.brekka.pegasus.core.model;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 /**
@@ -25,12 +22,7 @@ public class AnonymousTransfer extends Transfer {
      */
     private static final long serialVersionUID = -4542707737980018991L;
 
-    /**
-     * Token that identifies this transfer
-     */
-    @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="`TokenID`")
-    private Token token;
+
     
     /**
      * The creator can specify how man unlock attempts can be made.
@@ -40,15 +32,8 @@ public class AnonymousTransfer extends Transfer {
     
     @Transient
     private transient String code;
+
     
-    public Token getToken() {
-        return token;
-    }
-
-    public void setToken(Token token) {
-        this.token = token;
-    }
-
     public String getCode() {
         return code;
     }

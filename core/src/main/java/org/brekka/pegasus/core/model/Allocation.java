@@ -12,6 +12,7 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -34,7 +35,7 @@ import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.hibernate.annotations.Type;
 
 /**
- * An allocation of files.
+ * An allocation of of some sort that can include files.
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -94,6 +95,20 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      */
     @OneToMany(mappedBy="allocation")
     private List<AllocationFile> files;
+    
+    /**
+     * Token that identifies this allocation
+     */
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="`TokenID`")
+    private Token token;
+    
+    /**
+     * The disposition of this allocation (optional).
+     */
+    @Column(name="`Disposition`", length=16)
+    @Type(type="org.brekka.pegasus.core.support.AllocationDispositionUserType")
+    private AllocationDisposition disposition;
     
     /**
      * The details and bundle for the allocation
@@ -185,6 +200,29 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         return details(DetailsType.class);
     }
     
+    /**
+     * @return the disposition
+     */
+    public AllocationDisposition getDisposition() {
+        return disposition;
+    }
+
+    /**
+     * @param disposition the disposition to set
+     */
+    public void setDisposition(AllocationDisposition disposition) {
+        this.disposition = disposition;
+    }
+    
+    
+    public Token getToken() {
+        return token;
+    }
+
+    public void setToken(Token token) {
+        this.token = token;
+    }
+
     /**
      * Retrieve the details contained within the XML. Named without 'get' so as not to be handled as property.
      * @param expectedType

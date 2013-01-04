@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.KeySafeService;
+import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.services.CryptoProfileService;
@@ -66,6 +68,9 @@ class AllocationServiceSupport {
     
     @Autowired
     protected KeySafeService keySafeService;
+    
+    @Autowired
+    protected TokenService tokenService;
 
     @Autowired
     private AllocationDAO allocationDAO;
@@ -216,6 +221,7 @@ class AllocationServiceSupport {
         List<AllocationFile> files = allocation.getFiles();
         BundleType bundle = allocationType.getBundle();
         if (bundle == null) {
+            allocation.setFiles(Collections.<AllocationFile>emptyList());
             return;
         }
         List<FileType> fileList = bundle.getFileList();

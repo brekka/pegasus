@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,22 @@
 
 package org.brekka.pegasus.core.model;
 
-import org.brekka.commons.persistence.model.EntityType;
-
 /**
- * A type of token. 
+ * Pegasus Allocation EntityType
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface TokenType extends EntityType {
+public enum PegasusAllocationDisposition implements AllocationDisposition {
 
+    TRANSFER,
+    
+    MESSAGE,
+    
+    OTHER,
+    
+    ;
+    
+    public String getKey() {
+        return name();
+    }
 }

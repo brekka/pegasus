@@ -21,25 +21,26 @@ import java.util.List;
 import java.util.Map;
 
 import org.brekka.commons.persistence.support.AbstractTypeUserType;
-import org.brekka.pegasus.core.model.PegasusTokenType;
-import org.brekka.pegasus.core.model.TokenType;
+import org.brekka.pegasus.core.model.AllocationDisposition;
+import org.brekka.pegasus.core.model.PegasusAllocationDisposition;
 
 /**
- * Token User EntityType
+ * Allocation EntityType User EntityType
  * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public class TokenTypeUserType extends AbstractTypeUserType<TokenType> {
+public class AllocationDispositionUserType extends AbstractTypeUserType<AllocationDisposition> {
 
-    public TokenTypeUserType() {
-        super(Arrays.asList(PegasusTokenType.class));
+
+    public AllocationDispositionUserType() {
+        super(Arrays.asList(PegasusAllocationDisposition.class));
     }
 
-    public TokenTypeUserType(Map<String, TokenType> typesMap) {
+    public AllocationDispositionUserType(Map<String, AllocationDisposition> typesMap) {
         super(typesMap);
     }
 
-    public <Type extends Enum<?> & TokenType> TokenTypeUserType(List<Class<Type>> enumTypesList) {
+    public <Type extends Enum<?> & AllocationDisposition> AllocationDispositionUserType(List<Class<Type>> enumTypesList) {
         super(enumTypesList);
     }
     
@@ -47,7 +48,7 @@ public class TokenTypeUserType extends AbstractTypeUserType<TokenType> {
      * @see org.hibernate.usertype.UserType#returnedClass()
      */
     @Override
-    public Class<TokenType> returnedClass() {
-        return TokenType.class;
+    public Class<AllocationDisposition> returnedClass() {
+        return AllocationDisposition.class;
     }
 }

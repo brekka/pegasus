@@ -8,13 +8,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.paveway.core.model.UploadedFiles;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.DepositDAO;
 import org.brekka.pegasus.core.dao.InboxDAO;
 import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Actor;
+import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
@@ -30,6 +34,7 @@ import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.TokenService;
+import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
@@ -103,21 +108,21 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, 
+    public Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, 
             UploadedFiles files) {
         BundleType bundleType = completeFiles(0, files);
-        return createDeposit(inbox, details, expires, null, bundleType);
+        return createDeposit(inbox, disposition, details, expires, null, bundleType);
     }
     
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, Dispatch dispatch) {
+    public Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, Dispatch dispatch) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, null);
-        return createDeposit(inbox, details, expires, dispatch, dispatchBundle);
+        return createDeposit(inbox, disposition, details, expires, dispatch, dispatchBundle);
     }
 
-    protected Deposit createDeposit(Inbox inbox, DetailsType details, DateTime expires, Dispatch dispatch, BundleType newBundleType) {   
+    protected Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, Dispatch dispatch, BundleType newBundleType) {   
         Deposit deposit = new Deposit();
         deposit.setDerivedFrom(dispatch);
         
@@ -133,6 +138,10 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
+        deposit.setDisposition(disposition);
+        
+        Token token = tokenService.generateToken(PegasusTokenType.DEPOSIT);
+        deposit.setToken(token);
         
         createAllocationFiles(deposit);
         depositDAO.create(deposit);
@@ -148,6 +157,16 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     public Inbox retrieveForToken(String inboxToken) {
         Token token = tokenService.retrieveByPath(inboxToken);
         Inbox inbox = inboxDAO.retrieveByToken(token);
+        populateNames(Arrays.asList(inbox));
+        return inbox;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveById(java.util.UUID)
+     */
+    @Override
+    public Inbox retrieveById(UUID inboxId) {
+        Inbox inbox = inboxDAO.retrieveById(inboxId);
         populateNames(Arrays.asList(inbox));
         return inbox;
     }
@@ -202,6 +221,23 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposit(org.brekka.pegasus.core.model.Inbox, java.util.UUID)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public Deposit retrieveDeposit(Inbox inbox, UUID depositId) {
+        Deposit deposit = retrieveDeposit(depositId);
+        if (deposit == null) {
+            return null;
+        }
+        if (EntityUtils.identityEquals(deposit.getInbox(), inbox)) {
+            return deposit;
+        }
+        throw new PegasusException(PegasusErrorCode.PG745, 
+                "The deposit '%s' does not belong to inbox '%s'", depositId, inbox.getId());
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForMember()
      */
     @Override
@@ -240,6 +276,27 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         depositDAO.update(deposit);
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDepositListing(org.brekka.pegasus.core.model.Inbox, org.joda.time.DateTime, org.joda.time.DateTime, boolean, org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            ListingCriteria listingCriteria) {
+        List<Deposit> depositList = depositDAO.retrieveListing(inbox, defaultMin(from), defaultMax(until), showExpired, listingCriteria);
+        xmlEntityService.releaseAll(depositList, AllocationDocument.class);
+        return depositList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDepositListingRowCount(org.brekka.pegasus.core.model.Inbox, org.joda.time.DateTime, org.joda.time.DateTime, boolean)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired) {
+        return depositDAO.retrieveListingRowCount(inbox, defaultMin(from), defaultMax(until), showExpired);
+    }
+
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
@@ -266,5 +323,28 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
                 }
             }
         }
+    }
+    
+
+    /**
+     * @param from
+     * @return
+     */
+    private static DateTime defaultMin(DateTime from) {
+        if (from == null) {
+            from = new DateTime(0);
+        }
+        return from;
+    }
+
+    /**
+     * @param until
+     * @return
+     */
+    private static DateTime defaultMax(DateTime until) {
+        if (until == null) {
+            until = new DateTime().plusYears(100);
+        }
+        return until;
     }
 }

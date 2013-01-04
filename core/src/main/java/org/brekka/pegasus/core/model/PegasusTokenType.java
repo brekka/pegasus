@@ -39,7 +39,16 @@ public enum PegasusTokenType implements TokenType {
      * Some other purpose - 831m combinations of random
      */
     OTHER(8),
+    
+    /**
+     * A dispatch
+     */
+    DISPATCH(8),
 
+    /**
+     * Deposit
+     */
+    DEPOSIT(8),
     ;
 
     /**
