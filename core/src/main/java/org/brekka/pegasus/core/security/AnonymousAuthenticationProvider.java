@@ -29,7 +29,7 @@ public class AnonymousAuthenticationProvider implements AuthenticationProvider {
      */
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication == AnonymousAuthenticationToken.class;
+        return authentication == AnonymousTransferUser.class;
     }
     
 }

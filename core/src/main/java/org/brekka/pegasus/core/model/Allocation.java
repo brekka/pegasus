@@ -77,6 +77,13 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     private Date deleted;
     
     /**
+     * The authenticated user that created this allocation (if available).
+     */
+    @ManyToOne
+    @JoinColumn(name="`ActorID`")
+    private Actor actor;
+    
+    /**
      * An allocation could be derived from a dispatch (in the case of a file sent by a member).
      */
     @ManyToOne
@@ -221,6 +228,14 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
 
     public void setToken(Token token) {
         this.token = token;
+    }
+    
+    public Actor getActor() {
+        return actor;
+    }
+
+    public void setActor(Actor actor) {
+        this.actor = actor;
     }
 
     /**

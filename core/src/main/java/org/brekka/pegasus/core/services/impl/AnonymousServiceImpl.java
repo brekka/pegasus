@@ -4,21 +4,25 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
+import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.AnonymousService;
 import org.brekka.pegasus.core.services.EventService;
-import org.brekka.pegasus.core.services.TokenService;
+import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.PhalanxErrorCode;
 import org.brekka.phalanx.api.PhalanxException;
 import org.brekka.phalanx.api.services.PhalanxService;
@@ -60,6 +64,9 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     
     @Autowired
     private AllocationService allocationService;
+    
+    @Autowired
+    private MemberService memberService;
     
     
     /* (non-Javadoc)
@@ -145,6 +152,17 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         return transfer;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AnonymousService#deleteTransfer(org.brekka.pegasus.core.model.AnonymousTransfer)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void deleteTransfer(String token) {
+        AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
+        transfer.setExpires(new Date());
+        anonymousTransferDAO.update(transfer);
+    }
+    
 
     protected AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxUnlockAttempts, Dispatch dispatch, 
             BundleType bundleType, String code) {
@@ -181,6 +199,12 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         document.setAllocation(allocationType);
         XmlEntity<AllocationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(document, code, true);
         anonTransfer.setXml(xmlEntity);
+        
+        AuthenticatedMember<Member> current = memberService.getCurrent();
+        if (current != null) {
+            Actor activeActor = current.getActiveActor();
+            anonTransfer.setActor(activeActor);
+        }
         
         /*
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by

@@ -22,13 +22,7 @@ public class Dispatch extends Allocation implements KeySafeAware {
      * Serial UID
      */
     private static final long serialVersionUID = -9040394712700014948L;
-    
-    /**
-     * The employee / actor that sent this.
-     */
-    @ManyToOne
-    @JoinColumn(name="`ActorID`")
-    private Actor actor;
+
     
     /**
      * The division this from which this was dispatched.
@@ -43,15 +37,6 @@ public class Dispatch extends Allocation implements KeySafeAware {
     @ManyToOne
     @JoinColumn(name="`KeySafeID`")
     private KeySafe<?> keySafe;
-    
-
-    public Actor getActor() {
-        return actor;
-    }
-
-    public void setActor(Actor actor) {
-        this.actor = actor;
-    }
 
     @Override
     public KeySafe<?> getKeySafe() {

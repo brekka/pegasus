@@ -15,7 +15,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.brekka.pegasus.core.security.AnonymousAuthenticationToken;
+import org.brekka.pegasus.core.security.AnonymousTransferUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -61,7 +61,7 @@ public class SwitchAuthenticationFilter extends GenericFilterBean {
             ServletException {
         
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
+        if (authentication instanceof AnonymousTransferUser) {
             // Check whether we need a login.
             HttpServletRequest request = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;

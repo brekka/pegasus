@@ -143,6 +143,12 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         Token token = tokenService.generateToken(PegasusTokenType.DEPOSIT);
         deposit.setToken(token);
         
+        AuthenticatedMember<Member> current = memberService.getCurrent();
+        if (current != null) {
+            Actor activeActor = current.getActiveActor();
+            deposit.setActor(activeActor);
+        }
+        
         createAllocationFiles(deposit);
         depositDAO.create(deposit);
         

@@ -45,4 +45,9 @@ public interface AnonymousService {
      * @return
      */
     AnonymousTransfer retrieveTransfer(String token);
+
+    /**
+     * @param transfer
+     */
+    void deleteTransfer(String token);
 }
