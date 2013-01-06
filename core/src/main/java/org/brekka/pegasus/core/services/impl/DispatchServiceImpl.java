@@ -3,13 +3,16 @@
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.dao.DispatchDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Allocation;
+import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
@@ -63,9 +66,9 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#createDispatch(org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, java.lang.Integer, java.util.List)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, DateTime expires, Integer maxDownloads,
-            UploadedFiles files) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Dispatch createDispatch(KeySafe<?> keySafe, AllocationDisposition disposition, DetailsType details,
+            DateTime expires, Integer maxDownloads, UploadedFiles files) {
         Dispatch dispatch = new Dispatch();
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
@@ -82,6 +85,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         dispatch.setKeySafe(keySafe);
         dispatch.setActor(activeActor);
         dispatch.setExpires(expires.toDate());
+        dispatch.setDisposition(disposition);
         
         Token token = tokenService.generateToken(PegasusTokenType.DISPATCH);
         dispatch.setToken(token);
@@ -98,7 +102,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Transactional(propagation=Propagation.REQUIRED)
     public Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
             DetailsType details, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads, UploadedFiles files) {
-        Dispatch dispatch = createDispatch(keySafe, details, dispatchExpires, null, files);
+        Dispatch dispatch = createDispatch(keySafe, null, details, dispatchExpires, null, files);
         
         Inbox inbox = null;
         if (StringUtils.isNotBlank(recipientEMail)) {
@@ -127,5 +131,16 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
         return dispatchDAO.retrieveForInterval(keySafe, activeActor, from.toDate(), until.toDate());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DispatchService#delete(java.util.UUID)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void delete(UUID dispatchId) {
+        Dispatch dispatch = dispatchDAO.retrieveById(dispatchId);
+        dispatch.setExpires(new Date());
+        dispatchDAO.update(dispatch);
     }
 }

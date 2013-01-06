@@ -166,6 +166,9 @@ class AllocationServiceSupport {
     }
     
     protected void decryptDocument(Allocation allocation, String password) {
+        if(allocation == null) {
+            return;
+        }
         XmlEntity<AllocationDocument> existing = allocation.getXml();
         if (existing.getBean() != null) {
             // Already decrypted

@@ -14,7 +14,7 @@ import org.joda.time.DateTime;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
- *
+ * 
  */
 public interface DepositDAO extends EntityDAO<UUID, Deposit> {
 
@@ -24,8 +24,8 @@ public interface DepositDAO extends EntityDAO<UUID, Deposit> {
      */
     List<Deposit> retrieveByInbox(Inbox inbox);
 
-    
-    int retrieveListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired);
-    
-    List<Deposit> retrieveListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired, ListingCriteria listingCriteria);
+    int retrieveListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired, boolean dispatchBased);
+
+    List<Deposit> retrieveListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            ListingCriteria listingCriteria, boolean dispatchBased);
 }

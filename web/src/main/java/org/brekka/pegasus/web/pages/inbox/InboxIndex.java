@@ -75,7 +75,7 @@ public class InboxIndex {
      * @param loopDeposit the loopDeposit to set
      */
     public void setLoopDeposit(Deposit loopDeposit) {
-        this.loopDeposit = inboxService.retrieveDeposit(loopDeposit.getId());
+        this.loopDeposit = inboxService.retrieveDeposit(loopDeposit.getId(), false);
     }
     
     /**

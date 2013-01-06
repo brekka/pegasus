@@ -82,7 +82,7 @@ public interface InboxService {
      * @param deposit
      * @return
      */
-    Deposit retrieveDeposit(UUID depositId);
+    Deposit retrieveDeposit(UUID depositId, boolean populateDispatches);
     
     /**
      * Retrieve the specified deposit and verify that it belongs to the specified inbox.
@@ -107,11 +107,13 @@ public interface InboxService {
     /**
      * @param actionDeposit
      */
-    void deleteDeposit(Deposit deposit);
-    
-    int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired);
-    
-    List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired, ListingCriteria listingCriteria);
+    void deleteDeposit(UUID depositId);
+
+    int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            boolean dispatchBased);
+
+    List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            ListingCriteria listingCriteria, boolean populateDispatches);
 
     /**
      * @param fromString

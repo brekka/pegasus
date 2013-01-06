@@ -4,9 +4,11 @@
 package org.brekka.pegasus.core.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.model.Allocation;
+import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -27,9 +29,8 @@ public interface DispatchService {
      * @param fileBuilderList
      * @return
      */
-    Dispatch createDispatch(KeySafe<?> keySafe, DetailsType details, DateTime expires, Integer maxDownloads, UploadedFiles files);
-    
-    
+    Dispatch createDispatch(KeySafe<?> keySafe, AllocationDisposition disposition, DetailsType details,
+            DateTime expires, Integer maxDownloads, UploadedFiles files);
 
     /**
      * @param from
@@ -37,8 +38,6 @@ public interface DispatchService {
      * @return
      */
     List<Dispatch> retrieveCurrentForInterval(KeySafe<?> keySafe, DateTime from, DateTime until);
-
-
 
     /**
      * @param recipientEMail
@@ -50,6 +49,12 @@ public interface DispatchService {
      * @return
      */
     Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
-            DetailsType detailsType, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads, UploadedFiles files);
+            DetailsType detailsType, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads,
+            UploadedFiles files);
+
+    /**
+     * @param fromString
+     */
+    void delete(UUID dispatchId);
 
 }

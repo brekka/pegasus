@@ -15,6 +15,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Repository;
 
@@ -53,39 +54,49 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
     @SuppressWarnings("unchecked")
     @Override
     public List<Deposit> retrieveListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
-            ListingCriteria listingCriteria) {
+            ListingCriteria listingCriteria, boolean dispatchBased) {
         Criteria criteria = getCurrentSession().createCriteria(Deposit.class);
         criteria.add(Restrictions.eq("inbox", inbox));
         criteria.add(Restrictions.gt("created", from.toDate()));
         criteria.add(Restrictions.lt("created", until.toDate()));
-        if (!showExpired) {
+        if (dispatchBased) {
+            Criteria joinCriteria = criteria.createCriteria("derivedFrom", JoinType.LEFT_OUTER_JOIN);
+            joinCriteria.add(Restrictions.gt("expires", new Date()));
+        } else if (!showExpired) {
             criteria.add(Restrictions.gt("expires", new Date()));
         }
         HibernateUtils.applyCriteria(criteria, listingCriteria);
-        return criteria.list();
+        List<Deposit> list = criteria.list();
+        return list;
     }
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.DepositDAO#retrieveListingRowCount(org.brekka.pegasus.core.model.Inbox, org.joda.time.DateTime, org.joda.time.DateTime, boolean)
      */
     @Override
-    public int retrieveListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired) {
-        String hql = 
-                "select count(d) from Deposit d" +
-                " where d.inbox=:inbox" +
+    public int retrieveListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired, boolean dispatchBased) {
+        String hql = "select count(d) from Deposit d";
+        if (dispatchBased) {
+            hql += "  left join d.derivedFrom as disp";
+        }
+        hql +=  " where d.inbox=:inbox" +
                 "   and d.created>:from" +
                 "   and d.created<:until";
-        if (!showExpired) {
-            hql += " and d.expires>:now";
+        if (dispatchBased) {
+            hql += "  and disp.expires>:now";
+        } else if (!showExpired) {
+            hql += "  and d.expires>:now";
         }
+        
         Query query = getCurrentSession().createQuery(hql);
         query.setEntity("inbox", inbox);
-        query.setDate("from", from.toDate());
-        query.setDate("until", until.toDate());
-        if (!showExpired) {
-            hql += " and d.expires>:now";
-            query.setDate("now", new Date());
+        query.setTimestamp("from", from.toDate());
+        query.setTimestamp("until", until.toDate());
+        if (dispatchBased 
+                || !showExpired) {
+            query.setTimestamp("now", new Date());
         }
-        return ((Number) query.uniqueResult()).intValue();
+        int count = ((Number) query.uniqueResult()).intValue();
+        return count;
     }
 }
