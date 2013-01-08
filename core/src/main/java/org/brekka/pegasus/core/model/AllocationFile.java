@@ -84,6 +84,13 @@ public class AllocationFile implements IdentifiableEntity<UUID> {
     private int downloadCount = 0;
     
     /**
+     * Which allocation file is this derived from
+     */
+    @ManyToOne
+    @JoinColumn(name="DerivedFromID")
+    private AllocationFile derivedFrom;
+    
+    /**
      * A reference to the XML model that backs this file (assuming it has been decrypted).
      */
     @Transient
@@ -177,5 +184,19 @@ public class AllocationFile implements IdentifiableEntity<UUID> {
      */
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    /**
+     * @return the derivedFrom
+     */
+    public AllocationFile getDerivedFrom() {
+        return derivedFrom;
+    }
+
+    /**
+     * @param derivedFrom the derivedFrom to set
+     */
+    public void setDerivedFrom(AllocationFile derivedFrom) {
+        this.derivedFrom = derivedFrom;
     }
 }

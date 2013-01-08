@@ -143,7 +143,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
         String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         try {
-            decryptDocument(transfer, codeClean);
+            decryptDocument(transfer, codeClean, true);
         } catch (PhalanxException e) {
             checkAttempts(e, transfer);
             throw e;

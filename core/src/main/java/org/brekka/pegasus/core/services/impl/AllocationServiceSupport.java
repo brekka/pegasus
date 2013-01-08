@@ -161,11 +161,11 @@ class AllocationServiceSupport {
         return allocationType;
     }
     
-    protected void decryptDocument(Allocation allocation) {
-        decryptDocument(allocation, null);
+    protected void decryptDocument(Allocation allocation, boolean generateEvent) {
+        decryptDocument(allocation, null, generateEvent);
     }
     
-    protected void decryptDocument(Allocation allocation, String password) {
+    protected void decryptDocument(Allocation allocation, String password, boolean generateEvent) {
         if(allocation == null) {
             return;
         }
@@ -186,7 +186,7 @@ class AllocationServiceSupport {
             assignFileXml(allocation);
             unlockSuccess = true;
         } finally {
-            if (allocation instanceof Transfer) {
+            if (allocation instanceof Transfer && generateEvent) {
                 eventService.transferUnlock((Transfer) allocation, unlockSuccess);
             }
         }
@@ -206,14 +206,28 @@ class AllocationServiceSupport {
         if (bundle == null) {
             return;
         }
-        List<FileType> fileList = bundle.getFileList();
-        for (FileType fileType : fileList) {
-            AllocationFile allocationFile = new AllocationFile();
-            allocationFile.setAllocation(allocation);
-            CryptedFile cryptedFile = cryptedFileDAO.retrieveById(UUID.fromString(fileType.getUUID()));
-            allocationFile.setCryptedFile(cryptedFile);
-            allocationFile.setXml(fileType);
-            allocationFileDAO.create(allocationFile);
+        Dispatch derivedFrom = allocation.getDerivedFrom();
+        if (derivedFrom != null) {
+            decryptDocument(derivedFrom, false);
+            List<AllocationFile> files = derivedFrom.getFiles();
+            for (AllocationFile source : files) {
+                AllocationFile allocationFile = new AllocationFile();
+                allocationFile.setAllocation(allocation);
+                allocationFile.setCryptedFile(source.getCryptedFile());
+                allocationFile.setXml(source.getXml());
+                allocationFile.setDerivedFrom(source);
+                allocationFileDAO.create(allocationFile);
+            }
+        } else {
+            List<FileType> fileList = bundle.getFileList();
+            for (FileType fileType : fileList) {
+                AllocationFile allocationFile = new AllocationFile();
+                allocationFile.setAllocation(allocation);
+                CryptedFile cryptedFile = cryptedFileDAO.retrieveById(UUID.fromString(fileType.getUUID()));
+                allocationFile.setCryptedFile(cryptedFile);
+                allocationFile.setXml(fileType);
+                allocationFileDAO.create(allocationFile);
+            }
         }
     }
     

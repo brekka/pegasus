@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CryptedFile;
-import org.brekka.pegasus.core.PegasusErrorCode;
-import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.KeySafeAware;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
@@ -99,7 +99,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         Allocation unlockedAllocation = currentContext.retrieve(allocation.getId(), Allocation.class);
         if (unlockedAllocation == null) {
             // Allocation has not yet been unlocked
-            decryptDocument(allocation);
+            decryptDocument(allocation, true);
             currentContext.retain(allocation.getId(), allocation);
             unlockedAllocation = allocation;
         }
@@ -146,7 +146,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             if (allocation == null) {
                 continue;
             }
-            decryptDocument(allocation);
+            decryptDocument(allocation, true);
             bindToContext(allocation);
         }
     }
@@ -240,6 +240,31 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     @Transactional(propagation=Propagation.REQUIRED)
     public int retrieveDerivedFromListingRowCount(Dispatch derivedFrom) {
         return retrieveDerivedFromListingRowCount(derivedFrom);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrievePopulatedDownloadEvents(org.brekka.pegasus.core.model.Allocation)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<FileDownloadEvent> retrievePopulatedDownloadEvents(Allocation allocation) {
+        Allocation managed = allocationDAO.retrieveById(allocation.getId());
+        Dispatch derivedFrom = managed.getDerivedFrom();
+        decryptDocument(derivedFrom, false);
+        List<FileDownloadEvent> downloads = eventService.retrieveFileDownloads(managed);
+        
+        List<AllocationFile> files = derivedFrom.getFiles();
+        for (FileDownloadEvent fileDownloadEvent : downloads) {
+            AllocationFile eventTransferFile = fileDownloadEvent.getTransferFile();
+            for (AllocationFile dispatchTransferFile : files) {
+                if (EntityUtils.identityEquals(dispatchTransferFile, eventTransferFile.getDerivedFrom())) {
+                    // Copy XML to event transfer - just to provide the name. The UUID will be incorrect.
+                    eventTransferFile.setXml(dispatchTransferFile.getXml());
+                    break;
+                }
+            }
+        }
+        return downloads;
     }
 
 //    /**

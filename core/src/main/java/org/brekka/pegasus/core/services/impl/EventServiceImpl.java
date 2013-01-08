@@ -95,8 +95,16 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public boolean isAccepted(Transfer transfer) {
-        AgreementAcceptedEvent event = agreementAcceptedEventDAO.retrieveByTransfer(transfer);
-        return event != null;
+        return retrieveAgreement(transfer) != null;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EventService#retrieveAgreement(org.brekka.pegasus.core.model.Transfer)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public AgreementAcceptedEvent retrieveAgreement(Transfer transfer) {
+        return agreementAcceptedEventDAO.retrieveByTransfer(transfer);
     }
     
     /* (non-Javadoc)
@@ -138,6 +146,15 @@ public class EventServiceImpl implements EventService {
     @Transactional(propagation=Propagation.REQUIRED)
     public int retrieveFailedUnlockAttempts(Transfer transfer) {
         return bundleUnlockEventDAO.retrieveFailedUnlockAttempts(transfer);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EventService#retrieveUnlockAttempts(org.brekka.pegasus.core.model.Transfer)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<TransferUnlockEvent> retrieveUnlockAttempts(Transfer transfer) {
+        return bundleUnlockEventDAO.retrieveAttempts(transfer);
     }
     
     /* (non-Javadoc)

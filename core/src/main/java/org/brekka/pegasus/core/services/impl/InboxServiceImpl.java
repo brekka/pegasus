@@ -224,9 +224,9 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
             // Need to extract the metadata
             deposit = depositDAO.retrieveById(depositId);
             if (populateDispatches) {
-                decryptDocument(deposit.getDerivedFrom());
+                decryptDocument(deposit.getDerivedFrom(), true);
             } else {
-                decryptDocument(deposit);
+                decryptDocument(deposit, true);
             }
         } else {
             // Already unlocked, just refresh
@@ -274,7 +274,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         List<Deposit> depositList = depositDAO.retrieveByInbox(inbox);
         if (releaseXml) {
             for (Deposit deposit : depositList) {
-                decryptDocument(deposit);
+                decryptDocument(deposit, true);
                 bindToContext(deposit);
             }
         }

@@ -5,11 +5,12 @@ package org.brekka.pegasus.core.services;
 
 import java.util.List;
 
+import org.brekka.pegasus.core.model.AgreementAcceptedEvent;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
-import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.Transfer;
+import org.brekka.pegasus.core.model.TransferUnlockEvent;
 
 /**
  * @author Andrew Taylor
@@ -52,4 +53,16 @@ public interface EventService {
      * @return
      */
     List<FileDownloadEvent> retrieveFileDownloads(Allocation allocation);
+
+    /**
+     * @param allocation
+     * @return
+     */
+    AgreementAcceptedEvent retrieveAgreement(Transfer transfer);
+
+    /**
+     * @param anonymousTransfer
+     * @return
+     */
+    List<TransferUnlockEvent> retrieveUnlockAttempts(Transfer transfer);
 }

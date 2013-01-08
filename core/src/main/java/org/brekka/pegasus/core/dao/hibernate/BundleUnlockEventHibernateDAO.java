@@ -3,10 +3,13 @@
  */
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+
 import org.brekka.pegasus.core.dao.BundleUnlockEventDAO;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.TransferUnlockEvent;
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -40,6 +43,17 @@ public class BundleUnlockEventHibernateDAO extends AbstractPegasusHibernateDAO<T
         query.setEntity("transfer", transfer);
         query.setBoolean("success", false);
         return ((Number) query.uniqueResult()).intValue();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.BundleUnlockEventDAO#retrieveAttempts(org.brekka.pegasus.core.model.Transfer)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<TransferUnlockEvent> retrieveAttempts(Transfer transfer) {
+        return getCurrentSession().createCriteria(TransferUnlockEvent.class)
+                .add(Restrictions.eq("transfer", transfer))
+                .list();
     }
 
 }

@@ -11,6 +11,7 @@ import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.KeySafeAware;
 
 /**
@@ -48,4 +49,6 @@ public interface AllocationService {
      * @param transfer
      */
     void forceExpireAllocation(Allocation allocation);
+    
+    List<FileDownloadEvent> retrievePopulatedDownloadEvents(Allocation allocation);
 }
