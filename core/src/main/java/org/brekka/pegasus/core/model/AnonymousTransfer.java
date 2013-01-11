@@ -27,7 +27,7 @@ public class AnonymousTransfer extends Transfer {
     /**
      * The creator can specify how man unlock attempts can be made.
      */
-    @Column(name="MaxUnlockAttempts")
+    @Column(name="`MaxUnlockAttempts`")
     private Integer maxUnlockAttempts;
     
     @Transient

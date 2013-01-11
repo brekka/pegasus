@@ -87,7 +87,7 @@ public class AllocationFile implements IdentifiableEntity<UUID> {
      * Which allocation file is this derived from
      */
     @ManyToOne
-    @JoinColumn(name="DerivedFromID")
+    @JoinColumn(name="`DerivedFromID`")
     private AllocationFile derivedFrom;
     
     /**

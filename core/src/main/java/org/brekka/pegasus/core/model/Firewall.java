@@ -43,7 +43,7 @@ public class Firewall extends SnapshotEntity<UUID> {
      * The entity that owns this firewall ruleset. 
      * For example a member, division or even the system id.
      */
-    @Column(name="OwningEntityId", nullable=false)
+    @Column(name="`OwningEntityId`", nullable=false)
     @Type(type="pg-uuid")
     @Index(name="IDX_Firewall_Owner")
     private UUID owningEntityId;

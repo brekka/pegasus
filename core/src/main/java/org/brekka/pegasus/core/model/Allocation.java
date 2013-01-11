@@ -87,14 +87,14 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * An allocation could be derived from a dispatch (in the case of a file sent by a member).
      */
     @ManyToOne
-    @JoinColumn(name="DerivedFromID")
+    @JoinColumn(name="`DerivedFromID`")
     private Dispatch derivedFrom;
     
     
     /**
      * If set to to true, this allocation will be purged upon successful download.
      */
-    @Column(name="PurgeOnDownload")
+    @Column(name="`PurgeOnDownload`")
     private Boolean purgeOnDownload;
     
     /**

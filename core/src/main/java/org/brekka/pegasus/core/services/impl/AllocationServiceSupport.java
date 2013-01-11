@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -207,6 +208,7 @@ class AllocationServiceSupport {
             return;
         }
         Dispatch derivedFrom = allocation.getDerivedFrom();
+        List<AllocationFile> allocationFiles = new ArrayList<>();
         if (derivedFrom != null) {
             decryptDocument(derivedFrom, false);
             List<AllocationFile> files = derivedFrom.getFiles();
@@ -217,6 +219,7 @@ class AllocationServiceSupport {
                 allocationFile.setXml(source.getXml());
                 allocationFile.setDerivedFrom(source);
                 allocationFileDAO.create(allocationFile);
+                allocationFiles.add(allocationFile);
             }
         } else {
             List<FileType> fileList = bundle.getFileList();
@@ -227,8 +230,10 @@ class AllocationServiceSupport {
                 allocationFile.setCryptedFile(cryptedFile);
                 allocationFile.setXml(fileType);
                 allocationFileDAO.create(allocationFile);
+                allocationFiles.add(allocationFile);
             }
         }
+        allocation.setFiles(allocationFiles);
     }
     
     
