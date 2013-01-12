@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.services;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.Token;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 
@@ -15,10 +16,10 @@ import org.joda.time.DateTime;
  */
 public interface AnonymousService {
 
-    AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
+    AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
             UploadedFiles files, String code);
 
-    AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
+    AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
             Dispatch dispatch, String code);
 
     AnonymousTransfer unlock(String token, String code);

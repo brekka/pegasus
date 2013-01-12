@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -48,8 +49,8 @@ public class VelocityTemplateLoader extends ResourceLoader {
      */
     @Override
     public void init(ExtendedProperties configuration) {
-        this.templateDAO = (TemplateDAO) this.rsvc.getApplicationAttribute(TemplateDAO.class);
-        this.xmlEntityService = (XmlEntityService) this.rsvc.getApplicationAttribute(XmlEntityService.class);
+        this.templateDAO = (TemplateDAO) this.rsvc.getApplicationAttribute(TemplateDAO.class.getName());
+        this.xmlEntityService = (XmlEntityService) this.rsvc.getApplicationAttribute(XmlEntityService.class.getName());
     }
 
     /* (non-Javadoc)
@@ -64,7 +65,7 @@ public class VelocityTemplateLoader extends ResourceLoader {
         TemplateType templateType = templateDocument.getTemplate();
         String content = templateType.getContent();
         // TODO perhaps a less memory intensive way of doing this.
-        return IOUtils.toInputStream(content, Charset.forName("UTF-8"));
+        return new ByteArrayInputStream(content.getBytes(Charset.forName("UTF-8")));
     }
 
     /* (non-Javadoc)
@@ -74,7 +75,8 @@ public class VelocityTemplateLoader extends ResourceLoader {
     public boolean isSourceModified(Resource resource) {
         long cachedLastModified = resource.getLastModified();
         long currentLastModified = getLastModified(resource);
-        return currentLastModified != cachedLastModified;
+        boolean modified = currentLastModified != cachedLastModified;
+        return modified;
     }
 
     /* (non-Javadoc)
@@ -85,7 +87,8 @@ public class VelocityTemplateLoader extends ResourceLoader {
         String name = resource.getName();
         UUID templateId = UUID.fromString(name);
         Template template = templateDAO.retrieveById(templateId);
-        return template.getXml().getCreated().getTime();
+        long lastModified = template.getXml().getCreated().getTime();
+        return lastModified;
     }
 
 }

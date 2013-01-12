@@ -4,7 +4,7 @@
 package org.brekka.pegasus.core.services;
 
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.PegasusTokenType;
+import org.brekka.pegasus.core.model.TokenType;
 
 /**
  * Manipulate tokens
@@ -13,9 +13,9 @@ import org.brekka.pegasus.core.model.PegasusTokenType;
  */
 public interface TokenService {
 
-    Token generateToken(PegasusTokenType tokenType);
+    Token generateToken(TokenType tokenType);
     
-    Token createToken(String path, PegasusTokenType type);
+    Token createToken(String path, TokenType type);
 
     /**
      * @param inboxToken

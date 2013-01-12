@@ -8,6 +8,7 @@ import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TokenDAO;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.PegasusTokenType;
+import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,12 +31,12 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Token createToken(String path, PegasusTokenType type) {
+    public Token createToken(String path, TokenType type) {
         Token token;
         if (path != null) {
             if (tokenDAO.retrieveByPath(path) != null) {
                 throw new PegasusException(PegasusErrorCode.PG300, 
-                        "The inbox token '%s' is already taken", path);
+                        "The token '%s' of type '%s' is already taken", path, type.getKey());
             }
             token = new Token();
             token.setType(type);
@@ -53,14 +54,14 @@ public class TokenServiceImpl implements TokenService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Token generateToken(PegasusTokenType tokenType) {
+    public Token generateToken(TokenType tokenType) {
         // For now just keep generating random tokens
         Token token = chooseRandomToken(tokenType);
         tokenDAO.create(token);
         return token;
     }
 
-    private Token chooseRandomToken(PegasusTokenType type) {
+    private Token chooseRandomToken(TokenType type) {
         Token token = type.generateRandom();
         while (tokenDAO.retrieveByPath(token.getPath()) != null) {
             token = type.generateRandom();

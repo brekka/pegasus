@@ -52,7 +52,7 @@ public class MakeDirect extends AbstractMakePage {
         detailsType.setComment(comment);
         // TODO Expiry for transfers
         DateTime expires = new DateTime().plusDays(1);
-        Allocation allocation = anonymousService.createTransfer(detailsType, expires, 1, 5, files, null);
+        Allocation allocation = anonymousService.createTransfer(null, detailsType, expires, 1, 5, files, null);
         directDonePage.init(makeKey, allocation);
         return directDonePage;
     }

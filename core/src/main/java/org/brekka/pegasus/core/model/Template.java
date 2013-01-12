@@ -70,13 +70,13 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     /**
      * Identify this template via a slug (optional).
      */
-    @Column(name="`Slug`", unique=true)
+    @Column(name="`Slug`", unique=true, length=120)
     private String slug;
     
     /**
      * Optionally set a plaintext label.
      */
-    @Column(name="`Label`")
+    @Column(name="`Label`", length=200)
     private String label;
     
     /**

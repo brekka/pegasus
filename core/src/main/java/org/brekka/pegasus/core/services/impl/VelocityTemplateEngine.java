@@ -57,9 +57,10 @@ public class VelocityTemplateEngine implements TemplateEngineAdapter {
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, NAME);
         velocityEngine.setProperty(RuntimeConstants.VM_LIBRARY, "");
         velocityEngine.setProperty(RESOURCE_LOADER_CLASS, VelocityTemplateLoader.class.getName());
-        velocityEngine.setProperty(RESOURCE_LOADER_CACHE, Boolean.TRUE.toString());
-        velocityEngine.setProperty(TemplateDAO.class.getName(), templateDAO);
-        velocityEngine.setProperty(XmlEntityService.class.getName(), xmlEntityService);
+        // Disable caching as it seems a bit shit
+        velocityEngine.setProperty(RESOURCE_LOADER_CACHE, Boolean.FALSE.toString());
+        velocityEngine.setApplicationAttribute(TemplateDAO.class.getName(), templateDAO);
+        velocityEngine.setApplicationAttribute(XmlEntityService.class.getName(), xmlEntityService);
         velocityEngine.init();
         this.velocityEngine = velocityEngine;
     }

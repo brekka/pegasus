@@ -74,10 +74,10 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
+    public AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
             UploadedFiles files, String code) {
         BundleType bundleType = completeFiles(maxDownloads, files);
-        return createTransfer(details, expires, maxUnlockAttempts, null, bundleType, code);
+        return createTransfer(token, details, expires, maxUnlockAttempts, null, bundleType, code);
     }
     
     /* (non-Javadoc)
@@ -85,10 +85,10 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts, 
+    public AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts, 
             Dispatch dispatch, String code) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, maxDownloads);
-        return createTransfer(details, expires, maxUnlockAttempts, dispatch, dispatchBundle, code);
+        return createTransfer(token, details, expires, maxUnlockAttempts, dispatch, dispatchBundle, code);
     }
     
     
@@ -164,7 +164,7 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
     }
     
 
-    protected AnonymousTransfer createTransfer(DetailsType details, DateTime expires, Integer maxUnlockAttempts, Dispatch dispatch, 
+    protected AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxUnlockAttempts, Dispatch dispatch, 
             BundleType bundleType, String code) {
         AnonymousTransfer anonTransfer = new AnonymousTransfer();
         anonTransfer.setDerivedFrom(dispatch);
@@ -210,7 +210,9 @@ public class AnonymousServiceImpl extends AllocationServiceSupport implements An
          * Prepare the mapping between bundle and the url identifier that will be used to retrieve it by
          * the third party.
          */
-        Token token = tokenService.generateToken(PegasusTokenType.ANON);
+        if (token == null) {
+            token = tokenService.generateToken(PegasusTokenType.ANON);
+        }
         anonTransfer.setToken(token);
         
         anonymousTransferDAO.create(anonTransfer);
