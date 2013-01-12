@@ -19,7 +19,6 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
-import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.dao.RobotDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
