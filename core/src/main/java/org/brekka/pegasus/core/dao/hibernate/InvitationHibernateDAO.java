@@ -8,7 +8,8 @@ import java.util.List;
 import org.brekka.pegasus.core.dao.InvitationDAO;
 import org.brekka.pegasus.core.model.Invitation;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.Token;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -26,20 +27,21 @@ public class InvitationHibernateDAO extends AbstractPegasusHibernateDAO<Invitati
         return Invitation.class;
     }
     
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.InvitationDAO#retrieveForVault(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.Vault)
-     */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Invitation> retrieveForVault(Member member, Vault vault) {
-        return getCurrentSession().createQuery(
-                "select inv " +
-                "  from Invitation inv " +
-                "  join inv.xml as xml" +
-                " where inv.recipient=:recipient" +
-                "   and xml.keySafe=:vault")
-                .setEntity("recipient", member)
-                .setEntity("vault", vault)
+    public List<Invitation> retrieveForMember(Member member) {
+        return getCurrentSession().createCriteria(Invitation.class)
+                .add(Restrictions.eq("recipient", member))
                 .list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.InvitationDAO#retrieveByToken(org.brekka.pegasus.core.model.Token)
+     */
+    @Override
+    public Invitation retrieveByToken(Token token) {
+        return (Invitation) getCurrentSession().createCriteria(Invitation.class)
+                .add(Restrictions.eq("token", token))
+                .uniqueResult();
     }
 }

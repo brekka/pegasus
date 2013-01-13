@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
@@ -177,6 +178,15 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      */
     @Override
     public <T extends XmlObject> XmlEntity<T> updateEntity(XmlEntity<T> updated, XmlEntity<T> lockedCurrent, Class<T> xmlType) {
+        if (updated == null) {
+            // Request to remove the XML. Delete the series
+            List<XmlEntity<?>> series = xmlEntityDAO.retrieveBySerial(lockedCurrent.getSerial());
+            for (XmlEntity<?> xmlEntity : series) {
+                xmlEntity.setDeleted(new Date());
+                xmlEntityDAO.update(xmlEntity);
+            }
+            return null;
+        }
         if (lockedCurrent.getKeySafe() == null 
                 && lockedCurrent.getCryptedDataId() != null) {
             throw new PegasusException(PegasusErrorCode.PG443, 

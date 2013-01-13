@@ -121,9 +121,10 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
         if (AuthenticatedMemberBase.isAvailable(memberService)) {
             AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
             currentMember.retainVaultKey(vault);
+            
+            // Only pulish an open event if it is the current user opening the vault.
+            applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
         }
-        
-        applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
     }
 
     /* (non-Javadoc)

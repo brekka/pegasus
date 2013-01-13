@@ -64,4 +64,15 @@ public class XmlEntityHibernateDAO extends AbstractPegasusHibernateDAO<XmlEntity
                 .add(Restrictions.eq("keySafe", keySafe))
                 .list();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.XmlEntityDAO#retrieveBySeries(java.util.UUID)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<XmlEntity<?>> retrieveBySerial(UUID serial) {
+        return getCurrentSession().createCriteria(XmlEntity.class)
+                .add(Restrictions.eq("serial", serial))
+                .list();
+    }
 }

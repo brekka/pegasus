@@ -32,4 +32,10 @@ public interface XmlEntityDAO extends EntityDAO<UUID, XmlEntity<?>> {
      * @param vault
      */
     List<XmlEntity<?>> retrieveByKeySafe(KeySafe<?> keySafe);
+
+    /**
+     * @param serial
+     * @return
+     */
+    List<XmlEntity<?>> retrieveBySerial(UUID serial);
 }

@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -24,8 +25,10 @@ import org.brekka.xml.pegasus.v2.model.InvitationDocument;
 import org.hibernate.annotations.Type;
 
 /**
- * @author Andrew Taylor (andrew@brekka.org)
+ * An invitation is a way to grant someone access to something in secure way. For example it can be used to invite a new user to the system
+ * or give a member access to a division that they did not previously have access to.
  *
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @Table(name="`Invitation`", schema=PegasusConstants.SCHEMA)
@@ -44,36 +47,49 @@ public class Invitation extends SnapshotEntity<UUID> {
     @Column(name="`ID`")
     private UUID id;
     
+    /**
+     * Token that identifies this invitation
+     */
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="`TokenID`")
+    private Token token;
+    
+    /**
+     * User that sent the invitation
+     */
     @ManyToOne
     @JoinColumn(name="`SenderID`", nullable=false)
     private Actor sender;
     
+    /**
+     * Who should receive the invitation, assuming they are already a member. If not specified then the XML should
+     * be encrypted with a password.
+     */
     @ManyToOne
-    @JoinColumn(name="`RecipientID`", nullable=false)
+    @JoinColumn(name="`RecipientID`")
     private Member recipient;
     
+    /**
+     * When did the invitation get actioned.
+     */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="`Actioned`")
     private Date actioned;
     
+    /**
+     * Status of the invitation
+     */
     @Column(name="`Status`", nullable=false)
     @Enumerated(EnumType.STRING)
-    private InvitationStatus invitationStatus = InvitationStatus.NEW;
+    private InvitationStatus status = InvitationStatus.NEW;
 
+    /**
+     * The details of the invitation that can potentially be encrypted.
+     */
     @OneToOne
     @JoinColumn(name="`XmlEntityID`", nullable=false)
     private XmlEntity<InvitationDocument> xml;
-    
-    /**
-     * The key to the resource that the invitation if for. It will have been encrypted
-     * using the public key of the keySafe found in the XML entity. If the invitation
-     * is accepted, this should be transferred, otherwise it should be deleted in phalanx.
-     */
-    @Type(type="pg-uuid")
-    @Column(name="`CryptedDataID`", updatable=false)
-    private UUID cryptedDataId;
-
-    
+   
     
     public Actor getSender() {
         return sender;
@@ -99,12 +115,12 @@ public class Invitation extends SnapshotEntity<UUID> {
         this.actioned = actioned;
     }
 
-    public InvitationStatus getInvitationStatus() {
-        return invitationStatus;
+    public InvitationStatus getStatus() {
+        return status;
     }
 
-    public void setInvitationStatus(InvitationStatus invitationStatus) {
-        this.invitationStatus = invitationStatus;
+    public void setStatus(InvitationStatus invitationStatus) {
+        this.status = invitationStatus;
     }
 
     public XmlEntity<InvitationDocument> getXml() {
@@ -113,14 +129,6 @@ public class Invitation extends SnapshotEntity<UUID> {
 
     public void setXml(XmlEntity<InvitationDocument> xml) {
         this.xml = xml;
-    }
-
-    public UUID getCryptedDataId() {
-        return cryptedDataId;
-    }
-
-    public void setCryptedDataId(UUID cryptedDataId) {
-        this.cryptedDataId = cryptedDataId;
     }
 
     /**
@@ -135,5 +143,19 @@ public class Invitation extends SnapshotEntity<UUID> {
      */
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    /**
+     * @return the token
+     */
+    public Token getToken() {
+        return token;
+    }
+
+    /**
+     * @param token the token to set
+     */
+    public void setToken(Token token) {
+        this.token = token;
     }
 }

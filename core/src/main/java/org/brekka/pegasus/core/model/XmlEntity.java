@@ -4,6 +4,7 @@
 package org.brekka.pegasus.core.model;
 
 import java.sql.Blob;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -12,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -22,6 +25,7 @@ import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 /**
@@ -69,6 +73,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     /**
      * A common key between versions
      */
+    @Index(name="IDX_XmlEntity_Serial")
     @Column(name="`SerialID`", updatable=false, nullable=false)
     private UUID serial;
     
@@ -117,6 +122,13 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Column(name="`Data`", length=MAX_DATA_LENGTH, updatable=false)
     private Blob data;
+    
+    /**
+     * XML entities are initially marked soft-deleted and then completely removed at a later date.
+     */
+    @Column(name = "`Deleted`")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deleted;
     
     /**
      * The actual profile information in object form
@@ -264,5 +276,19 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     public void setExternalData(boolean externalData) {
         this.externalData = externalData;
+    }
+
+    /**
+     * @return the deleted
+     */
+    public Date getDeleted() {
+        return deleted;
+    }
+
+    /**
+     * @param deleted the deleted to set
+     */
+    public void setDeleted(Date deleted) {
+        this.deleted = deleted;
     }
 }

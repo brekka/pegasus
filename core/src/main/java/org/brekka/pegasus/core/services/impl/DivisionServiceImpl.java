@@ -19,6 +19,8 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.model.Actor;
@@ -31,18 +33,20 @@ import org.brekka.pegasus.core.model.KeySafeStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
+import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
 import org.brekka.phalanx.api.model.KeyPair;
+import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * TODO Description of DivisionServiceImpl
+ * Division Service Impl
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -90,6 +94,23 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.impl.AbstractKeySafeServiceSupport#createPartnership(org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Division, org.brekka.phalanx.api.model.KeyPair)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(Owner owner,
+            Division<Owner> source, Division<Target> target) {
+        PrivateKeyToken privateKeyToken = target.getPrivateKeyToken();
+        if (privateKeyToken == null) {
+            AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
+            privateKeyToken = resolvePrivateKeyFor(target, currentMember);
+        }
+        IdentityKeyPair targetKeyPair = new IdentityKeyPair(target.getKeyPairId());
+        KeyPair connectionKeyPair = phalanxService.assignKeyPair(privateKeyToken, targetKeyPair);
+        return super.createPartnership(owner, source, target, connectionKeyPair);
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.DivisionService#retrievePartnershipById(java.util.UUID)
      */
     @SuppressWarnings("unchecked")
@@ -120,10 +141,24 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public <T extends Actor> Division<T> createDivision(Division<T> parent, String slug, String name) {
-        IdentityKeyPair identityKeyPair = new IdentityKeyPair(parent.getKeyPairId());
-        KeyPair protectedBy = phalanxService.generateKeyPair(identityKeyPair);
-        Division<T> division = createDivision(parent.getOwner(), parent, protectedBy, slug, name);
+    public <T extends Actor> Division<T> createDivision(KeySafe<T> parent, String slug, String name) {
+        KeyPair divisionKeyPair;
+        PrivateKeyToken privateKey = null;
+        if (parent instanceof Division) {
+            Division<T> division = (Division<T>) parent;
+            IdentityKeyPair identityKeyPair = new IdentityKeyPair(division.getKeyPairId());
+            divisionKeyPair = phalanxService.generateKeyPair(identityKeyPair);
+        } else if (parent instanceof Vault) {
+            Vault vault = (Vault) parent;
+            KeyPair keyPair = vault.getAuthenticatedPrincipal().getPrincipal().getDefaultKeyPair();
+            divisionKeyPair = phalanxService.generateKeyPair(keyPair);
+            privateKey = phalanxService.decryptKeyPair(divisionKeyPair, vault.getAuthenticatedPrincipal().getDefaultPrivateKey());
+        } else {
+            throw new PegasusException(PegasusErrorCode.PG701, 
+                    "Unable to handle keySafe type '%s' at this location", parent.getClass().getName());
+        }
+        Division<T> division = createDivision(parent.getOwner(), parent, divisionKeyPair, slug, name);
+        division.setPrivateKeyToken(privateKey);
         return division;
     }
 
@@ -166,7 +201,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         return enlistment;
     }
     
-    protected <T extends Actor> Division<T> createDivision(T owner, Division<T> parent, 
+    protected <T extends Actor> Division<T> createDivision(T owner, KeySafe<T> parent, 
             KeyPair protectedBy, String slug, String name) {
         Division<T> division = new Division<>();
         division.setId(UUID.randomUUID());

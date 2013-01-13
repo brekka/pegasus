@@ -39,8 +39,11 @@ public interface DivisionService {
     
     <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> 
             createDivisionPartnership(Division<Owner> source, Target target, String slug, String name);
+    
+    <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(Owner owner,
+            Division<Owner> source, Division<Target> target);
 
-    <T extends Actor> Division<T> createDivision(Division<T> parent, String slug, String name);
+    <T extends Actor> Division<T> createDivision(KeySafe<T> parent, String slug, String name);
     
     
     <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 

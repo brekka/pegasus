@@ -9,11 +9,11 @@ import java.util.UUID;
 import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Invitation;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.model.Token;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
- *
+ * 
  */
 public interface InvitationDAO extends EntityDAO<UUID, Invitation> {
 
@@ -22,7 +22,7 @@ public interface InvitationDAO extends EntityDAO<UUID, Invitation> {
      * @param vault
      * @return
      */
-    List<Invitation> retrieveForVault(Member member, Vault vault);
+    List<Invitation> retrieveForMember(Member member);
 
-
+    Invitation retrieveByToken(Token token);
 }

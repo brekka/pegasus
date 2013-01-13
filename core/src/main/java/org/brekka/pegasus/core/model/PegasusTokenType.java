@@ -49,6 +49,11 @@ public enum PegasusTokenType implements TokenType {
      * Deposit
      */
     DEPOSIT(8),
+    
+    /**
+     * An invitation
+     */
+    INVITATION(10),
     ;
 
     /**

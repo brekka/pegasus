@@ -165,9 +165,9 @@ public class MemberIndex {
         //return organizationService.retrieveAssociates(loopVault);
     }
     
-    public List<Invitation> getInvistationList() {
-        return invitationService.retrieveCurrent(loopVault);
-    }
+//    public List<Invitation> getInvistationList() {
+//        return invitationService.retrieveForMember(loopVault);
+//    }
     
     public boolean isVaultOpen() {
         return vaultService.isOpen(loopVault);

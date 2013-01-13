@@ -9,6 +9,7 @@ package org.brekka.pegasus.core.model;
  */
 public enum InvitationStatus {
     NEW,
+    PREPARED,
     ACCEPTED,
     REJECTED,
 }

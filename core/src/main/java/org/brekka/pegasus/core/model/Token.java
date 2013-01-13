@@ -48,7 +48,7 @@ public class Token extends SnapshotEntity<UUID> {
     /**
      * The type of this token
      */
-    @Column(name="`Type`", nullable=false, length=8)
+    @Column(name="`Type`", nullable=false, length=12)
     @Type(type="org.brekka.pegasus.core.support.TokenTypeUserType")
     private TokenType type;
 
