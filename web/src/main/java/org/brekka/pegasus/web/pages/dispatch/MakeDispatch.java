@@ -98,7 +98,7 @@ public class MakeDispatch extends AbstractMakePage {
     }
     
     Object onActivate(String makeKey) {
-        Vault activeVault = memberService.getCurrent().getActiveVault();
+        Vault activeVault = (Vault) memberService.getCurrent().getActiveKeySafe();
         return activate(makeKey, null, activeVault);
     }
     

@@ -127,7 +127,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
+    public <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<? extends Member> assignToKeySafe, 
             Connection<Owner, Source, Division<Organization>> existingEnlistment) {
         Division<Organization> target = existingEnlistment.getTarget();
         KeyPair identityKeyPair = new IdentityKeyPair(existingEnlistment.getKeyPairId());
@@ -190,7 +190,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @param division
      * @return
      */
-    protected Enlistment createEnlistment(Associate associate, KeySafe<Member> protectedBy, Division<Organization> division, KeyPair memberDivisionKeyPair) {
+    protected Enlistment createEnlistment(Associate associate, KeySafe<? extends Member> protectedBy, Division<Organization> division, KeyPair memberDivisionKeyPair) {
         Enlistment enlistment = new Enlistment();
         enlistment.setId(UUID.randomUUID());
         enlistment.setAssociate(associate);

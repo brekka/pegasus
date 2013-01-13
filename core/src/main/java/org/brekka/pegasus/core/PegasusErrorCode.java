@@ -30,6 +30,8 @@ public enum PegasusErrorCode implements ErrorCode {
      */
     PG302,
     
+    PG333,
+    
     PG400,
     
     PG401,

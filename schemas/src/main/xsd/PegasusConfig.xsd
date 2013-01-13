@@ -16,6 +16,7 @@
                 <xsd:element ref="plxc:EMailAddressService" />
                 <xsd:element ref="plxc:UsernamePasswordService" minOccurs="0" />
                 <xsd:element ref="plxc:CertificateAuthenticationService" minOccurs="0" />
+                <xsd:element ref="plxc:XmlEntityService" minOccurs="0" />
                 <xsd:element name="AnonymousTransfer">
                     <xsd:complexType>
                         <xsd:sequence>
@@ -67,6 +68,19 @@
                     <xsd:annotation>
                         <xsd:documentation>The pattern used to identify allowed certificates based on their subject distinguished name. A single capturing group can be specified that will be used to resolve the common name that will be returned as a username.</xsd:documentation>
                     </xsd:annotation></xsd:element>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    
+    <xsd:element name="XmlEntityService">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="NamespacePrefix" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="uri" type="xsd:anyURI" />
+                        <xsd:attribute name="prefix" type="xsd:string" />
+                    </xsd:complexType>
+                </xsd:element>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>

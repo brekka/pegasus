@@ -16,7 +16,7 @@ public interface AuthenticatedMember<T extends Member> extends Accessor {
     
     T getMember();
     
-    Vault getActiveVault();
+    KeySafe<?> getActiveKeySafe();
     
     ProfileType getProfile();
     

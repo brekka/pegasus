@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -48,6 +50,9 @@ import org.brekka.phoenix.api.StreamCryptor;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.brekka.phoenix.api.services.CryptoProfileService;
 import org.brekka.phoenix.api.services.SymmetricCryptoService;
+import org.brekka.stillingar.api.annotations.Configured;
+import org.brekka.xml.pegasus.v2.config.XmlEntityServiceDocument;
+import org.brekka.xml.pegasus.v2.config.XmlEntityServiceDocument.XmlEntityService.NamespacePrefix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -65,10 +70,9 @@ import difflib.PatchFailedException;
  */
 @Service
 @Transactional
+@Configured
 public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListener<ApplicationEvent>  {
 
-    private static final XmlOptions WRITE_OPTS = new XmlOptions().setSavePrettyPrint();
-    
     @Autowired
     private XmlEntityDAO xmlEntityDAO;
 
@@ -92,6 +96,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     
     @Autowired
     private PhalanxService phalanxService;
+    
+    private XmlOptions xmlWriteOptions;
+    
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.XmlEntityService#persistPlainEntity(org.apache.xmlbeans.XmlObject)
@@ -276,6 +284,21 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         }
     }
     
+    @Configured
+    public void configured(@Configured XmlEntityServiceDocument.XmlEntityService config) {
+        Map<String, String> prefixes = new HashMap<>();
+        List<NamespacePrefix> prefixList = config.getNamespacePrefixList();
+        for (NamespacePrefix namespacePrefix : prefixList) {
+            prefixes.put(namespacePrefix.getUri(), namespacePrefix.getPrefix());
+        }
+        XmlOptions opts = new XmlOptions();
+        opts.setSavePrettyPrint();
+        opts.setSaveAggressiveNamespaces();
+        opts.setSaveSuggestedPrefixes(prefixes);
+        opts.setSaveNamespacesFirst();
+        this.xmlWriteOptions = opts;
+    }
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.XmlEntityService#retrieveEntity(java.util.UUID)
      */
@@ -296,7 +319,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      */
     protected <T extends XmlObject> XmlEntity<T> createEncrypted(T xml, int version, UUID serial, KeySafe<?> keySafe, UUID cryptedDataId,
             CryptoProfile cryptoProfile, SecretKey secretKey, boolean externalData) {
-
+        
+        validate(xml);
 
         ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
         XmlEntity<T> entity = new XmlEntity<>();
@@ -310,7 +334,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         if (externalData) {
             ByteSequence allocate = resourceStorageService.allocate(entity.getId());
             try ( OutputStream os = allocate.getOutputStream(); OutputStream saveOs = encryptor.encrypt(os)) {
-                xml.save(saveOs);
+                xml.save(saveOs, xmlWriteOptions);
                 saveOs.close();
             } catch (IOException e) {
                 throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
@@ -319,7 +343,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try (OutputStream saveOs = encryptor.encrypt(baos)) {
-                xml.save(saveOs);
+                xml.save(saveOs, xmlWriteOptions);
                 saveOs.close();
             } catch (IOException e) {
                 throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
@@ -335,6 +359,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @param entity
      */
     protected <T extends XmlObject> XmlEntity<T> createPlainEntity(T xml, int version, UUID serial, boolean externalData) {
+        validate(xml);
+        
         XmlEntity<T> entity = new XmlEntity<>();
         entity.setId(UUID.randomUUID());
         populate(entity, xml, version, serial);
@@ -343,7 +369,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
             ByteSequence allocate = resourceStorageService.allocate(entity.getId());
             try ( OutputStream os = allocate.getOutputStream(); 
                     GZIPOutputStream gos = new GZIPOutputStream(os) ) {
-                xml.save(gos);
+                xml.save(gos, xmlWriteOptions);
                 gos.close();
             } catch (IOException e) {
                 throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
@@ -352,7 +378,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try ( GZIPOutputStream gos = new GZIPOutputStream(baos) ) {
-                xml.save(gos);
+                xml.save(gos, xmlWriteOptions);
                 gos.close();
             } catch (IOException e) {
                 throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
@@ -462,13 +488,17 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     protected List<String> toStringList(XmlObject obj) {
         StringListWriter out = new StringListWriter();
         try {
-            obj.save(out, WRITE_OPTS);
+            obj.save(out, xmlWriteOptions);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
         return out.toList();
     }
     
-    
-
+    protected void validate(XmlObject xml) {
+        if (!xml.validate()) {
+            // TODO more detail
+            throw new PegasusException(PegasusErrorCode.PG333, "XML does not validate");
+        }
+    }
 }

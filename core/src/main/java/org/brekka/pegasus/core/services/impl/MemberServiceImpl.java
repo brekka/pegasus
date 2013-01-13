@@ -307,7 +307,7 @@ public class MemberServiceImpl implements MemberService {
             AuthenticatedMember<Person> current = getCurrent(Person.class);
             AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase<Person>) current;
             authenticatedPersonImpl.setMember(person);
-            authenticatedPersonImpl.setActiveVault(defaultVault);
+            authenticatedPersonImpl.setActiveKeySafe(defaultVault);
             authenticatedPersonImpl.setActiveProfile(profile);
         }
     }

@@ -46,7 +46,7 @@ public interface DivisionService {
     <T extends Actor> Division<T> createDivision(KeySafe<T> parent, String slug, String name);
     
     
-    <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<Member> assignToKeySafe, 
+    <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<? extends Member> assignToKeySafe, 
             Connection<Owner, Source, Division<Organization>> existingEnlistment);
     
     /**

@@ -53,7 +53,7 @@ import org.hibernate.annotations.Type;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue("Connection")
-public class Connection<Owner extends Actor, Source extends KeySafe<?>, Target extends KeySafe<?>> extends LongevousEntity<UUID> {
+public class Connection<Owner extends Actor, Source extends KeySafe<? extends Actor>, Target extends KeySafe<?>> extends LongevousEntity<UUID> {
 
     /**
      * Serial UID

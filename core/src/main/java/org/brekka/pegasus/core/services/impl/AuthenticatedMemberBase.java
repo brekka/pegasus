@@ -13,6 +13,7 @@ import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
@@ -55,7 +56,7 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     /**
      * The active vault
      */
-    private transient Vault activeVault;
+    private transient KeySafe<?> activeKeySafe;
     
     /**
      * The user-selected active profile
@@ -135,15 +136,15 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#getActiveVault()
      */
     @Override
-    public Vault getActiveVault() {
-        return activeVault;
+    public KeySafe<?> getActiveKeySafe() {
+        return activeKeySafe;
     }
 
     /**
      * @param activeVault the activeVault to set
      */
-    protected void setActiveVault(Vault activeVault) {
-        this.activeVault = activeVault;
+    protected void setActiveKeySafe(KeySafe<?> activeKeySafe) {
+        this.activeKeySafe = activeKeySafe;
     }
     
     /**
@@ -199,7 +200,6 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * @return
      */
     synchronized List<AuthenticatedPrincipal> clearVaults() {
-        this.activeVault = null;
         return vaultKeyCache.clear();
     }
     

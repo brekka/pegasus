@@ -15,7 +15,7 @@ import javax.persistence.Entity;
  */
 @Entity
 @DiscriminatorValue("Enlistment")
-public class Enlistment extends Connection<Associate, KeySafe<Member>, Division<Organization>> {
+public class Enlistment extends Connection<Associate, KeySafe<? extends Member>, Division<Organization>> {
 
     /**
      * Serial UID
