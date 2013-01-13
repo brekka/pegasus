@@ -105,8 +105,8 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
             AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
             privateKeyToken = resolvePrivateKeyFor(target, currentMember);
         }
-        IdentityKeyPair targetKeyPair = new IdentityKeyPair(target.getKeyPairId());
-        KeyPair connectionKeyPair = phalanxService.assignKeyPair(privateKeyToken, targetKeyPair);
+        IdentityKeyPair sourceKeyPair = new IdentityKeyPair(source.getKeyPairId());
+        KeyPair connectionKeyPair = phalanxService.assignKeyPair(privateKeyToken, sourceKeyPair);
         return super.createPartnership(owner, source, target, connectionKeyPair);
     }
     
@@ -115,11 +115,19 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @SuppressWarnings("unchecked")
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> retrievePartnershipById(
             UUID partnershipId) {
         return (Partnership<Owner, Target>) connectionDAO.retrieveById(partnershipId);
     }
     
+    @Transactional(propagation=Propagation.REQUIRED)
+    @SuppressWarnings("unchecked")
+    @Override
+    public <Owner extends Actor, Target extends Actor> List<Partnership<Owner, Target>> retrievePartnershipsByTarget(Division<Target> target) {
+        List<Partnership<Owner, Target>> partnerships = connectionDAO.retrieveConnectionsByTarget(target, Partnership.class);
+        return partnerships;
+    }
     
     
     /* (non-Javadoc)

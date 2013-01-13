@@ -58,7 +58,7 @@ public class Invitation extends SnapshotEntity<UUID> {
      * User that sent the invitation
      */
     @ManyToOne
-    @JoinColumn(name="`SenderID`", nullable=false)
+    @JoinColumn(name="`SenderID`")
     private Actor sender;
     
     /**

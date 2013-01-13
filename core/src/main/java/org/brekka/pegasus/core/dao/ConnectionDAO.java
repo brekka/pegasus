@@ -38,6 +38,9 @@ public interface ConnectionDAO extends EntityDAO<UUID, Connection<?, ?, ?>>  {
      */
     List<Connection<?, ?, ?>> identifyConnectionsBetween(KeySafe<?> keySafe, Actor contextMember);
 
+    <Target extends KeySafe<?>, T extends Connection<Actor, KeySafe<? extends Actor>, Target>> List<T> 
+            retrieveConnectionsByTarget(Target target, Class<T> expected);
+    
     /**
      * @param vault
      */

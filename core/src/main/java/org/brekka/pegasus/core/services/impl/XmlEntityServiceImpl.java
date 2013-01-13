@@ -496,9 +496,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     }
     
     protected void validate(XmlObject xml) {
-        if (!xml.validate()) {
-            // TODO more detail
-            throw new PegasusException(PegasusErrorCode.PG333, "XML does not validate");
-        }
+//        if (!xml.validate()) {
+//            // TODO more detail
+//            throw new PegasusException(PegasusErrorCode.PG333, "XML does not validate");
+//        }
     }
 }

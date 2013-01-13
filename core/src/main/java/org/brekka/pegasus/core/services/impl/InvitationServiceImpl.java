@@ -64,8 +64,8 @@ public class InvitationServiceImpl implements InvitationService {
      */
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
-    public Invitation createInvitation(InvitationType details, String password) {
-        return createInvitation(details, null, password);
+    public Invitation createInvitation(Token token, InvitationType details, String password) {
+        return createInvitation(token, details, null, password);
     }
     
     /* (non-Javadoc)
@@ -73,8 +73,8 @@ public class InvitationServiceImpl implements InvitationService {
      */
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
-    public Invitation createInvitation(InvitationType details, Member recipient) {
-        return createInvitation(details, recipient, null);
+    public Invitation createInvitation(Token token, InvitationType details, Member recipient) {
+        return createInvitation(token, details, recipient, null);
     }
     
     
@@ -119,7 +119,7 @@ public class InvitationServiceImpl implements InvitationService {
     }
 
     
-    protected Invitation createInvitation(InvitationType invitationType, Member recipient, String password) {
+    protected Invitation createInvitation(Token token, InvitationType invitationType, Member recipient, String password) {
         Invitation invitation = new Invitation();
         
         InvitationDocument invitationDocument = InvitationDocument.Factory.newInstance();
@@ -137,9 +137,13 @@ public class InvitationServiceImpl implements InvitationService {
         invitation.setRecipient(recipient);
         
         AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
-        invitation.setSender(current.getActiveActor());
+        if (current != null) {
+            invitation.setSender(current.getActiveActor());
+        }
         
-        Token token = tokenService.generateToken(PegasusTokenType.INVITATION);
+        if (token == null) {
+            token = tokenService.generateToken(PegasusTokenType.INVITATION);
+        }
         invitation.setToken(token);
         
         invitationDAO.create(invitation);

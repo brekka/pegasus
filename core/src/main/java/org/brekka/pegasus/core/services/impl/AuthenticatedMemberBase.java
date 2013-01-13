@@ -291,6 +291,9 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     
     static <T extends Member> AuthenticatedMemberBase<T> getCurrent(MemberService memberService, Class<T> expectedType) {
         AuthenticatedMember<T> current = memberService.getCurrent(expectedType);
+        if (current == null) {
+            return null;
+        }
         if (current instanceof AuthenticatedMemberBase) {
             return (AuthenticatedMemberBase<T>) current;
         }

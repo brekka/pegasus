@@ -202,6 +202,18 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.VaultService#changePassword(org.brekka.pegasus.core.model.Vault, java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void changePassword(Vault defaultVault, String password) {
+        // Replace the principal. The old principal will just be orphaned.
+        Principal principal = phalanxService.createPrincipal(password);
+        defaultVault.setPrincipalId(principal.getId());
+        vaultDAO.update(defaultVault);
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.VaultService#closeVault(java.util.UUID)
      */
     @Override

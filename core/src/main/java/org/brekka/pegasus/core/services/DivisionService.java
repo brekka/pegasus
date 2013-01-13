@@ -56,6 +56,8 @@ public interface DivisionService {
      */
     <T extends Actor> Division<T> retrieveDivision(T organization, String divisionSlug);
     
+    <Owner extends Actor, Target extends Actor> List<Partnership<Owner, Target>> retrievePartnershipsByTarget(Division<Target> target);
+    
     /**
      * @param organization
      * @return
@@ -68,4 +70,5 @@ public interface DivisionService {
      * @return
      */
     <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> retrievePartnershipById(UUID partnershipId);
+
 }

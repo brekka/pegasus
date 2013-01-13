@@ -37,7 +37,7 @@ public interface InvitationService {
      * @param recipient
      * @return
      */
-    Invitation createInvitation(InvitationType details, Member recipient);
+    Invitation createInvitation(Token token, InvitationType details, Member recipient);
     
     /**
      * Create a new anonymous invitation.
@@ -46,7 +46,7 @@ public interface InvitationService {
      * @param password
      * @return
      */
-    Invitation createInvitation(InvitationType details, String password);
+    Invitation createInvitation(Token token, InvitationType details, String password);
     
     /**
      * Retrieve all invitations received by the specified member.

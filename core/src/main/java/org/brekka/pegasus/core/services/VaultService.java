@@ -77,7 +77,16 @@ public interface VaultService {
     void changePassword(Vault defaultVault, String oldPassword, String newPassword);
 
     /**
+     * Force change of a password
+     * @param defaultVault
+     * @param password
+     */
+    void changePassword(Vault defaultVault, String password);
+    
+    /**
      * @param vault
      */
     void deleteVault(Vault vault);
+
+
 }

@@ -118,17 +118,20 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void changePassword(UsernamePassword usernamePassword, String oldPassword, String newPassword) {
         if (verify(usernamePassword, oldPassword)) {
-            byte[] passwordBytes = toBytes(newPassword);
-            DerivedKey derivedKey = derivedKeyCryptoService.apply(passwordBytes, CryptoProfile.DEFAULT);
-            usernamePassword.setIterations(derivedKey.getIterations());
-            usernamePassword.setPassword(derivedKey.getDerivedKey());
-            usernamePassword.setProfile(derivedKey.getCryptoProfile().getNumber());
-            usernamePassword.setSalt(derivedKey.getSalt());
-            usernamePasswordDAO.update(usernamePassword);
+            internalChangePassword(usernamePassword, newPassword);
         } else {
             throw new PegasusException(PegasusErrorCode.PG103, 
                     "Unable to change password for user '%s', old password is incorrect", usernamePassword.getUsername());
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.UsernamePasswordService#changePassword(org.brekka.pegasus.core.model.UsernamePassword, java.lang.String)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public void changePassword(UsernamePassword usernamePassword, String newPassword) {
+        internalChangePassword(usernamePassword, newPassword);
     }
     
     /* (non-Javadoc)
@@ -138,6 +141,16 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void delete(AuthenticationToken authenticationToken) {
         usernamePasswordDAO.delete(authenticationToken.getId());
+    }
+    
+    protected void internalChangePassword(UsernamePassword usernamePassword, String newPassword) {
+        byte[] passwordBytes = toBytes(newPassword);
+        DerivedKey derivedKey = derivedKeyCryptoService.apply(passwordBytes, CryptoProfile.DEFAULT);
+        usernamePassword.setIterations(derivedKey.getIterations());
+        usernamePassword.setPassword(derivedKey.getDerivedKey());
+        usernamePassword.setProfile(derivedKey.getCryptoProfile().getNumber());
+        usernamePassword.setSalt(derivedKey.getSalt());
+        usernamePasswordDAO.update(usernamePassword);
     }
     
     protected byte[] deriveUsername(String username) {

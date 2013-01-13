@@ -22,6 +22,7 @@ import org.brekka.pegasus.core.dao.ConnectionDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -58,6 +59,18 @@ public class ConnectionHibernateDAO extends AbstractPegasusHibernateDAO<Connecti
             "    or owner in (select assoc.organization from Associate as assoc where assoc.member = :member))")
             .setEntity("target", keySafe)
             .setEntity("member", contextMember)
+            .list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.ConnectionDAO#retrieveConnectionsByTarget(org.brekka.pegasus.core.model.KeySafe, java.lang.Class)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <Target extends KeySafe<?>, T extends Connection<Actor, KeySafe<? extends Actor>, Target>> List<T> retrieveConnectionsByTarget(
+            Target target, Class<T> expected) {
+        return getCurrentSession().createCriteria(expected)
+            .add(Restrictions.eq("target", target))
             .list();
     }
     

@@ -40,7 +40,15 @@ public interface UsernamePasswordService {
     void changePassword(UsernamePassword usernamePassword, String oldPassword, String newPassword);
 
     /**
+     * @param usernamePassword
+     * @param password
+     */
+    void changePassword(UsernamePassword usernamePassword, String password);
+    
+    
+    /**
      * @param authenticationToken
      */
     void delete(AuthenticationToken authenticationToken);
+
 }
