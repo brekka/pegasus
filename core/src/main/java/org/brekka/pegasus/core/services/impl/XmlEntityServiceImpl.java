@@ -8,7 +8,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +21,12 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.SchemaType;
 import org.apache.xmlbeans.SchemaTypeLoader;
 import org.apache.xmlbeans.XmlBeans;
+import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
@@ -72,6 +78,8 @@ import difflib.PatchFailedException;
 @Transactional
 @Configured
 public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListener<ApplicationEvent>  {
+    
+    private static final Log log = LogFactory.getLog(XmlEntityServiceImpl.class);
 
     @Autowired
     private XmlEntityDAO xmlEntityDAO;
@@ -496,9 +504,42 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     }
     
     protected void validate(XmlObject xml) {
-//        if (!xml.validate()) {
-//            // TODO more detail
-//            throw new PegasusException(PegasusErrorCode.PG333, "XML does not validate");
-//        }
+        XmlOptions xo = new XmlOptions();
+        List<XmlError> errors = new ArrayList<>();
+        xo.setErrorListener(errors);
+        if (xml.validate(xo)) {
+            // All good
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            // Need to be careful with this, XML can include sensitive information
+            StringWriter sw = new StringWriter();
+            try (PrintWriter out = new PrintWriter(sw)) {
+                out.printf("XML Validation errors (%d)%n", errors.size());
+                int cnt = 1;
+                for (XmlError xmlError : errors) {
+                    out.printf("\t%d) line %d, col %d: %s%n", cnt, xmlError.getLine(), xmlError.getColumn(), xmlError.getMessage());
+                    cnt++;
+                }
+                out.println("Content:");
+                out.flush();
+                XmlOptions opts = new XmlOptions(xmlWriteOptions);
+                opts.setSaveNoXmlDecl();
+                xml.save(out, opts);
+            } catch (IOException e) {
+                log.warn("IO Error", e);
+            }
+            log.debug(sw.toString());
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < errors.size(); i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            XmlError xmlError = errors.get(i);
+            sb.append(String.format("%d) line %d, col %d: %s%n", 
+                    (i + 1), xmlError.getLine(), xmlError.getColumn(), xmlError.getMessage()));
+        }
+        throw new PegasusException(PegasusErrorCode.PG333, "XML validation errors { %s }", sb);
     }
 }

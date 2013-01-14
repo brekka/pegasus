@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 
 import org.apache.commons.collections.ExtendedProperties;
-import org.apache.commons.io.IOUtils;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;

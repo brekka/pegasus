@@ -5,9 +5,11 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
 
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.dao.ProfileDAO;
 import org.brekka.pegasus.core.event.VaultOpenEvent;
 import org.brekka.pegasus.core.event.XmlEntityDeleteEvent;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Person;
@@ -69,13 +71,13 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Profile createEncryptedProfile(Member member, Vault vault) {
+    public Profile createEncryptedProfile(Member member, KeySafe<? extends Member> keySafe) {
         Profile profile = new Profile();
         profile.setOwner(member);
         
         ProfileDocument profileDocument = createProfile(member);
         
-        XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(profileDocument, vault, false);
+        XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
         profile.setXml(xmlEntity);
         
         profileDAO.create(profile);
@@ -108,30 +110,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         return profile;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#releaseProfile(org.brekka.pegasus.core.model.Profile, org.brekka.pegasus.core.model.Vault)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public boolean releaseProfile(Profile profile, Vault vault) {
-        if (profile == null) {
-            return false;
-        }
-        if (profile.getXml().getBean() != null) {
-            // The bean is already unlocked
-            return false;
-        }
-        XmlEntity<ProfileDocument> xmlEntity = profile.getXml();
-        if (!xmlEntity.getKeySafe().getId().equals(vault.getId())) {
-            // This is not the vault we are looking for.
-            return false;
-        }
-        // Unlock it
-        XmlEntity<ProfileDocument> managedXmlEntity = xmlEntityService.retrieveEntity(xmlEntity.getId(), ProfileDocument.class);
-        xmlEntity.setBean(managedXmlEntity.getBean());
-        return true;
-    }
-    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ProfileService#currentUserProfileUpdated()
      */
@@ -181,6 +159,40 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             profileType.setFullName(((Person) member).getFullName());
         }
         return profileDocument;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.ProfileService#releaseProfile(org.brekka.pegasus.core.model.Profile, org.brekka.pegasus.core.model.Vault)
+     */
+    protected boolean releaseProfile(Profile profile, Vault vault) {
+        if (profile == null) {
+            return false;
+        }
+        if (profile.getXml().getBean() != null) {
+            // The bean is already unlocked
+            return false;
+        }
+        XmlEntity<ProfileDocument> xmlEntity = profile.getXml();
+        KeySafe<?> keySafe = xmlEntity.getKeySafe();
+        Vault protectedBy = null;
+        while (keySafe != null) {
+            if (keySafe instanceof Division) {
+                Division<?> division = (Division<?>) keySafe;
+                keySafe = division.getParent();
+            } else if (keySafe instanceof Vault) {
+                protectedBy = (Vault) keySafe;
+                break;
+            }
+        }
+        if (protectedBy == null 
+                || !EntityUtils.identityEquals(protectedBy, vault)) {
+            // This is not the vault we are looking for.
+            return false;
+        }
+        // Unlock it
+        XmlEntity<ProfileDocument> managedXmlEntity = xmlEntityService.retrieveEntity(xmlEntity.getId(), ProfileDocument.class);
+        xmlEntity.setBean(managedXmlEntity.getBean());
+        return true;
     }
     
     private class ProfileSynchronization extends TransactionSynchronizationAdapter {

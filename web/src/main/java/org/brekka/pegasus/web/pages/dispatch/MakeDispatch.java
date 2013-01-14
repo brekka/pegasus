@@ -9,6 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tapestry5.OptionModel;
 import org.apache.tapestry5.SelectModel;
 import org.apache.tapestry5.annotations.InjectPage;
@@ -31,6 +32,7 @@ import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.VaultService;
+import org.brekka.pegasus.core.support.AllocationDetailsBuilder;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.pages.direct.DirectDone;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
@@ -88,7 +90,7 @@ public class MakeDispatch extends AbstractMakePage {
     
     Object onActivate(String orgToken, String divisionSlug, String makeKey) {
         Organization organization = organizationService.retrieveByToken(orgToken, false);
-        Division division = divisionService.retrieveDivision(organization, divisionSlug);
+        Division<?> division = divisionService.retrieveDivision(organization, divisionSlug);
         return activate(makeKey, division, division, orgToken, divisionSlug);
     }
     
@@ -98,7 +100,7 @@ public class MakeDispatch extends AbstractMakePage {
     }
     
     Object onActivate(String makeKey) {
-        Vault activeVault = (Vault) memberService.getCurrent().getActiveKeySafe();
+        Vault activeVault = (Vault) memberService.getCurrent().getMember().getDefaultVault();
         return activate(makeKey, null, activeVault);
     }
     
@@ -124,10 +126,12 @@ public class MakeDispatch extends AbstractMakePage {
     @Override
     protected Object onSuccess(String comment, UploadedFiles files) {
         Object retVal;
-        DetailsType detailsType = DetailsType.Factory.newInstance();
-        detailsType.setAgreement(agreementText);
-        detailsType.setReference(reference);
-        detailsType.setComment(comment);
+        DetailsType detailsType = new AllocationDetailsBuilder<>(DetailsType.class)
+            .setAgreementText(agreementText)
+            .setReference(reference)
+            .setComment(comment)
+            .toDetailsType();
+        
         // TODO Picked some numbers out of a hat
         DateTime dispatchExpires = new DateTime().plusDays(31);
         DateTime allocationExpires = new DateTime().plusDays(7);

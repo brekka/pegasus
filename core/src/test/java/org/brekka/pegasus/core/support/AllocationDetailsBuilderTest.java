@@ -14,35 +14,25 @@
  * limitations under the License.
  */
 
-package org.brekka.pegasus.core.dao;
+package org.brekka.pegasus.core.support;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.brekka.commons.persistence.dao.EntityDAO;
-import org.brekka.commons.persistence.model.ListingCriteria;
-import org.brekka.pegasus.core.model.Template;
-import org.brekka.pegasus.core.model.Token;
+import org.brekka.xml.pegasus.v2.model.DetailsType;
+import org.junit.Test;
 
 /**
- * Manipulate Template objects
+ * TODO Description of AllocationDetailsBuilderTest
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-public interface TemplateDAO extends EntityDAO<UUID, Template> {
-
-    Template retrieveByToken(Token token);
-    
-    Template retrieveBySlug(String slug);
-    
-    /**
-     * @return
-     */
-    int retrieveListingRowCount();
+public class AllocationDetailsBuilderTest {
 
     /**
-     * @param listingCriteria
-     * @return
+     * Test method for {@link org.brekka.pegasus.core.support.AllocationDetailsBuilder#setSubject(java.lang.String)}.
      */
-    List<Template> retrieveListing(ListingCriteria listingCriteria);
+    @Test
+    public void test() {
+        AllocationDetailsBuilder<DetailsType> builder = new AllocationDetailsBuilder<>(DetailsType.class);
+        builder.setAgreementText("boo");
+    }
+
 }

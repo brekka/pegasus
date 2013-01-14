@@ -97,6 +97,7 @@ public class RobotServiceImpl implements RobotService {
         
         Vault vault = vaultService.createVault("Default", code, robot);
         robot.setDefaultVault(vault);
+        robot.setPrimaryKeySafe(vault);
         
         robot.setStatus(ActorStatus.ACTIVE);
         robot.setOwner(owner);

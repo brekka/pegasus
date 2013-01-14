@@ -52,7 +52,7 @@ public interface OrganizationService {
      */
     Enlistment createOrganization(@Nullable UUID idToAssign, @Nullable String name, @Nullable String tokenStr,
             @Nullable String domainNameStr, @Nullable OrganizationType details, @Nonnull Member owner,
-            @Nullable String associateEMailStr, @Nonnull KeySafe<Member> protectWith);
+            @Nullable String associateEMailStr, @Nonnull KeySafe<? extends Member> protectWith);
 
     /**
      * Create a new organization, as a partner of some other actor. 

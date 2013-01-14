@@ -5,6 +5,7 @@ package org.brekka.pegasus.web.pages.deposit;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -15,6 +16,7 @@ import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.PegasusAllocationDisposition;
 import org.brekka.pegasus.core.services.InboxService;
+import org.brekka.pegasus.core.support.AllocationDetailsBuilder;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.pegasus.web.support.MakeKeyUtils;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
@@ -76,9 +78,10 @@ public class MakeDeposit extends AbstractMakePage {
      */
     @Override
     protected Object onSuccess(String comment, UploadedFiles files) {
-        DetailsType detailsType = DetailsType.Factory.newInstance();
-        detailsType.setReference(reference);
-        detailsType.setComment(comment);
+        DetailsType detailsType = new AllocationDetailsBuilder<>(DetailsType.class)
+                .setReference(reference)
+                .setComment(comment)
+                .toDetailsType();
         // TODO Expiry for deposits
         DateTime expires = new DateTime().plusDays(14);
         Allocation allocation = inboxService.createDeposit(inbox, PegasusAllocationDisposition.TRANSFER, detailsType, expires, files);

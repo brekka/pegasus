@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.services;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.model.TemplateEngine;
@@ -131,4 +133,15 @@ public interface TemplateService {
      * @return the engine set.
      */
     Set<TemplateEngine> getAvailableEngines();
+
+    /**
+     * @return
+     */
+    int retrieveListingRowCount();
+
+    /**
+     * @param listingCriteria
+     * @return
+     */
+    List<Template> retrieveListing(ListingCriteria listingCriteria);
 }

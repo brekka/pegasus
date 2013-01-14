@@ -7,7 +7,6 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TokenDAO;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.TokenType;
 import org.brekka.pegasus.core.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -13,7 +13,6 @@ import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
-import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
@@ -52,11 +51,6 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * can switch 'context' to for instance their associate entry.
      */
     private transient Actor activeActor;
-    
-    /**
-     * The active vault
-     */
-    private transient KeySafe<?> activeKeySafe;
     
     /**
      * The user-selected active profile
@@ -130,21 +124,6 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     
     void setMember(T member) {
         this.member = member;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AuthenticatedMember#getActiveVault()
-     */
-    @Override
-    public KeySafe<?> getActiveKeySafe() {
-        return activeKeySafe;
-    }
-
-    /**
-     * @param activeVault the activeVault to set
-     */
-    protected void setActiveKeySafe(KeySafe<?> activeKeySafe) {
-        this.activeKeySafe = activeKeySafe;
     }
     
     /**

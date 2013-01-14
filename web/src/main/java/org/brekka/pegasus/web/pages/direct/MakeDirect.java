@@ -13,6 +13,7 @@ import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.support.AllocationDetailsBuilder;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
@@ -48,8 +49,10 @@ public class MakeDirect extends AbstractMakePage {
      */
     @Override
     protected Object onSuccess(String comment, UploadedFiles files) {
-        DetailsType detailsType = DetailsType.Factory.newInstance();
-        detailsType.setComment(comment);
+        DetailsType detailsType = new AllocationDetailsBuilder<>(DetailsType.class)
+                .setComment(comment)
+                .toDetailsType();
+        
         // TODO Expiry for transfers
         DateTime expires = new DateTime().plusDays(1);
         Allocation allocation = anonymousService.createTransfer(null, detailsType, expires, 1, 5, files, null);

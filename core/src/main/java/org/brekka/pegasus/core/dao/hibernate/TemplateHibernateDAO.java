@@ -16,9 +16,15 @@
 
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+
+import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.commons.persistence.support.HibernateUtils;
 import org.brekka.pegasus.core.dao.TemplateDAO;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.model.Token;
+import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -48,6 +54,27 @@ public class TemplateHibernateDAO extends AbstractPegasusHibernateDAO<Template> 
         return (Template) getCurrentSession().createCriteria(Template.class)
                 .add(Restrictions.eq("slug", slug))
                 .uniqueResult();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveListing(org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Template> retrieveListing(ListingCriteria listingCriteria) {
+        Criteria criteria = getCurrentSession().createCriteria(Template.class);
+        HibernateUtils.applyCriteria(criteria, listingCriteria);
+        return criteria.list();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveListingRowCount()
+     */
+    @Override
+    public int retrieveListingRowCount() {
+        Query query = getCurrentSession().createQuery(
+                "select count(t) from Template t");
+        return ((Number) query.uniqueResult()).intValue();
     }
 
     /* (non-Javadoc)

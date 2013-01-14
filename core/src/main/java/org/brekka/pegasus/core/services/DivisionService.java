@@ -30,12 +30,12 @@ import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
 
 /**
- * TODO Description of DivisionService
+ * Division Service
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface DivisionService {
-    Enlistment createDivisionEnlistment(Associate associate, KeySafe<Member> protectedBy, String slug, String name);
+    Enlistment createDivisionEnlistment(Associate associate, KeySafe<? extends Member> protectedBy, String slug, String name);
     
     <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> 
             createDivisionPartnership(Division<Owner> source, Target target, String slug, String name);
@@ -64,7 +64,17 @@ public interface DivisionService {
      */
     List<Enlistment> retrieveCurrentEnlistments();
     
-
+    /**
+     * Replace the keyPair in the division with that backed-up to a partnership identified by the division as the target.
+     * 
+     * @param division
+     *            the division being restored
+     * @param protectWith
+     *            the keySafe to assign access to the keyPair that must have been previously backed up via a
+     *            partnership.
+     */
+    <T extends Actor> void restoreDivision(Division<T> division, KeySafe<?> protectWith);
+    
     /**
      * @param partnershipId
      * @return

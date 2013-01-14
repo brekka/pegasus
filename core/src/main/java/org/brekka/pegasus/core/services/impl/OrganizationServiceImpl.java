@@ -91,7 +91,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
     public Enlistment createOrganization(UUID idToAssign, String name, String tokenStr, String domainNameStr,
-            OrganizationType details, Member owner, String associateEMailStr, KeySafe<Member> protectWith) {
+            OrganizationType details, Member owner, String associateEMailStr, KeySafe<? extends Member> protectWith) {
         
         EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(associateEMailStr);
         if (eMailAddress == null) {

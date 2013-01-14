@@ -16,8 +16,6 @@ public interface AuthenticatedMember<T extends Member> extends Accessor {
     
     T getMember();
     
-    KeySafe<?> getActiveKeySafe();
-    
     ProfileType getProfile();
     
     boolean hasAccess(GrantedAuthority grantedAuthority);

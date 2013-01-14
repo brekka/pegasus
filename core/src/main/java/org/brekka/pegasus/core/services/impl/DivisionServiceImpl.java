@@ -73,7 +73,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Enlistment createDivisionEnlistment(Associate associate, KeySafe<Member> protectedBy, String slug, String name) {
+    public Enlistment createDivisionEnlistment(Associate associate, KeySafe<? extends Member> protectedBy, String slug, String name) {
         KeyPair memberDivisionKeyPair = keySafeService.createKeyPair(protectedBy);
         KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(memberDivisionKeyPair);
         Division<Organization> division = createDivision(associate.getOrganization(), null, publicOnlyKeyPair, slug, name);
@@ -189,6 +189,37 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Associate associate = (Associate) currentMember.getActiveActor();
         return enlistmentDAO.retrieveForAssociate(associate);
+    }
+    
+    /**
+     * Replace the keyPair in the division with that backed-up to a partnership identified by the division as the target.
+     * 
+     * @param division
+     *            the division being restored
+     * @param protectWith
+     *            the keySafe to assign access to the keyPair that must have been previously backed up via a
+     *            partnership.
+     */
+    @Transactional(propagation=Propagation.REQUIRED)
+    @Override
+    public <T extends Actor> void restoreDivision(Division<T> division, KeySafe<?> protectWith) {
+        List<Partnership<Organization, T>> partnerships = retrievePartnershipsByTarget(division);
+        
+        if (partnerships.size() != 1) {
+            throw new PegasusException(PegasusErrorCode.PG723, 
+                    "Unable to find backup of division '%s'", division.getId());
+        }
+        
+        for (Partnership<Organization, T> partnership : partnerships) {
+            Division<Organization> globalDivision = partnership.getSource();
+            KeyPair keyPair = new IdentityKeyPair(partnership.getKeyPairId());
+            KeyPair updatedKeyPair = keySafeService.assignKeyPair(globalDivision, keyPair, protectWith);
+            division.setKeyPairId(updatedKeyPair.getId());
+            
+            Division<?> managed = divisionDAO.retrieveById(division.getId());
+            managed.setKeyPairId(updatedKeyPair.getId());
+            divisionDAO.update(managed);
+        }
     }
     
     /**

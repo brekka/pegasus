@@ -18,6 +18,7 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,6 +27,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
+import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TemplateDAO;
@@ -152,6 +155,8 @@ public class TemplateServiceImpl implements TemplateService {
     public Template create(@Nonnull TemplateType details, @Nonnull TemplateEngine engine, @Nullable KeySafe<?> keySafe,
             @Nullable String slug, @Nullable Token token, @Nullable String label) {
         Template template = new Template();
+        
+        fixDetails(details);
         TemplateDocument templateDocument = TemplateDocument.Factory.newInstance();
         templateDocument.setTemplate(details);
         
@@ -177,7 +182,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void update(@Nonnull Template template) {
         Template managed = templateDAO.retrieveById(template.getId());
-        
+        fixDetails(managed.getXml().getBean().getTemplate());
         XmlEntity<TemplateDocument> incoming = template.getXml();
         XmlEntity<TemplateDocument> current = managed.getXml();
         XmlEntity<TemplateDocument> xml = xmlEntityService.updateEntity(incoming, current, TemplateDocument.class);
@@ -201,12 +206,46 @@ public class TemplateServiceImpl implements TemplateService {
     }
     
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#retrieveListing(org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public List<Template> retrieveListing(ListingCriteria listingCriteria) {
+        return templateDAO.retrieveListing(listingCriteria);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#retrieveListingRowCount()
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int retrieveListingRowCount() {
+        return templateDAO.retrieveListingRowCount();
+    }
+    
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#getAvailableEngines()
      */
     @Override
     public Set<TemplateEngine> getAvailableEngines() {
         Set<TemplateEngine> engines = EnumSet.copyOf(adapters.keySet());
         return engines;
+    }
+
+    /**
+     * @param details
+     */
+    protected void fixDetails(TemplateType details) {
+        if (details == null) {
+            return;
+        }
+        if (details.isSetDocumentation() 
+                && details.getDocumentation() == null) {
+            details.unsetDocumentation();
+        }
+        if (details.getContent() == null) {
+            details.setContent(StringUtils.EMPTY);
+        }
     }
     
     /**

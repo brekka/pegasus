@@ -18,12 +18,14 @@ import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OrganizationService;
@@ -68,6 +70,9 @@ public class MemberServiceImpl implements MemberService {
     
     @Autowired
     private OrganizationService organizationService;
+    
+    @Autowired
+    private DivisionService divisionService;
     
     
     /* (non-Javadoc)
@@ -280,13 +285,14 @@ public class MemberServiceImpl implements MemberService {
         Vault defaultVault = vaultService.createVault("Default", vaultPassword, person);
         person.setDefaultVault(defaultVault);
         vaultService.openVault(defaultVault, vaultPassword);
-        
+        Division<Member> primaryDivision = divisionService.createDivision(defaultVault, null, "Primary");
+        person.setPrimaryKeySafe(primaryDivision);
         
         
         // Profile
         Profile profile;
         if (encryptProfile) {
-            profile = profileService.createEncryptedProfile(person, defaultVault);
+            profile = profileService.createEncryptedProfile(person, primaryDivision);
         } else {
             profile = profileService.createPlainProfile(person);
         }
@@ -307,7 +313,6 @@ public class MemberServiceImpl implements MemberService {
             AuthenticatedMember<Person> current = getCurrent(Person.class);
             AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase<Person>) current;
             authenticatedPersonImpl.setMember(person);
-            authenticatedPersonImpl.setActiveKeySafe(defaultVault);
             authenticatedPersonImpl.setActiveProfile(profile);
         }
     }
