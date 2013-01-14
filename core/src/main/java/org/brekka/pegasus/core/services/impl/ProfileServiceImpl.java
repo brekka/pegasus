@@ -53,11 +53,11 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Profile createPlainProfile(Member member) {
+    public Profile createPlainProfile(Member member, ProfileType profileType) {
         Profile profile = new Profile();
         profile.setOwner(member);
         
-        ProfileDocument profileDocument = createProfile(member);
+        ProfileDocument profileDocument = prepareProfileDocument(profileType);
         
         XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistPlainEntity(profileDocument, false);
         profile.setXml(xmlEntity);
@@ -71,11 +71,11 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Profile createEncryptedProfile(Member member, KeySafe<? extends Member> keySafe) {
+    public Profile createEncryptedProfile(Member member, ProfileType profileType, KeySafe<? extends Member> keySafe) {
         Profile profile = new Profile();
         profile.setOwner(member);
         
-        ProfileDocument profileDocument = createProfile(member);
+        ProfileDocument profileDocument = prepareProfileDocument(profileType);
         
         XmlEntity<ProfileDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
         profile.setXml(xmlEntity);
@@ -151,13 +151,9 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         }
     }
 
-    private static ProfileDocument createProfile(Member member) {
+    private static ProfileDocument prepareProfileDocument(ProfileType profileType) {
         ProfileDocument profileDocument = ProfileDocument.Factory.newInstance();
-        ProfileType profileType = profileDocument.addNewProfile();
-
-        if (member instanceof Person) {
-            profileType.setFullName(((Person) member).getFullName());
-        }
+        profileDocument.setProfile(profileType);
         return profileDocument;
     }
     

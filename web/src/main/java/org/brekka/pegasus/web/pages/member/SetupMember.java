@@ -10,6 +10,8 @@ import org.apache.tapestry5.corelib.components.Form;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.web.support.OpenIDUtils;
+import org.brekka.xml.pegasus.v2.model.EMailType;
+import org.brekka.xml.pegasus.v2.model.ProfileType;
 
 /**
  * @author Andrew Taylor
@@ -52,7 +54,11 @@ public class SetupMember {
     
     Object onSuccess() {
         String email = OpenIDUtils.identifyEmail();
-        memberService.setupPerson(name, email, vaultPassword, encryptProfile);
+        ProfileType profileType = ProfileType.Factory.newInstance();
+        profileType.setFullName(name);
+        EMailType profileEmail = profileType.addNewEMail();
+        profileEmail.setAddress(email);
+        memberService.setupPerson(profileType, vaultPassword, encryptProfile);
         return MemberIndex.class;
     }
 }

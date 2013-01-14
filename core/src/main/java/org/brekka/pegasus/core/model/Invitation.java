@@ -87,7 +87,7 @@ public class Invitation extends SnapshotEntity<UUID> {
      * The details of the invitation that can potentially be encrypted.
      */
     @OneToOne
-    @JoinColumn(name="`XmlEntityID`", nullable=false)
+    @JoinColumn(name="`XmlEntityID`")
     private XmlEntity<InvitationDocument> xml;
    
     

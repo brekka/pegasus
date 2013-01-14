@@ -113,6 +113,7 @@ public class InvitationServiceImpl implements InvitationService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#retrieveById(java.util.UUID)
      */
+    @Transactional(propagation=Propagation.REQUIRED)
     @Override
     public Invitation retrieveById(UUID invitationId) {
         return invitationDAO.retrieveById(invitationId);

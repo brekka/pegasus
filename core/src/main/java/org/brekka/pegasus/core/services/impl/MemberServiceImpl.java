@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -33,6 +32,8 @@ import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
+import org.brekka.xml.pegasus.v2.model.EMailType;
+import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -148,9 +149,9 @@ public class MemberServiceImpl implements MemberService {
     
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public void setupPerson(String fullName, String email, String vaultPassword, boolean encryptedProfile) {
+    public void setupPerson(ProfileType profileType, String vaultPassword, boolean encryptedProfile) {
         Person managed = (Person) getManaged();
-        populatePerson(managed, fullName, email, vaultPassword, encryptedProfile, false, true);
+        populatePerson(managed, profileType, vaultPassword, encryptedProfile, false, true);
         memberDAO.update(managed);
     }
     
@@ -159,11 +160,11 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     @Transactional(propagation=Propagation.REQUIRED)
-    public Person createPerson(AuthenticationToken authenticationToken, String fullName, String email,
+    public Person createPerson(AuthenticationToken authenticationToken, ProfileType profileType,
             String vaultPassword, boolean encryptProfile) {
         Person person = new Person();
         person.setAuthenticationToken(authenticationToken);
-        populatePerson(person, fullName, email, vaultPassword, encryptProfile, true, false);
+        populatePerson(person, profileType, vaultPassword, encryptProfile, true, false);
         return person;
     }
     
@@ -272,8 +273,9 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.retrieveById(member.getId());
     }
 
-    protected void populatePerson(Person person, String fullName, String email, String vaultPassword, boolean encryptProfile, boolean create, boolean currentUser) {
-        person.setFullName(fullName);
+    protected void populatePerson(Person person, ProfileType profileType, String vaultPassword,
+            boolean encryptProfile, boolean create, boolean currentUser) {
+        person.setFullName(profileType.getFullName());
         person.setStatus(ActorStatus.ACTIVE);
         if (create) {
             // Need to save now, person is reference
@@ -288,24 +290,27 @@ public class MemberServiceImpl implements MemberService {
         Division<Member> primaryDivision = divisionService.createDivision(defaultVault, null, "Primary");
         person.setPrimaryKeySafe(primaryDivision);
         
+        List<EMailType> eMailList = profileType.getEMailList();
+        for (EMailType eMailType : eMailList) {
+            String address = eMailType.getAddress().toLowerCase();
+            EMailAddress emailAddress = eMailAddressService.retrieveByAddress(address);
+            if (emailAddress == null) {
+                emailAddress = eMailAddressService.createEMail(address, person, false);
+            }
+            if (person.getDefaultEmailAddress() == null) {
+                person.setDefaultEmailAddress(emailAddress);
+            }
+            eMailType.setUUID(emailAddress.getId().toString());
+            eMailType.setAddress(address); // Now confirmed lowercase.
+        }
+        
         
         // Profile
         Profile profile;
         if (encryptProfile) {
-            profile = profileService.createEncryptedProfile(person, primaryDivision);
+            profile = profileService.createEncryptedProfile(person, profileType, primaryDivision);
         } else {
-            profile = profileService.createPlainProfile(person);
-        }
-        
-        
-        // E-Mail - needs to happen once profile/context are set
-        if (StringUtils.isNotBlank(email)) {
-            // TODO verification
-            EMailAddress emailAddress = eMailAddressService.retrieveByAddress(email);
-            if (emailAddress == null) {
-                emailAddress = eMailAddressService.createEMail(email, person, false);
-            }
-            person.setDefaultEmailAddress(emailAddress);
+            profile = profileService.createPlainProfile(person, profileType);
         }
         
         if (currentUser) {

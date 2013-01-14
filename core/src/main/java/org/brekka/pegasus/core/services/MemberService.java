@@ -11,6 +11,7 @@ import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
+import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 
@@ -25,9 +26,9 @@ public interface MemberService {
      */
     boolean isNewMember();
 
-    void setupPerson(String name, String email, String vaultPassword, boolean encryptedProfile);
+    void setupPerson(ProfileType profileType, String vaultPassword, boolean encryptedProfile);
     
-    Person createPerson(AuthenticationToken authenticationToken, String fullName, String email, String vaultPassword, boolean encryptProfile);
+    Person createPerson(AuthenticationToken authenticationToken, ProfileType profileType, String vaultPassword, boolean encryptProfile);
     
     <T extends Member> AuthenticatedMember<T> getCurrent(Class<T> expectedType);
     
