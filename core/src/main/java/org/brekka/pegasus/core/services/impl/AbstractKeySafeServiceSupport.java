@@ -26,9 +26,11 @@ import org.brekka.pegasus.core.dao.ConnectionDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
+import org.brekka.pegasus.core.model.Fallback;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Partnership;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
@@ -37,6 +39,8 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Common {@link KeySafe} operations shared among various service implementations.
@@ -106,16 +110,17 @@ abstract class AbstractKeySafeServiceSupport {
         }
         return privateKeyToken;
     }
-
-    protected <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(Owner owner,
-            Division<Owner> source, Division<Target> target, KeyPair connectionKeyPair) {
-        Partnership<Owner, Target> partnership = new Partnership<>();
-        partnership.setOwner(owner);
-        partnership.setSource(source);
-        partnership.setTarget(target);
-        partnership.setKeyPairId(connectionKeyPair.getId());
-        connectionDAO.create(partnership);
-        return partnership;
+    
+    protected <Owner extends Actor, Source extends KeySafe<? extends Actor>, 
+                Target extends KeySafe<?>, T extends Connection< Owner, Source, Target >> 
+        T createConnection(T connection, Owner owner,
+                             Source source, Target target, KeyPair connectionKeyPair) {
+        connection.setOwner(owner);
+        connection.setSource(source);
+        connection.setTarget(target);
+        connection.setKeyPairId(connectionKeyPair.getId());
+        connectionDAO.create(connection);
+        return connection;
     }
 
     protected KeyPair createKeyPair(KeySafe<?> keySafe) {

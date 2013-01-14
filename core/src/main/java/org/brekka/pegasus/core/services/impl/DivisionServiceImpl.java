@@ -28,11 +28,13 @@ import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.Fallback;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.KeySafeStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
+import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.KeySafeService;
@@ -88,7 +90,8 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         KeyPair newKeyPair = keySafeService.createKeyPair(source);
         KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(newKeyPair);
         Division<Target> division = createDivision(target, null, newKeyPair, slug, name);
-        Partnership<Owner, Target> partnership = createPartnership(owner, source, division, newKeyPair);
+        Partnership<Owner, Target> partnership = new Partnership<>();
+        partnership = createConnection(partnership, owner, source, division, newKeyPair);
         division.setKeyPairId(publicOnlyKeyPair.getId());
         return partnership;
     }
@@ -100,15 +103,21 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     @Transactional(propagation=Propagation.REQUIRED)
     public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(Owner owner,
             Division<Owner> source, Division<Target> target) {
-        PrivateKeyToken privateKeyToken = target.getPrivateKeyToken();
-        if (privateKeyToken == null) {
-            AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-            privateKeyToken = resolvePrivateKeyFor(target, currentMember);
-        }
-        IdentityKeyPair sourceKeyPair = new IdentityKeyPair(source.getKeyPairId());
-        KeyPair connectionKeyPair = phalanxService.assignKeyPair(privateKeyToken, sourceKeyPair);
-        return super.createPartnership(owner, source, target, connectionKeyPair);
+        Partnership<Owner, Target> partnership = new Partnership<>();
+        return createConnection(partnership, owner, source, target);
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.impl.AbstractKeySafeServiceSupport#createPartnership(org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Division, org.brekka.phalanx.api.model.KeyPair)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public <Owner extends Actor> Fallback<Owner> createFallback(Owner owner,
+            Division<Owner> source, Division<Person> target) {
+        Fallback<Owner> fallback = new Fallback<>();
+        return createConnection(fallback, owner, source, target);
+    }
+    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.DivisionService#retrievePartnershipById(java.util.UUID)
@@ -120,15 +129,6 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
             UUID partnershipId) {
         return (Partnership<Owner, Target>) connectionDAO.retrieveById(partnershipId);
     }
-    
-    @Transactional(propagation=Propagation.REQUIRED)
-    @SuppressWarnings("unchecked")
-    @Override
-    public <Owner extends Actor, Target extends Actor> List<Partnership<Owner, Target>> retrievePartnershipsByTarget(Division<Target> target) {
-        List<Partnership<Owner, Target>> partnerships = connectionDAO.retrieveConnectionsByTarget(target, Partnership.class);
-        return partnerships;
-    }
-    
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.impl.DivisionServiceImpl#createEnlistment(org.brekka.pegasus.core.model.Associate, org.brekka.pegasus.core.model.KeySafe, org.brekka.pegasus.core.model.Connection)
@@ -192,7 +192,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     }
     
     /**
-     * Replace the keyPair in the division with that backed-up to a partnership identified by the division as the target.
+     * Replace the keyPair in the division with that backed-up to a fallback identified by the division as the target.
      * 
      * @param division
      *            the division being restored
@@ -202,16 +202,17 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @Transactional(propagation=Propagation.REQUIRED)
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends Actor> void restoreDivision(Division<T> division, KeySafe<?> protectWith) {
-        List<Partnership<Organization, T>> partnerships = retrievePartnershipsByTarget(division);
+        List<Fallback<?>> fallbacks = connectionDAO.retrieveConnectionsByTarget(division, Fallback.class);
         
-        if (partnerships.size() != 1) {
+        if (fallbacks.size() != 1) {
             throw new PegasusException(PegasusErrorCode.PG723, 
                     "Unable to find backup of division '%s'", division.getId());
         }
         
-        for (Partnership<Organization, T> partnership : partnerships) {
-            Division<Organization> globalDivision = partnership.getSource();
+        for (Fallback<?> partnership : fallbacks) {
+            Division<?> globalDivision = partnership.getSource();
             KeyPair keyPair = new IdentityKeyPair(partnership.getKeyPairId());
             KeyPair updatedKeyPair = keySafeService.assignKeyPair(globalDivision, keyPair, protectWith);
             division.setKeyPairId(updatedKeyPair.getId());
@@ -220,6 +221,20 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
             managed.setKeyPairId(updatedKeyPair.getId());
             divisionDAO.update(managed);
         }
+    }
+    
+    protected <Owner extends Actor, Source extends Division<? extends Actor>, 
+                Target extends Division<?>, T extends Connection< Owner, Source, Target >> 
+            T createConnection(T connection, Owner owner, Source source, Target target) {
+        PrivateKeyToken privateKeyToken = target.getPrivateKeyToken();
+        if (privateKeyToken == null) {
+            AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService,
+                    Member.class);
+            privateKeyToken = resolvePrivateKeyFor(target, currentMember);
+        }
+        IdentityKeyPair sourceKeyPair = new IdentityKeyPair(source.getKeyPairId());
+        KeyPair connectionKeyPair = phalanxService.assignKeyPair(privateKeyToken, sourceKeyPair);
+        return super.createConnection(connection, owner, source, target, connectionKeyPair);
     }
     
     /**

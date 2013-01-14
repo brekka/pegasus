@@ -24,10 +24,12 @@ import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.Enlistment;
+import org.brekka.pegasus.core.model.Fallback;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
+import org.brekka.pegasus.core.model.Person;
 
 /**
  * Division Service
@@ -56,7 +58,7 @@ public interface DivisionService {
      */
     <T extends Actor> Division<T> retrieveDivision(T organization, String divisionSlug);
     
-    <Owner extends Actor, Target extends Actor> List<Partnership<Owner, Target>> retrievePartnershipsByTarget(Division<Target> target);
+    <Owner extends Actor> Fallback<Owner> createFallback(Owner owner, Division<Owner> source, Division<Person> target);
     
     /**
      * @param organization
