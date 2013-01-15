@@ -93,6 +93,10 @@ class AllocationServiceSupport {
         }
         BundleType bundleType = BundleType.Factory.newInstance();
         List<CompletableUploadedFile> ready = files.uploadComplete();
+        if (ready.isEmpty()) {
+            return null;
+        }
+        
         for (CompletableUploadedFile file : ready) {
             CryptedFile cryptedFile = pavewayService.complete(file);
             

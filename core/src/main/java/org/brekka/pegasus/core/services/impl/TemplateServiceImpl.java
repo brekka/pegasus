@@ -182,7 +182,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional(propagation=Propagation.REQUIRED)
     public void update(@Nonnull Template template) {
         Template managed = templateDAO.retrieveById(template.getId());
-        fixDetails(managed.getXml().getBean().getTemplate());
+        fixDetails(template.getXml().getBean().getTemplate());
         XmlEntity<TemplateDocument> incoming = template.getXml();
         XmlEntity<TemplateDocument> current = managed.getXml();
         XmlEntity<TemplateDocument> xml = xmlEntityService.updateEntity(incoming, current, TemplateDocument.class);
