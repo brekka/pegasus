@@ -29,6 +29,7 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.model.TemplateEngine;
 import org.brekka.pegasus.core.model.Token;
+import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
 
 /**
@@ -144,4 +145,18 @@ public interface TemplateService {
      * @return
      */
     List<Template> retrieveListing(ListingCriteria listingCriteria);
+    
+    /**
+     * Export all templates.
+     * @return
+     */
+    ExportedTemplatesDocument exportAll();
+    
+    /**
+     * Import from exported templates
+     * @param exportedTemplatesDocument
+     * @param keySafe
+     * @return the number of templates imported.
+     */
+    int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, @Nullable KeySafe<?> keySafe);
 }

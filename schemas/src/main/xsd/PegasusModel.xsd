@@ -11,6 +11,14 @@
 	<xsd:element name="Division"            type="pgm:DivisionType" />
 	<xsd:element name="Invitation"          type="pgm:InvitationType" />
     <xsd:element name="Template"            type="pgm:TemplateType" />
+    <xsd:element name="ExportedTemplate"    type="pgm:ExportedTemplateType" />
+    <xsd:element name="ExportedTemplates">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="ExportedTemplate" type="pgm:ExportedTemplateType" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
     
     <xsd:complexType name="BundleType">
 		<xsd:sequence>
@@ -151,8 +159,19 @@
             <xsd:element name="Documentation" type="xsd:string"    minOccurs="0" />
             <xsd:element name="Content"       type="xsd:string"    />
             <xsd:element name="ExampleVariables" type="xsd:string" />
-            
         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="ExportedTemplateType">
+        <xsd:complexContent>
+            <xsd:extension base="pgm:TemplateType">
+                <xsd:sequence>
+                    <xsd:element name="Slug" type="xsd:string" />
+                    <xsd:element name="Engine" type="xsd:string" />
+                    <xsd:element name="PlainLabel" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
     </xsd:complexType>
     
     

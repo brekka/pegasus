@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +30,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.commons.persistence.model.OrderByPart;
+import org.brekka.commons.persistence.model.OrderByProperty;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TemplateDAO;
@@ -39,6 +42,9 @@ import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.TemplateService;
 import org.brekka.pegasus.core.services.XmlEntityService;
+import org.brekka.xml.pegasus.v2.model.ExportedTemplateType;
+import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument;
+import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument.ExportedTemplates;
 import org.brekka.xml.pegasus.v2.model.TemplateDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,6 +227,58 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional(propagation=Propagation.REQUIRED)
     public int retrieveListingRowCount() {
         return templateDAO.retrieveListingRowCount();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#exportAll()
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public ExportedTemplatesDocument exportAll() {
+        int count = templateDAO.retrieveListingRowCount();
+        List<Template> listing = retrieveListing(new ListingCriteria(0, count, Arrays.<OrderByPart>asList(new OrderByProperty("created", false))));
+        ExportedTemplatesDocument doc = ExportedTemplatesDocument.Factory.newInstance();
+        ExportedTemplates templates = doc.addNewExportedTemplates();
+        for (Template template : listing) {
+            xmlEntityService.release(template, TemplateDocument.class);
+            TemplateType templateXml = template.getXml().getBean().getTemplate();
+            ExportedTemplateType exportedTemplate = templates.addNewExportedTemplate();
+            exportedTemplate.setSlug(template.getSlug());
+            exportedTemplate.setPlainLabel(template.getLabel());
+            exportedTemplate.setLabel(templateXml.getLabel());
+            exportedTemplate.setContent(templateXml.getContent());
+            exportedTemplate.setDocumentation(templateXml.getDocumentation());
+            exportedTemplate.setEngine(template.getEngine().toString());
+            exportedTemplate.setExampleVariables(templateXml.getExampleVariables());
+        }
+        return doc;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#importFrom(org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument)
+     */
+    @Override
+    @Transactional(propagation=Propagation.REQUIRED)
+    public int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, KeySafe<?> keySafe) {
+        int count = 0;
+        ExportedTemplates exportedTemplates = exportedTemplatesDocument.getExportedTemplates();
+        List<ExportedTemplateType> exportedTemplateList = exportedTemplates.getExportedTemplateList();
+        for (ExportedTemplateType exportedTemplateType : exportedTemplateList) {
+            String slug = exportedTemplateType.getSlug();
+            if (templateDAO.retrieveBySlug(slug) != null) {
+                // Already exists, don't overwrite
+                continue;
+            }
+            TemplateType template = TemplateType.Factory.newInstance();
+            template.setLabel(exportedTemplateType.getLabel());
+            template.setContent(exportedTemplateType.getContent());
+            template.setDocumentation(exportedTemplateType.getDocumentation());
+            template.setExampleVariables(exportedTemplateType.getExampleVariables());
+            TemplateEngine templateEngine = TemplateEngine.valueOf(exportedTemplateType.getEngine());
+            create(template, templateEngine, keySafe, slug, null, exportedTemplateType.getPlainLabel());
+            count++;
+        }
+        return count;
     }
     
     /* (non-Javadoc)
