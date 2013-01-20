@@ -86,6 +86,9 @@ public class EMailAddressServiceImpl implements EMailAddressService {
     public EMailAddress retrieveByAddress(String address) {
         byte[] hash = hash(address);
         EMailAddress eMailAddress = eMailAddressDAO.retrieveByHash(hash);
+        if (eMailAddress == null) {
+            return null;
+        }
         eMailAddress.setAddress(address);
         return eMailAddress;
     }
