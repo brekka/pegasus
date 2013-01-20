@@ -82,9 +82,12 @@ public class EMailAddressServiceImpl implements EMailAddressService {
      * @see org.brekka.pegasus.core.services.EMailAddressService#retrieveByAddress(java.lang.String)
      */
     @Override
+    @Transactional(propagation=Propagation.REQUIRED)
     public EMailAddress retrieveByAddress(String address) {
         byte[] hash = hash(address);
-        return eMailAddressDAO.retrieveByHash(hash);
+        EMailAddress eMailAddress = eMailAddressDAO.retrieveByHash(hash);
+        eMailAddress.setAddress(address);
+        return eMailAddress;
     }
 
     /**

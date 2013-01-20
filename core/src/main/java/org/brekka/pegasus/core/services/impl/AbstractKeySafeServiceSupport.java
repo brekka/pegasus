@@ -26,11 +26,8 @@ import org.brekka.pegasus.core.dao.ConnectionDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
-import org.brekka.pegasus.core.model.Fallback;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.Partnership;
-import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
@@ -39,8 +36,6 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Common {@link KeySafe} operations shared among various service implementations.

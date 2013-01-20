@@ -17,6 +17,10 @@
 package org.brekka.pegasus.core.services;
 
 import java.util.Collection;
+import java.util.UUID;
+
+import org.brekka.pegasus.core.model.EMailMessage;
+import org.brekka.pegasus.core.model.KeySafe;
 
 /**
  * Send an e-mail
@@ -34,7 +38,7 @@ public interface EMailSendingService {
      * @param plainBody the plain body (optional)
      * @param htmlBody the html body (optional).
      */
-    void send(String recipient, String sender, String subject, String plainBody, String htmlBody);
+    EMailMessage send(String recipient, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe);
     
     /**
      * Send an e-mail to a multiple recipients
@@ -45,5 +49,12 @@ public interface EMailSendingService {
      * @param plainBody the plain body (optional)
      * @param htmlBody the html body (optional).
      */
-    void send(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody);
+    EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe);
+    
+    /**
+     * Retrieve a sent message by its ID
+     * @param emailMessageId
+     * @return
+     */
+    EMailMessage retrieveById(UUID emailMessageId);
 }

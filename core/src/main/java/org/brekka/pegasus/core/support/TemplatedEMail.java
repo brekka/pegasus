@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.services.EMailSendingService;
 import org.brekka.pegasus.core.services.TemplateService;
@@ -104,10 +105,10 @@ public class TemplatedEMail {
             return this;
         }
         
-        public void send(String recipient, EMailSendingService eMailSendingService) {
+        public void send(String recipient, EMailSendingService eMailSendingService, KeySafe<?> keySafe) {
             String subject = templateService.merge(subjectTemplate, context);
             String body = templateService.merge(bodyTemplate, context);
-            eMailSendingService.send(recipient, sender, subject, body, null);
+            eMailSendingService.send(recipient, sender, subject, body, null, keySafe);
         }
     }
     

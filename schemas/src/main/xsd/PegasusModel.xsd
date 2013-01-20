@@ -19,6 +19,7 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
+    <xsd:element name="EMailMessage"    type="pgm:EMailMessageType" />
     
     <xsd:complexType name="BundleType">
 		<xsd:sequence>
@@ -152,6 +153,31 @@
             <xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
+    
+    <xsd:complexType name="EMailMessageType">
+        <xsd:sequence>
+            <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Subject"     type="xsd:string"       minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Sender"      type="pgm:EMailType"    minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Recipient"   type="pgm:EMailType"    minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="Content"                             minOccurs="1" maxOccurs="2">
+                <xsd:complexType>
+                    <xsd:simpleContent>
+                        <xsd:extension base="xsd:string">
+                            <xsd:attribute name="type">
+                                <xsd:simpleType>
+                                    <xsd:restriction base="xsd:string">
+                                        <xsd:enumeration value="PLAIN" />
+                                        <xsd:enumeration value="HTML" />
+                                    </xsd:restriction>
+                                </xsd:simpleType>
+                            </xsd:attribute>
+                        </xsd:extension>
+                    </xsd:simpleContent>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="TemplateType">
         <xsd:sequence>
