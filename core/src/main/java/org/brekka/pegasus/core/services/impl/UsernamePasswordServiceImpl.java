@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.UsernamePasswordDAO;
-import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.UsernamePassword;
 import org.brekka.pegasus.core.services.UsernamePasswordService;
 import org.brekka.phoenix.api.CryptoProfile;
@@ -34,7 +33,7 @@ import org.brekka.xml.pegasus.v2.config.SystemDerivedKeySpecType;
 import org.brekka.xml.pegasus.v2.config.UsernamePasswordServiceDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -67,7 +66,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#create(java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public UsernamePassword create(String username, String password) {
         byte[] derivedUsername = deriveUsername(username);
         byte[] passwordBytes = toBytes(password);
@@ -91,7 +90,6 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#verify(java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.SUPPORTS)
     public boolean verify(UsernamePassword usernamePassword, String password) {
         byte[] passwordBytes = toBytes(password);
         return derivedKeyCryptoService.check(passwordBytes, usernamePassword);
@@ -101,7 +99,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#retrieveByUsername(java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.SUPPORTS)
+    @Transactional(readOnly=true)
     public UsernamePassword retrieveByUsername(String username) {
         byte[] derivedUsername = deriveUsername(username);
         UsernamePassword usernamePassword = usernamePasswordDAO.retrieveByUsernameDigest(derivedUsername);
@@ -115,7 +113,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#changePassword(org.brekka.pegasus.core.model.UsernamePassword, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void changePassword(UsernamePassword usernamePassword, String oldPassword, String newPassword) {
         if (verify(usernamePassword, oldPassword)) {
             internalChangePassword(usernamePassword, newPassword);
@@ -129,7 +127,7 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#changePassword(org.brekka.pegasus.core.model.UsernamePassword, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void changePassword(UsernamePassword usernamePassword, String newPassword) {
         internalChangePassword(usernamePassword, newPassword);
     }
@@ -138,9 +136,9 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#delete(org.brekka.pegasus.core.model.AuthenticationToken)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public void delete(AuthenticationToken authenticationToken) {
-        usernamePasswordDAO.delete(authenticationToken.getId());
+    @Transactional()
+    public void delete(UsernamePassword usernamePassword) {
+        usernamePasswordDAO.delete(usernamePassword.getId());
     }
     
     protected void internalChangePassword(UsernamePassword usernamePassword, String newPassword) {

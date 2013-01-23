@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 
 /**
  * @author Andrew Taylor
@@ -24,7 +24,7 @@ public class UnlockDirect {
     private AgreementDirect agreementDirectPage;
     
     @Inject
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     @Property
     private String token;

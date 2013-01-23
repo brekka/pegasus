@@ -1,6 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Date;
@@ -21,7 +34,7 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.pegasus.core.services.DispatchService;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.InboxService;
@@ -33,12 +46,13 @@ import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * A dispatch is an allocation created by a registered user with the goal of assigning it to another user.
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 @Service
 @Transactional
@@ -54,7 +68,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     private InboxService inboxService;
     
     @Autowired
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     @Autowired
     private KeySafeService keySafeService;
@@ -66,7 +80,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#createDispatch(org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, java.lang.Integer, java.util.List)
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional()
     public Dispatch createDispatch(KeySafe<?> keySafe, AllocationDisposition disposition, DetailsType details,
             DateTime expires, Integer maxDownloads, UploadedFiles files) {
         Dispatch dispatch = new Dispatch();
@@ -99,7 +113,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#createDispatchAndAllocate(java.lang.String, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, int, java.util.List)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Allocation createDispatchAndAllocate(String recipientEMail, Division<?> division, KeySafe<?> keySafe,
             DetailsType details, DateTime dispatchExpires, DateTime allocationExpires, int maxDownloads, UploadedFiles files) {
         Dispatch dispatch = createDispatch(keySafe, null, details, dispatchExpires, null, files);
@@ -126,7 +140,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#retrieveCurrentForInterval(org.joda.time.DateTime, org.joda.time.DateTime)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public List<Dispatch> retrieveCurrentForInterval(KeySafe<?> keySafe, DateTime from, DateTime until) {
         AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
@@ -137,7 +151,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
      * @see org.brekka.pegasus.core.services.DispatchService#delete(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void delete(UUID dispatchId) {
         Dispatch dispatch = dispatchDAO.retrieveById(dispatchId);
         dispatch.setExpires(new Date());

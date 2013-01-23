@@ -40,7 +40,6 @@ import org.brekka.xml.pegasus.v2.model.EMailMessageType;
 import org.brekka.xml.pegasus.v2.model.EMailMessageType.Content;
 import org.brekka.xml.pegasus.v2.model.EMailType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -70,7 +69,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public EMailMessage send(String recipient, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe) {
         return send(Arrays.asList(recipient), sender, subject, plainBody, htmlBody, keySafe);
     }
@@ -79,7 +78,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.util.Collection, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody,
             String htmlBody, KeySafe<?> keySafe) {
         if (sender == null) {
@@ -145,7 +144,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @see org.brekka.pegasus.core.services.EMailSendingService#retrieveById(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public EMailMessage retrieveById(UUID emailMessageId) {
         return eMailMessageDAO.retrieveById(emailMessageId);
     }

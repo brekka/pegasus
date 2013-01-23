@@ -14,7 +14,7 @@ import org.joda.time.DateTime;
  * @author Andrew Taylor
  * 
  */
-public interface AnonymousService {
+public interface AnonymousTransferService {
 
     AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
             UploadedFiles files, String code);

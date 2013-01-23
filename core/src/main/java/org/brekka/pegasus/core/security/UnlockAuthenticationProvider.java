@@ -16,7 +16,7 @@
 
 package org.brekka.pegasus.core.security;
 
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.phalanx.api.PhalanxErrorCode;
 import org.brekka.phalanx.api.PhalanxException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class UnlockAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
     @Autowired
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails,

@@ -40,7 +40,6 @@ import org.brekka.xml.pegasus.v2.model.RobotDocument;
 import org.brekka.xml.pegasus.v2.model.RobotType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -70,7 +69,7 @@ public class RobotServiceImpl implements RobotService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.RobotService#createRobot(java.util.UUID, java.lang.String)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     @Override
     public Robot create(String key, String code, Actor owner, RobotType details) {
         KeySafe<?> detailsProtectedBy;
@@ -116,24 +115,24 @@ public class RobotServiceImpl implements RobotService {
         return robot;
     }
     
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     @Override
     public int retrieveListingRowCount(Actor owner) {
         return robotDAO.retrieveListingRowCount(owner);
     }
     
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     @Override
     public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
         return robotDAO.retrieveListing(owner, listingCriteria);
     }
     
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     @Override
     public void delete(Robot robot) {
         Robot managed = robotDAO.retrieveById(robot.getId());
         vaultService.deleteVault(managed.getDefaultVault());
-        usernamePasswordService.delete(managed.getAuthenticationToken());
+        usernamePasswordService.delete((UsernamePassword) managed.getAuthenticationToken());
         xmlEntityService.delete(managed.getXml().getId());
         robotDAO.delete(managed.getId());
     }

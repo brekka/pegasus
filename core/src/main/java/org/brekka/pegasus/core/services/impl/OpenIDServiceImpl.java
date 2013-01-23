@@ -35,7 +35,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -61,7 +60,7 @@ public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
      * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public UserDetails loadUserByUsername(String openIdUri) throws UsernameNotFoundException {
         Set<GrantedAuthority> authorities = new LinkedHashSet<>();
         OpenID openID = openIdDAO.retrieveByURI(openIdUri);
@@ -95,7 +94,7 @@ public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
      * @see org.brekka.pegasus.core.services.OpenIDService#retreieveByOpenID(java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public OpenID retreieveByOpenID(String openIdUri) {
         return openIdDAO.retrieveByURI(openIdUri);
     }

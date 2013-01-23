@@ -1,6 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Date;
@@ -27,13 +40,15 @@ import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
 /**
+ * Providing operations for the base {@link Allocation} type. 
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 @Service
 @Transactional
@@ -57,7 +72,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @see org.brekka.pegasus.core.services.BundleService#incrementDownloadCounter(org.brekka.pegasus.core.model.BundleFile)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    @Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ)
     public void incrementDownloadCounter(AllocationFile allocationFile) {
         FileType xml = allocationFile.getXml();
         int maxDownloads = Integer.MAX_VALUE;
@@ -80,7 +95,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @see org.brekka.pegasus.core.services.AllocationService#retrieveFile(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public AllocationFile retrieveFile(UUID allocationFileId) {
         AccessorContext currentContext = AccessorContextImpl.getCurrent();
         AllocationFile unlockedAllocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
@@ -120,7 +135,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @see org.brekka.pegasus.core.services.AllocationService#deallocateAllocation(org.brekka.pegasus.core.model.Allocation)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.SERIALIZABLE)
     public void clearAllocation(Allocation allocation) {
         List<AllocationFile> fileList = allocationFileDAO.retrieveByAllocation(allocation);
         for (AllocationFile file : fileList) {
@@ -140,7 +155,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @see org.brekka.pegasus.core.services.AllocationService#releaseDetails(java.util.List)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends Allocation & KeySafeAware> void releaseDetails(List<T> allocationList) {
         for (T allocation : allocationList) {
             if (allocation == null) {
@@ -155,7 +170,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @see org.brekka.pegasus.core.services.AllocationService#forceExpireAllocation(org.brekka.pegasus.core.model.Allocation)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    @Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ)
     public void forceExpireAllocation(Allocation allocation) {
         Date expiryDate = new Date();
         // Update the incoming reference with the date
@@ -171,12 +186,73 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      * @param file
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void clearAllocationFile(AllocationFile file) {
         clearAllocationFile(file, true);
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DispatchService#updateDetails(org.brekka.pegasus.core.model.Dispatch, org.brekka.xml.pegasus.v2.model.DetailsType)
+     */
+    @Override
+    @Transactional(isolation=Isolation.SERIALIZABLE)
+    public void updateDetails(Allocation allocation) {
+        XmlEntity<AllocationDocument> updatedXml = allocation.getXml();
+        Allocation latest = allocationDAO.retrieveById(allocation.getId());
+        XmlEntity<AllocationDocument> updatedEntity = xmlEntityService.updateEntity(updatedXml, latest.getXml(), AllocationDocument.class);
+        latest.setXml(updatedEntity);
+        allocationDAO.update(latest);
+    }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListing(org.brekka.pegasus.core.model.Dispatch, org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Allocation> retrieveDerivedFromListing(Dispatch derivedFrom, ListingCriteria listingCriteria) {
+        List<Allocation> listing = allocationDAO.retrieveDerivedFromListing(derivedFrom, listingCriteria);
+        return listing;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListingRowCount(org.brekka.pegasus.core.model.Dispatch)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public int retrieveDerivedFromListingRowCount(Dispatch derivedFrom) {
+        return retrieveDerivedFromListingRowCount(derivedFrom);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.AllocationService#retrievePopulatedDownloadEvents(org.brekka.pegasus.core.model.Allocation)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<FileDownloadEvent> retrievePopulatedDownloadEvents(Allocation allocation) {
+        Allocation managed = allocationDAO.retrieveById(allocation.getId());
+        Dispatch derivedFrom = managed.getDerivedFrom();
+        decryptDocument(derivedFrom, false);
+        List<FileDownloadEvent> downloads = eventService.retrieveFileDownloads(managed);
+        
+        List<AllocationFile> files = derivedFrom.getFiles();
+        for (FileDownloadEvent fileDownloadEvent : downloads) {
+            AllocationFile eventTransferFile = fileDownloadEvent.getTransferFile();
+            for (AllocationFile dispatchTransferFile : files) {
+                if (EntityUtils.identityEquals(dispatchTransferFile, eventTransferFile.getDerivedFrom())) {
+                    // Copy XML to event transfer - just to provide the name. The UUID will be incorrect.
+                    eventTransferFile.setXml(dispatchTransferFile.getXml());
+                    break;
+                }
+            }
+        }
+        return downloads;
+    }
+    
+    /**
+     * 
+     * @param file
+     * @param deleteAllocationIfPossible
+     */
     protected void clearAllocationFile(AllocationFile file, boolean deleteAllocationIfPossible) {
         AllocationFile allocationFile = allocationFileDAO.retrieveById(file.getId());
         
@@ -207,96 +283,4 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             pavewayService.removeFile(cryptedFile); 
         }
     }
-    
-    
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#updateDetails(org.brekka.pegasus.core.model.Dispatch, org.brekka.xml.pegasus.v2.model.DetailsType)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public void updateDetails(Allocation allocation) {
-        XmlEntity<AllocationDocument> updatedXml = allocation.getXml();
-        Allocation latest = allocationDAO.retrieveById(allocation.getId());
-        XmlEntity<AllocationDocument> updatedEntity = xmlEntityService.updateEntity(updatedXml, latest.getXml(), AllocationDocument.class);
-        latest.setXml(updatedEntity);
-        allocationDAO.update(latest);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListing(org.brekka.pegasus.core.model.Dispatch, org.brekka.commons.persistence.model.ListingCriteria)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<Allocation> retrieveDerivedFromListing(Dispatch derivedFrom, ListingCriteria listingCriteria) {
-        List<Allocation> listing = allocationDAO.retrieveDerivedFromListing(derivedFrom, listingCriteria);
-        return listing;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListingRowCount(org.brekka.pegasus.core.model.Dispatch)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public int retrieveDerivedFromListingRowCount(Dispatch derivedFrom) {
-        return retrieveDerivedFromListingRowCount(derivedFrom);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrievePopulatedDownloadEvents(org.brekka.pegasus.core.model.Allocation)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<FileDownloadEvent> retrievePopulatedDownloadEvents(Allocation allocation) {
-        Allocation managed = allocationDAO.retrieveById(allocation.getId());
-        Dispatch derivedFrom = managed.getDerivedFrom();
-        decryptDocument(derivedFrom, false);
-        List<FileDownloadEvent> downloads = eventService.retrieveFileDownloads(managed);
-        
-        List<AllocationFile> files = derivedFrom.getFiles();
-        for (FileDownloadEvent fileDownloadEvent : downloads) {
-            AllocationFile eventTransferFile = fileDownloadEvent.getTransferFile();
-            for (AllocationFile dispatchTransferFile : files) {
-                if (EntityUtils.identityEquals(dispatchTransferFile, eventTransferFile.getDerivedFrom())) {
-                    // Copy XML to event transfer - just to provide the name. The UUID will be incorrect.
-                    eventTransferFile.setXml(dispatchTransferFile.getXml());
-                    break;
-                }
-            }
-        }
-        return downloads;
-    }
-
-//    /**
-//     * Perform the de-allocation
-//     * 
-//     * @param bundle
-//     */
-//    @Override
-//    @Transactional(propagation=Propagation.REQUIRED)
-//    public void deallocateBundle(Bundle bundle) {
-//        List<CryptedFile> fileList = cryptedFileDAO.retrieveByBundle(bundle);
-//        for (CryptedFile bundleFile : fileList) {
-//            // Bundle file id matches the crypted file id from paveway.
-//            deallocateCryptedFile(bundleFile);
-//        }
-//        
-//        // Clear the bundle XML
-//        resourceStorageService.remove(bundle.getId());
-//        bundleDAO.delete(bundle.getId());
-//    }
-//    
-//    @Override
-//    @Transactional(propagation=Propagation.REQUIRED)
-//    public void deallocateCryptedFile(CryptedFile cryptedFile) {
-//        cryptedFile = cryptedFileDAO.retrieveById(cryptedFile.getId());
-//        List<CryptedPart> parts = cryptedFile.getParts();
-//        for (CryptedPart cryptedPart : parts) {
-//            UUID partId = cryptedPart.getId();
-//            resourceStorageService.remove(partId);
-//            cryptedPartDAO.delete(partId);
-//        }
-//        cryptedFileDAO.delete(cryptedFile.getId());
-//    }
-    
 }

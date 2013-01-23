@@ -8,9 +8,11 @@ import java.util.List;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.support.HibernateUtils;
+import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.utils.PegasusUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Order;
@@ -76,5 +78,23 @@ public class AllocationHibernateDAO extends AbstractPegasusHibernateDAO<Allocati
                 " where a.derivedFrom=:derivedFrom");
         query.setEntity("derivedFrom", derivedFrom);
         return ((Number) query.uniqueResult()).intValue();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.AnonymousTransferDAO#retrieveByToken(java.lang.String)
+     */
+    @Override
+    public <T extends Allocation> T retrieveByToken(String token, Class<T> expectedType) {
+        Object val = getCurrentSession().createQuery(
+                "select a " +
+                "  from " + expectedType.getSimpleName() + " a " +
+                " inner join a.token as token " +
+                "  with token.path=:token")
+                .setString("token", token)
+                .uniqueResult();
+        if (val == null) {
+            return null;
+        }
+        return PegasusUtils.asType(val, expectedType, PegasusErrorCode.PG888, "For allocation token '%s'", token);
     }
 }

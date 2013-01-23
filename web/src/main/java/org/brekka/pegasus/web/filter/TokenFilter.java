@@ -26,7 +26,7 @@ import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.TokenType;
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.pegasus.core.services.DownloadService;
 import org.brekka.pegasus.core.services.TokenService;
 import org.brekka.pegasus.web.pages.deposit.MakeDeposit;
@@ -47,7 +47,7 @@ public class TokenFilter implements Filter {
             "^(?:/([0-9]+))?/([A-Z0-9][A-Za-z0-9_]{%d,%d})(?:\\.zip|/[^/]+)?$",
             PegasusTokenType.MIN_LENGTH, PegasusTokenType.MAX_LENGTH));
     
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     private DownloadService downloadService;
     
@@ -71,7 +71,7 @@ public class TokenFilter implements Filter {
                         }
                     }
                     downloadService = applicationContext.getBean(DownloadService.class);
-                    anonymousService = applicationContext.getBean(AnonymousService.class);
+                    anonymousService = applicationContext.getBean(AnonymousTransferService.class);
                     tokenService = applicationContext.getBean(TokenService.class);
                 }
             }

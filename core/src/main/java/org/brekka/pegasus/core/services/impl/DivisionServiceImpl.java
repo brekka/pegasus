@@ -44,11 +44,11 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Division Service Impl
+ * Division Service 
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -74,7 +74,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @see org.brekka.pegasus.core.services.OrganizationService#createDivision(org.brekka.pegasus.core.model.Organization, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Enlistment createDivisionEnlistment(Associate associate, KeySafe<? extends Member> protectedBy, String slug, String name) {
         KeyPair memberDivisionKeyPair = keySafeService.createKeyPair(protectedBy);
         KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(memberDivisionKeyPair);
@@ -84,7 +84,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     }
 
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createDivisionPartnership(Division<Owner> source, Target target, String slug, String name) {
         Owner owner = source.getOwner();
         KeyPair newKeyPair = keySafeService.createKeyPair(source);
@@ -100,7 +100,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @see org.brekka.pegasus.core.services.impl.AbstractKeySafeServiceSupport#createPartnership(org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Division, org.brekka.phalanx.api.model.KeyPair)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(Owner owner,
             Division<Owner> source, Division<Target> target) {
         Partnership<Owner, Target> partnership = new Partnership<>();
@@ -111,7 +111,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @see org.brekka.pegasus.core.services.impl.AbstractKeySafeServiceSupport#createPartnership(org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Division, org.brekka.phalanx.api.model.KeyPair)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <Owner extends Actor> Fallback<Owner> createFallback(Owner owner,
             Division<Owner> source, Division<Person> target) {
         Fallback<Owner> fallback = new Fallback<>();
@@ -124,7 +124,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      */
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> retrievePartnershipById(
             UUID partnershipId) {
         return (Partnership<Owner, Target>) connectionDAO.retrieveById(partnershipId);
@@ -134,7 +134,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @see org.brekka.pegasus.core.services.impl.DivisionServiceImpl#createEnlistment(org.brekka.pegasus.core.model.Associate, org.brekka.pegasus.core.model.KeySafe, org.brekka.pegasus.core.model.Connection)
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional()
     public <Owner extends Actor, Source extends KeySafe<?>> Enlistment createEnlistment(Associate toAssign, KeySafe<? extends Member> assignToKeySafe, 
             Connection<Owner, Source, Division<Organization>> existingEnlistment) {
         Division<Organization> target = existingEnlistment.getTarget();
@@ -148,7 +148,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @see org.brekka.pegasus.core.services.DivisionService#createDivision(org.brekka.pegasus.core.model.Division, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <T extends Actor> Division<T> createDivision(KeySafe<T> parent, String slug, String name) {
         KeyPair divisionKeyPair;
         PrivateKeyToken privateKey = null;
@@ -174,7 +174,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveDivision(java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends Actor> Division<T> retrieveDivision(T organization, String divisionSlug) {
         Division<T> division = divisionDAO.retrieveBySlug(organization, divisionSlug);
         return division;
@@ -183,7 +183,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveDivisions(org.brekka.pegasus.core.model.Organization)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     @Override
     public List<Enlistment> retrieveCurrentEnlistments() {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
@@ -200,7 +200,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
      *            the keySafe to assign access to the keyPair that must have been previously backed up via a
      *            partnership.
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.SERIALIZABLE)
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Actor> void restoreDivision(Division<T> division, KeySafe<?> protectWith) {

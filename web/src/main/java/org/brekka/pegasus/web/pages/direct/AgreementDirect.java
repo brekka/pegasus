@@ -7,7 +7,7 @@ import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -21,7 +21,7 @@ public class AgreementDirect {
     private FetchDirect fetchDirectPage;
     
     @Inject
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     @Property
     private boolean agree;

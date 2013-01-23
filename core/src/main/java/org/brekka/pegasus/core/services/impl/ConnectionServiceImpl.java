@@ -16,10 +16,12 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import static org.brekka.pegasus.core.utils.PegasusUtils.asType;
+import static org.brekka.pegasus.core.utils.PegasusUtils.checkNotNull;
+
 import java.util.UUID;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
-import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.ConnectionDAO;
 import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.model.Connection;
@@ -28,11 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * TODO Description of ConnectionServiceImpl
+ * Provides functionality to manipulate {@link Connection} instances.
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -47,6 +48,7 @@ public class ConnectionServiceImpl implements ConnectionService, ApplicationList
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
+    @Transactional()
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
@@ -57,18 +59,12 @@ public class ConnectionServiceImpl implements ConnectionService, ApplicationList
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ConnectionService#retrieveById(java.util.UUID, java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends Connection<?, ?, ?>> T retrieveById(UUID connectionId, Class<T> expectedType) {
+        checkNotNull(connectionId, "connectionId");
+        checkNotNull(expectedType, "expectedType");
         Connection<?, ?, ?> connection = connectionDAO.retrieveById(connectionId);
-        if (connection == null) {
-            return null;
-        }
-        if (expectedType.isAssignableFrom(connection.getClass()) == false) {
-            throw new PegasusException(PegasusErrorCode.PG444, "Expected '%s', actual '%s'", 
-                    expectedType.getName(), connection.getClass().getName());
-        }
-        return (T) connection;
+        return asType(connection, expectedType, PegasusErrorCode.PG444, "Connection '%s'", connectionId);
     }
 }

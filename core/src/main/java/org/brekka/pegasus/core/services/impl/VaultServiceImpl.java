@@ -1,6 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2012 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Collections;
@@ -29,12 +42,13 @@ import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Andrew Taylor
+ * Service for manipulating {@link Vault} instances. 
  *
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
 @Transactional
@@ -50,7 +64,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#createVault(org.brekka.pegasus.core.model.Member, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Vault createVault(String name, String vaultPassword, Member owner) {
         Vault vault = new Vault();
         vault.setOwner(owner);
@@ -68,6 +82,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#deleteVault(org.brekka.pegasus.core.model.Vault)
      */
     @Override
+    @Transactional()
     public void deleteVault(Vault vault) {
         applicationEventPublisher.publishEvent(new VaultDeleteEvent(vault));
         vaultDAO.delete(vault.getId());
@@ -77,6 +92,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#retrieveById(java.util.UUID)
      */
     @Override
+    @Transactional(readOnly=true)
     public Vault retrieveById(UUID vaultId) {
         return vaultDAO.retrieveById(vaultId);
     }
@@ -85,6 +101,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#retrieveForUser()
      */
     @Override
+    @Transactional(readOnly=true)
     public List<Vault> retrieveForUser() {
         AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         List<Vault> vaultList = vaultDAO.retrieveForMember(current.getMember());
@@ -106,7 +123,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public void openVault(Vault vault, String vaultPassword) {
         UUID principalId = vault.getPrincipalId();
         AuthenticatedPrincipal authenticatedPrincipal;
@@ -131,7 +148,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#releaseKey(java.util.UUID, org.brekka.pegasus.core.model.OpenVault)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public byte[] releaseKey(UUID cryptedDataId, Vault vault) {
         AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault);
         CryptedData cryptedData = new IdentityCryptedData(cryptedDataId);
@@ -144,7 +161,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#createKeyPair(org.brekka.pegasus.core.model.Vault)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public KeyPair createKeyPair(Vault vault) {
         AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault);
         KeyPair keyPair = authenticatedPrincipal.getDefaultPrivateKey().getKeyPair();
@@ -156,7 +173,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#releaseKeyPair(org.brekka.phalanx.api.model.KeyPair, org.brekka.pegasus.core.model.Vault)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public PrivateKeyToken releaseKeyPair(KeyPair keyPair, Vault vault) {
         AuthenticatedPrincipal authenticatedPrincipal = getVaultKey(vault);
         PrivateKeyToken privateKey = authenticatedPrincipal.getDefaultPrivateKey();
@@ -169,7 +186,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#retrieveBySlug(java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Vault retrieveBySlug(String vaultSlug) {
         AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
         Member member = current.getMember();
@@ -181,7 +198,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#isOpen(org.brekka.pegasus.core.model.Vault)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public boolean isOpen(Vault vault) {
         if (vault == null) {
             return false;
@@ -195,7 +212,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#changePassword(org.brekka.pegasus.core.model.Vault, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void changePassword(Vault defaultVault, String oldPassword, String newPassword) {
         UUID principalId = defaultVault.getPrincipalId();
         phalanxService.changePassword(new IdentityPrincipal(principalId), oldPassword, newPassword);
@@ -205,19 +222,21 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
      * @see org.brekka.pegasus.core.services.VaultService#changePassword(org.brekka.pegasus.core.model.Vault, java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void changePassword(Vault defaultVault, String password) {
+        Vault managed = vaultDAO.retrieveById(defaultVault.getId());
         // Replace the principal. The old principal will just be orphaned.
         Principal principal = phalanxService.createPrincipal(password);
-        defaultVault.setPrincipalId(principal.getId());
-        vaultDAO.update(defaultVault);
+        managed.setPrincipalId(principal.getId());
+        vaultDAO.update(managed);
+        defaultVault.setPrincipalId(managed.getPrincipalId());
     }
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.VaultService#closeVault(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public void closeVault(UUID vaultId) {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         Vault vault = new Vault(vaultId);

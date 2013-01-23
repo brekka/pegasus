@@ -35,7 +35,7 @@ import org.brekka.xml.pegasus.v2.model.InvitationDocument;
 import org.brekka.xml.pegasus.v2.model.InvitationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -62,7 +62,7 @@ public class InvitationServiceImpl implements InvitationService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#createInvitation(org.brekka.xml.pegasus.v2.model.InvitationType, java.lang.String)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     @Override
     public Invitation createInvitation(Token token, InvitationType details, String password) {
         return createInvitation(token, details, null, password);
@@ -71,14 +71,14 @@ public class InvitationServiceImpl implements InvitationService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#createInvitation(org.brekka.xml.pegasus.v2.model.InvitationType, org.brekka.pegasus.core.model.Member)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     @Override
     public Invitation createInvitation(Token token, InvitationType details, Member recipient) {
         return createInvitation(token, details, recipient, null);
     }
     
     
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     @Override
     public List<Invitation> retrieveForMember(Member member) {
         AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
@@ -88,7 +88,7 @@ public class InvitationServiceImpl implements InvitationService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#retrieveByToken(org.brekka.pegasus.core.model.Token)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     @Override
     public Invitation retrieveByToken(Token token) {
         return invitationDAO.retrieveByToken(token);
@@ -97,7 +97,7 @@ public class InvitationServiceImpl implements InvitationService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#update(org.brekka.pegasus.core.model.Invitation)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.SERIALIZABLE)
     @Override
     public void update(Invitation invitation) {
         Invitation managed = invitationDAO.retrieveById(invitation.getId());
@@ -113,7 +113,7 @@ public class InvitationServiceImpl implements InvitationService {
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#retrieveById(java.util.UUID)
      */
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     @Override
     public Invitation retrieveById(UUID invitationId) {
         return invitationDAO.retrieveById(invitationId);

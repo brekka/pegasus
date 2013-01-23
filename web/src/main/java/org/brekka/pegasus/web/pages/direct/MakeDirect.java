@@ -12,7 +12,7 @@ import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.FileBuilder;
 import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.pegasus.core.model.Allocation;
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.pegasus.core.support.AllocationDetailsBuilder;
 import org.brekka.pegasus.web.base.AbstractMakePage;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
@@ -27,7 +27,7 @@ public class MakeDirect extends AbstractMakePage {
     private DirectDone directDonePage;
     
     @Inject
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     @Inject
     private AlertManager alertManager;

@@ -1,6 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2012 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
@@ -22,8 +35,8 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Partnership;
-import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.PegasusTokenType;
+import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
@@ -38,10 +51,12 @@ import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 import org.brekka.xml.pegasus.v2.model.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Organizations are groups of actors with a shared set of resources.
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
@@ -89,7 +104,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#createOrganization(java.util.UUID, java.lang.String, java.lang.String, java.lang.String, org.brekka.xml.pegasus.v2.model.OrganizationType, org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Enlistment createOrganization(UUID idToAssign, String name, String tokenStr, String domainNameStr,
             OrganizationType details, Member owner, String associateEMailStr, KeySafe<? extends Member> protectWith) {
         
@@ -112,7 +127,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#createOrganization(java.util.UUID, java.lang.String, java.lang.String, java.lang.String, org.brekka.xml.pegasus.v2.model.OrganizationType, org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.Division)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <Owner extends Actor> Partnership<Owner, Organization> createOrganization(UUID idToAssign, String name,
             String tokenStr, String domainNameStr, OrganizationType details, Owner owner, Division<Owner> owningDivision) {
         Organization organization = createOrganization(name, tokenStr, domainNameStr, idToAssign);
@@ -124,7 +139,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.SERIALIZABLE)
     public XmlEntity<OrganizationDocument> updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml) {
         Organization organization = organizationDAO.retrieveById(orgId);
         XmlEntity<OrganizationDocument> entity = xmlEntityService.updateEntity(orgXml, organization.getXml(), OrganizationDocument.class);
@@ -134,7 +149,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationType organizationType) {
         Organization organization = organizationDAO.retrieveById(orgId);
         XmlEntity<OrganizationDocument> entity = applyDetailsXML(organizationType, organization.getGlobalDivision());
@@ -146,7 +161,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveById(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Organization retrieveById(UUID orgId, boolean releaseXml) {
         Organization organization = organizationDAO.retrieveById(orgId);
         if (organization == null) {
@@ -160,7 +175,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveByToken(java.lang.String)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Organization retrieveByToken(String tokenPath, boolean releaseXml) {
         Token token = tokenService.retrieveByPath(tokenPath);
         Organization organization = organizationDAO.retrieveByToken(token);
@@ -169,7 +184,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Associate createAssociate(Organization organization, Member owner, EMailAddress eMailAddress) {
         // Add current user as an associate
         Associate associate = new Associate();
@@ -185,7 +200,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#exists(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public boolean organizationExists(UUID orgId) {
         return organizationDAO.retrieveById(orgId) != null;
     }
@@ -196,7 +211,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveAssociate(org.brekka.pegasus.core.model.Organization, org.brekka.pegasus.core.model.Member)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Associate retrieveAssociate(Organization organization, Member member) {
         Associate associate = associateDAO.retrieveByOrgAndMember(organization, member);
         return associate;
@@ -206,7 +221,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveAssociates(org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public List<Associate> retrieveAssociates(Member member) {
         List<Associate> asociateList = associateDAO.retrieveAssociates(member);
         return asociateList;
@@ -216,7 +231,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveEnlistment(org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.Member)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Enlistment retrieveEnlistment(Member member, Division<Organization> target) {
         Associate associate = retrieveAssociate(target.getOwner(), member);
         Enlistment enlistment = enlistmentDAO.retrieveEnlistmentByTarget(target, associate);
@@ -228,7 +243,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @see org.brekka.pegasus.core.services.OrganizationService#deleteAssociates(org.brekka.pegasus.core.model.Member)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public void deleteAssociates(Member member) {
         List<Associate> associates = associateDAO.retrieveByMember(member);
         for (Associate associate : associates) {

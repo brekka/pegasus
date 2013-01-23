@@ -13,41 +13,29 @@ public enum PegasusErrorCode implements ErrorCode {
     PG101,
     PG102,
     PG103,
-    
     PG104,
     
     PG200,
-    
     PG265,
     
     /**
      * Token already in use
      */
     PG300,
-    
     /**
      * Incorrect unlock code for vault
      */
     PG302,
-    
     PG333,
     
     PG400,
-    
     PG401,
-    
     PG402,
-    
     PG403,
-    
     PG423,
-    
     PG431,
-    
     PG443,
-    
     PG444,
-    
     PG453,
     
     PG500,
@@ -57,12 +45,14 @@ public enum PegasusErrorCode implements ErrorCode {
     
     PG600,
     PG601,
+    PG623,
     
     PG700,
     PG701,
     PG702,
     PG703,
     PG704,
+    PG721,
     PG723,
     PG745,
     PG773,
@@ -73,14 +63,15 @@ public enum PegasusErrorCode implements ErrorCode {
     PG853,
     PG871,
     PG876,
+    PG888,
     
     PG900,
     PG901,
-    
     PG902,
     PG903,
     PG904,
     PG905,
+    PG950,
     ;
     
     private static final Area AREA = ErrorCode.Utils.createArea("PG");

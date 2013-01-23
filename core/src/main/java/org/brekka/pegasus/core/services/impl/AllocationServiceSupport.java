@@ -1,7 +1,22 @@
-/**
- * 
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
+
+import static org.brekka.pegasus.core.utils.PegasusUtils.checkNotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,6 +31,8 @@ import org.brekka.paveway.core.model.UploadedFiles;
 import org.brekka.paveway.core.services.PavewayService;
 import org.brekka.paveway.core.services.ResourceCryptoService;
 import org.brekka.paveway.core.services.ResourceStorageService;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
@@ -26,6 +43,7 @@ import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.TokenService;
@@ -41,8 +59,9 @@ import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
+ * Methods common to all allocation services that should not be exposed via {@link AllocationService}.
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 class AllocationServiceSupport {
 
@@ -111,6 +130,18 @@ class AllocationServiceSupport {
             }
         }
         return bundleType;
+    }
+    
+    protected <T extends Allocation> T retrieveByToken(String token, Class<T> expectedType, boolean notFoundThrows) {
+        checkNotNull(token, "token");
+        checkNotNull(expectedType, "expectedType");
+        T value = allocationDAO.retrieveByToken(token, expectedType);
+        if (value == null 
+                && notFoundThrows) {
+            throw new PegasusException(PegasusErrorCode.PG721, 
+                    "No %s found for token '%s'", expectedType.getSimpleName(), token);
+        }
+        return value;
     }
     
     

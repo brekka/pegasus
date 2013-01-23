@@ -1,6 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2012 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.Collection;
@@ -40,12 +53,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Andrew Taylor
+ * Handle membership
  *
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
 @Transactional
@@ -80,6 +94,7 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#activateOrganization(org.brekka.pegasus.core.model.Organization)
      */
     @Override
+    @Transactional()
     public void activateOrganization(Organization organization) {
         AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
         Member member = current.getMember();
@@ -99,7 +114,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends Member> T retrieveById(UUID memberId, Class<T> expectedType) {
         Member member = memberDAO.retrieveById(memberId);
         if (!expectedType.isAssignableFrom(member.getClass())) {
@@ -114,7 +129,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends Member> T retrieveMember(AuthenticationToken token, Class<T> expectedType) {
         Member member = memberDAO.retrieveByAuthenticationToken(token);
         if (member == null) {
@@ -148,7 +163,7 @@ public class MemberServiceImpl implements MemberService {
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void setupPerson(ProfileType profileType, String vaultPassword, boolean encryptedProfile) {
         Person managed = (Person) getManaged();
         populatePerson(managed, profileType, vaultPassword, encryptedProfile, false, true);
@@ -159,7 +174,7 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#createPerson(org.brekka.pegasus.core.model.AuthenticationToken, java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Person createPerson(AuthenticationToken authenticationToken, ProfileType profileType,
             String vaultPassword, boolean encryptProfile) {
         Person person = new Person();
@@ -172,7 +187,7 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#preparePerson(org.brekka.pegasus.core.model.OpenID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Person createPerson(AuthenticationToken authenticationToken) {
         Person person = new Person();
         person.setAuthenticationToken(authenticationToken);
@@ -185,7 +200,7 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#logout(org.springframework.security.core.context.SecurityContext)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public void logout(SecurityContext securityContext) {
         AuthenticatedMemberBase<Member> authenticatedMember = getAuthenticatedMember(securityContext, Member.class);
         if (authenticatedMember != null) {
@@ -200,17 +215,16 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#hasAccess(org.springframework.security.core.GrantedAuthority)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public boolean hasAccess(GrantedAuthority anonymousTransfer) {
+    public boolean hasAccess(GrantedAuthority authority) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        return authorities.contains(anonymousTransfer);
+        return authorities.contains(authority);
     }
  
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends Member> AuthenticatedMember<T> getCurrent(Class<T> expectedType) {
         SecurityContext context = SecurityContextHolder.getContext();
         AuthenticatedMemberBase<T> authMember = getAuthenticatedMember(context, expectedType);
@@ -230,7 +244,7 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#resetMember(org.brekka.pegasus.core.model.Member)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void resetMember(Member member) {
         Member managedMember = memberDAO.retrieveById(member.getId());
         Vault vault = managedMember.getDefaultVault();
@@ -260,7 +274,7 @@ public class MemberServiceImpl implements MemberService {
      * @see org.brekka.pegasus.core.services.MemberService#updateStatus(java.util.UUID, org.brekka.pegasus.core.model.ActorStatus)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void updateStatus(UUID actorId, ActorStatus status) {
         Actor managed = actorDAO.retrieveById(actorId);
         managed.setStatus(status);

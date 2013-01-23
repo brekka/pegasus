@@ -14,7 +14,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.brekka.commons.lang.ByteLengthFormat;
 import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.services.AnonymousService;
+import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 
@@ -33,7 +33,7 @@ public class FetchDirect {
     private AgreementDirect agreementDirectPage;
     
     @Inject
-    private AnonymousService anonymousService;
+    private AnonymousTransferService anonymousService;
     
     @Inject
     private ComponentResources resources;

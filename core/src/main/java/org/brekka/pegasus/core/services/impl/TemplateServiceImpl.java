@@ -49,7 +49,7 @@ import org.brekka.xml.pegasus.v2.model.TemplateDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
@@ -92,7 +92,6 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Nullable
-    @Transactional(propagation=Propagation.REQUIRED)
     public String merge(@Nonnull Template template, @Nonnull Map<String, Object> context) {
         String merged;
         TemplateEngineAdapter templateEngineAdapter = adapters.get(template.getEngine());
@@ -127,7 +126,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Nullable
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Template retrieveByToken(@Nonnull Token token) {
         return templateDAO.retrieveByToken(token);
     }
@@ -137,7 +136,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Nullable
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Template retrieveBySlug(@Nonnull String slug) {
         return templateDAO.retrieveBySlug(slug);
     }
@@ -147,7 +146,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Nullable
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public Template retrieveById(@Nonnull UUID templateId) {
         return templateDAO.retrieveById(templateId);
     }
@@ -157,7 +156,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Nonnull
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional()
     public Template create(@Nonnull TemplateType details, @Nonnull TemplateEngine engine, @Nullable KeySafe<?> keySafe,
             @Nullable String slug, @Nullable Token token, @Nullable String label) {
         Template template = new Template();
@@ -185,7 +184,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @see org.brekka.pegasus.core.services.TemplateService#update(org.brekka.pegasus.core.model.Template)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.SERIALIZABLE)
     public void update(@Nonnull Template template) {
         Template managed = templateDAO.retrieveById(template.getId());
         fixDetails(template.getXml().getBean().getTemplate());
@@ -206,7 +205,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @see org.brekka.pegasus.core.services.TemplateService#delete(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public void delete(UUID templateId) {
         templateDAO.delete(templateId);
     }
@@ -215,7 +214,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @see org.brekka.pegasus.core.services.TemplateService#retrieveListing(org.brekka.commons.persistence.model.ListingCriteria)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public List<Template> retrieveListing(ListingCriteria listingCriteria) {
         return templateDAO.retrieveListing(listingCriteria);
     }
@@ -224,7 +223,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @see org.brekka.pegasus.core.services.TemplateService#retrieveListingRowCount()
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public int retrieveListingRowCount() {
         return templateDAO.retrieveListingRowCount();
     }
@@ -233,7 +232,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @see org.brekka.pegasus.core.services.TemplateService#exportAll()
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public ExportedTemplatesDocument exportAll() {
         int count = templateDAO.retrieveListingRowCount();
         List<Template> listing = retrieveListing(new ListingCriteria(0, count, Arrays.<OrderByPart>asList(new OrderByProperty("created", false))));
@@ -258,7 +257,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @see org.brekka.pegasus.core.services.TemplateService#importFrom(org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, KeySafe<?> keySafe) {
         int count = 0;
         ExportedTemplates exportedTemplates = exportedTemplatesDocument.getExportedTemplates();

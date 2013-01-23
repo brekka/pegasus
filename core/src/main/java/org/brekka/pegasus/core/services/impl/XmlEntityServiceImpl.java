@@ -64,7 +64,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import difflib.DiffUtils;
@@ -107,20 +107,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     
     private XmlOptions xmlWriteOptions;
     
-    
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#persistPlainEntity(org.apache.xmlbeans.XmlObject)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml, boolean externalData) {
-        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID(), externalData);
-        return entity;
-    }
+
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, Class<T> expectedType) {
         if (theEntity.getBean() != null) {
             return theEntity;
@@ -130,7 +120,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends XmlObject> XmlEntity<T> release(XmlEntity<T> theEntity, String password, Class<T> expectedType) {
         if (theEntity.getBean() != null) {
             return theEntity;
@@ -140,7 +130,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     }
     
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends XmlObject> void releaseAll(List<? extends XmlEntityAware<T>> list, Class<T> expectedType) {
         for (XmlEntityAware<T> xmlEntityAware : list) {
             // TODO parallel
@@ -152,7 +142,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @see org.brekka.pegasus.core.services.XmlEntityService#release(org.brekka.pegasus.core.model.XmlEntityAware, java.lang.Class)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(readOnly=true)
     public <T extends XmlObject> void release(XmlEntityAware<T> entity, Class<T> expectedType) {
         XmlEntity<?> xml = entity.getXml();
         if (xml.getBean() == null) {
@@ -160,12 +150,22 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
             entity.setXml(released);
         }
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.XmlEntityService#persistPlainEntity(org.apache.xmlbeans.XmlObject)
+     */
+    @Override
+    @Transactional()
+    public <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml, boolean externalData) {
+        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID(), externalData);
+        return entity;
+    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.XmlEntityService#persistEncryptedEntity(org.apache.xmlbeans.XmlObject, org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe, boolean externalData) {
         CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
         SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
@@ -178,7 +178,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @see org.brekka.pegasus.core.services.XmlEntityService#persistEncryptedEntity(org.apache.xmlbeans.XmlObject, org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, String password, boolean externalData) {
         CryptoProfile cryptoProfile = cryptoProfileService.retrieveDefault();
         SecretKey secretKey = symmetricCryptoService.createSecretKey(cryptoProfile);
@@ -193,6 +193,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @see org.brekka.pegasus.core.services.XmlEntityService#updateEntity(org.brekka.pegasus.core.model.XmlEntity, org.brekka.pegasus.core.model.XmlEntity, java.lang.Class)
      */
     @Override
+    @Transactional(isolation=Isolation.SERIALIZABLE)
     public <T extends XmlObject> XmlEntity<T> updateEntity(XmlEntity<T> updated, XmlEntity<T> lockedCurrent, Class<T> xmlType) {
         if (updated == null) {
             // Request to remove the XML. Delete the series
@@ -247,7 +248,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @see org.brekka.pegasus.core.services.XmlEntityService#isEncrypted(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public boolean isEncrypted(UUID xmlEntityId) {
         XmlEntity<?> xmlEntity = xmlEntityDAO.retrieveById(xmlEntityId);
         return xmlEntity != null 
@@ -258,7 +259,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @see org.brekka.pegasus.core.services.XmlEntityService#retrieveEntity(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public <T extends XmlObject> XmlEntity<T> retrieveEntity(UUID xmlEntityId, Class<T> expectedType) {
         return retrieveEntity(xmlEntityId, expectedType, null);
     }
@@ -267,7 +268,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
      * @see org.brekka.pegasus.core.services.XmlEntityService#delete(java.util.UUID)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public void delete(UUID xmlEntityId) {
         XmlEntity<?> entity = xmlEntityDAO.retrieveById(xmlEntityId);
         if (entity.isExternalData()) {

@@ -1,5 +1,17 @@
-/**
- * 
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.brekka.pegasus.core.services.impl;
 
@@ -21,12 +33,12 @@ import org.brekka.phoenix.api.services.SymmetricCryptoService;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Andrew Taylor
+ * Provide the ability to download with events.
  *
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
 @Transactional
@@ -53,7 +65,7 @@ public class DownloadServiceImpl implements DownloadService {
      *      java.lang.String, java.lang.String, java.io.OutputStream)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public InputStream download(AllocationFile file, ProgressCallback progressCallback) {
         FileType fileType = file.getXml();
         FileDownloadEvent event = eventService.beginFileDownloadEvent(file);

@@ -42,11 +42,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the digital certificate service
+ * Implementation of the digital certificate service.
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -64,15 +64,21 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
     @Autowired
     private DerivedKeyCryptoService derivedKeyCryptoService;
     
+    /**
+     * Service configuration, set by {@link #configure(org.brekka.xml.pegasus.v2.config.CertificateAuthenticationServiceDocument.CertificateAuthenticationService)}.
+     */
     private CertificateAuthenticationServiceDocument.CertificateAuthenticationService config;
     
+    /**
+     * The list of certificate subject DN patterns to allow access.
+     */
     private List<Pattern> allowedSubjectDistinguishedNamePatterns;
     
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.CertificateAuthenticationService#authenticate(java.security.cert.X509Certificate)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public DigitalCertificate authenticate(X509Certificate certificate) throws BadCredentialsException, DisabledException {
         byte[] signature = certificate.getSignature();
         String subjectDN = certificate.getSubjectDN().getName();
@@ -118,6 +124,7 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
                     "The certficate with id '%s' expired %tF", digitalCertificate.getId(), digitalCertificate.getExpires()));
         }
         
+        // Both of these are transient
         certificateSubject.setCommonName(commonName);
         certificateSubject.setDistinguishedName(subjectDN);
         return digitalCertificate;
@@ -127,7 +134,7 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
      * @see org.brekka.pegasus.core.services.CertificateAuthenticationService#retrieveSubjectCertificates(org.brekka.pegasus.core.model.CertificateSubject)
      */
     @Override
-    @Transactional(propagation=Propagation.SUPPORTS)
+    @Transactional(readOnly=true)
     public List<DigitalCertificate> retrieveSubjectCertificates(CertificateSubject certificateSubject) {
         return digitalCertificateDAO.retrieveForSubject(certificateSubject);
     }
@@ -136,7 +143,7 @@ public class CertificateAuthenticationServiceImpl implements CertificateAuthenti
      * @see org.brekka.pegasus.core.services.CertificateAuthenticationService#setEnabled(org.brekka.pegasus.core.model.DigitalCertificate, boolean)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void setEnabled(DigitalCertificate certificate, boolean enabled) {
         DigitalCertificate managed = digitalCertificateDAO.retrieveById(certificate.getId());
         managed.setActive(Boolean.valueOf(enabled));

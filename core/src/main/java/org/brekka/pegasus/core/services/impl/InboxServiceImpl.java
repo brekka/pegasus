@@ -1,6 +1,19 @@
-/**
- * 
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.util.ArrayList;
@@ -28,8 +41,8 @@ import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
-import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.PegasusTokenType;
+import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.InboxService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -46,10 +59,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Inboxes accept deposits.
+ * 
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
@@ -76,7 +90,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      * @see org.brekka.pegasus.core.services.InboxService#createInbox(java.lang.String, org.brekka.pegasus.core.model.Vault)
      */
     @Override
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional()
     public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<? extends Actor> keySafe) {
         Inbox inbox = new Inbox();
         inbox.setId(UUID.randomUUID());
@@ -111,7 +125,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      * java.util.List)
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional()
     public Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires,
             UploadedFiles files) {
         BundleType bundleType = completeFiles(0, files);
@@ -119,12 +133,195 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional()
     public Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires,
             Dispatch dispatch) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, null);
         return createDeposit(inbox, disposition, details, expires, dispatch, dispatchBundle);
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForToken(java.lang.String)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Inbox retrieveForToken(String inboxToken) {
+        Token token = tokenService.retrieveByPath(inboxToken);
+        Inbox inbox = inboxDAO.retrieveByToken(token);
+        populateNames(Arrays.asList(inbox));
+        return inbox;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveById(java.util.UUID)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Inbox retrieveById(UUID inboxId) {
+        Inbox inbox = inboxDAO.retrieveById(inboxId);
+        populateNames(Arrays.asList(inbox));
+        return inbox;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForVault(org.brekka.pegasus.core.model.Vault)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe) {
+        List<Inbox> inboxList = inboxDAO.retrieveForKeySafe(keySafe);
+        populateNames(inboxList);
+        return inboxList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForEMailAddress(org.brekka.pegasus.core.model.EMailAddress)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Inbox retrieveForEMailAddress(EMailAddress eMailAddress) {
+        Inbox inbox = inboxDAO.retrieveForEMailAddress(eMailAddress);
+        return inbox;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForDivision(org.brekka.pegasus.core.model.Enlistment)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Inbox> retrieveForDivision(Division<?> division) {
+        return inboxDAO.retrieveForDivision(division);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Deposit retrieveDeposit(UUID depositId, boolean populateDispatches) {
+        AccessorContext current = AccessorContextImpl.getCurrent();
+        Deposit deposit = current.retrieve(depositId, Deposit.class);
+        if (deposit == null) {
+            // Need to extract the metadata
+            deposit = depositDAO.retrieveById(depositId);
+            if (populateDispatches) {
+                decryptDocument(deposit.getDerivedFrom(), true);
+            } else {
+                decryptDocument(deposit, true);
+            }
+        } else {
+            // Already unlocked, just refresh
+            refreshAllocation(deposit);
+        }
+        return deposit;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposit(org.brekka.pegasus.core.model.Inbox, java.util.UUID)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Deposit retrieveDeposit(Inbox inbox, UUID depositId) {
+        Deposit deposit = retrieveDeposit(depositId, false);
+        if (deposit == null) {
+            return null;
+        }
+        if (EntityUtils.identityEquals(deposit.getInbox(), inbox)) {
+            return deposit;
+        }
+        throw new PegasusException(PegasusErrorCode.PG745, 
+                "The deposit '%s' does not belong to inbox '%s'", depositId, inbox.getId());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveForMember()
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Inbox> retrieveForMember() {
+        AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
+        List<Inbox> inboxList = inboxDAO.retrieveForMember(authenticatedMember.getMember());
+        populateNames(inboxList);
+        return inboxList;
+    }
+
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Inbox)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml) {
+        List<Deposit> depositList = depositDAO.retrieveByInbox(inbox);
+        if (releaseXml) {
+            for (Deposit deposit : depositList) {
+                decryptDocument(deposit, true);
+                bindToContext(deposit);
+            }
+        }
+        return depositList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
+     */
+    @Override
+    @Transactional()
+    public void deleteDeposit(UUID depositId) {
+        Deposit deposit = depositDAO.retrieveById(depositId);
+        deposit.setExpires(new Date());
+        depositDAO.update(deposit);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDepositListing(org.brekka.pegasus.core.model.Inbox,
+     * org.joda.time.DateTime, org.joda.time.DateTime, boolean, org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            ListingCriteria listingCriteria, boolean dispatchBased) {
+        List<Deposit> depositList = depositDAO.retrieveListing(inbox, defaultMin(from), defaultMax(until), showExpired,
+                listingCriteria, dispatchBased);
+        if (dispatchBased) {
+            List<Dispatch> dispatchList = new ArrayList<>();
+            for (Deposit deposit : depositList) {
+                Dispatch derivedFrom = deposit.getDerivedFrom();
+                dispatchList.add(derivedFrom);
+            }
+            xmlEntityService.releaseAll(dispatchList, AllocationDocument.class);
+        } else {
+            xmlEntityService.releaseAll(depositList, AllocationDocument.class);
+        }
+        return depositList;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.brekka.pegasus.core.services.InboxService#retrieveDepositListingRowCount(org.brekka.pegasus.core.model.Inbox,
+     * org.joda.time.DateTime, org.joda.time.DateTime, boolean)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            boolean dispatchBased) {
+        return depositDAO.retrieveListingRowCount(inbox, defaultMin(from), defaultMax(until), showExpired,
+                dispatchBased);
+    }
+
+    @Override
+    @Transactional()
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof VaultDeleteEvent) {
+            VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
+            inboxDAO.deleteWithKeySafe(vaultDeleteEvent.getVault());
+        }
+    }
+    
 
     protected Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details,
             DateTime expires, Dispatch dispatch, BundleType newBundleType) {
@@ -160,187 +357,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         return deposit;
     }
     
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveForToken(java.lang.String)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Inbox retrieveForToken(String inboxToken) {
-        Token token = tokenService.retrieveByPath(inboxToken);
-        Inbox inbox = inboxDAO.retrieveByToken(token);
-        populateNames(Arrays.asList(inbox));
-        return inbox;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveById(java.util.UUID)
-     */
-    @Override
-    public Inbox retrieveById(UUID inboxId) {
-        Inbox inbox = inboxDAO.retrieveById(inboxId);
-        populateNames(Arrays.asList(inbox));
-        return inbox;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveForVault(org.brekka.pegasus.core.model.Vault)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe) {
-        List<Inbox> inboxList = inboxDAO.retrieveForKeySafe(keySafe);
-        populateNames(inboxList);
-        return inboxList;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveForEMailAddress(org.brekka.pegasus.core.model.EMailAddress)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Inbox retrieveForEMailAddress(EMailAddress eMailAddress) {
-        Inbox inbox = inboxDAO.retrieveForEMailAddress(eMailAddress);
-        return inbox;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveForDivision(org.brekka.pegasus.core.model.Enlistment)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<Inbox> retrieveForDivision(Division<?> division) {
-        return inboxDAO.retrieveForDivision(division);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit retrieveDeposit(UUID depositId, boolean populateDispatches) {
-        AccessorContext current = AccessorContextImpl.getCurrent();
-        Deposit deposit = current.retrieve(depositId, Deposit.class);
-        if (deposit == null) {
-            // Need to extract the metadata
-            deposit = depositDAO.retrieveById(depositId);
-            if (populateDispatches) {
-                decryptDocument(deposit.getDerivedFrom(), true);
-            } else {
-                decryptDocument(deposit, true);
-            }
-        } else {
-            // Already unlocked, just refresh
-            refreshAllocation(deposit);
-        }
-        return deposit;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposit(org.brekka.pegasus.core.model.Inbox, java.util.UUID)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public Deposit retrieveDeposit(Inbox inbox, UUID depositId) {
-        Deposit deposit = retrieveDeposit(depositId, false);
-        if (deposit == null) {
-            return null;
-        }
-        if (EntityUtils.identityEquals(deposit.getInbox(), inbox)) {
-            return deposit;
-        }
-        throw new PegasusException(PegasusErrorCode.PG745, 
-                "The deposit '%s' does not belong to inbox '%s'", depositId, inbox.getId());
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveForMember()
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<Inbox> retrieveForMember() {
-        AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
-        List<Inbox> inboxList = inboxDAO.retrieveForMember(authenticatedMember.getMember());
-        populateNames(inboxList);
-        return inboxList;
-    }
-
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Inbox)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml) {
-        List<Deposit> depositList = depositDAO.retrieveByInbox(inbox);
-        if (releaseXml) {
-            for (Deposit deposit : depositList) {
-                decryptDocument(deposit, true);
-                bindToContext(deposit);
-            }
-        }
-        return depositList;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
-     */
-    @Override
-    @Transactional(propagation=Propagation.REQUIRED)
-    public void deleteDeposit(UUID depositId) {
-        Deposit deposit = depositDAO.retrieveById(depositId);
-        deposit.setExpires(new Date());
-        depositDAO.update(deposit);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveDepositListing(org.brekka.pegasus.core.model.Inbox,
-     * org.joda.time.DateTime, org.joda.time.DateTime, boolean, org.brekka.commons.persistence.model.ListingCriteria)
-     */
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
-            ListingCriteria listingCriteria, boolean dispatchBased) {
-        List<Deposit> depositList = depositDAO.retrieveListing(inbox, defaultMin(from), defaultMax(until), showExpired,
-                listingCriteria, dispatchBased);
-        if (dispatchBased) {
-            List<Dispatch> dispatchList = new ArrayList<>();
-            for (Deposit deposit : depositList) {
-                Dispatch derivedFrom = deposit.getDerivedFrom();
-                dispatchList.add(derivedFrom);
-            }
-            xmlEntityService.releaseAll(dispatchList, AllocationDocument.class);
-        } else {
-            xmlEntityService.releaseAll(depositList, AllocationDocument.class);
-        }
-        return depositList;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.brekka.pegasus.core.services.InboxService#retrieveDepositListingRowCount(org.brekka.pegasus.core.model.Inbox,
-     * org.joda.time.DateTime, org.joda.time.DateTime, boolean)
-     */
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
-            boolean dispatchBased) {
-        return depositDAO.retrieveListingRowCount(inbox, defaultMin(from), defaultMax(until), showExpired,
-                dispatchBased);
-    }
-
-    @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof VaultDeleteEvent) {
-            VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
-            inboxDAO.deleteWithKeySafe(vaultDeleteEvent.getVault());
-        }
-    }
-    
-    private void populateNames(List<Inbox> inboxList) {
+    protected void populateNames(List<Inbox> inboxList) {
         AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
         if (authenticatedMember == null) {
             return;
