@@ -277,4 +277,9 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         }
         return doc;
     }
+    
+    public boolean expired() {
+        return getExpires() != null 
+             && getExpires().before(new Date());
+    }
 }

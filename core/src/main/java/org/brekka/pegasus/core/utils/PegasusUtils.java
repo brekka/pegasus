@@ -104,7 +104,9 @@ public final class PegasusUtils {
      *            the name of the parameter
      */
     public static void checkNotNull(Object value, String parameterName) {
-        checkNotNull(parameterName, "parameterName");
+        if (parameterName == null) {
+            checkNotNull(null, "parameterName");
+        }
         if (value == null) {
             throw new PegasusException(PegasusErrorCode.PG950, "The parameter '%s' is required", parameterName);
         }

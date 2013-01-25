@@ -59,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -266,7 +267,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
      */
     @Override
-    @Transactional()
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void deleteDeposit(UUID depositId) {
         Deposit deposit = depositDAO.retrieveById(depositId);
         deposit.setExpires(new Date());
