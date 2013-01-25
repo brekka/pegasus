@@ -131,7 +131,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
             authenticatedPrincipal = phalanxService.authenticate(new IdentityPrincipal(principalId), vaultPassword);
         } catch (PhalanxException e) {
             throw new PegasusException(PegasusErrorCode.PG302, e,
-                    "Unable to unlock vault'%s'", vault.getId());
+                    "Unable to unlock vault '%s'", vault.getId());
         }
         vault.setAuthenticatedPrincipal(authenticatedPrincipal);
         

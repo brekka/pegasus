@@ -18,6 +18,10 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import net.iharder.Base64;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.paveway.core.services.ResourceStorageService;
@@ -290,5 +294,22 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     public void setDeleted(Date deleted) {
         this.deleted = deleted;
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+            .append("id", id)
+            .append("profile", profile)
+            .append("version", version)
+            .append("external", externalData)
+            .append("cryptedDataId", cryptedDataId)
+            .append("keySafe", (keySafe != null ? keySafe.getId() : null))
+            .append("iv", Base64.encodeBytes(iv))
+            .toString();
     }
 }

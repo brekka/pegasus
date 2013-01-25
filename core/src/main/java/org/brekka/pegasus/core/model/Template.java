@@ -29,6 +29,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -205,5 +207,20 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
         }
         throw new PegasusException(PegasusErrorCode.PG812, "Expected template details of type '%s', actual '%s'", 
                 expectedType.getName(), details.getClass().getName());
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+            .append("id", id)
+            .append("slug", slug)
+            .append("token", token)
+            .append("engine", engine)
+            .append("label", label)
+            .append("xml", xml)
+            .toString();
     }
 }

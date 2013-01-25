@@ -199,6 +199,7 @@ public class TemplateServiceImpl implements TemplateService {
         managed.setLabel(template.getLabel());
         
         templateDAO.update(managed);
+        template.setXml(xml);
     }
 
     /* (non-Javadoc)
