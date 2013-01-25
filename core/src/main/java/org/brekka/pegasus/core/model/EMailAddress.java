@@ -46,24 +46,25 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     private UUID id;
     
     /**
-     * A hash of the e-mail address (SHA-256). May also have gone through a number of iterations.
+     * A hash of the e-mail address. The algorithm used depends on how the service is configured.
      */
     @Column(name="`Hash`", length=32, nullable=false)
     private byte[] hash;
     
     /**
      * The domain the address belongs to (the part after the '@'). For common services such as gmail, this
-     * will simply be null. It is intended to be used to aggregate organization members by their e-mail.
+     * may simply be null. It is intended to be used to aggregate organization members by their e-mail.
      */
     @ManyToOne
     @JoinColumn(name="`DomainName`")
     private DomainName domainName;
     
     /**
-     * The member who owns this mail address.
+     * The member who owns this mail address. It may be that the e-mail does not belong to an active member
+     * so allow nulls.
      */
     @ManyToOne
-    @JoinColumn(name="`Owner`", nullable=false)
+    @JoinColumn(name="`Owner`")
     private Member owner;
     
     /**

@@ -85,18 +85,21 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
             sender = defaultSourceAddress;
         }
         
+        Member member = null;
         AuthenticatedMember<Member> current = memberService.getCurrent();
-        Member member = current.getMember();
+        if (current != null) {
+            member = current.getMember();
+        }
 
         EMailMessage message = new EMailMessage();
         message.setId(UUID.randomUUID());
-        message.setOwner(memberService.getCurrent().getMember());
-        message.setSender(toAddress(sender, member));
+        message.setOwner(member);
+        message.setSender(toAddress(sender));
         
         List<EMailRecipient> eMailRecipientList = new ArrayList<>();
         for (String recipient : recipients) {
             EMailRecipient eMailRecipient = new EMailRecipient();
-            eMailRecipient.setAddress(toAddress(recipient, member));
+            eMailRecipient.setAddress(toAddress(recipient));
             eMailRecipient.setMessage(message);
             eMailRecipientList.add(eMailRecipient);
         }
@@ -156,10 +159,10 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @param sender
      * @return
      */
-    private EMailAddress toAddress(String address, Member member) {
+    private EMailAddress toAddress(String address) {
         EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(address);
         if (eMailAddress == null) {
-            eMailAddress = eMailAddressService.createEMail(address, member, false);
+            eMailAddress = eMailAddressService.createEMail(address, null, false);
         }
         return eMailAddress;
     }
