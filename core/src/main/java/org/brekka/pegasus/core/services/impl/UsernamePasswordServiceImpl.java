@@ -18,11 +18,13 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.nio.charset.Charset;
 
+import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.UsernamePasswordDAO;
 import org.brekka.pegasus.core.model.UsernamePassword;
 import org.brekka.pegasus.core.services.UsernamePasswordService;
+import org.brekka.pegasus.core.utils.PegasusUtils;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.DerivedKey;
 import org.brekka.phoenix.api.services.CryptoProfileService;
@@ -152,6 +154,8 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     }
     
     protected byte[] deriveUsername(String username) {
+        username = StringUtils.trimToNull(username);
+        PegasusUtils.checkNotNull(username, "username");
         SystemDerivedKeySpecType spec = config.getSystemDerivedKeySpec();
         if (!config.getUserNameCaseSensitive()) {
             username = username.toUpperCase();
