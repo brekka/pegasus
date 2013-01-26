@@ -197,11 +197,11 @@ class AllocationServiceSupport {
         return allocationType;
     }
     
-    protected void decryptDocument(Allocation allocation, boolean generateEvent) {
-        decryptDocument(allocation, null, generateEvent);
+    protected void decryptDocument(Allocation allocation) {
+        decryptDocument(allocation, null);
     }
     
-    protected void decryptDocument(Allocation allocation, String password, boolean generateEvent) {
+    protected void decryptDocument(Allocation allocation, String password) {
         if(allocation == null) {
             return;
         }
@@ -222,7 +222,8 @@ class AllocationServiceSupport {
             assignFileXml(allocation);
             unlockSuccess = true;
         } finally {
-            if (allocation instanceof Transfer && generateEvent) {
+            if (allocation instanceof Transfer 
+                    && password != null) {
                 eventService.transferUnlock((Transfer) allocation, unlockSuccess);
             }
         }
@@ -245,7 +246,7 @@ class AllocationServiceSupport {
         Dispatch derivedFrom = allocation.getDerivedFrom();
         List<AllocationFile> allocationFiles = new ArrayList<>();
         if (derivedFrom != null) {
-            decryptDocument(derivedFrom, false);
+            decryptDocument(derivedFrom);
             List<AllocationFile> files = derivedFrom.getFiles();
             for (AllocationFile source : files) {
                 AllocationFile allocationFile = new AllocationFile();

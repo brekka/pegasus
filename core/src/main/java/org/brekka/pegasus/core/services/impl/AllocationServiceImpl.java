@@ -114,7 +114,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         Allocation unlockedAllocation = currentContext.retrieve(allocation.getId(), Allocation.class);
         if (unlockedAllocation == null) {
             // Allocation has not yet been unlocked
-            decryptDocument(allocation, true);
+            decryptDocument(allocation);
             currentContext.retain(allocation.getId(), allocation);
             unlockedAllocation = allocation;
         }
@@ -161,7 +161,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             if (allocation == null) {
                 continue;
             }
-            decryptDocument(allocation, true);
+            decryptDocument(allocation);
             bindToContext(allocation);
         }
     }
@@ -231,7 +231,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     public List<FileDownloadEvent> retrievePopulatedDownloadEvents(Allocation allocation) {
         Allocation managed = allocationDAO.retrieveById(allocation.getId());
         Dispatch derivedFrom = managed.getDerivedFrom();
-        decryptDocument(derivedFrom, false);
+        decryptDocument(derivedFrom);
         List<FileDownloadEvent> downloads = eventService.retrieveFileDownloads(managed);
         
         List<AllocationFile> files = derivedFrom.getFiles();

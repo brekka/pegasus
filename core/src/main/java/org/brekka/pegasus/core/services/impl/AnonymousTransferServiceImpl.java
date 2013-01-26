@@ -160,7 +160,7 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = anonymousTransferDAO.retrieveByToken(token);
         try {
-            decryptDocument(transfer, codeClean, true);
+            decryptDocument(transfer, codeClean);
         } catch (PhalanxException e) {
             checkAttempts(e, transfer);
             throw e;
