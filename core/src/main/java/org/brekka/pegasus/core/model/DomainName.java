@@ -38,7 +38,7 @@ public class DomainName extends SnapshotEntity<UUID> {
     private UUID id;
     
     /**
-     * A hash of the domain name (SHA-256). May also have gone through a number of iterations.
+     * A hash of the domain name.
      */
     @Column(name="`Hash`", unique=true, length=32, nullable=false)
     private byte[] hash;

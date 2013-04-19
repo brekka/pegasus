@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.security;
 
+import org.apache.commons.lang3.StringUtils;
 import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.phalanx.api.PhalanxErrorCode;
 import org.brekka.phalanx.api.PhalanxException;
@@ -48,6 +49,9 @@ public class UnlockAuthenticationProvider extends AbstractUserDetailsAuthenticat
             throws AuthenticationException {
         Object credentials = authentication.getCredentials();
         String password = credentials.toString();
+        if (StringUtils.isBlank(password)) {
+            throw new BadCredentialsException("A code is required");
+        }
         
         AnonymousTransferUser anonymousTransferUser = new AnonymousTransferUser(token);
         SecurityContext context = SecurityContextHolder.getContext();
