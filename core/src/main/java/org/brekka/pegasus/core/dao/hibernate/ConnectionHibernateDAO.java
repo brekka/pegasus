@@ -83,5 +83,15 @@ public class ConnectionHibernateDAO extends AbstractPegasusHibernateDAO<Connecti
             .setEntity("source", keySafe)
             .executeUpdate();
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.ConnectionDAO#deleteWithOwner(org.brekka.pegasus.core.model.Actor)
+     */
+    @Override
+    public void deleteWithOwner(Actor owner) {
+        getCurrentSession().createQuery("delete from Connection where owner=:owner")
+            .setEntity("owner", owner)
+            .executeUpdate();
+    }
 
 }

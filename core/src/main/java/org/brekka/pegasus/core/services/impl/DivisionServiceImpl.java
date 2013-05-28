@@ -169,6 +169,14 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         division.setPrivateKeyToken(privateKey);
         return division;
     }
+    
+    @Override
+    @Transactional(readOnly=true)
+    public void detachParent(Division<?> division) {
+        Division<?> managed = divisionDAO.retrieveById(division.getId());
+        managed.setParent(null);
+        divisionDAO.update(managed);
+    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.OrganizationService#retrieveDivision(java.lang.String, java.lang.String)
@@ -219,6 +227,8 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
             
             Division<?> managed = divisionDAO.retrieveById(division.getId());
             managed.setKeyPairId(updatedKeyPair.getId());
+            // TODO fix type safety
+            managed.setParent((KeySafe) protectWith);
             divisionDAO.update(managed);
         }
     }

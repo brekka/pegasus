@@ -311,9 +311,7 @@ public class MemberServiceImpl implements MemberService {
             if (emailAddress == null) {
                 emailAddress = eMailAddressService.createEMail(address, person, false);
             }
-            if (person.getDefaultEmailAddress() == null) {
-                person.setDefaultEmailAddress(emailAddress);
-            }
+            person.setDefaultEmailAddress(emailAddress);
             eMailType.setUUID(emailAddress.getId().toString());
             eMailType.setAddress(address); // Now confirmed lowercase.
         }

@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.dao.ConnectionDAO;
+import org.brekka.pegasus.core.event.AssociateDeleteEvent;
 import org.brekka.pegasus.core.event.VaultDeleteEvent;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.services.ConnectionService;
@@ -53,6 +54,9 @@ public class ConnectionServiceImpl implements ConnectionService, ApplicationList
         if (event instanceof VaultDeleteEvent) {
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
             connectionDAO.deleteWithSourceKeySafe(vaultDeleteEvent.getVault());
+        } else if (event instanceof AssociateDeleteEvent) {
+            AssociateDeleteEvent associateDeleteEvent = (AssociateDeleteEvent) event;
+            connectionDAO.deleteWithOwner(associateDeleteEvent.getAssociate());
         }
     }
     

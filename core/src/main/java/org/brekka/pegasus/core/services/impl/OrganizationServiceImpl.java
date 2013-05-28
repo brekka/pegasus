@@ -24,6 +24,7 @@ import org.brekka.pegasus.core.dao.AssociateDAO;
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.EnlistmentDAO;
 import org.brekka.pegasus.core.dao.OrganizationDAO;
+import org.brekka.pegasus.core.event.AssociateDeleteEvent;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
@@ -50,6 +51,7 @@ import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.xml.pegasus.v2.model.OrganizationDocument;
 import org.brekka.xml.pegasus.v2.model.OrganizationType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,6 +100,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     
     @Autowired
     private PhalanxService phalanxService;
+    
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
     
     
     /* (non-Javadoc)
@@ -247,6 +252,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void deleteAssociates(Member member) {
         List<Associate> associates = associateDAO.retrieveByMember(member);
         for (Associate associate : associates) {
+            applicationEventPublisher.publishEvent(new AssociateDeleteEvent(associate));
             associateDAO.delete(associate.getId());
         }
     }

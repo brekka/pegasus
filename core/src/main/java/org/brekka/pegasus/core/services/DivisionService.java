@@ -83,4 +83,5 @@ public interface DivisionService {
      */
     <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> retrievePartnershipById(UUID partnershipId);
 
+    void detachParent(Division<?> division);
 }
