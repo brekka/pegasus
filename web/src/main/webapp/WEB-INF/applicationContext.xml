@@ -28,7 +28,7 @@
 
     <stil:configuration-service id="pegasus-config" name="pegasus" reload-interval="5000" engine="xmlbeans"> 
         <stil:property-placeholder />
-        <stil:namespace prefix="c"     url="http://brekka.org/xml/pegasus/v2/config" />
+        <stil:namespace prefix="c"     uri="http://brekka.org/xml/pegasus/v2/config" />
     </stil:configuration-service> 
     
     <bean id="config" class="org.brekka.pegasus.web.support.Configuration" />
