@@ -60,6 +60,8 @@ public interface DivisionService {
     
     <Owner extends Actor> Fallback<Owner> createFallback(Owner owner, Division<Owner> source, Division<Person> target);
     
+    void removeEnlistment(Associate associate);
+    
     /**
      * @param organization
      * @return

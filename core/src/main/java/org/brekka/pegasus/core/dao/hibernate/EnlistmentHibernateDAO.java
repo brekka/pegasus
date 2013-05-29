@@ -35,7 +35,7 @@ public class EnlistmentHibernateDAO extends AbstractPegasusHibernateDAO<Enlistme
     @Override
     public List<Enlistment> retrieveForAssociate(Associate associate) {
         return getCurrentSession().createCriteria(Enlistment.class)
-                .add(Restrictions.eq("associate", associate))
+                .add(Restrictions.eq("owner", associate))
                 .list();
     }
     

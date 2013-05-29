@@ -251,7 +251,9 @@ public class MemberServiceImpl implements MemberService {
         vaultService.deleteVault(vault);
         managedMember.setDefaultVault(null);
         memberDAO.update(managedMember);
-        organizationService.deleteAssociates(member);
+        
+        // Makes no sense to do this
+//        organizationService.deleteAssociates(member);
         
         // Update the context user, if appropriate.
         AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);

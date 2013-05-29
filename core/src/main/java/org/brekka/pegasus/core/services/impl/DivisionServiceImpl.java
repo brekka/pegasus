@@ -144,6 +144,12 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         return enlistment;
     }
     
+    @Override
+    @Transactional()
+    public void removeEnlistment(Associate associate) {
+        connectionDAO.deleteWithOwner(associate);
+    }
+    
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.DivisionService#createDivision(org.brekka.pegasus.core.model.Division, java.lang.String, java.lang.String)
      */
