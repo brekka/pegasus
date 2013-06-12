@@ -30,6 +30,7 @@ import org.brekka.phoenix.api.DerivedKey;
 import org.brekka.phoenix.api.services.CryptoProfileService;
 import org.brekka.phoenix.api.services.DerivedKeyCryptoService;
 import org.brekka.phoenix.api.services.DigestCryptoService;
+import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.stillingar.api.annotations.Configured;
 import org.brekka.xml.pegasus.v2.config.SystemDerivedKeySpecType;
 import org.brekka.xml.pegasus.v2.config.UsernamePasswordServiceDocument;
@@ -59,6 +60,9 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     
     @Autowired
     private CryptoProfileService cryptoProfileService;
+    
+    @Autowired
+    private RandomCryptoService randomCryptoService;
     
     @Configured
     private UsernamePasswordServiceDocument.UsernamePasswordService config;
@@ -141,6 +145,18 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
     @Transactional()
     public void delete(UsernamePassword usernamePassword) {
         usernamePasswordDAO.delete(usernamePassword.getId());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.UsernamePasswordService#scramble(org.brekka.pegasus.core.model.UsernamePassword)
+     */
+    @Override
+    @Transactional()
+    public void scramble(UsernamePassword usernamePassword) {
+        UsernamePassword managed = usernamePasswordDAO.retrieveById(usernamePassword.getId());
+        managed.setUsernameDigest(randomCryptoService.generateBytes(32));
+        managed.setPassword(randomCryptoService.generateBytes(32));
+        usernamePasswordDAO.update(usernamePassword);
     }
     
     protected void internalChangePassword(UsernamePassword usernamePassword, String newPassword) {

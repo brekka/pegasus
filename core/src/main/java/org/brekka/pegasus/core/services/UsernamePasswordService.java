@@ -49,5 +49,14 @@ public interface UsernamePasswordService {
      * @param authenticationToken
      */
     void delete(UsernamePassword usernamePassword);
+    
+    
+    /**
+     * A temporary workaround for the issue where a deleted user could not be re-added with the same
+     * credentials. Essentially overwite the username and password values with random data to eliminate
+     * the duplicate problem.
+     * @param usernamePassword
+     */
+    void scramble(UsernamePassword usernamePassword);
 
 }
