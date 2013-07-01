@@ -17,6 +17,7 @@
 package org.brekka.pegasus.core.support;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -109,6 +110,12 @@ public class TemplatedEMail {
             String subject = templateService.merge(subjectTemplate, context);
             String body = templateService.merge(bodyTemplate, context);
             eMailSendingService.send(recipient, sender, subject, body, null, keySafe);
+        }
+        
+        public void send(List<String> recipients, EMailSendingService eMailSendingService, KeySafe<?> keySafe) {
+            String subject = templateService.merge(subjectTemplate, context);
+            String body = templateService.merge(bodyTemplate, context);
+            eMailSendingService.send(recipients, sender, subject, body, null, keySafe);
         }
     }
     

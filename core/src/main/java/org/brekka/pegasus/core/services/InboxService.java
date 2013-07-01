@@ -108,6 +108,12 @@ public interface InboxService {
      * @param actionDeposit
      */
     void deleteDeposit(UUID depositId);
+    
+    /**
+     * @param depositId
+     * @param after
+     */
+    void deleteDepositAfter(UUID depositId, DateTime after);
 
     int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
             boolean dispatchBased);

@@ -16,8 +16,16 @@
 
 package org.brekka.pegasus.core.dao.hibernate;
 
+import java.util.List;
+
+import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.commons.persistence.support.HibernateUtils;
 import org.brekka.pegasus.core.dao.EMailMessageDAO;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.EMailMessage;
+import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -36,4 +44,30 @@ public class EMailMessageHibernateDAO extends AbstractPegasusHibernateDAO<EMailM
         return EMailMessage.class;
     }
 
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.EMailMessageDAO#retrieveForRecipient(org.brekka.pegasus.core.model.EMailAddress, org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<EMailMessage> retrieveForRecipient(EMailAddress eMailAddress, ListingCriteria listingCriteria) {
+        Criteria criteria = getCurrentSession().createCriteria(EMailMessage.class)
+            .createCriteria("recipients")
+            .add(Restrictions.eq("address", eMailAddress));
+        HibernateUtils.applyCriteria(criteria, listingCriteria);
+        return criteria.list();
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveListingRowCount()
+     */
+    @Override
+    public int retrieveForRecipientRowCount(EMailAddress eMailAddress) {
+        Query query = getCurrentSession().createQuery(
+                "select count(em) from EMailMessage em" +
+                "  join em.recipients as rec" +
+                " where rec.address = :address");
+        query.setParameter("address", eMailAddress);
+        return ((Number) query.uniqueResult()).intValue();
+    }
 }

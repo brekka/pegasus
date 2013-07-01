@@ -17,8 +17,11 @@
 package org.brekka.pegasus.core.services;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.EMailMessage;
 import org.brekka.pegasus.core.model.KeySafe;
 
@@ -57,4 +60,13 @@ public interface EMailSendingService {
      * @return
      */
     EMailMessage retrieveById(UUID emailMessageId);
+    
+    /**
+     * Retrieve the list of e-mail addresses for the specified recipient address.
+     * @param recipientAddress
+     * @return
+     */
+    List<EMailMessage> retrieveForRecipient(String recipientAddress, ListingCriteria listingCriteria);
+    
+    int retrieveForRecipientRowCount(String recipientAddress);
 }

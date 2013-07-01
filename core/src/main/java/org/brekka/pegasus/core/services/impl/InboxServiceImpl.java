@@ -269,8 +269,17 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void deleteDeposit(UUID depositId) {
+        deleteDepositAfter(depositId, DateTime.now());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
+     */
+    @Override
+    @Transactional(isolation=Isolation.REPEATABLE_READ)
+    public void deleteDepositAfter(UUID depositId, DateTime after) {
         Deposit deposit = depositDAO.retrieveById(depositId);
-        deposit.setExpires(new Date());
+        deposit.setExpires(after.toDate());
         depositDAO.update(deposit);
     }
     

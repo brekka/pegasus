@@ -16,9 +16,12 @@
 
 package org.brekka.pegasus.core.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.EMailMessage;
 
 /**
@@ -28,4 +31,12 @@ import org.brekka.pegasus.core.model.EMailMessage;
  */
 public interface EMailMessageDAO extends EntityDAO<UUID, EMailMessage> {
 
+    /**
+     * @param eMailAddress
+     * @param listingCriteria
+     * @return
+     */
+    List<EMailMessage> retrieveForRecipient(EMailAddress eMailAddress, ListingCriteria listingCriteria);
+
+    int retrieveForRecipientRowCount(EMailAddress eMailAddress);
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.dao.EMailMessageDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.EMailAddress;
@@ -150,6 +151,28 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
     @Transactional(readOnly=true)
     public EMailMessage retrieveById(UUID emailMessageId) {
         return eMailMessageDAO.retrieveById(emailMessageId);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EMailSendingService#retrieveForRecipient(java.lang.String, org.brekka.commons.persistence.model.ListingCriteria)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<EMailMessage> retrieveForRecipient(String recipientAddress, ListingCriteria listingCriteria) {
+        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(recipientAddress);
+        List<EMailMessage> eMailList = eMailMessageDAO.retrieveForRecipient(eMailAddress, listingCriteria);
+        xmlEntityService.releaseAll(eMailList, EMailMessageDocument.class);
+        return eMailList;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EMailSendingService#retrieveForRecipientRowCount(org.brekka.pegasus.core.model.EMailAddress)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public int retrieveForRecipientRowCount(String recipientAddress) {
+        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(recipientAddress);
+        return eMailMessageDAO.retrieveForRecipientRowCount(eMailAddress);
     }
     
     protected abstract String sendInternal(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody);
