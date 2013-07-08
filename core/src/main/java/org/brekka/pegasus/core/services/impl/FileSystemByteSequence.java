@@ -58,7 +58,16 @@ public class FileSystemByteSequence implements ByteSequence {
                     try {
                         // Reduce information leakage by setting modified timestamp to the beginning of the day
                         // The reason for not setting to the epoch is so that incremental backups can still be performed.
-                        file.setLastModified(LocalDate.now().toDate().getTime());
+                        long stamp = LocalDate.now().toDate().getTime();
+                        file.setLastModified(stamp);
+                        // Also clear the parent
+                        file.getParentFile().setLastModified(stamp);
+                        // And it's parent
+                        File parentFile = file.getParentFile().getParentFile();
+                        if (parentFile.lastModified() > stamp) {
+                            // Needs to be amended
+                            file.getParentFile().getParentFile().setLastModified(stamp);
+                        }
                     } catch (Exception e) {
                         if (log.isDebugEnabled()) {
                             log.debug(String.format("Failed to reset last modified for '%s'", file), e);
