@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -21,6 +23,8 @@ import org.brekka.pegasus.core.PegasusException;
  *
  */
 public class FileSystemByteSequence implements ByteSequence {
+    
+    private static final Log log = LogFactory.getLog(FileSystemByteSequence.class);
 
     private final UUID id;
     
@@ -59,7 +63,20 @@ public class FileSystemByteSequence implements ByteSequence {
     @Override
     public InputStream getInputStream() {
         try {
-            return new FileInputStream(file);
+            return new FileInputStream(file) {
+                @Override
+                public void close() throws IOException {
+                    super.close();
+                    // Don't reveal any information about the byte sequence.
+                    try {
+                        file.setLastModified(0);
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Failed to reset last modified for '%s'", file), e);
+                        }
+                    }
+                }
+            };
         } catch (IOException e) {
             throw new PegasusException(PegasusErrorCode.PG101, 
                     "Failed to read data for resource id '%s'", id);
