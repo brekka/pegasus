@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.brekka.paveway.core.model.ByteSequence;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.joda.time.LocalDate;
 
 /**
  * @author Andrew Taylor
@@ -50,7 +51,21 @@ public class FileSystemByteSequence implements ByteSequence {
     @Override
     public OutputStream getOutputStream() {
         try {
-            return new FileOutputStream(file);
+            return new FileOutputStream(file) { 
+                @Override
+                public void close() throws IOException {
+                    super.close();
+                    try {
+                        // Reduce information leakage by setting modified timestamp to the beginning of the day
+                        // The reason for not setting to the epoch is so that incremental backups can still be performed.
+                        file.setLastModified(LocalDate.now().toDate().getTime());
+                    } catch (Exception e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("Failed to reset last modified for '%s'", file), e);
+                        }
+                    }
+                }
+            };
         } catch (FileNotFoundException e) {
             throw new PegasusException(PegasusErrorCode.PG100, 
                     "Failed to copy data for resource id '%s'", id);
@@ -63,20 +78,7 @@ public class FileSystemByteSequence implements ByteSequence {
     @Override
     public InputStream getInputStream() {
         try {
-            return new FileInputStream(file) {
-                @Override
-                public void close() throws IOException {
-                    super.close();
-                    // Don't reveal any information about the byte sequence.
-                    try {
-                        file.setLastModified(0);
-                    } catch (Exception e) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format("Failed to reset last modified for '%s'", file), e);
-                        }
-                    }
-                }
-            };
+            return new FileInputStream(file);
         } catch (IOException e) {
             throw new PegasusException(PegasusErrorCode.PG101, 
                     "Failed to read data for resource id '%s'", id);

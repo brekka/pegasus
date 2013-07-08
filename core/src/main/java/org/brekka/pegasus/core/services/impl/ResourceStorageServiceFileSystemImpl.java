@@ -17,6 +17,7 @@ import org.brekka.paveway.core.services.ResourceStorageService;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.stillingar.api.annotations.Configured;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
@@ -91,12 +92,18 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
         File dir1 = new File(rootFile, part1);
         if (!dir1.exists()) {
             dir1.mkdir();
+            // Reduce information leakage by setting modified timestamp to the beginning of the day
+            // The reason for not setting to the epoch is so that incremental backups can still be performed.
+            dir1.setLastModified(LocalDate.now().toDate().getTime());
         }
         
         String part2 = idStr.substring(2, 4);
         File dir2 = new File(dir1, part2);
         if (!dir2.exists()) {
             dir2.mkdir();
+            // Reduce information leakage by setting modified timestamp to the beginning of the day
+            // The reason for not setting to the epoch is so that incremental backups can still be performed.
+            dir2.setLastModified(LocalDate.now().toDate().getTime());
         }
         return new File(dir2, idStr);
     }
