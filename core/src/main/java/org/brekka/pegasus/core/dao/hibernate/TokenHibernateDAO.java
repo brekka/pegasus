@@ -32,7 +32,9 @@ public class TokenHibernateDAO extends AbstractPegasusHibernateDAO<Token> implem
     public Token retrieveByPath(String path, boolean exclusive) {
         Criteria criteria = getCurrentSession().createCriteria(Token.class);
         criteria.add(Restrictions.eq("path", path));
-        criteria.setLockMode(LockMode.PESSIMISTIC_READ);
+        if (exclusive) {
+            criteria.setLockMode(LockMode.PESSIMISTIC_READ);
+        }
         return (Token) criteria.uniqueResult();
     }
 }
