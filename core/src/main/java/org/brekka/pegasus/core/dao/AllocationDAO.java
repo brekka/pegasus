@@ -9,8 +9,8 @@ import java.util.UUID;
 import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.model.Allocation;
-import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
+import org.brekka.pegasus.core.model.Token;
 
 /**
  * @author Andrew Taylor
@@ -28,7 +28,7 @@ public interface AllocationDAO extends EntityDAO<UUID, Allocation> {
      * @param token
      * @return
      */
-    <T extends Allocation> T retrieveByToken(String token, Class<T> expectedType);
+    <T extends Allocation> T retrieveByToken(Token token, Class<T> expectedType);
 
     /**
      * @param maxAllocationCount

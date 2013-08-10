@@ -107,7 +107,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * Token that identifies this allocation
      */
     @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="`TokenID`")
+    @JoinColumn(name="`TokenID`") // TODO should be unique
     private Token token;
     
     /**

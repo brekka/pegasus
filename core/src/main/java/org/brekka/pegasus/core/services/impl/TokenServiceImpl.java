@@ -49,7 +49,7 @@ public class TokenServiceImpl implements TokenService {
     public Token createToken(String path, TokenType type) {
         Token token;
         if (path != null) {
-            if (tokenDAO.retrieveByPath(path) != null) {
+            if (tokenDAO.retrieveByPath(path, false) != null) {
                 throw new PegasusException(PegasusErrorCode.PG300, 
                         "The token '%s' of type '%s' is already taken", path, type.getKey());
             }
@@ -78,7 +78,7 @@ public class TokenServiceImpl implements TokenService {
 
     private Token chooseRandomToken(TokenType type) {
         Token token = type.generateRandom();
-        while (tokenDAO.retrieveByPath(token.getPath()) != null) {
+        while (tokenDAO.retrieveByPath(token.getPath(), false) != null) {
             token = type.generateRandom();
         }
         return token;
@@ -88,7 +88,16 @@ public class TokenServiceImpl implements TokenService {
      * @see org.brekka.pegasus.core.services.TokenService#retrieveByPath(java.lang.String)
      */
     @Override
+    @Transactional()
     public Token retrieveByPath(String path) {
-        return tokenDAO.retrieveByPath(path);
+        return retrieveByPath(path, false);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TokenService#retrieveByPath(java.lang.String, boolean)
+     */
+    @Override
+    public Token retrieveByPath(String path, boolean exclusive) {
+        return tokenDAO.retrieveByPath(path, exclusive);
     }
 }

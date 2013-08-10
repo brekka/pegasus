@@ -41,6 +41,7 @@ import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
@@ -132,9 +133,10 @@ class AllocationServiceSupport {
         return bundleType;
     }
     
-    protected <T extends Allocation> T retrieveByToken(String token, Class<T> expectedType, boolean notFoundThrows) {
-        checkNotNull(token, "token");
+    protected <T extends Allocation> T retrieveByToken(String tokenStr, Class<T> expectedType, boolean notFoundThrows) {
+        checkNotNull(tokenStr, "token");
         checkNotNull(expectedType, "expectedType");
+        Token token = tokenService.retrieveByPath(tokenStr, true);
         T value = allocationDAO.retrieveByToken(token, expectedType);
         if (value == null 
                 && notFoundThrows) {
