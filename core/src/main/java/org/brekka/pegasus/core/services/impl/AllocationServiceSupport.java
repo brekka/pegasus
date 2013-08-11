@@ -136,7 +136,7 @@ class AllocationServiceSupport {
     protected <T extends Allocation> T retrieveByToken(String tokenStr, Class<T> expectedType, boolean notFoundThrows) {
         checkNotNull(tokenStr, "token");
         checkNotNull(expectedType, "expectedType");
-        Token token = tokenService.retrieveByPath(tokenStr, true);
+        Token token = tokenService.retrieveByPath(tokenStr);
         T value = allocationDAO.retrieveByToken(token, expectedType);
         if (value == null 
                 && notFoundThrows) {

@@ -22,7 +22,5 @@ public interface TokenService {
      * @return
      */
     Token retrieveByPath(String path);
-    
-    Token retrieveByPath(String path, boolean exclusive);
 
 }

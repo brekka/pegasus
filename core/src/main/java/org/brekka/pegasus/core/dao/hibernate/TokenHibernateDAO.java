@@ -6,7 +6,6 @@ package org.brekka.pegasus.core.dao.hibernate;
 import org.brekka.pegasus.core.dao.TokenDAO;
 import org.brekka.pegasus.core.model.Token;
 import org.hibernate.Criteria;
-import org.hibernate.LockMode;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -29,12 +28,9 @@ public class TokenHibernateDAO extends AbstractPegasusHibernateDAO<Token> implem
      * @see org.brekka.pegasus.core.dao.TokenDAO#retrieveByPath(java.lang.String)
      */
     @Override
-    public Token retrieveByPath(String path, boolean exclusive) {
+    public Token retrieveByPath(String path) {
         Criteria criteria = getCurrentSession().createCriteria(Token.class);
         criteria.add(Restrictions.eq("path", path));
-        if (exclusive) {
-            criteria.setLockMode(LockMode.PESSIMISTIC_READ);
-        }
         return (Token) criteria.uniqueResult();
     }
 }
