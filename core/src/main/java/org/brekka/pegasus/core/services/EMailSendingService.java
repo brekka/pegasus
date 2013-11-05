@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.pegasus.core.model.Attachment;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.EMailMessage;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -43,6 +44,7 @@ public interface EMailSendingService {
      */
     EMailMessage send(String recipient, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe);
     
+    
     /**
      * Send an e-mail to a multiple recipients
      * 
@@ -53,6 +55,17 @@ public interface EMailSendingService {
      * @param htmlBody the html body (optional).
      */
     EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe);
+    
+    /**
+     * Send an e-mail to a multiple recipients with plain attachments
+     * 
+     * @param recipients who should receive the message
+     * @param sender the sender of the message.
+     * @param subject what the e-mail is about
+     * @param plainBody the plain body (optional)
+     * @param htmlBody the html body (optional).
+     */
+    EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody, List<Attachment> attachments, KeySafe<?> keySafe);
     
     /**
      * Retrieve a sent message by its ID

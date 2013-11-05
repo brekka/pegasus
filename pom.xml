@@ -1,33 +1,50 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.brekka.pegasus</groupId>
-	<artifactId>pegasus</artifactId>
-	<version>2.1</version>
-	<packaging>pom</packaging>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.brekka.pegasus</groupId>
+    <artifactId>pegasus</artifactId>
+    <version>2.4-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<description>
+    <description>
         Pegasus secure file relay service
     </description>
-    
-	<inceptionYear>2012</inceptionYear>
+
+    <inceptionYear>2012</inceptionYear>
+
+    <scm>
+        <url>https://github.com/brekka/pegasus.git</url>
+        <connection>https://github.com/brekka/pegasus.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/brekka/pegasus.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>brekka.org</id>
+            <url>https://brekka.org/maven/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>brekka.org</id>
+            <url>https://brekka.org/maven/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <developers>
-       <developer>
-           <name>Andrew Taylor</name>
-           <email>andrew@brekka.org</email>
-           <timezone>GMT</timezone>
-       </developer>
+        <developer>
+            <name>Andrew Taylor</name>
+            <email>andrew@brekka.org</email>
+            <timezone>GMT</timezone>
+        </developer>
     </developers>
 
-	<modules>
-		<module>core</module>
-		<module>schemas</module>
-		<module>web</module>
-	</modules>
+    <modules>
+        <module>core</module>
+        <module>schemas</module>
+    </modules>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <xmlbeans-version>2.5.0</xmlbeans-version>
         <spring-version>3.1.2.RELEASE</spring-version>
         <spring-security-version>3.1.2.RELEASE</spring-security-version>
@@ -37,5 +54,5 @@
         <stillingar-core-version>1.0.0</stillingar-core-version>
         <stillingar-spring-version>1.0.0</stillingar-spring-version>
         <stillingar-xmlbeans-version>1.0.0</stillingar-xmlbeans-version>
-	</properties>
+    </properties>
 </project>

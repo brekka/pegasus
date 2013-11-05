@@ -19,12 +19,14 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.dao.EMailMessageDAO;
+import org.brekka.pegasus.core.model.Attachment;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.EMailMessage;
@@ -40,6 +42,7 @@ import org.brekka.xml.pegasus.v2.model.EMailMessageDocument;
 import org.brekka.xml.pegasus.v2.model.EMailMessageType;
 import org.brekka.xml.pegasus.v2.model.EMailMessageType.Content;
 import org.brekka.xml.pegasus.v2.model.EMailType;
+import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +77,15 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
     public EMailMessage send(String recipient, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe) {
         return send(Arrays.asList(recipient), sender, subject, plainBody, htmlBody, keySafe);
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.util.Collection, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.List, org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    public EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody,
+            String htmlBody, KeySafe<?> keySafe) {
+        return send(recipients, sender, subject, plainBody, htmlBody, Collections.<Attachment>emptyList(), keySafe);
+    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.util.Collection, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
@@ -81,7 +93,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
     @Override
     @Transactional()
     public EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody,
-            String htmlBody, KeySafe<?> keySafe) {
+            String htmlBody, List<Attachment> attachments, KeySafe<?> keySafe) {
         if (sender == null) {
             sender = defaultSourceAddress;
         }
@@ -127,6 +139,13 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         }
         eMailMessage.setSubject(subject);
         eMailMessage.setUUID(message.getId().toString());
+        for (Attachment attachment : attachments) {
+            FileType fileType = eMailMessage.addNewAttachment();
+            fileType.setName(attachment.getName());
+            fileType.setLength(attachment.getLength());
+            fileType.setMimeType(attachment.getContentType());
+            fileType.setUUID(UUID.randomUUID().toString());
+        }
         
         XmlEntity<EMailMessageDocument> xml;
         if (keySafe == null) {
@@ -134,10 +153,11 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         } else {
             xml = xmlEntityService.persistEncryptedEntity(document, keySafe, false);
         }
+        
         message.setXml(xml);
         
         
-        String reference = sendInternal(recipients, sender, subject, plainBody, htmlBody);
+        String reference = sendInternal(recipients, sender, subject, plainBody, htmlBody, attachments);
         message.setReference(reference);
         eMailMessageDAO.create(message);
         return message;
@@ -175,7 +195,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         return eMailMessageDAO.retrieveForRecipientRowCount(eMailAddress);
     }
     
-    protected abstract String sendInternal(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody);
+    protected abstract String sendInternal(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody, List<Attachment> attachments);
     
     
     /**
