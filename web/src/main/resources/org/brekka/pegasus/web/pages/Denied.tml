@@ -1,8 +1,0 @@
-<html t:type="layout" xmlns:p="tapestry:parameter"
-      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd">
-      
-      
-    <h1>Not allowed</h1>
-
-    <p> Sorry, but this service is currently unavailable to your region. </p>
-</html>
