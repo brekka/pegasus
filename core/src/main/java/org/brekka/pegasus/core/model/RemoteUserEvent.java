@@ -24,7 +24,7 @@ import org.hibernate.annotations.Type;
  */
 @MappedSuperclass
 public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
-    
+
     /**
      * Serial UID
      */
@@ -37,20 +37,20 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The moment the event begun
      */
     @Column(name="`Initiated`", updatable=false, nullable=false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date initiated; 
-    
+    private Date initiated;
+
     /**
      * IP address of the system this web server talked to.
      */
     @Column(name="`RemoteAddress`", nullable=false)
     private String remoteAddress;
-    
+
     /**
      * If the remote party was behind a proxy and it reported the internal IP,
      * this will record that IP.
@@ -63,7 +63,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
      */
     @Column(name="`UserAgent`")
     private String userAgent;
-    
+
     /**
      * The member who performed the event (if available).
      */
@@ -75,7 +75,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
         return initiated;
     }
 
-    public void setInitiated(Date initiated) {
+    public void setInitiated(final Date initiated) {
         this.initiated = initiated;
     }
 
@@ -83,7 +83,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
         return remoteAddress;
     }
 
-    public void setRemoteAddress(String remoteAddress) {
+    public void setRemoteAddress(final String remoteAddress) {
         this.remoteAddress = remoteAddress;
     }
 
@@ -91,7 +91,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
         return onBehalfOfAddress;
     }
 
-    public void setOnBehalfOfAddress(String onBehalfOfAddress) {
+    public void setOnBehalfOfAddress(final String onBehalfOfAddress) {
         this.onBehalfOfAddress = onBehalfOfAddress;
     }
 
@@ -99,7 +99,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
         return userAgent;
     }
 
-    public void setUserAgent(String userAgent) {
+    public void setUserAgent(final String userAgent) {
         this.userAgent = userAgent;
     }
 
@@ -107,13 +107,14 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
         return member;
     }
 
-    public void setMember(Member member) {
+    public void setMember(final Member member) {
         this.member = member;
     }
 
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -121,7 +122,8 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 }

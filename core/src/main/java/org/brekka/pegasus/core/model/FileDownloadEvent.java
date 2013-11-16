@@ -34,7 +34,7 @@ public class FileDownloadEvent extends RemoteUserEvent {
     /**
      * The file that was downloaded
      */
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name="`TransferFileID`", nullable=false)
     @Index(name="IDX_FileDownloadEvent_01")
     private AllocationFile transferFile;

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CompletableUploadedFile;
 import org.brekka.paveway.core.model.CryptedFile;
@@ -68,46 +69,46 @@ class AllocationServiceSupport {
 
     @Autowired
     protected PhalanxService phalanxService;
-    
+
     @Autowired
     protected PavewayService pavewayService;
-    
+
     @Autowired
     protected ResourceStorageService resourceStorageService;
-    
+
     @Autowired
     protected SymmetricCryptoService symmetricCryptoService;
-    
+
     @Autowired
     protected ResourceCryptoService resourceCryptoService;
-    
+
     @Autowired
     protected CryptoProfileService cryptoProfileService;
-    
+
     @Autowired
     protected EventService eventService;
-    
+
     @Autowired
     protected KeySafeService keySafeService;
-    
+
     @Autowired
     protected TokenService tokenService;
 
     @Autowired
     private AllocationDAO allocationDAO;
-    
+
     @Autowired
     private AllocationFileDAO allocationFileDAO;
-    
+
     @Autowired
     private CryptedFileDAO cryptedFileDAO;
-    
+
     @Autowired
     protected XmlEntityService xmlEntityService;
-    
-    
 
-    protected BundleType completeFiles(int maxDownloads, UploadedFiles files) {
+
+
+    protected BundleType completeFiles(final int maxDownloads, final UploadedFiles files) {
         if (files == null) {
             return null;
         }
@@ -116,10 +117,10 @@ class AllocationServiceSupport {
         if (ready.isEmpty()) {
             return null;
         }
-        
+
         for (CompletableUploadedFile file : ready) {
             CryptedFile cryptedFile = pavewayService.complete(file);
-            
+
             FileType fileXml = bundleType.addNewFile();
             fileXml.setName(cryptedFile.getFileName());
             fileXml.setMimeType(cryptedFile.getMimeType());
@@ -132,27 +133,27 @@ class AllocationServiceSupport {
         }
         return bundleType;
     }
-    
-    protected <T extends Allocation> T retrieveByToken(String tokenStr, Class<T> expectedType, boolean notFoundThrows) {
+
+    protected <T extends Allocation> T retrieveByToken(final String tokenStr, final Class<T> expectedType, final boolean notFoundThrows) {
         checkNotNull(tokenStr, "token");
         checkNotNull(expectedType, "expectedType");
         Token token = tokenService.retrieveByPath(tokenStr);
         T value = allocationDAO.retrieveByToken(token, expectedType);
-        if (value == null 
+        if (value == null
                 && notFoundThrows) {
-            throw new PegasusException(PegasusErrorCode.PG721, 
+            throw new PegasusException(PegasusErrorCode.PG721,
                     "No %s found for token '%s'", expectedType.getSimpleName(), token);
         }
         return value;
     }
-    
-    
+
+
     /**
      * @param maxDownloads
      * @param bundleType
      * @return
      */
-    protected BundleType copyBundle(Integer maxDownloads, BundleType bundleType) {
+    protected BundleType copyBundle(final Integer maxDownloads, final BundleType bundleType) {
         if (bundleType == null) {
             return null;
         }
@@ -175,20 +176,20 @@ class AllocationServiceSupport {
      * @param dispatch
      * @return
      */
-    protected BundleType copyDispatchBundle(Dispatch dispatch, Integer maxDownloads) {
+    protected BundleType copyDispatchBundle(final Dispatch dispatch, final Integer maxDownloads) {
         XmlEntity<AllocationDocument> xml = xmlEntityService.retrieveEntity(dispatch.getXml().getId(), AllocationDocument.class);
         AllocationType dispatchXml = xml.getBean().getAllocation();
         BundleType dispatchBundle = copyBundle(maxDownloads, dispatchXml.getBundle());
         return dispatchBundle;
     }
-    
+
     /**
      * Prepare the XML based structure that will contain the details for this bundle,
      * while will be subsequently encrypted.
      * @param bundleType
      * @return
      */
-    protected AllocationType prepareAllocationType(BundleType bundleType, DetailsType detailsType) {
+    protected AllocationType prepareAllocationType(final BundleType bundleType, final DetailsType detailsType) {
         AllocationType allocationType = AllocationType.Factory.newInstance();
         if (bundleType != null) {
             allocationType.setBundle(bundleType);
@@ -198,16 +199,17 @@ class AllocationServiceSupport {
         }
         return allocationType;
     }
-    
-    protected void decryptDocument(Allocation allocation) {
+
+    protected void decryptDocument(final Allocation allocation) {
         decryptDocument(allocation, null);
     }
-    
-    protected void decryptDocument(Allocation allocation, String password) {
-        if(allocation == null) {
+
+    protected void decryptDocument(final Allocation allocation, final String password) {
+        Allocation nAllocation = EntityUtils.narrow(allocation, Allocation.class);
+        if (nAllocation == null) {
             return;
         }
-        XmlEntity<AllocationDocument> existing = allocation.getXml();
+        XmlEntity<AllocationDocument> existing = nAllocation.getXml();
         if (existing.getBean() != null) {
             // Already decrypted
             return;
@@ -220,26 +222,26 @@ class AllocationServiceSupport {
             } else {
                 xml = xmlEntityService.release(existing, password, AllocationDocument.class);
             }
-            allocation.setXml(xml);
-            assignFileXml(allocation);
+            nAllocation.setXml(xml);
+            assignFileXml(nAllocation);
             unlockSuccess = true;
         } finally {
-            if (allocation instanceof Transfer 
+            if (nAllocation instanceof Transfer
                     && password != null) {
-                eventService.transferUnlock((Transfer) allocation, unlockSuccess);
+                eventService.transferUnlock((Transfer) nAllocation, unlockSuccess);
             }
         }
-        
+
     }
-    
-    protected void encryptDocument(Allocation allocation, AllocationType allocationType, KeySafe<?> keySafe) {
+
+    protected void encryptDocument(final Allocation allocation, final AllocationType allocationType, final KeySafe<?> keySafe) {
         AllocationDocument allocationDocument = AllocationDocument.Factory.newInstance();
         allocationDocument.setAllocation(allocationType);
         XmlEntity<AllocationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(allocationDocument, keySafe, true);
         allocation.setXml(xmlEntity);
     }
-    
-    protected void createAllocationFiles(Allocation allocation) {
+
+    protected void createAllocationFiles(final Allocation allocation) {
         XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
         BundleType bundle = xml.getBean().getAllocation().getBundle();
         if (bundle == null) {
@@ -273,9 +275,9 @@ class AllocationServiceSupport {
         }
         allocation.setFiles(allocationFiles);
     }
-    
-    
-    protected void assignFileXml(Allocation allocation) {
+
+
+    protected void assignFileXml(final Allocation allocation) {
         XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
         AllocationType allocationType = xml.getBean().getAllocation();
         List<AllocationFile> files = allocation.getFiles();
@@ -297,12 +299,12 @@ class AllocationServiceSupport {
             }
         }
     }
-    
-    protected void bindToContext(Allocation allocation) {
+
+    protected void bindToContext(final Allocation allocation) {
         bindToContext(allocation.getId(), allocation);
     }
-    
-    protected void bindToContext(Serializable key, Allocation allocation) {
+
+    protected void bindToContext(final Serializable key, final Allocation allocation) {
         AccessorContext accessorContext = AccessorContextImpl.getCurrent();
         accessorContext.retain(key, allocation);
         List<AllocationFile> files = allocation.getFiles();
@@ -310,21 +312,22 @@ class AllocationServiceSupport {
             accessorContext.retain(allocationFile.getId(), allocationFile);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.AllocationService#refreshAllocation(org.brekka.pegasus.core.model.AnonymousTransfer)
      */
-    protected void refreshAllocation(Allocation allocation) {
-        if (allocation instanceof AnonymousTransfer) {
-            AnonymousTransfer anonTrans = (AnonymousTransfer) allocation;
+    protected void refreshAllocation(final Allocation allocation) {
+        Allocation nAllocation = EntityUtils.narrow(allocation, Allocation.class);
+        if (nAllocation instanceof AnonymousTransfer) {
+            AnonymousTransfer anonTrans = (AnonymousTransfer) nAllocation;
             // Need to keep the XML as we have no way to re-extract at this point (+ it should never change).
             XmlEntity<AllocationDocument> xml = anonTrans.getXml();
-            allocationDAO.refresh(allocation);
-            allocation.setXml(xml);
+            allocationDAO.refresh(nAllocation);
+            nAllocation.setXml(xml);
         } else {
-            allocationDAO.refresh(allocation);
-            xmlEntityService.release(allocation, AllocationDocument.class);
+            allocationDAO.refresh(nAllocation);
+            xmlEntityService.release(nAllocation, AllocationDocument.class);
         }
-        assignFileXml(allocation);
+        assignFileXml(nAllocation);
     }
 }

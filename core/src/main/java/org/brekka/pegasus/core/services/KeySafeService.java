@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.services;
 
 import java.util.UUID;
 
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.model.KeyPair;
@@ -21,7 +22,7 @@ public interface KeySafeService {
      * @return
      */
     CryptedData protect(byte[] keyData, KeySafe<?> keySafe);
-    
+
     /**
      * Release the key identified by <code>cryptedDataId</code> which is protected
      * by <code>keySage</code>.
@@ -44,5 +45,11 @@ public interface KeySafeService {
      * @return
      */
     KeyPair assignKeyPair(KeySafe<?> protectingKeySafe, KeyPair keyPairToAssign, KeySafe<?> assignToKeySafe);
-    
+
+    /**
+     * @param id
+     * @return
+     */
+    KeySafe<? extends Actor> retrieveById(UUID id);
+
 }

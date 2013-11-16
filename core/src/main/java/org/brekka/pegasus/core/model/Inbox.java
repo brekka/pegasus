@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -18,6 +19,7 @@ import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
+import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Type;
 
 /**
@@ -39,10 +41,11 @@ public class Inbox extends LongevousEntity<UUID> {
      * Unique id
      */
     @Id
+    @AccessType("property")
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The token that identifies this inbox to the outside world.
      */
@@ -54,55 +57,56 @@ public class Inbox extends LongevousEntity<UUID> {
      * The key safe that will be used to store files added to this inbox. The user can change this at any time,
      * with future deposits being associated with the new key safe.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`KeySafeID`", nullable = false)
     private KeySafe<?> keySafe;
-    
+
     /**
      * The owner of this inbox. One of owner or division should be set.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`OwnerID`")
     private Actor owner;
-    
+
     /**
      * The division this inbox may belong to.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`DivisionID`")
     private Division<?> division;
-    
+
     /**
      * Text to be displayed to the person when depositing a file.
      */
     @Column(name="`Introduction`", length=2000)
     private String introduction;
-    
+
     /**
      * Records the current status of this inbox
      */
     @Column(name="`Status`", length=8, nullable=false)
     @Enumerated(EnumType.STRING)
     private InboxStatus status = InboxStatus.ACTIVE;
-    
+
     /**
      * The user can connect an e-mail address to the inbox as another way to identify it.
      */
     @OneToOne
     @JoinColumn(name="`EMailAddressID`", unique=true)
     private EMailAddress eMailAddress;
-    
+
     /**
      * Name will be stored separately
      */
     @Transient
     private transient String name;
-    
-    
-    
+
+
+
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -110,7 +114,8 @@ public class Inbox extends LongevousEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -118,7 +123,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return keySafe;
     }
 
-    public void setKeySafe(KeySafe<?> keySafe) {
+    public void setKeySafe(final KeySafe<?> keySafe) {
         this.keySafe = keySafe;
     }
 
@@ -126,7 +131,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return token;
     }
 
-    public void setToken(Token token) {
+    public void setToken(final Token token) {
         this.token = token;
     }
 
@@ -134,7 +139,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return owner;
     }
 
-    public void setOwner(Actor owner) {
+    public void setOwner(final Actor owner) {
         this.owner = owner;
     }
 
@@ -142,7 +147,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return introduction;
     }
 
-    public void setIntroduction(String introduction) {
+    public void setIntroduction(final String introduction) {
         this.introduction = introduction;
     }
 
@@ -150,7 +155,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -158,7 +163,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return status;
     }
 
-    public void setStatus(InboxStatus status) {
+    public void setStatus(final InboxStatus status) {
         this.status = status;
     }
 
@@ -166,7 +171,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return division;
     }
 
-    public void setDivision(Division<?> division) {
+    public void setDivision(final Division<?> division) {
         this.division = division;
     }
 
@@ -174,7 +179,7 @@ public class Inbox extends LongevousEntity<UUID> {
         return eMailAddress;
     }
 
-    public void seteMailAddress(EMailAddress eMailAddress) {
+    public void seteMailAddress(final EMailAddress eMailAddress) {
         this.eMailAddress = eMailAddress;
     }
 }

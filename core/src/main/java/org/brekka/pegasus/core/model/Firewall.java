@@ -38,22 +38,22 @@ public class Firewall extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
-     * The entity that owns this firewall ruleset. 
+     * The entity that owns this firewall ruleset.
      * For example a member, division or even the system id.
      */
     @Column(name="`OwningEntityId`", nullable=false)
     @Type(type="pg-uuid")
     @Index(name="IDX_Firewall_Owner")
     private UUID owningEntityId;
-    
+
     /**
      * Optional name for this firewall.
      */
     @Column(name="`Name`", length=128)
     private String name;
-    
+
     /**
      * The default action to be performed if no rules are matched.
      */
@@ -64,6 +64,7 @@ public class Firewall extends SnapshotEntity<UUID> {
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -71,7 +72,8 @@ public class Firewall extends SnapshotEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -79,7 +81,7 @@ public class Firewall extends SnapshotEntity<UUID> {
         return owningEntityId;
     }
 
-    public void setOwningEntityId(UUID owningEntityId) {
+    public void setOwningEntityId(final UUID owningEntityId) {
         this.owningEntityId = owningEntityId;
     }
 
@@ -87,7 +89,7 @@ public class Firewall extends SnapshotEntity<UUID> {
         return defaultAction;
     }
 
-    public void setDefaultAction(FirewallAction defaultAction) {
+    public void setDefaultAction(final FirewallAction defaultAction) {
         this.defaultAction = defaultAction;
     }
 
@@ -95,7 +97,7 @@ public class Firewall extends SnapshotEntity<UUID> {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 }

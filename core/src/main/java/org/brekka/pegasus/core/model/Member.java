@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SecondaryTable;
@@ -30,23 +31,23 @@ public abstract class Member extends Actor {
     /**
      * Authentication token that identifies this member
      */
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`AuthenticationTokenID`", table="`Member`", nullable=false)
     private AuthenticationToken authenticationToken;
-    
+
     /**
      * The default vault for this member.
      */
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`DefaultVaultID`", table="`Member`")
     private Vault defaultVault;
-    
+
     /**
      * The primary keySafe of this member. Depending on the policy applied to the user, this may be just a reference to the defaultVault,
      * some other vault or some other keySafe such as a division. When allocating a resource to a user, this keySafe should be used in
      * preference over the defaultVault unless the resource should be explicitly tied to the passworded keypair.
      */
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "`PrimaryKeySafeID`", table="`Member`")
     private KeySafe<? extends Member> primaryKeySafe;
 
@@ -60,23 +61,23 @@ public abstract class Member extends Actor {
     /**
      * @param authenticationToken the authenticationToken to set
      */
-    public void setAuthenticationToken(AuthenticationToken authenticationToken) {
+    public void setAuthenticationToken(final AuthenticationToken authenticationToken) {
         this.authenticationToken = authenticationToken;
     }
 
-    public final Vault getDefaultVault() {
+    public Vault getDefaultVault() {
         return defaultVault;
     }
 
-    public final void setDefaultVault(Vault defaultVault) {
+    public void setDefaultVault(final Vault defaultVault) {
         this.defaultVault = defaultVault;
     }
-    
+
 
     /**
      * @return the primaryKeySafe
      */
-    public final KeySafe<? extends Member> getPrimaryKeySafe() {
+    public KeySafe<? extends Member> getPrimaryKeySafe() {
         return primaryKeySafe;
     }
 
@@ -84,7 +85,7 @@ public abstract class Member extends Actor {
      * @param primaryKeySafe
      *            the primaryKeySafe to set
      */
-    public final void setPrimaryKeySafe(KeySafe<? extends Member> primaryKeySafe) {
+    public void setPrimaryKeySafe(final KeySafe<? extends Member> primaryKeySafe) {
         this.primaryKeySafe = primaryKeySafe;
     }
 }

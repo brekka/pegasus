@@ -10,6 +10,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.AccessType;
+
 /**
  * Recreates the table structure defined by the Spring Security remember-me functionality.
  * 
@@ -19,54 +21,55 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name="`persistent_logins`")
 public class PersistentLogin implements Serializable {
-	/**
-	 * Serial UID
-	 */
-	private static final long serialVersionUID = 374697702088091906L;
+    /**
+     * Serial UID
+     */
+    private static final long serialVersionUID = 374697702088091906L;
 
-	@Id
-	@Column(length=64)
-	private String series;
-	
-	@Column(nullable=false, length=255)
-	private String username;
-	
-	@Column(nullable=false, length=64)
-	private String token;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="`last_used`", nullable=false)
-	private Date lastUsed;
+    @Id
+    @AccessType("property")
+    @Column(length=64)
+    private String series;
 
-	public String getSeries() {
-		return series;
-	}
+    @Column(nullable=false, length=255)
+    private String username;
 
-	public void setSeries(String series) {
-		this.series = series;
-	}
+    @Column(nullable=false, length=64)
+    private String token;
 
-	public String getUsername() {
-		return username;
-	}
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="`last_used`", nullable=false)
+    private Date lastUsed;
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public String getSeries() {
+        return series;
+    }
 
-	public String getToken() {
-		return token;
-	}
+    public void setSeries(final String series) {
+        this.series = series;
+    }
 
-	public void setToken(String token) {
-		this.token = token;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public Date getLastUsed() {
-		return lastUsed;
-	}
+    public void setUsername(final String username) {
+        this.username = username;
+    }
 
-	public void setLastUsed(Date lastUsed) {
-		this.lastUsed = lastUsed;
-	}
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(final String token) {
+        this.token = token;
+    }
+
+    public Date getLastUsed() {
+        return lastUsed;
+    }
+
+    public void setLastUsed(final Date lastUsed) {
+        this.lastUsed = lastUsed;
+    }
 }

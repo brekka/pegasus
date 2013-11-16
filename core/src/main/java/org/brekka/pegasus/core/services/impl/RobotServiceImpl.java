@@ -19,6 +19,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.dao.RobotDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
@@ -43,7 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Robot Service 
+ * Robot Service
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
@@ -52,84 +53,85 @@ import org.springframework.transaction.annotation.Transactional;
 public class RobotServiceImpl implements RobotService {
 
     @Autowired
-    private UsernamePasswordService usernamePasswordService; 
-    
+    private UsernamePasswordService usernamePasswordService;
+
     @Autowired
     private VaultService vaultService;
-    
+
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private RobotDAO robotDAO;
-    
+
     @Autowired
     private XmlEntityService xmlEntityService;
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.RobotService#createRobot(java.util.UUID, java.lang.String)
      */
     @Transactional()
     @Override
-    public Robot create(String key, String code, Actor owner, RobotType details) {
+    public Robot create(final String key, final String code, final Actor owner, final RobotType details) {
+        Actor nOwner = EntityUtils.narrow(owner, Actor.class);
         KeySafe<?> detailsProtectedBy;
-        
-        if (owner instanceof Organization) {
-            Organization organizationOwner = (Organization) owner;
+
+        if (nOwner instanceof Organization) {
+            Organization organizationOwner = (Organization) nOwner;
             detailsProtectedBy = organizationOwner.getGlobalDivision();
-        } else if (owner instanceof Associate) {
-            Associate associateOwner = (Associate) owner;
+        } else if (nOwner instanceof Associate) {
+            Associate associateOwner = (Associate) nOwner;
             detailsProtectedBy = associateOwner.getOrganization().getGlobalDivision();
-        } else if (owner instanceof Person) {
-            Person personOwner = (Person) owner;
+        } else if (nOwner instanceof Person) {
+            Person personOwner = (Person) nOwner;
             detailsProtectedBy = personOwner.getDefaultVault();
         } else {
             throw new IllegalStateException(String.format(
-                    "Only Organization, Associate or Person based actors can create robots, not '%s'", 
-                    owner.getClass().getName()));
+                    "Only Organization, Associate or Person based actors can create robots, not '%s'",
+                    nOwner.getClass().getName()));
         }
-        
+
         Robot robot = new Robot();
-        
+
         UsernamePassword usernamePassword = usernamePasswordService.create(key, code);
         robot.setAuthenticationToken(usernamePassword);
-        
+
         Vault vault = vaultService.createVault("Default", code, robot);
         robot.setDefaultVault(vault);
         robot.setPrimaryKeySafe(vault);
-        
+
         robot.setStatus(ActorStatus.ACTIVE);
-        robot.setOwner(owner);
-        
+        robot.setOwner(nOwner);
+
         RobotDocument robotDocument = RobotDocument.Factory.newInstance();
         robotDocument.setRobot(details);
-        
+
         // Robot cannot see its own details, why would it need to?
         XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy, false);
         robot.setXml(encryptedEntity);
-        
+
         AuthenticatedMember<Person> current = memberService.getCurrent(Person.class);
         robot.setCreatedBy(current.getMember());
-        
+
         robotDAO.create(robot);
         return robot;
     }
-    
+
     @Transactional(readOnly=true)
     @Override
-    public int retrieveListingRowCount(Actor owner) {
+    public int retrieveListingRowCount(final Actor owner) {
         return robotDAO.retrieveListingRowCount(owner);
     }
-    
+
     @Transactional(readOnly=true)
     @Override
-    public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
+    public List<Robot> retrieveListing(final Actor owner, final ListingCriteria listingCriteria) {
         return robotDAO.retrieveListing(owner, listingCriteria);
     }
-    
+
     @Transactional()
     @Override
-    public void delete(Robot robot) {
+    public void delete(final Robot robot) {
         Robot managed = robotDAO.retrieveById(robot.getId());
         vaultService.deleteVault(managed.getDefaultVault());
         usernamePasswordService.delete((UsernamePassword) managed.getAuthenticationToken());

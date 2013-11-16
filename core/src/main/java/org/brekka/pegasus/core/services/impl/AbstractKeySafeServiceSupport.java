@@ -53,23 +53,24 @@ abstract class AbstractKeySafeServiceSupport {
     @Autowired
     protected MemberService memberService;
 
-    protected PrivateKeyToken resolvePrivateKeyFor(KeySafe<?> keySafe, AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken resolvePrivateKeyFor(final KeySafe<?> keySafe, final AuthenticatedMemberBase<?> currentMember) {
+        KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         PrivateKeyToken privateKeyToken;
 
         Actor contextMember = currentMember.getMember();
-        Actor keySafeOwner = keySafe.getOwner();
+        Actor keySafeOwner = nKeySafe.getOwner();
         if (EntityUtils.identityEquals(keySafeOwner, contextMember)) {
             /*
              * The user owns this keySafe that means it is their personal chain. Simply walk up the chain to get to the
              * vault.
              */
-            privateKeyToken = traverseChain(keySafe, currentMember);
+            privateKeyToken = traverseChain(nKeySafe, currentMember);
         } else {
             /*
              * Not a personal chain. Check to see if there are any connections from this keysafe to the current user or
              * to organizations they are members of
              */
-            List<Connection<?, ?, ?>> connectionList = connectionDAO.identifyConnectionsBetween(keySafe, contextMember);
+            List<Connection<?, ?, ?>> connectionList = connectionDAO.identifyConnectionsBetween(nKeySafe, contextMember);
             PrivateKeyToken found = null;
             for (Connection<?, ?, ?> connection : connectionList) {
                 KeySafe<?> source = connection.getSource();
@@ -82,8 +83,8 @@ abstract class AbstractKeySafeServiceSupport {
 
             if (found == null) {
                 // Still not found
-                if (keySafe instanceof Division) {
-                    Division<?> division = (Division<?>) keySafe;
+                if (nKeySafe instanceof Division) {
+                    Division<?> division = (Division<?>) nKeySafe;
                     /*
                      * Try the division parent
                      */
@@ -93,23 +94,23 @@ abstract class AbstractKeySafeServiceSupport {
                     }
                 } else {
                     throw new PegasusException(PegasusErrorCode.PG701,
-                            "Unable to handle keySafe type '%s' at this location", keySafe.getClass().getName());
+                            "Unable to handle keySafe type '%s' at this location", nKeySafe.getClass().getName());
                 }
             }
 
             if (found == null) {
                 throw new PegasusException(PegasusErrorCode.PG700,
-                        "Unable to locate a chain of keys that will unlock the keySafe '%s'", keySafe.getId());
+                        "Unable to locate a chain of keys that will unlock the keySafe '%s'", nKeySafe.getId());
             }
             privateKeyToken = found;
         }
         return privateKeyToken;
     }
-    
-    protected <Owner extends Actor, Source extends KeySafe<? extends Actor>, 
-                Target extends KeySafe<?>, T extends Connection< Owner, Source, Target >> 
-        T createConnection(T connection, Owner owner,
-                             Source source, Target target, KeyPair connectionKeyPair) {
+
+    protected <Owner extends Actor, Source extends KeySafe<? extends Actor>,
+    Target extends KeySafe<?>, T extends Connection< Owner, Source, Target >>
+    T createConnection(final T connection, final Owner owner,
+            final Source source, final Target target, final KeyPair connectionKeyPair) {
         connection.setOwner(owner);
         connection.setSource(source);
         connection.setTarget(target);
@@ -118,19 +119,20 @@ abstract class AbstractKeySafeServiceSupport {
         return connection;
     }
 
-    protected KeyPair createKeyPair(KeySafe<?> keySafe) {
+    protected KeyPair createKeyPair(final KeySafe<?> keySafe) {
+        KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         KeyPair keyPair;
-        if (keySafe instanceof Vault) {
-            Vault vault = (Vault) keySafe;
+        if (nKeySafe instanceof Vault) {
+            Vault vault = (Vault) nKeySafe;
             AuthenticatedPrincipal vaultKey = getVaultKey(vault);
             KeyPair vaultKeyPair = vaultKey.getDefaultPrivateKey().getKeyPair();
             keyPair = phalanxService.generateKeyPair(vaultKeyPair);
-        } else if (keySafe instanceof Division) {
-            Division<?> division = (Division<?>) keySafe;
+        } else if (nKeySafe instanceof Division) {
+            Division<?> division = (Division<?>) nKeySafe;
             IdentityKeyPair identityKeyPair = new IdentityKeyPair(division.getKeyPairId());
             keyPair = phalanxService.generateKeyPair(identityKeyPair);
         } else {
-            throw new IllegalStateException("Unknown keySafe type: " + keySafe.getClass().getName());
+            throw new IllegalStateException("Unknown keySafe type: " + nKeySafe.getClass().getName());
         }
         return keyPair;
     }
@@ -140,8 +142,8 @@ abstract class AbstractKeySafeServiceSupport {
      * @param currentMember
      * @return
      */
-    protected PrivateKeyToken resolveAndUnlock(KeySafe<?> parent, UUID keyPairId,
-            AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken resolveAndUnlock(final KeySafe<?> parent, final UUID keyPairId,
+            final AuthenticatedMemberBase<?> currentMember) {
         KeyPair keyPair = new IdentityKeyPair(keyPairId);
         return resolveAndUnlock(parent, keyPair, currentMember);
     }
@@ -151,8 +153,8 @@ abstract class AbstractKeySafeServiceSupport {
      * @param currentMember
      * @return
      */
-    protected PrivateKeyToken resolveAndUnlock(KeySafe<?> parent, KeyPair keyPair,
-            AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken resolveAndUnlock(final KeySafe<?> parent, final KeyPair keyPair,
+            final AuthenticatedMemberBase<?> currentMember) {
         PrivateKeyToken privateKeyToken = currentMember.getPrivateKey(keyPair);
         if (privateKeyToken == null) {
             /*
@@ -173,18 +175,19 @@ abstract class AbstractKeySafeServiceSupport {
      * @param keySafe
      * @return
      */
-    private PrivateKeyToken traverseChain(KeySafe<?> keySafe, AuthenticatedMemberBase<?> currentMember) {
+    private PrivateKeyToken traverseChain(final KeySafe<?> keySafe, final AuthenticatedMemberBase<?> currentMember) {
+        KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         PrivateKeyToken privateKeyToken;
-        if (keySafe instanceof Vault) {
-            Vault vault = (Vault) keySafe;
+        if (nKeySafe instanceof Vault) {
+            Vault vault = (Vault) nKeySafe;
             AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
             if (vaultKey == null) {
                 throw new PegasusException(PegasusErrorCode.PG704,
                         "Vault '%s' is not currently available. Most likely it needs to be unlocked.", vault.getId());
             }
             privateKeyToken = vaultKey.getDefaultPrivateKey();
-        } else if (keySafe instanceof Division) {
-            Division<?> division = (Division<?>) keySafe;
+        } else if (nKeySafe instanceof Division) {
+            Division<?> division = (Division<?>) nKeySafe;
 
             // Check the parent
             KeySafe<?> parent = division.getParent();
@@ -201,16 +204,16 @@ abstract class AbstractKeySafeServiceSupport {
             } else {
                 throw new PegasusException(PegasusErrorCode.PG702,
                         "Reached end of personal chain for actor '%s' without finding a key", currentMember.getMember()
-                                .getId());
+                        .getId());
             }
         } else {
             throw new PegasusException(PegasusErrorCode.PG703, "Unable to handle keySafe type '%s' at this location",
-                    keySafe.getClass().getName());
+                    nKeySafe.getClass().getName());
         }
         return privateKeyToken;
     }
 
-    protected PrivateKeyToken unlockPrivateKey(KeyPair keyPair, Vault vault, AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken unlockPrivateKey(final KeyPair keyPair, final Vault vault, final AuthenticatedMemberBase<?> currentMember) {
         AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
         PrivateKeyToken userPrivateKey = vaultKey.getDefaultPrivateKey();
         PrivateKeyToken privateKeyToken = phalanxService.decryptKeyPair(new IdentityKeyPair(keyPair.getId()),
@@ -218,7 +221,7 @@ abstract class AbstractKeySafeServiceSupport {
         return privateKeyToken;
     }
 
-    protected AuthenticatedPrincipal getVaultKey(Vault vault) {
+    protected AuthenticatedPrincipal getVaultKey(final Vault vault) {
         AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
         AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vault);
         if (authenticatedPrincipal == null) {

@@ -53,7 +53,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      * Serial UID
      */
     private static final long serialVersionUID = -3495924634770257184L;
-    
+
     /**
      * Unique id
      */
@@ -61,33 +61,33 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * Allows this template to be optionally located via token (if set).
      */
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="`TokenID`")
     private Token token;
-    
+
     /**
      * Identify this template via a slug (optional).
      */
     @Column(name="`Slug`", unique=true, length=120)
     private String slug;
-    
+
     /**
      * Optionally set a plaintext label.
      */
     @Column(name="`Label`", length=200)
     private String label;
-    
+
     /**
      * Template engine to use
      */
     @Column(name="`Engine`", nullable=false, length=12)
     @Enumerated(EnumType.STRING)
     private TemplateEngine engine;
-    
+
     /**
      * The template details.
      */
@@ -107,7 +107,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      * @param id the id to set
      */
     @Override
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -121,7 +121,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     /**
      * @param token the token to set
      */
-    public void setToken(Token token) {
+    public void setToken(final Token token) {
         this.token = token;
     }
 
@@ -135,13 +135,14 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     /**
      * @param slug the slug to set
      */
-    public void setSlug(String key) {
+    public void setSlug(final String key) {
         this.slug = key;
     }
 
     /**
      * @return the xml
      */
+    @Override
     public XmlEntity<TemplateDocument> getXml() {
         return xml;
     }
@@ -149,7 +150,8 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     /**
      * @param xml the xml to set
      */
-    public void setXml(XmlEntity<TemplateDocument> xml) {
+    @Override
+    public void setXml(final XmlEntity<TemplateDocument> xml) {
         this.xml = xml;
     }
 
@@ -163,11 +165,11 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     /**
      * @param engine the engine to set
      */
-    public void setEngine(TemplateEngine engine) {
+    public void setEngine(final TemplateEngine engine) {
         this.engine = engine;
     }
-    
-    
+
+
     /**
      * @return the label
      */
@@ -178,21 +180,21 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     /**
      * @param label the label to set
      */
-    public void setLabel(String label) {
+    public void setLabel(final String label) {
         this.label = label;
     }
 
     public TemplateType details() {
         return details(TemplateType.class);
     }
-    
+
     /**
      * Retrieve the details contained within the XML. Named without 'get' so as not to be handled as property.
      * @param expectedType
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T extends TemplateType> T details(Class<T> expectedType) {
+    public <T extends TemplateType> T details(final Class<T> expectedType) {
         TemplateDocument doc = xml.getBean();
         if (doc == null) {
             throw new PegasusException(PegasusErrorCode.PG876, "Template[%s] XML entity is locked", getId());
@@ -205,22 +207,22 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
         if (expectedType.isAssignableFrom(details.getClass())) {
             return (T) details;
         }
-        throw new PegasusException(PegasusErrorCode.PG812, "Expected template details of type '%s', actual '%s'", 
+        throw new PegasusException(PegasusErrorCode.PG812, "Expected template details of type '%s', actual '%s'",
                 expectedType.getName(), details.getClass().getName());
     }
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-            .append("id", id)
-            .append("slug", slug)
-            .append("token", token)
-            .append("engine", engine)
-            .append("label", label)
-            .append("xml", xml)
-            .toString();
+        .append("id", id)
+        .append("slug", slug)
+        .append("token", token)
+        .append("engine", engine)
+        .append("label", label)
+        .append("xml", xml)
+        .toString();
     }
 }

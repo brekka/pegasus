@@ -39,28 +39,28 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The firewall this rule belongs to.
      */
     @ManyToOne
     @JoinColumn(name="`FirewallID`", nullable=false)
     private Firewall firewall;
-    
+
     /**
      * The group of networks which the rule will apply to.
      */
     @ManyToOne
     @JoinColumn(name="`NetworkGroupID`", nullable=false)
     private NetworkGroup networkGroup;
-    
+
     /**
      * What action should be taken when this rule matches one or more of the networks in the group.
      */
     @Column(name="`Action`", length=5, nullable=false)
     @Enumerated(EnumType.STRING)
     private FirewallAction action;
-    
+
     /**
      * Priority of this rule over others. Lower value = higher priority.
      */
@@ -70,6 +70,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -77,7 +78,8 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -85,7 +87,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
         return firewall;
     }
 
-    public void setFirewall(Firewall firewall) {
+    public void setFirewall(final Firewall firewall) {
         this.firewall = firewall;
     }
 
@@ -93,7 +95,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
         return networkGroup;
     }
 
-    public void setNetworkGroup(NetworkGroup networkGroup) {
+    public void setNetworkGroup(final NetworkGroup networkGroup) {
         this.networkGroup = networkGroup;
     }
 
@@ -101,7 +103,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
         return action;
     }
 
-    public void setAction(FirewallAction action) {
+    public void setAction(final FirewallAction action) {
         this.action = action;
     }
 
@@ -109,7 +111,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public void setPriority(final int priority) {
         this.priority = priority;
     }
 }

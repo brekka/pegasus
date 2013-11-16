@@ -38,14 +38,14 @@ public class Network extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The group that this network block belongs to.
      */
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name="`NetworkGroupID`", nullable=false, updatable=false)
     private NetworkGroup networkGroup;
-    
+
     /**
      * The CIDR network block, e.g. "10.0.0.0/8"
      */
@@ -58,7 +58,7 @@ public class Network extends SnapshotEntity<UUID> {
         return networkGroup;
     }
 
-    public void setNetworkGroup(NetworkGroup networkGroup) {
+    public void setNetworkGroup(final NetworkGroup networkGroup) {
         this.networkGroup = networkGroup;
     }
 
@@ -66,13 +66,14 @@ public class Network extends SnapshotEntity<UUID> {
         return block;
     }
 
-    public void setBlock(String block) {
+    public void setBlock(final String block) {
         this.block = block;
     }
 
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -80,7 +81,8 @@ public class Network extends SnapshotEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 }

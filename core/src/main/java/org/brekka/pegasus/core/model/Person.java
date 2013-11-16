@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SecondaryTable;
@@ -32,7 +33,7 @@ public class Person extends Member {
     /**
      * The user's default e-mail address
      */
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`EMailAddressID`", table="`Person`")
     private EMailAddress defaultEmailAddress;
 
@@ -41,13 +42,13 @@ public class Person extends Member {
      */
     @Transient
     private transient String fullName;
-    
+
 
     public EMailAddress getDefaultEmailAddress() {
         return defaultEmailAddress;
     }
 
-    public void setDefaultEmailAddress(EMailAddress defaultEmailAddress) {
+    public void setDefaultEmailAddress(final EMailAddress defaultEmailAddress) {
         this.defaultEmailAddress = defaultEmailAddress;
     }
 
@@ -55,7 +56,7 @@ public class Person extends Member {
         return fullName;
     }
 
-    public void setFullName(String fullName) {
+    public void setFullName(final String fullName) {
         this.fullName = fullName;
     }
 }

@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -43,9 +44,9 @@ import org.hibernate.annotations.Type;
 @Table(name="`Allocation`", schema=PegasusConstants.SCHEMA)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-    name="`Type`", length=10,
-    discriminatorType=DiscriminatorType.STRING
-)
+        name="`Type`", length=10,
+        discriminatorType=DiscriminatorType.STRING
+        )
 @DiscriminatorValue("Allocation")
 public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEntityAware<AllocationDocument> {
 
@@ -53,7 +54,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * Serial UID
      */
     private static final long serialVersionUID = -949222719619428451L;
-    
+
     /**
      * Unique id
      */
@@ -61,7 +62,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * When is this allocation due to expire?
      */
@@ -75,61 +76,61 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     @Column(name = "`Deleted`")
     @Temporal(TemporalType.TIMESTAMP)
     private Date deleted;
-    
+
     /**
      * The authenticated user that created this allocation (if available).
      */
     @ManyToOne
     @JoinColumn(name="`ActorID`")
     private Actor actor;
-    
+
     /**
      * An allocation could be derived from a dispatch (in the case of a file sent by a member).
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`DerivedFromID`")
     private Dispatch derivedFrom;
-    
-    
+
+
     /**
      * If set to to true, this allocation will be purged upon successful download.
      */
     @Column(name="`PurgeOnDownload`")
     private Boolean purgeOnDownload;
-    
+
     /**
      * Associated files
      */
-    @OneToMany(mappedBy="allocation")
+    @OneToMany(mappedBy="allocation", fetch=FetchType.LAZY, cascade=CascadeType.REMOVE)
     private List<AllocationFile> files;
-    
+
     /**
      * Token that identifies this allocation
      */
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="`TokenID`", unique=true)
     private Token token;
-    
+
     /**
      * The disposition of this allocation (optional).
      */
     @Column(name="`Disposition`", length=16)
     @Type(type="org.brekka.pegasus.core.support.AllocationDispositionUserType")
     private AllocationDisposition disposition;
-    
+
     /**
      * The details and bundle for the allocation
      */
-    @OneToOne()
+    @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.REMOVE)
     @JoinColumn(name="`XmlEntityID`")
     private XmlEntity<AllocationDocument> xml;
-    
-    
+
+
     public List<AllocationFile> getFiles() {
         return files;
     }
 
-    public void setFiles(List<AllocationFile> files) {
+    public void setFiles(final List<AllocationFile> files) {
         this.files = files;
     }
 
@@ -137,7 +138,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         return expires;
     }
 
-    public void setExpires(Date expires) {
+    public void setExpires(final Date expires) {
         this.expires = expires;
     }
 
@@ -145,7 +146,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         return deleted;
     }
 
-    public void setDeleted(Date deleted) {
+    public void setDeleted(final Date deleted) {
         this.deleted = deleted;
     }
 
@@ -153,13 +154,14 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         return derivedFrom;
     }
 
-    public void setDerivedFrom(Dispatch derivedFrom) {
+    public void setDerivedFrom(final Dispatch derivedFrom) {
         this.derivedFrom = derivedFrom;
     }
 
     /**
      * @return the id
      */
+    @Override
     public final UUID getId() {
         return id;
     }
@@ -167,7 +169,8 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     /**
      * @param id the id to set
      */
-    public final void setId(UUID id) {
+    @Override
+    public final void setId(final UUID id) {
         this.id = id;
     }
 
@@ -181,13 +184,14 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     /**
      * @param purgeOnDownload the purgeOnDownload to set
      */
-    public void setPurgeOnDownload(Boolean purgeOnDownload) {
+    public void setPurgeOnDownload(final Boolean purgeOnDownload) {
         this.purgeOnDownload = purgeOnDownload;
     }
 
     /**
      * @return the xml
      */
+    @Override
     public XmlEntity<AllocationDocument> getXml() {
         return xml;
     }
@@ -195,10 +199,11 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     /**
      * @param xml the xml to set
      */
-    public void setXml(XmlEntity<AllocationDocument> xml) {
+    @Override
+    public void setXml(final XmlEntity<AllocationDocument> xml) {
         this.xml = xml;
     }
-    
+
     /**
      * Retrieve the details contained within the XML. Named without 'get' so as not to be handled as property.
      * @return
@@ -206,7 +211,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     public DetailsType details() {
         return details(DetailsType.class);
     }
-    
+
     /**
      * @return the disposition
      */
@@ -217,24 +222,24 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     /**
      * @param disposition the disposition to set
      */
-    public void setDisposition(AllocationDisposition disposition) {
+    public void setDisposition(final AllocationDisposition disposition) {
         this.disposition = disposition;
     }
-    
-    
+
+
     public Token getToken() {
         return token;
     }
 
-    public void setToken(Token token) {
+    public void setToken(final Token token) {
         this.token = token;
     }
-    
+
     public Actor getActor() {
         return actor;
     }
 
-    public void setActor(Actor actor) {
+    public void setActor(final Actor actor) {
         this.actor = actor;
     }
 
@@ -244,7 +249,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T extends DetailsType> T details(Class<T> expectedType) {
+    public <T extends DetailsType> T details(final Class<T> expectedType) {
         DetailsType details = allocationType().getDetails();
         if (details == null) {
             // perfectly acceptable to be null.
@@ -253,10 +258,10 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         if (expectedType.isAssignableFrom(details.getClass())) {
             return (T) details;
         }
-        throw new PegasusException(PegasusErrorCode.PG853, "Expected details of type '%s', actual '%s'", 
+        throw new PegasusException(PegasusErrorCode.PG853, "Expected details of type '%s', actual '%s'",
                 expectedType.getName(), details.getClass().getName());
     }
-    
+
     /**
      * Retrieve the bundle contained within the XML. Named without 'get' so as not to be handled as property.
      * @return
@@ -264,12 +269,12 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     public BundleType bundle() {
         return allocationType().getBundle();
     }
-    
+
     public AllocationType allocationType() {
         AllocationDocument doc = getAllocationDocument();
         return doc.getAllocation();
     }
-    
+
     private AllocationDocument getAllocationDocument() {
         AllocationDocument doc = xml.getBean();
         if (doc == null) {
@@ -277,9 +282,9 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
         }
         return doc;
     }
-    
+
     public boolean expired() {
-        return getExpires() != null 
-             && getExpires().before(new Date());
+        return getExpires() != null
+                && getExpires().before(new Date());
     }
 }

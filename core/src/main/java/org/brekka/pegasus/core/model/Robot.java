@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -31,21 +32,21 @@ public class Robot extends Member {
     /**
      * The {@link Organization}, {@link Associate} or {@link Person} that owns this robot.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`OwnerID`", table="`Robot`", updatable=false, nullable=false)
     private Actor owner;
     
     /**
      * The person that created this robot.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`CreatedByID`", table="`Robot`", updatable=false, nullable=false)
     private Person createdBy;
     
     /**
      * Additional organization details that can be encrypted (ie only employees can view/edit the details).
      */
-    @OneToOne()
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`XmlEntityID`", table="`Robot`")
     private XmlEntity<RobotDocument> xml;
 

@@ -18,8 +18,15 @@ import org.brekka.phalanx.api.model.PrivateKeyToken;
 public interface VaultService {
 
     Vault createVault(String name, String vaultPassword, Member owner);
-    
-    void openVault(Vault vault, String vaultPassword);
+
+    /**
+     * Open the vault specified by the id and return it.
+     * 
+     * @param vault
+     * @param vaultPassword
+     * @return
+     */
+    Vault openVault(UUID vaultId, String vaultPassword);
 
     /**
      * @param fromString
@@ -82,7 +89,7 @@ public interface VaultService {
      * @param password
      */
     void changePassword(Vault defaultVault, String password);
-    
+
     /**
      * @param vault
      */

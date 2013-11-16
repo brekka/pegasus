@@ -37,7 +37,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name="`EMailRecipient`", schema=PegasusConstants.SCHEMA)
 public class EMailRecipient extends SnapshotEntity<UUID> {
-    
+
     /**
      * Serial UID
      */
@@ -50,14 +50,14 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The address of the recipient.
      */
     @ManyToOne
     @JoinColumn(name="`EMailAddressID`")
     private EMailAddress address;
-    
+
     /**
      * The message sent to the recipient
      */
@@ -68,6 +68,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -75,7 +76,8 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -89,7 +91,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
     /**
      * @param address the address to set
      */
-    public void setAddress(EMailAddress address) {
+    public void setAddress(final EMailAddress address) {
         this.address = address;
     }
 
@@ -103,7 +105,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
     /**
      * @param message the message to set
      */
-    public void setMessage(EMailMessage message) {
+    public void setMessage(final EMailMessage message) {
         this.message = message;
     }
 }

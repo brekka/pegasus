@@ -33,9 +33,9 @@ import org.hibernate.annotations.Type;
 @Table(name="`Actor`", schema=PegasusConstants.SCHEMA)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-    name="`Type`", length=12,
-    discriminatorType=DiscriminatorType.STRING
-)
+        name="`Type`", length=12,
+        discriminatorType=DiscriminatorType.STRING
+        )
 @DiscriminatorValue("Actor")
 public abstract class Actor extends LongevousEntity<UUID> {
 
@@ -58,27 +58,29 @@ public abstract class Actor extends LongevousEntity<UUID> {
     @Enumerated(EnumType.STRING)
     @Column(name="`Status`", length=8, nullable=false)
     private ActorStatus status = ActorStatus.NEW;
-    
 
-    public final ActorStatus getStatus() {
+
+    public ActorStatus getStatus() {
         return status;
     }
 
-    public final void setStatus(ActorStatus status) {
+    public void setStatus(final ActorStatus status) {
         this.status = status;
     }
 
     /**
      * @return the id
      */
-    public final UUID getId() {
+    @Override
+    public UUID getId() {
         return id;
     }
 
     /**
      * @param id the id to set
      */
-    public final void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 }

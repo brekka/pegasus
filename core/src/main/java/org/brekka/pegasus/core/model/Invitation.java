@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
@@ -33,7 +33,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name="`Invitation`", schema=PegasusConstants.SCHEMA)
 public class Invitation extends SnapshotEntity<UUID> {
-    
+
     /**
      * Serial UID
      */
@@ -46,36 +46,36 @@ public class Invitation extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * Token that identifies this invitation
      */
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`TokenID`")
     private Token token;
-    
+
     /**
      * User that sent the invitation
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`SenderID`")
     private Actor sender;
-    
+
     /**
      * Who should receive the invitation, assuming they are already a member. If not specified then the XML should
      * be encrypted with a password.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`RecipientID`")
     private Member recipient;
-    
+
     /**
      * When did the invitation get actioned.
      */
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="`Actioned`")
     private Date actioned;
-    
+
     /**
      * Status of the invitation
      */
@@ -86,16 +86,16 @@ public class Invitation extends SnapshotEntity<UUID> {
     /**
      * The details of the invitation that can potentially be encrypted.
      */
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`XmlEntityID`")
     private XmlEntity<InvitationDocument> xml;
-   
-    
+
+
     public Actor getSender() {
         return sender;
     }
 
-    public void setSender(Actor sender) {
+    public void setSender(final Actor sender) {
         this.sender = sender;
     }
 
@@ -103,7 +103,7 @@ public class Invitation extends SnapshotEntity<UUID> {
         return recipient;
     }
 
-    public void setRecipient(Member recipient) {
+    public void setRecipient(final Member recipient) {
         this.recipient = recipient;
     }
 
@@ -111,7 +111,7 @@ public class Invitation extends SnapshotEntity<UUID> {
         return actioned;
     }
 
-    public void setActioned(Date actioned) {
+    public void setActioned(final Date actioned) {
         this.actioned = actioned;
     }
 
@@ -119,7 +119,7 @@ public class Invitation extends SnapshotEntity<UUID> {
         return status;
     }
 
-    public void setStatus(InvitationStatus invitationStatus) {
+    public void setStatus(final InvitationStatus invitationStatus) {
         this.status = invitationStatus;
     }
 
@@ -127,13 +127,14 @@ public class Invitation extends SnapshotEntity<UUID> {
         return xml;
     }
 
-    public void setXml(XmlEntity<InvitationDocument> xml) {
+    public void setXml(final XmlEntity<InvitationDocument> xml) {
         this.xml = xml;
     }
 
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -141,7 +142,8 @@ public class Invitation extends SnapshotEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -155,7 +157,7 @@ public class Invitation extends SnapshotEntity<UUID> {
     /**
      * @param token the token to set
      */
-    public void setToken(Token token) {
+    public void setToken(final Token token) {
         this.token = token;
     }
 }

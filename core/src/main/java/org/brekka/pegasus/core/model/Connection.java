@@ -42,16 +42,16 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`Connection`", schema=PegasusConstants.SCHEMA,
-    uniqueConstraints={ 
+uniqueConstraints={
         // Surrogate key
         @UniqueConstraint(columnNames = {"`OwnerID`", "`SourceID`", "`TargetID`" }),
-    }
-)
+}
+        )
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-    name="`Type`", length=11,
-    discriminatorType=DiscriminatorType.STRING
-)
+        name="`Type`", length=11,
+        discriminatorType=DiscriminatorType.STRING
+        )
 @DiscriminatorValue("Connection")
 public class Connection<Owner extends Actor, Source extends KeySafe<? extends Actor>, Target extends KeySafe<?>> extends LongevousEntity<UUID> {
 
@@ -67,30 +67,33 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * Who owns the connection
+     * Cannot be marked lazy loaded
      */
     @ManyToOne(targetEntity=Actor.class)
     @JoinColumn(name="`OwnerID`", nullable=false)
     private Owner owner;
-    
+
     /**
      * The source
+     * Cannot be marked lazy loaded
      */
     @ManyToOne(targetEntity=KeySafe.class)
     @JoinColumn(name="`SourceID`", nullable=false)
     private Source source;
-    
+
     /**
      * The target
+     * Cannot be marked lazy loaded
      */
     @ManyToOne(targetEntity=KeySafe.class)
     @JoinColumn(name="`TargetID`", nullable=false)
     private Target target;
-    
+
     /**
-     * The key pair that gives the source division access to the target. 
+     * The key pair that gives the source division access to the target.
      */
     @Column(name="`KeyPairID`", nullable=false)
     @Type(type="pg-uuid")
@@ -99,6 +102,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -106,7 +110,8 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -120,7 +125,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     /**
      * @param owner the owner to set
      */
-    public void setOwner(Owner owner) {
+    public void setOwner(final Owner owner) {
         this.owner = owner;
     }
 
@@ -134,7 +139,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     /**
      * @param source the source to set
      */
-    public void setSource(Source source) {
+    public void setSource(final Source source) {
         this.source = source;
     }
 
@@ -148,7 +153,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     /**
      * @param keyPairId the keyPairId to set
      */
-    public void setKeyPairId(UUID keyPairId) {
+    public void setKeyPairId(final UUID keyPairId) {
         this.keyPairId = keyPairId;
     }
 
@@ -162,7 +167,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
     /**
      * @param target the target to set
      */
-    public void setTarget(Target target) {
+    public void setTarget(final Target target) {
         this.target = target;
     }
 }

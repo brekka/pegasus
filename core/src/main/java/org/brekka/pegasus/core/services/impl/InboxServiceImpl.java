@@ -18,7 +18,6 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,26 +72,27 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
 
     @Autowired
     private TokenService tokenService;
-    
+
     @Autowired
     private InboxDAO inboxDAO;
-    
+
     @Autowired
     private DepositDAO depositDAO;
-    
+
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private ProfileService profileService;
-    
-    
+
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#createInbox(java.lang.String, org.brekka.pegasus.core.model.Vault)
      */
     @Override
     @Transactional()
-    public Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<? extends Actor> keySafe) {
+    public Inbox createInbox(final String name, final String introduction, final String inboxToken, final KeySafe<? extends Actor> keySafe) {
+        KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         Inbox inbox = new Inbox();
         inbox.setId(UUID.randomUUID());
         if (inboxToken != null) {
@@ -100,15 +100,15 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
             inbox.setToken(token);
         }
         inbox.setIntroduction(introduction);
-        inbox.setKeySafe(keySafe);
+        inbox.setKeySafe(nKeySafe);
         inbox.setName(name);
-        inbox.setOwner(keySafe.getOwner());
-        if (keySafe instanceof Division) {
-            inbox.setDivision((Division<?>) keySafe);
-        } else if (keySafe instanceof Vault) {
+        inbox.setOwner(nKeySafe.getOwner());
+        if (nKeySafe instanceof Division) {
+            inbox.setDivision((Division<?>) nKeySafe);
+        } else if (nKeySafe instanceof Vault) {
             AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
             if (authenticatedMember != null
-                    && EntityUtils.identityEquals(authenticatedMember.getMember(), keySafe.getOwner())) {
+                    && EntityUtils.identityEquals(authenticatedMember.getMember(), nKeySafe.getOwner())) {
                 InboxType newXmlInbox = authenticatedMember.getProfile().addNewInbox();
                 newXmlInbox.setUUID(inbox.getId().toString());
                 newXmlInbox.setName(name);
@@ -118,7 +118,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         inboxDAO.create(inbox);
         return inbox;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -127,79 +127,79 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional()
-    public Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires,
-            UploadedFiles files) {
+    public Deposit createDeposit(final Inbox inbox, final AllocationDisposition disposition, final DetailsType details, final DateTime expires,
+            final UploadedFiles files) {
         BundleType bundleType = completeFiles(0, files);
         return createDeposit(inbox, disposition, details, expires, null, bundleType);
     }
 
     @Override
     @Transactional()
-    public Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires,
-            Dispatch dispatch) {
+    public Deposit createDeposit(final Inbox inbox, final AllocationDisposition disposition, final DetailsType details, final DateTime expires,
+            final Dispatch dispatch) {
         BundleType dispatchBundle = copyDispatchBundle(dispatch, null);
         return createDeposit(inbox, disposition, details, expires, dispatch, dispatchBundle);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForToken(java.lang.String)
      */
     @Override
     @Transactional(readOnly=true)
-    public Inbox retrieveForToken(String inboxToken) {
+    public Inbox retrieveForToken(final String inboxToken) {
         Token token = tokenService.retrieveByPath(inboxToken);
         Inbox inbox = inboxDAO.retrieveByToken(token);
         populateNames(Arrays.asList(inbox));
         return inbox;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveById(java.util.UUID)
      */
     @Override
     @Transactional(readOnly=true)
-    public Inbox retrieveById(UUID inboxId) {
+    public Inbox retrieveById(final UUID inboxId) {
         Inbox inbox = inboxDAO.retrieveById(inboxId);
         populateNames(Arrays.asList(inbox));
         return inbox;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForVault(org.brekka.pegasus.core.model.Vault)
      */
     @Override
     @Transactional(readOnly=true)
-    public List<Inbox> retrieveForKeySafe(KeySafe<?> keySafe) {
+    public List<Inbox> retrieveForKeySafe(final KeySafe<?> keySafe) {
         List<Inbox> inboxList = inboxDAO.retrieveForKeySafe(keySafe);
         populateNames(inboxList);
         return inboxList;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForEMailAddress(org.brekka.pegasus.core.model.EMailAddress)
      */
     @Override
     @Transactional(readOnly=true)
-    public Inbox retrieveForEMailAddress(EMailAddress eMailAddress) {
+    public Inbox retrieveForEMailAddress(final EMailAddress eMailAddress) {
         Inbox inbox = inboxDAO.retrieveForEMailAddress(eMailAddress);
         return inbox;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForDivision(org.brekka.pegasus.core.model.Enlistment)
      */
     @Override
     @Transactional(readOnly=true)
-    public List<Inbox> retrieveForDivision(Division<?> division) {
+    public List<Inbox> retrieveForDivision(final Division<?> division) {
         return inboxDAO.retrieveForDivision(division);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)
      */
     @Override
     @Transactional(readOnly=true)
-    public Deposit retrieveDeposit(UUID depositId, boolean populateDispatches) {
+    public Deposit retrieveDeposit(final UUID depositId, final boolean populateDispatches) {
         AccessorContext current = AccessorContextImpl.getCurrent();
         Deposit deposit = current.retrieve(depositId, Deposit.class);
         if (deposit == null) {
@@ -216,13 +216,13 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         }
         return deposit;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposit(org.brekka.pegasus.core.model.Inbox, java.util.UUID)
      */
     @Override
     @Transactional(readOnly=true)
-    public Deposit retrieveDeposit(Inbox inbox, UUID depositId) {
+    public Deposit retrieveDeposit(final Inbox inbox, final UUID depositId) {
         Deposit deposit = retrieveDeposit(depositId, false);
         if (deposit == null) {
             return null;
@@ -230,10 +230,10 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         if (EntityUtils.identityEquals(deposit.getInbox(), inbox)) {
             return deposit;
         }
-        throw new PegasusException(PegasusErrorCode.PG745, 
+        throw new PegasusException(PegasusErrorCode.PG745,
                 "The deposit '%s' does not belong to inbox '%s'", depositId, inbox.getId());
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveForMember()
      */
@@ -246,13 +246,13 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         return inboxList;
     }
 
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Inbox)
      */
     @Override
     @Transactional(readOnly=true)
-    public List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml) {
+    public List<Deposit> retrieveDeposits(final Inbox inbox, final boolean releaseXml) {
         List<Deposit> depositList = depositDAO.retrieveByInbox(inbox);
         if (releaseXml) {
             for (Deposit deposit : depositList) {
@@ -262,27 +262,27 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         }
         return depositList;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
      */
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
-    public void deleteDeposit(UUID depositId) {
+    public void deleteDeposit(final UUID depositId) {
         deleteDepositAfter(depositId, DateTime.now());
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#deleteDeposit(org.brekka.pegasus.core.model.Deposit)
      */
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
-    public void deleteDepositAfter(UUID depositId, DateTime after) {
+    public void deleteDepositAfter(final UUID depositId, final DateTime after) {
         Deposit deposit = depositDAO.retrieveById(depositId);
         deposit.setExpires(after.toDate());
         depositDAO.update(deposit);
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -291,8 +291,8 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(readOnly=true)
-    public List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
-            ListingCriteria listingCriteria, boolean dispatchBased) {
+    public List<Deposit> retrieveDepositListing(final Inbox inbox, final DateTime from, final DateTime until, final boolean showExpired,
+            final ListingCriteria listingCriteria, final boolean dispatchBased) {
         List<Deposit> depositList = depositDAO.retrieveListing(inbox, defaultMin(from), defaultMax(until), showExpired,
                 listingCriteria, dispatchBased);
         if (dispatchBased) {
@@ -317,24 +317,24 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      */
     @Override
     @Transactional(readOnly=true)
-    public int retrieveDepositListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
-            boolean dispatchBased) {
+    public int retrieveDepositListingRowCount(final Inbox inbox, final DateTime from, final DateTime until, final boolean showExpired,
+            final boolean dispatchBased) {
         return depositDAO.retrieveListingRowCount(inbox, defaultMin(from), defaultMax(until), showExpired,
                 dispatchBased);
     }
 
     @Override
     @Transactional()
-    public void onApplicationEvent(ApplicationEvent event) {
+    public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
             inboxDAO.deleteWithKeySafe(vaultDeleteEvent.getVault());
         }
     }
-    
 
-    protected Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details,
-            DateTime expires, Dispatch dispatch, BundleType newBundleType) {
+
+    protected Deposit createDeposit(Inbox inbox, final AllocationDisposition disposition, final DetailsType details,
+            final DateTime expires, final Dispatch dispatch, final BundleType newBundleType) {
         Deposit deposit = new Deposit();
         deposit.setDerivedFrom(dispatch);
 
@@ -342,32 +342,32 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         inbox = inboxDAO.retrieveById(inbox.getId());
         KeySafe<?> keySafe = inbox.getKeySafe();
         deposit.setExpires(expires.toDate());
-        
+
         AllocationType allocationType = prepareAllocationType(newBundleType, details);
-        
+
         // Encrypt the document
         encryptDocument(deposit, allocationType, keySafe);
-        
+
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
         deposit.setDisposition(disposition);
-        
+
         Token token = tokenService.generateToken(PegasusTokenType.DEPOSIT);
         deposit.setToken(token);
-        
+
         AuthenticatedMember<Member> current = memberService.getCurrent();
         if (current != null) {
             Actor activeActor = current.getActiveActor();
             deposit.setActor(activeActor);
         }
-        
+
         createAllocationFiles(deposit);
         depositDAO.create(deposit);
-        
+
         return deposit;
     }
-    
-    protected void populateNames(List<Inbox> inboxList) {
+
+    protected void populateNames(final List<Inbox> inboxList) {
         AuthenticatedMember<Member> authenticatedMember = memberService.getCurrent(Member.class);
         if (authenticatedMember == null) {
             return;
@@ -386,7 +386,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
             }
         }
     }
-    
+
     /**
      * @param from
      * @return

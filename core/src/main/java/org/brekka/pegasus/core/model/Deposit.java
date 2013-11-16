@@ -5,6 +5,7 @@ package org.brekka.pegasus.core.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
@@ -26,7 +27,7 @@ public class Deposit extends Transfer implements KeySafeAware {
     /**
      * Identifies the origin of the bundle.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`InboxID`", updatable=false)
     private Inbox inbox;
     

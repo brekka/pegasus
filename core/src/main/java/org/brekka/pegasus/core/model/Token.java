@@ -30,7 +30,7 @@ public class Token extends SnapshotEntity<UUID> {
      * Serial UID
      */
     private static final long serialVersionUID = -2345199614401295313L;
-    
+
     /**
      * Unique id
      */
@@ -38,13 +38,13 @@ public class Token extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The token path that must consist of URL-safe characters
      */
     @Column(name="`Path`", nullable=false, unique=true, length=32)
     private String path;
-    
+
     /**
      * The type of this token
      */
@@ -52,20 +52,21 @@ public class Token extends SnapshotEntity<UUID> {
     @Type(type="org.brekka.pegasus.core.support.TokenTypeUserType")
     private TokenType type;
 
-    
+
     /**
      * 
      */
     public Token() {
     }
-    
-    public Token(String path) {
+
+    public Token(final String path) {
         this.path = path;
     }
-    
+
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -73,7 +74,8 @@ public class Token extends SnapshotEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -81,16 +83,16 @@ public class Token extends SnapshotEntity<UUID> {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(final String path) {
         this.path = path;
     }
 
     public TokenType getType() {
         return type;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public <T extends TokenType> T getType(Class<T> expectedType) {
+    public <T extends TokenType> T getType(final Class<T> expectedType) {
         TokenType type = getType();
         if (type == null) {
             return null;
@@ -98,13 +100,13 @@ public class Token extends SnapshotEntity<UUID> {
         if (expectedType.isAssignableFrom(type.getClass())) {
             return (T) type;
         }
-        throw new PegasusException(PegasusErrorCode.PG265, 
+        throw new PegasusException(PegasusErrorCode.PG265,
                 "Expected '%s' actual '%s'", expectedType.getName(), type.getClass().getName());
     }
 
-    public void setType(TokenType type) {
+    public void setType(final TokenType type) {
         this.type = type;
     }
 
-    
+
 }

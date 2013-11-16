@@ -41,9 +41,9 @@ import org.hibernate.annotations.Type;
 @Table(name="`AuthenticationToken`", schema=PegasusConstants.SCHEMA)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-    name="`Type`", length=12,
-    discriminatorType=DiscriminatorType.STRING
-)
+        name="`Type`", length=12,
+        discriminatorType=DiscriminatorType.STRING
+        )
 @DiscriminatorValue("Base")
 public abstract class AuthenticationToken extends LongevousEntity<UUID> {
 
@@ -51,7 +51,7 @@ public abstract class AuthenticationToken extends LongevousEntity<UUID> {
      * Serial UID
      */
     private static final long serialVersionUID = -7223318842397626756L;
-    
+
     /**
      * Unique id
      */
@@ -59,10 +59,11 @@ public abstract class AuthenticationToken extends LongevousEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -70,10 +71,11 @@ public abstract class AuthenticationToken extends LongevousEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
-    
+
     /**
      * Retrieve the user name
      * @return

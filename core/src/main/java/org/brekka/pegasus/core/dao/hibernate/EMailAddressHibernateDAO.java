@@ -21,12 +21,12 @@ public class EMailAddressHibernateDAO extends AbstractPegasusHibernateDAO<EMailA
     protected Class<EMailAddress> type() {
         return EMailAddress.class;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.EMailAddressDAO#retrieveByHash(byte[])
      */
     @Override
-    public EMailAddress retrieveByHash(byte[] hash) {
+    public EMailAddress retrieveByHash(final byte[] hash) {
         return (EMailAddress) getCurrentSession().createCriteria(EMailAddress.class)
                 .add(Restrictions.eq("hash", hash))
                 .add(Restrictions.eq("active", Boolean.TRUE))

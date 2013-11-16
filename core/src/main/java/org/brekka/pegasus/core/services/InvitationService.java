@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.brekka.pegasus.core.model.Invitation;
+import org.brekka.pegasus.core.model.InvitationStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.xml.pegasus.v2.model.InvitationType;
@@ -32,40 +33,50 @@ public interface InvitationService {
 
     /**
      * Create a new invitation that will be assigned to the specified member.
-     * 
+     *
      * @param details
      * @param recipient
      * @return
      */
     Invitation createInvitation(Token token, InvitationType details, Member recipient);
-    
+
     /**
      * Create a new anonymous invitation.
-     * 
+     *
      * @param details
      * @param password
      * @return
      */
     Invitation createInvitation(Token token, InvitationType details, String password);
-    
+
     /**
      * Retrieve all invitations received by the specified member.
      * @param recipient
      * @return
      */
     List<Invitation> retrieveForMember(Member recipient);
-    
+
     /**
      * Retrieve the invitation by its token
-     * 
+     *
      * @param token
+     * @param string
      * @return
      */
     Invitation retrieveByToken(Token token);
-    
+
+    /**
+     * Retrieve the invitation by its token and unlock the xml using the specifid password.
+     *
+     * @param token
+     * @param string
+     * @return
+     */
+    Invitation retrieveByToken(Token token, String password, InvitationStatus requiredStatus);
+
     /**
      * Update the invitation
-     * 
+     *
      * @param invitation
      */
     void update(Invitation invitation);

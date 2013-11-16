@@ -26,13 +26,12 @@ import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.ReaperService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The reaper uses background threads to delete allocations once they have expired.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Transactional
@@ -41,48 +40,48 @@ public class ReaperServiceImpl implements ReaperService {
 
     @Autowired
     private AllocationDAO allocationDAO;
-    
+
     @Autowired
     private AllocationFileDAO allocationFileDAO;
-    
+
     @Autowired
     private AllocationService allocationService;
-    
+
     // TODO configured
-    private int maxAllocationCount = 20;
+    private final int maxAllocationCount = 20;
     // TODO configured
-    private int maxAllocationFileCount = 20;
-    
+    private final int maxAllocationFileCount = 20;
+
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ReaperService#clearAllocationFiles()
      */
     @Override
-    @Scheduled(fixedDelay=5000) // Gap of five seconds between each invocation
+//    @Scheduled(fixedDelay=5000) // Gap of five seconds between each invocation
     @Transactional()
     public void clearAllocationFiles() {
         List<AllocationFile> allocationFileList = Collections.emptyList();
         do {
-            allocationFileList = allocationFileDAO.retrieveOldestExpired(maxAllocationFileCount);
+            allocationFileList = this.allocationFileDAO.retrieveOldestExpired(this.maxAllocationFileCount);
             for (AllocationFile allocationFile : allocationFileList) {
-                allocationService.clearAllocationFile(allocationFile);
+                this.allocationService.clearAllocationFile(allocationFile);
             }
             // Keep looping until there are no more entries to expire
         } while (!allocationFileList.isEmpty());
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ReaperService#clearAllocations()
      */
     @Override
-    @Scheduled(fixedDelay=10000) // Gap of ten seconds between each invocation
+//    @Scheduled(fixedDelay=10000) // Gap of ten seconds between each invocation
     @Transactional()
     public void clearAllocations() {
         List<Allocation> allocationList = Collections.emptyList();
         do {
-            allocationList = allocationDAO.retrieveOldestExpired(maxAllocationCount);
+            allocationList = this.allocationDAO.retrieveOldestExpired(this.maxAllocationCount);
             for (Allocation allocation : allocationList) {
-                allocationService.clearAllocation(allocation);
+                this.allocationService.clearAllocation(allocation);
             }
             // Keep looping until there are no more entries to expire
         } while (!allocationList.isEmpty());

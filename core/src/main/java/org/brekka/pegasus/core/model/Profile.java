@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -40,25 +41,26 @@ public class Profile extends LongevousEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The user that owns this profile.
      */
     @ManyToOne
     @JoinColumn(name="`OwnerID`", nullable=false)
     private Member owner;
-    
+
     /**
      * The profile XML
      */
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`XmlEntityID`", nullable=false)
     private XmlEntity<ProfileDocument> xml;
-    
+
 
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -66,7 +68,8 @@ public class Profile extends LongevousEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -74,7 +77,7 @@ public class Profile extends LongevousEntity<UUID> {
         return owner;
     }
 
-    public void setOwner(Member owner) {
+    public void setOwner(final Member owner) {
         this.owner = owner;
     }
 
@@ -82,7 +85,7 @@ public class Profile extends LongevousEntity<UUID> {
         return xml;
     }
 
-    public void setXml(XmlEntity<ProfileDocument> xml) {
+    public void setXml(final XmlEntity<ProfileDocument> xml) {
         this.xml = xml;
     }
 }

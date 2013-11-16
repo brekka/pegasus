@@ -19,9 +19,11 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.InvitationDAO;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Invitation;
+import org.brekka.pegasus.core.model.InvitationStatus;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
@@ -49,106 +51,131 @@ public class InvitationServiceImpl implements InvitationService {
 
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private InvitationDAO invitationDAO;
-    
+
     @Autowired
     private XmlEntityService xmlEntityService;
-    
+
     @Autowired
     private TokenService tokenService;
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#createInvitation(org.brekka.xml.pegasus.v2.model.InvitationType, java.lang.String)
      */
     @Transactional()
     @Override
-    public Invitation createInvitation(Token token, InvitationType details, String password) {
+    public Invitation createInvitation(final Token token, final InvitationType details, final String password) {
         return createInvitation(token, details, null, password);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#createInvitation(org.brekka.xml.pegasus.v2.model.InvitationType, org.brekka.pegasus.core.model.Member)
      */
     @Transactional()
     @Override
-    public Invitation createInvitation(Token token, InvitationType details, Member recipient) {
+    public Invitation createInvitation(final Token token, final InvitationType details, final Member recipient) {
         return createInvitation(token, details, recipient, null);
     }
-    
-    
+
+
     @Transactional(readOnly=true)
     @Override
-    public List<Invitation> retrieveForMember(Member member) {
-        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
-        return invitationDAO.retrieveForMember(current.getMember());
+    public List<Invitation> retrieveForMember(final Member member) {
+        AuthenticatedMember<Member> current = this.memberService.getCurrent(Member.class);
+        return this.invitationDAO.retrieveForMember(current.getMember());
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#retrieveByToken(org.brekka.pegasus.core.model.Token)
      */
     @Transactional(readOnly=true)
     @Override
-    public Invitation retrieveByToken(Token token) {
-        return invitationDAO.retrieveByToken(token);
+    public Invitation retrieveByToken(final Token token) {
+        return retrieveByToken(token, null, null);
     }
-    
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InvitationService#retrieveByToken(org.brekka.pegasus.core.model.Token, java.lang.String)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Invitation retrieveByToken(final Token token, final String password, final InvitationStatus requiredStatus) {
+        Invitation invitation = this.invitationDAO.retrieveByToken(token);
+        if (invitation == null) {
+            return null;
+        }
+        if (invitation.getStatus() != requiredStatus) {
+            return null;
+        }
+        if (password != null) {
+            XmlEntity<InvitationDocument> xml;
+            try {
+                xml = this.xmlEntityService.release(invitation.getXml(), password, InvitationDocument.class);
+                invitation.setXml(xml);
+            } catch (PegasusException e) {
+                return null;
+            }
+        }
+        return invitation;
+    }
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#update(org.brekka.pegasus.core.model.Invitation)
      */
     @Transactional(isolation=Isolation.SERIALIZABLE)
     @Override
-    public void update(Invitation invitation) {
-        Invitation managed = invitationDAO.retrieveById(invitation.getId());
+    public void update(final Invitation invitation) {
+        Invitation managed = this.invitationDAO.retrieveById(invitation.getId());
         managed.setStatus(invitation.getStatus());
         managed.setActioned(invitation.getActioned());
         if (managed.getRecipient() != null) {
-            XmlEntity<InvitationDocument> xml = xmlEntityService.updateEntity(invitation.getXml(), managed.getXml(), InvitationDocument.class);
+            XmlEntity<InvitationDocument> xml = this.xmlEntityService.updateEntity(invitation.getXml(), managed.getXml(), InvitationDocument.class);
             managed.setXml(xml);
         }
-        invitationDAO.update(managed);
+        this.invitationDAO.update(managed);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InvitationService#retrieveById(java.util.UUID)
      */
     @Transactional(readOnly=true)
     @Override
-    public Invitation retrieveById(UUID invitationId) {
-        return invitationDAO.retrieveById(invitationId);
+    public Invitation retrieveById(final UUID invitationId) {
+        return this.invitationDAO.retrieveById(invitationId);
     }
 
-    
-    protected Invitation createInvitation(Token token, InvitationType invitationType, Member recipient, String password) {
+
+    protected Invitation createInvitation(Token token, final InvitationType invitationType, final Member recipient, final String password) {
         Invitation invitation = new Invitation();
-        
+
         InvitationDocument invitationDocument = InvitationDocument.Factory.newInstance();
         invitationDocument.setInvitation(invitationType);
-        
+
         XmlEntity<InvitationDocument> xmlEntity;
         if (recipient != null) {
             Vault defaultVault = recipient.getDefaultVault();
-            xmlEntity = xmlEntityService.persistEncryptedEntity(invitationDocument, defaultVault, false);
+            xmlEntity = this.xmlEntityService.persistEncryptedEntity(invitationDocument, defaultVault, false);
         } else {
-            xmlEntity = xmlEntityService.persistEncryptedEntity(invitationDocument, password, false);
+            xmlEntity = this.xmlEntityService.persistEncryptedEntity(invitationDocument, password, false);
         }
-        
+
         invitation.setXml(xmlEntity);
         invitation.setRecipient(recipient);
-        
-        AuthenticatedMember<Member> current = memberService.getCurrent(Member.class);
+
+        AuthenticatedMember<Member> current = this.memberService.getCurrent(Member.class);
         if (current != null) {
             invitation.setSender(current.getActiveActor());
         }
-        
+
         if (token == null) {
-            token = tokenService.generateToken(PegasusTokenType.INVITATION);
+            token = this.tokenService.generateToken(PegasusTokenType.INVITATION);
         }
         invitation.setToken(token);
-        
-        invitationDAO.create(invitation);
-        
+
+        this.invitationDAO.create(invitation);
+
         return invitation;
     }
 }

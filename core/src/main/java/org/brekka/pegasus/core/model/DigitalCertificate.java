@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -39,14 +40,14 @@ import org.hibernate.annotations.Type;
  */
 @Entity
 @Table(name="`DigitalCertificate`", uniqueConstraints=
-    @UniqueConstraint(columnNames={"`CertificateSubjectID`", "`Signature`"})
-)
+@UniqueConstraint(columnNames={"`CertificateSubjectID`", "`Signature`"})
+        )
 public class DigitalCertificate extends SnapshotEntity<UUID> {
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -4869048281179726403L;
-    
+
     /**
      * Unique id
      */
@@ -54,33 +55,33 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The signature of this certificate - surrogate key in combination with certificate authentication.
      */
     @Column(name="`Signature`")
     private byte[] signature;
-    
+
     /**
      * The certificate authentication that this certificate belongs to.
      */
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="`CertificateSubjectID`", nullable=false)
     private CertificateSubject certificateSubject;
-    
+
     /**
      * The moment this certificate is due to expire
      */
     @Column(name="`Expires`", nullable=false, updatable=false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date expires;
-    
+
     /**
      * Is this certificate currently active? Setting to false essentially acts as certificate revocation.
      */
     @Column(name="`Active`")
     private Boolean active;
-    
+
     /* (non-Javadoc)
      * @see org.brekka.commons.persistence.model.IdentifiableEntity#getId()
      */
@@ -93,7 +94,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      * @see org.brekka.commons.persistence.model.IdentifiableEntity#setId(java.io.Serializable)
      */
     @Override
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -107,7 +108,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
     /**
      * @param expires the expires to set
      */
-    public void setExpires(Date expires) {
+    public void setExpires(final Date expires) {
         this.expires = expires;
     }
 
@@ -121,7 +122,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
     /**
      * @param active the active to set
      */
-    public void setActive(Boolean active) {
+    public void setActive(final Boolean active) {
         this.active = active;
     }
 
@@ -135,7 +136,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
     /**
      * @param signature the signature to set
      */
-    public void setSignature(byte[] signature) {
+    public void setSignature(final byte[] signature) {
         this.signature = signature;
     }
 
@@ -149,7 +150,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
     /**
      * @param certificateSubject the certificateSubject to set
      */
-    public void setCertificateSubject(CertificateSubject certificateSubject) {
+    public void setCertificateSubject(final CertificateSubject certificateSubject) {
         this.certificateSubject = certificateSubject;
     }
 }

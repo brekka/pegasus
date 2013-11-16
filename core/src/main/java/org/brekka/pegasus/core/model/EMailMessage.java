@@ -43,7 +43,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name="`EMailMessage`", schema=PegasusConstants.SCHEMA)
 public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware<EMailMessageDocument> {
-    
+
     /**
      * Serial UID
      */
@@ -56,40 +56,47 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The sender of the message, in case we want to locate messages by sender. Should be indexed
      */
     @ManyToOne
     @JoinColumn(name="`SenderEMailAddressID`")
     private EMailAddress sender;
-    
+
+    /**
+     * The subject of the mail. Included for optimal listing / filtering performance (not having to open the xml). The DAO
+     * should control whether this gets set or not.
+     */
+    @Column(name="`Subject`", length=4000, nullable=true)
+    private String subject;
+
     /**
      * The actual user that created the message. Should also be indexed.
      */
     @ManyToOne
     @JoinColumn(name="`OwnerID`")
     private Actor owner;
-    
+
     /**
      * The email content, that may be encrypted.
      */
     @OneToOne()
     @JoinColumn(name="`XmlEntityID`")
     private XmlEntity<EMailMessageDocument> xml;
-    
+
     /**
      * The recipients
      */
     @OneToMany(mappedBy="message", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
     private List<EMailRecipient> recipients;
-    
+
     /**
      * The reference allocated by the service that will be relaying the message.
      */
     @Column(name="`Reference`")
     private String reference;
-    
+
     /**
      * @return the recipients
      */
@@ -100,7 +107,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     /**
      * @param recipients the recipients to set
      */
-    public void setRecipients(List<EMailRecipient> recipients) {
+    public void setRecipients(final List<EMailRecipient> recipients) {
         this.recipients = recipients;
     }
 
@@ -114,7 +121,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     /**
      * @param sender the sender to set
      */
-    public void setSender(EMailAddress sender) {
+    public void setSender(final EMailAddress sender) {
         this.sender = sender;
     }
 
@@ -128,13 +135,14 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     /**
      * @param owner the owner to set
      */
-    public void setOwner(Actor owner) {
+    public void setOwner(final Actor owner) {
         this.owner = owner;
     }
 
     /**
      * @return the xml
      */
+    @Override
     public XmlEntity<EMailMessageDocument> getXml() {
         return xml;
     }
@@ -142,13 +150,15 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     /**
      * @param xml the xml to set
      */
-    public void setXml(XmlEntity<EMailMessageDocument> xml) {
+    @Override
+    public void setXml(final XmlEntity<EMailMessageDocument> xml) {
         this.xml = xml;
     }
 
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -156,7 +166,8 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -170,7 +181,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
     /**
      * @param reference the reference to set
      */
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         this.reference = reference;
     }
 }

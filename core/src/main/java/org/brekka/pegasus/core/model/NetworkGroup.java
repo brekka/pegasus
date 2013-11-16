@@ -43,13 +43,13 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
-    
+
     /**
      * The name of this network group, e.g. England
      */
     @Column(name="`Name`", length=128)
     private String name;
-    
+
     /**
      * Apply a category to this group such as if this is a country.
      */
@@ -57,17 +57,18 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     @Enumerated(EnumType.STRING)
     @Index(name="IDX_NetworkGroup_Category")
     private NetworkGroupCategory networkGroupCategory;
-    
+
     @OneToMany(mappedBy = "networkGroup", cascade = {CascadeType.REMOVE}, fetch=FetchType.LAZY)
     private List<Network> networks;
 
     @OneToMany(mappedBy = "networkGroup", fetch=FetchType.LAZY)
     private List<FirewallRule> rules;
 
-    
+
     /**
      * @return the id
      */
+    @Override
     public UUID getId() {
         return id;
     }
@@ -75,7 +76,8 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     /**
      * @param id the id to set
      */
-    public void setId(UUID id) {
+    @Override
+    public void setId(final UUID id) {
         this.id = id;
     }
 
@@ -83,7 +85,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -91,7 +93,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
         return networkGroupCategory;
     }
 
-    public void setNetworkGroupCategory(NetworkGroupCategory networkGroupCategory) {
+    public void setNetworkGroupCategory(final NetworkGroupCategory networkGroupCategory) {
         this.networkGroupCategory = networkGroupCategory;
     }
 
@@ -99,7 +101,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
         return networks;
     }
 
-    public void setNetworks(List<Network> networks) {
+    public void setNetworks(final List<Network> networks) {
         this.networks = networks;
     }
 
@@ -107,7 +109,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
         return rules;
     }
 
-    public void setRules(List<FirewallRule> rules) {
+    public void setRules(final List<FirewallRule> rules) {
         this.rules = rules;
     }
 }
