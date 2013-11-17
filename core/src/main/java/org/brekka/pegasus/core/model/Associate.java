@@ -44,7 +44,7 @@ public class Associate extends Actor {
      * The organization this employee belongs to.
      * Eagerly fetch as the associate is fairly useless without this information.
      */
-    @ManyToOne()
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`OrganizationID`", table="`Associate`", nullable=false)
     private Organization organization;
 

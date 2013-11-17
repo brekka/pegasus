@@ -4,7 +4,7 @@ import org.brekka.commons.lang.ErrorCode;
 
 /**
  * Error types relating to the Pegasus subsystem.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public enum PegasusErrorCode implements ErrorCode {
@@ -14,10 +14,11 @@ public enum PegasusErrorCode implements ErrorCode {
     PG102,
     PG103,
     PG104,
-    
+    PG105,
+
     PG200,
     PG265,
-    
+
     /**
      * Token already in use
      */
@@ -27,7 +28,7 @@ public enum PegasusErrorCode implements ErrorCode {
      */
     PG302,
     PG333,
-    
+
     PG400,
     PG401,
     PG402,
@@ -37,16 +38,16 @@ public enum PegasusErrorCode implements ErrorCode {
     PG443,
     PG444,
     PG453,
-    
+
     PG500,
     PG535,
     PG591,
     PG595,
-    
+
     PG600,
     PG601,
     PG623,
-    
+
     PG700,
     PG701,
     PG702,
@@ -56,7 +57,7 @@ public enum PegasusErrorCode implements ErrorCode {
     PG723,
     PG745,
     PG773,
-    
+
     PG812,
     PG817,
     PG831,
@@ -64,7 +65,7 @@ public enum PegasusErrorCode implements ErrorCode {
     PG871,
     PG876,
     PG888,
-    
+
     PG900,
     PG901,
     PG902,
@@ -73,7 +74,7 @@ public enum PegasusErrorCode implements ErrorCode {
     PG905,
     PG950,
     ;
-    
+
     private static final Area AREA = ErrorCode.Utils.createArea("PG");
     private int number = 0;
 

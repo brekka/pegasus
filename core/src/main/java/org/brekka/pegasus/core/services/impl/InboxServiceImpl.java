@@ -193,6 +193,14 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     public List<Inbox> retrieveForDivision(final Division<?> division) {
         return inboxDAO.retrieveForDivision(division);
     }
+    
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.AllocationDisposition)
+     */
+    @Override
+    public List<Deposit> retrieveDeposits(Member member, AllocationDisposition allocationDisposition) {
+        return depositDAO.retrieveDepositsForConscript(member, allocationDisposition);
+    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)

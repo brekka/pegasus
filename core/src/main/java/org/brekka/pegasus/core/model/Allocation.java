@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
@@ -37,7 +37,7 @@ import org.hibernate.annotations.Type;
 
 /**
  * An allocation of of some sort that can include files.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -127,7 +127,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
 
 
     public List<AllocationFile> getFiles() {
-        return files;
+        return this.files;
     }
 
     public void setFiles(final List<AllocationFile> files) {
@@ -135,7 +135,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     }
 
     public Date getExpires() {
-        return expires;
+        return this.expires;
     }
 
     public void setExpires(final Date expires) {
@@ -143,7 +143,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     }
 
     public Date getDeleted() {
-        return deleted;
+        return this.deleted;
     }
 
     public void setDeleted(final Date deleted) {
@@ -151,7 +151,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     }
 
     public Dispatch getDerivedFrom() {
-        return derivedFrom;
+        return this.derivedFrom;
     }
 
     public void setDerivedFrom(final Dispatch derivedFrom) {
@@ -163,7 +163,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      */
     @Override
     public final UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -178,7 +178,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * @return the purgeOnDownload
      */
     public Boolean getPurgeOnDownload() {
-        return purgeOnDownload;
+        return this.purgeOnDownload;
     }
 
     /**
@@ -193,7 +193,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      */
     @Override
     public XmlEntity<AllocationDocument> getXml() {
-        return xml;
+        return this.xml;
     }
 
     /**
@@ -216,7 +216,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * @return the disposition
      */
     public AllocationDisposition getDisposition() {
-        return disposition;
+        return this.disposition;
     }
 
     /**
@@ -228,7 +228,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
 
 
     public Token getToken() {
-        return token;
+        return this.token;
     }
 
     public void setToken(final Token token) {
@@ -236,7 +236,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     }
 
     public Actor getActor() {
-        return actor;
+        return this.actor;
     }
 
     public void setActor(final Actor actor) {
@@ -276,7 +276,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     }
 
     private AllocationDocument getAllocationDocument() {
-        AllocationDocument doc = xml.getBean();
+        AllocationDocument doc = this.xml.getBean();
         if (doc == null) {
             throw new PegasusException(PegasusErrorCode.PG817, "Allocation[%s] XML entity is locked", getId());
         }

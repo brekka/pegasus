@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -101,7 +103,8 @@ public class Inbox extends LongevousEntity<UUID> {
     @Transient
     private transient String name;
 
-
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="inbox")
+    private List<Deposit> deposits;
 
     /**
      * @return the id

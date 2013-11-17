@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services;
 
@@ -15,6 +15,7 @@ import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 
@@ -30,19 +31,19 @@ public interface InboxService {
      * @return
      */
     Inbox createInbox(String name, String introduction, String inboxToken, KeySafe<?> keySafe);
-    
+
     /**
-     * Create a deposit in the specified inbox. 
-     * 
+     * Create a deposit in the specified inbox.
+     *
      * @param inboxToken
      * @param comment
      * @param fileBuilders
      * @return
      */
     Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, UploadedFiles files);
-    
+
     /**
-     * 
+     *
      * @param inbox
      * @param details
      * @param bundleType
@@ -62,28 +63,37 @@ public interface InboxService {
      * @return
      */
     Inbox retrieveForToken(String inboxToken);
-    
+
     /**
      * E-Mail address
      * @param eMailAddress
      * @return
      */
     Inbox retrieveForEMailAddress(EMailAddress eMailAddress);
-    
+
     /**
      * Retrieve all deposits from the specified inbox.
      * @param inbox
      * @return
      */
     List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml);
-    
+
+    /**
+     * Retrieve all deposits of a given type assigned to the specified member via any collective the user is a member of.
+     *
+     * @param member
+     * @param allocationDisposition
+     * @return
+     */
+    List<Deposit> retrieveDeposits(Member member, AllocationDisposition allocationDisposition);
+
     /**
      * Retrieve the specified deposit which will contain the file decryption key metadata.
      * @param deposit
      * @return
      */
     Deposit retrieveDeposit(UUID depositId, boolean populateDispatches);
-    
+
     /**
      * Retrieve the specified deposit and verify that it belongs to the specified inbox.
      * @param inbox
@@ -91,7 +101,7 @@ public interface InboxService {
      * @return
      */
     Deposit retrieveDeposit(Inbox inbox, UUID depositId);
-    
+
     /**
      * @param keySafe
      * @return
@@ -108,7 +118,7 @@ public interface InboxService {
      * @param actionDeposit
      */
     void deleteDeposit(UUID depositId);
-    
+
     /**
      * @param depositId
      * @param after
