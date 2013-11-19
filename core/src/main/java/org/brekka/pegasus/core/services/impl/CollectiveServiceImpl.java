@@ -88,8 +88,13 @@ public class CollectiveServiceImpl implements CollectiveService {
      */
     @Override
     @Transactional
-    public void update(final Collective collective) {
-        this.collectiveDAO.update(collective);
+    public Collective update(final Collective collective) {
+        Collective managed = this.collectiveDAO.retrieveById(collective.getId());
+        managed.setDescription(collective.getDescription());
+        managed.setName(collective.getName());
+        managed.setKey(collective.getKey());
+        this.collectiveDAO.update(managed);
+        return managed;
     }
 
 
@@ -98,8 +103,8 @@ public class CollectiveServiceImpl implements CollectiveService {
      */
     @Override
     @Transactional(readOnly=true)
-    public List<Collective> retrieveForOwner(final Actor owner) {
-        return this.collectiveDAO.retrieveByOwner(owner);
+    public List<Collective> retrieveForOwner(final Actor owner, final boolean includePersonal) {
+        return this.collectiveDAO.retrieveByOwner(owner, includePersonal);
     }
 
     /* (non-Javadoc)
@@ -118,6 +123,15 @@ public class CollectiveServiceImpl implements CollectiveService {
     @Transactional(readOnly=true)
     public Collective retrieveById(final UUID collectiveId) {
         return this.collectiveDAO.retrieveById(collectiveId);
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.CollectiveService#retrieveByKey(org.brekka.pegasus.core.model.Actor, java.lang.String)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public Collective retrieveByKey(final Actor owner, final String key) {
+        return this.collectiveDAO.retrieveByKey(owner, key);
     }
 
     /* (non-Javadoc)
@@ -172,6 +186,16 @@ public class CollectiveServiceImpl implements CollectiveService {
     }
 
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.CollectiveService#discharge(org.brekka.pegasus.core.model.Collective, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    @Transactional
+    public void discharge(final Collective collective, final Member member) {
+        Participant participant = this.participantDAO.retrieveByMember(collective, member);
+        this.participantDAO.delete(participant.getId());
+    }
+
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.CollectiveService#assign(org.brekka.commons.persistence.model.IdentifiableEntity, org.brekka.commons.persistence.model.EntityType, org.brekka.pegasus.core.model.Collective[])
      */
     @Override
@@ -194,5 +218,6 @@ public class CollectiveServiceImpl implements CollectiveService {
     public List<Collective> retrieveAssignments(final IdentifiableEntity<UUID> entity, final EntityType entityType) {
         return this.collectiveDAO.retrieveForEntity(entity, entityType);
     }
+
 
 }

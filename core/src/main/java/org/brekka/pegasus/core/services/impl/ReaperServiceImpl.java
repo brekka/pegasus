@@ -26,6 +26,7 @@ import org.brekka.pegasus.core.model.AllocationFile;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.ReaperService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +58,7 @@ public class ReaperServiceImpl implements ReaperService {
      * @see org.brekka.pegasus.core.services.ReaperService#clearAllocationFiles()
      */
     @Override
-//    @Scheduled(fixedDelay=5000) // Gap of five seconds between each invocation
+    @Scheduled(fixedDelay=5000) // Gap of five seconds between each invocation
     @Transactional()
     public void clearAllocationFiles() {
         List<AllocationFile> allocationFileList = Collections.emptyList();
@@ -74,7 +75,7 @@ public class ReaperServiceImpl implements ReaperService {
      * @see org.brekka.pegasus.core.services.ReaperService#clearAllocations()
      */
     @Override
-//    @Scheduled(fixedDelay=10000) // Gap of ten seconds between each invocation
+    @Scheduled(fixedDelay=10000) // Gap of ten seconds between each invocation
     @Transactional()
     public void clearAllocations() {
         List<Allocation> allocationList = Collections.emptyList();

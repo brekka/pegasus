@@ -62,7 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Methods common to all allocation services that should not be exposed via {@link AllocationService}.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 class AllocationServiceSupport {
@@ -119,7 +119,7 @@ class AllocationServiceSupport {
         }
 
         for (CompletableUploadedFile file : ready) {
-            CryptedFile cryptedFile = pavewayService.complete(file);
+            CryptedFile cryptedFile = this.pavewayService.complete(file);
 
             FileType fileXml = bundleType.addNewFile();
             fileXml.setName(cryptedFile.getFileName());
@@ -137,8 +137,8 @@ class AllocationServiceSupport {
     protected <T extends Allocation> T retrieveByToken(final String tokenStr, final Class<T> expectedType, final boolean notFoundThrows) {
         checkNotNull(tokenStr, "token");
         checkNotNull(expectedType, "expectedType");
-        Token token = tokenService.retrieveByPath(tokenStr);
-        T value = allocationDAO.retrieveByToken(token, expectedType);
+        Token token = this.tokenService.retrieveByPath(tokenStr);
+        T value = this.allocationDAO.retrieveByToken(token, expectedType);
         if (value == null
                 && notFoundThrows) {
             throw new PegasusException(PegasusErrorCode.PG721,
@@ -177,7 +177,7 @@ class AllocationServiceSupport {
      * @return
      */
     protected BundleType copyDispatchBundle(final Dispatch dispatch, final Integer maxDownloads) {
-        XmlEntity<AllocationDocument> xml = xmlEntityService.retrieveEntity(dispatch.getXml().getId(), AllocationDocument.class);
+        XmlEntity<AllocationDocument> xml = this.xmlEntityService.retrieveEntity(dispatch.getXml().getId(), AllocationDocument.class);
         AllocationType dispatchXml = xml.getBean().getAllocation();
         BundleType dispatchBundle = copyBundle(maxDownloads, dispatchXml.getBundle());
         return dispatchBundle;
@@ -218,31 +218,31 @@ class AllocationServiceSupport {
         try {
             XmlEntity<AllocationDocument> xml;
             if (password == null) {
-                xml = xmlEntityService.release(existing, AllocationDocument.class);
+                xml = this.xmlEntityService.release(existing, AllocationDocument.class);
             } else {
-                xml = xmlEntityService.release(existing, password, AllocationDocument.class);
+                xml = this.xmlEntityService.release(existing, password, AllocationDocument.class);
             }
             nAllocation.setXml(xml);
             assignFileXml(nAllocation);
             unlockSuccess = true;
+            bindToContext(nAllocation);
         } finally {
             if (nAllocation instanceof Transfer
                     && password != null) {
-                eventService.transferUnlock((Transfer) nAllocation, unlockSuccess);
+                this.eventService.transferUnlock((Transfer) nAllocation, unlockSuccess);
             }
         }
-
     }
 
     protected void encryptDocument(final Allocation allocation, final AllocationType allocationType, final KeySafe<?> keySafe) {
         AllocationDocument allocationDocument = AllocationDocument.Factory.newInstance();
         allocationDocument.setAllocation(allocationType);
-        XmlEntity<AllocationDocument> xmlEntity = xmlEntityService.persistEncryptedEntity(allocationDocument, keySafe, true);
+        XmlEntity<AllocationDocument> xmlEntity = this.xmlEntityService.persistEncryptedEntity(allocationDocument, keySafe, true);
         allocation.setXml(xmlEntity);
     }
 
     protected void createAllocationFiles(final Allocation allocation) {
-        XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
+        XmlEntity<AllocationDocument> xml = this.xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
         BundleType bundle = xml.getBean().getAllocation().getBundle();
         if (bundle == null) {
             return;
@@ -258,7 +258,7 @@ class AllocationServiceSupport {
                 allocationFile.setCryptedFile(source.getCryptedFile());
                 allocationFile.setXml(source.getXml());
                 allocationFile.setDerivedFrom(source);
-                allocationFileDAO.create(allocationFile);
+                this.allocationFileDAO.create(allocationFile);
                 allocationFiles.add(allocationFile);
             }
         } else {
@@ -266,10 +266,10 @@ class AllocationServiceSupport {
             for (FileType fileType : fileList) {
                 AllocationFile allocationFile = new AllocationFile();
                 allocationFile.setAllocation(allocation);
-                CryptedFile cryptedFile = cryptedFileDAO.retrieveById(UUID.fromString(fileType.getUUID()));
+                CryptedFile cryptedFile = this.cryptedFileDAO.retrieveById(UUID.fromString(fileType.getUUID()));
                 allocationFile.setCryptedFile(cryptedFile);
                 allocationFile.setXml(fileType);
-                allocationFileDAO.create(allocationFile);
+                this.allocationFileDAO.create(allocationFile);
                 allocationFiles.add(allocationFile);
             }
         }
@@ -278,7 +278,7 @@ class AllocationServiceSupport {
 
 
     protected void assignFileXml(final Allocation allocation) {
-        XmlEntity<AllocationDocument> xml = xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
+        XmlEntity<AllocationDocument> xml = this.xmlEntityService.release(allocation.getXml(), AllocationDocument.class);
         AllocationType allocationType = xml.getBean().getAllocation();
         List<AllocationFile> files = allocation.getFiles();
         BundleType bundle = allocationType.getBundle();
@@ -322,11 +322,11 @@ class AllocationServiceSupport {
             AnonymousTransfer anonTrans = (AnonymousTransfer) nAllocation;
             // Need to keep the XML as we have no way to re-extract at this point (+ it should never change).
             XmlEntity<AllocationDocument> xml = anonTrans.getXml();
-            allocationDAO.refresh(nAllocation);
+            this.allocationDAO.refresh(nAllocation);
             nAllocation.setXml(xml);
         } else {
-            allocationDAO.refresh(nAllocation);
-            xmlEntityService.release(nAllocation, AllocationDocument.class);
+            this.allocationDAO.refresh(nAllocation);
+            this.xmlEntityService.release(nAllocation, AllocationDocument.class);
         }
         assignFileXml(nAllocation);
     }

@@ -42,14 +42,22 @@ public interface CollectiveDAO extends EntityDAO<UUID, Collective> {
 
     /**
      * @param owner
+     * @param includePersonal
      * @return
      */
-    List<Collective> retrieveByOwner(Actor owner);
+    List<Collective> retrieveByOwner(Actor owner, boolean includePersonal);
 
     /**
      * @param member
      * @return
      */
     List<Collective> retrieveByConscriptedMember(Member member);
+
+    /**
+     * @param owner
+     * @param key
+     * @return
+     */
+    Collective retrieveByKey(Actor owner, String key);
 
 }

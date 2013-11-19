@@ -5,10 +5,13 @@ package org.brekka.pegasus.core.dao.hibernate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
+import org.brekka.commons.persistence.support.FirstResultTransformer;
 import org.brekka.commons.persistence.support.HibernateUtils;
 import org.brekka.pegasus.core.dao.DepositDAO;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Inbox;
@@ -48,6 +51,24 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
                 .add(Restrictions.isNull("deleted"))
                 .addOrder(Order.desc("created"))
                 .list();
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DepositDAO#retrieveById(java.util.UUID, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    public Deposit retrieveById(final UUID depositId, final Member memberCanAccess) {
+        String hql = "select d "
+                   + "  from Participant as p "
+                   + "  join p.collective as c "
+                   + "  join c.inbox as i "
+                   + "  join i.deposits as d "
+                   + " where p.member=:member "
+                   + "   and d.id=:depositId ";
+        Query q = getCurrentSession().createQuery(hql);
+        q.setParameter("depositId", depositId);
+        q.setParameter("member", memberCanAccess);
+        return (Deposit) q.uniqueResult();
     }
 
     /* (non-Javadoc)
@@ -102,24 +123,65 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
         return count;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.DepositDAO#retrieveDepositsForConscript(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.AllocationDisposition)
+    /*
+     * (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DepositDAO#retrieveDepositsForParticipant(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.AllocationDisposition)
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> retrieveDepositsForConscript(final Member member, final AllocationDisposition allocationDisposition) {
+    public List<Deposit> retrieveDepositsForParticipant(final Member member, final AllocationDisposition allocationDisposition, final boolean personalOnly) {
         String hql = "select d, df "
                   + "  from Participant p "
                   + "  join p.collective as c "
                   + "  join c.inbox as i "
                   + "  join i.deposits as d "
-                  + "  left join d.derivedFrom as df "
-                  + " where p.member=:member"
-                  + "   and d.disposition=:disposition"
-                  + " order by d.created desc";
-        return getCurrentSession().createQuery(hql)
-              .setParameter("member", member)
-              .setParameter("disposition", allocationDisposition)
-              .list();
+                  + "  join d.derivedFrom as df "
+                  + " where p.member=:member "
+                  + "   and df.deleted is null ";
+        if  (allocationDisposition != null) {
+            hql +=  "   and d.disposition=:disposition";
+        }
+        if (personalOnly) {
+            hql +=  "   and c.personal=:personal";
+        }
+        hql +=      " order by d.created desc";
+        Query q = getCurrentSession().createQuery(hql)
+              .setParameter("member", member);
+        if (allocationDisposition != null) {
+            q.setParameter("disposition", allocationDisposition);
+        }
+        if (personalOnly) {
+            q.setParameter("personal", personalOnly);
+        }
+        q.setResultTransformer(FirstResultTransformer.INSTANCE);
+        return q.list();
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.DepositDAO#retrieveDepositsForCollectiveOwner(org.brekka.pegasus.core.model.Actor, org.brekka.pegasus.core.model.AllocationDisposition)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Deposit> retrieveDepositsForCollectiveOwner(final Actor owner, final AllocationDisposition allocationDisposition, final boolean includePersonal) {
+        String hql = "select d, df "
+                   + "  from Collective c "
+                   + "  join c.inbox as i "
+                   + "  join i.deposits as d "
+                   + "  join d.derivedFrom as df "
+                   + " where c.owner=:owner "
+                   + "   and df.deleted is null "
+                   + "   and c.personal=:personal ";
+        if  (allocationDisposition != null) {
+            hql +=   "   and d.disposition=:disposition";
+        }
+        hql +=       " order by d.created desc";
+        Query q = getCurrentSession().createQuery(hql)
+              .setParameter("owner", owner);
+        if (allocationDisposition != null) {
+            q.setParameter("disposition", allocationDisposition);
+        }
+        q.setParameter("personal", includePersonal);
+        q.setResultTransformer(FirstResultTransformer.INSTANCE);
+        return q.list();
     }
 }

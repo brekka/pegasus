@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,8 @@ import org.brekka.commons.persistence.model.EntityType;
 import org.brekka.commons.persistence.model.IdentifiableEntity;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Collective;
-import org.brekka.pegasus.core.model.Participant;
-import org.brekka.pegasus.core.model.Inbox;
-import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.Participant;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
@@ -40,7 +38,7 @@ public interface CollectiveService {
      * @param owner
      * @return
      */
-    List<Collective> retrieveForOwner(Actor owner);
+    List<Collective> retrieveForOwner(Actor owner, boolean includePersonal);
 
     /**
      * Retrieve all collectives for the specified member.
@@ -52,24 +50,33 @@ public interface CollectiveService {
 
     Collective retrieveById(UUID collectiveId);
 
+    Collective retrieveByKey(Actor owner, String key);
+
     Participant retrieveParticipantById(UUID conscriptId);
 
     UUID create(Collective collective);
 
     void delete(Collective collective);
 
-    void update(Collective collective);
+    /**
+     * Update the editable details of this collective, name, key and description.
+     * @param collective
+     * @return the now updated, managed version of the collective
+     */
+    Collective update(Collective collective);
 
     /**
      * Create a new {@link Participant} and return its ID.
-     * 
+     *
      * @param collective
      * @param member
      * @return
      */
     UUID enlist(Collective collective, Member member);
 
-    void discharge(Participant conscript);
+    void discharge(Participant participant);
+
+    void discharge(Collective collective, Member member);
 
     /**
      * Assign the specified collectives to the given entity.
@@ -78,7 +85,7 @@ public interface CollectiveService {
      * @param too
      */
     void assign(IdentifiableEntity<UUID> entity, EntityType entityType, Collective... too);
-    
+
     /**
      * Retrieve the list of collectives that were assigned to the specified entity.
      * @param entity
@@ -86,4 +93,7 @@ public interface CollectiveService {
      * @return
      */
     List<Collective> retrieveAssignments(IdentifiableEntity<UUID> entity, EntityType entityType);
+
+
+
 }

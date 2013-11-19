@@ -18,6 +18,7 @@ package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,6 +27,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
@@ -38,7 +40,10 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name = "`Participant`", schema = PegasusConstants.SCHEMA)
+@Table(name = "`Participant`", schema = PegasusConstants.SCHEMA, uniqueConstraints={
+        // Surrogate key
+        @UniqueConstraint(columnNames = {"`CollectiveID`", "`MemberID`" }),
+})
 public class Participant extends SnapshotEntity<UUID> {
 
     /**
@@ -74,7 +79,7 @@ public class Participant extends SnapshotEntity<UUID> {
      * division held by the {@link Inbox} in the {@link Collective}, assuming there is one.
      * If an inbox is present, and no partnership existsm, assume the inbox keysafe = primaryKeySafe.
      */
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade=CascadeType.REMOVE)
     @JoinColumn(name = "`PartnershipID`")
     private Partnership<? extends Member, Actor> partnership;
 

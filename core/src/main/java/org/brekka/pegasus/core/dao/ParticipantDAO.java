@@ -19,6 +19,8 @@ package org.brekka.pegasus.core.dao;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
+import org.brekka.pegasus.core.model.Collective;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Participant;
 
 /**
@@ -27,5 +29,12 @@ import org.brekka.pegasus.core.model.Participant;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface ParticipantDAO extends EntityDAO<UUID, Participant> {
+
+    /**
+     * @param collective
+     * @param member
+     * @return
+     */
+    Participant retrieveByMember(Collective collective, Member member);
 
 }

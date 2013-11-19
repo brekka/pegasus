@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
@@ -29,12 +29,13 @@ import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
+import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
 /**
  * Stores a piece of XML either plain or encrypted. Should only ever be replaced, never updated.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -57,6 +58,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Id
     @Type(type="pg-uuid")
+    @AccessType("property")
     @Column(name="`ID`", updatable=false)
     private UUID id;
 
@@ -134,7 +136,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
 
 
     /**
-     * 
+     *
      */
     public XmlEntity() {
     }
@@ -151,7 +153,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -163,7 +165,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
     public KeySafe<?> getKeySafe() {
-        return keySafe;
+        return this.keySafe;
     }
 
     public void setKeySafe(final KeySafe<?> keySafe) {
@@ -171,7 +173,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
     public byte[] getIv() {
-        return iv;
+        return this.iv;
     }
 
     public void setIv(final byte[] iv) {
@@ -179,7 +181,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
     public UUID getCryptedDataId() {
-        return cryptedDataId;
+        return this.cryptedDataId;
     }
 
     public void setCryptedDataId(final UUID cryptedDataId) {
@@ -187,7 +189,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
     public Blob getData() {
-        return data;
+        return this.data;
     }
 
     public void setData(final Blob data) {
@@ -195,7 +197,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
     public T getBean() {
-        return bean;
+        return this.bean;
     }
 
     public void setBean(final T bean) {
@@ -203,7 +205,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
     public int getProfile() {
-        return profile;
+        return this.profile;
     }
 
     public void setProfile(final int profile) {
@@ -223,7 +225,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Override
     public byte[] getIV() {
-        return iv;
+        return this.iv;
     }
 
     /* (non-Javadoc)
@@ -231,7 +233,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Override
     public SecretKey getSecretKey() {
-        return secretKey;
+        return this.secretKey;
     }
 
     /**
@@ -245,7 +247,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      * @return the serial
      */
     public UUID getSerial() {
-        return serial;
+        return this.serial;
     }
 
     /**
@@ -259,7 +261,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      * @return the version
      */
     public int getVersion() {
-        return version;
+        return this.version;
     }
 
     /**
@@ -273,7 +275,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      * @return the externalData
      */
     public boolean isExternalData() {
-        return externalData;
+        return this.externalData;
     }
 
     /**
@@ -287,7 +289,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      * @return the deleted
      */
     public Date getDeleted() {
-        return deleted;
+        return this.deleted;
     }
 
     /**
@@ -304,13 +306,13 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-        .append("id", id)
-        .append("profile", profile)
-        .append("version", version)
-        .append("external", externalData)
-        .append("cryptedDataId", cryptedDataId)
-        .append("keySafe", (keySafe != null ? keySafe.getId() : null))
-        .append("iv", Base64.encodeBytes(iv))
+        .append("id", this.id)
+        .append("profile", this.profile)
+        .append("version", this.version)
+        .append("external", this.externalData)
+        .append("cryptedDataId", this.cryptedDataId)
+        .append("keySafe", (this.keySafe != null ? this.keySafe.getId() : null))
+        .append("iv", Base64.encodeBytes(this.iv))
         .toString();
     }
 }

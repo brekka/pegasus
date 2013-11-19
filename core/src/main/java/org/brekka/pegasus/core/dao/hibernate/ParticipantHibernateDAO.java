@@ -16,7 +16,10 @@
 
 package org.brekka.pegasus.core.dao.hibernate;
 import org.brekka.pegasus.core.dao.ParticipantDAO;
+import org.brekka.pegasus.core.model.Collective;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Participant;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,5 +33,16 @@ public class ParticipantHibernateDAO extends AbstractPegasusHibernateDAO<Partici
     @Override
     protected Class<Participant> type() {
         return Participant.class;
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.ParticipantDAO#retrieveByMember(org.brekka.pegasus.core.model.Collective, org.brekka.pegasus.core.model.Member)
+     */
+    @Override
+    public Participant retrieveByMember(final Collective collective, final Member member) {
+        return (Participant) getCurrentSession().createCriteria(Participant.class)
+                .add(Restrictions.eq("collective", collective))
+                .add(Restrictions.eq("member", member))
+                .uniqueResult();
     }
 }

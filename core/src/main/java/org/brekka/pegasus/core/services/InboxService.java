@@ -1,6 +1,19 @@
-/**
+/*
+ * Copyright 2013 the original author or authors.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services;
 
 import java.util.List;
@@ -8,6 +21,7 @@ import java.util.UUID;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.paveway.core.model.UploadedFiles;
+import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Deposit;
 import org.brekka.pegasus.core.model.Dispatch;
@@ -16,6 +30,7 @@ import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.Participant;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.joda.time.DateTime;
 
@@ -26,6 +41,7 @@ public interface InboxService {
 
     /**
      * Create a new inbox for the current user, using the specified vault.
+     *
      * @param token
      * @param keySafe
      * @return
@@ -40,7 +56,8 @@ public interface InboxService {
      * @param fileBuilders
      * @return
      */
-    Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, UploadedFiles files);
+    Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires,
+            UploadedFiles files);
 
     /**
      *
@@ -50,10 +67,12 @@ public interface InboxService {
      * @param dispatch
      * @return
      */
-    Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires, Dispatch dispatch);
+    Deposit createDeposit(Inbox inbox, AllocationDisposition disposition, DetailsType details, DateTime expires,
+            Dispatch dispatch);
 
     /**
      * Retrieve the inboxes owned by this member.
+     *
      * @return
      */
     List<Inbox> retrieveForMember();
@@ -66,6 +85,7 @@ public interface InboxService {
 
     /**
      * E-Mail address
+     *
      * @param eMailAddress
      * @return
      */
@@ -73,22 +93,28 @@ public interface InboxService {
 
     /**
      * Retrieve all deposits from the specified inbox.
+     *
      * @param inbox
      * @return
      */
     List<Deposit> retrieveDeposits(Inbox inbox, boolean releaseXml);
 
     /**
-     * Retrieve all deposits of a given type assigned to the specified member via any collective the user is a member of.
+     * Retrieve all deposits of a given type assigned to the specified member via any collective the user is a member
+     * of.
      *
      * @param member
      * @param allocationDisposition
      * @return
      */
-    List<Deposit> retrieveDeposits(Member member, AllocationDisposition allocationDisposition);
+    List<Deposit> retrieveDepositsByMember(Member member, AllocationDisposition allocationDisposition,
+            boolean personalOnly);
+
+    List<Deposit> retrieveDepositsByOwner(Actor owner, AllocationDisposition allocationDisposition, boolean includePersonal);
 
     /**
      * Retrieve the specified deposit which will contain the file decryption key metadata.
+     *
      * @param deposit
      * @return
      */
@@ -96,11 +122,22 @@ public interface InboxService {
 
     /**
      * Retrieve the specified deposit and verify that it belongs to the specified inbox.
-     * @param inbox
+     *
      * @param depositId
+     * @param checkInInbox
      * @return
      */
-    Deposit retrieveDeposit(Inbox inbox, UUID depositId);
+    Deposit retrieveDeposit(UUID depositId, Inbox checkInInbox);
+
+    /**
+     * Retrieve the deposit with the specified id, and make sure that the specified member has access (via
+     * {@link Participant}).
+     *
+     * @param depositId
+     * @param canAccess
+     * @return
+     */
+    Deposit retrieveDeposit(UUID depositId, Member memberCanAccess);
 
     /**
      * @param keySafe
@@ -136,6 +173,5 @@ public interface InboxService {
      * @return
      */
     Inbox retrieveById(UUID inboxId);
-
 
 }

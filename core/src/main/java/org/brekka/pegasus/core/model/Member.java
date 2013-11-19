@@ -1,12 +1,15 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
+
+import java.util.List;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SecondaryTable;
 
@@ -14,7 +17,7 @@ import org.brekka.pegasus.core.PegasusConstants;
 
 /**
  * A member of the site, can be either a {@link Person} or a {@link Robot}.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -52,10 +55,16 @@ public abstract class Member extends Actor {
     private KeySafe<? extends Member> primaryKeySafe;
 
     /**
+     * Collectives that this member is participating in.
+     */
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="member")
+    private List<Participant> participations;
+
+    /**
      * @return the authenticationToken
      */
     public AuthenticationToken getAuthenticationToken() {
-        return authenticationToken;
+        return this.authenticationToken;
     }
 
     /**
@@ -66,7 +75,7 @@ public abstract class Member extends Actor {
     }
 
     public Vault getDefaultVault() {
-        return defaultVault;
+        return this.defaultVault;
     }
 
     public void setDefaultVault(final Vault defaultVault) {
@@ -78,7 +87,7 @@ public abstract class Member extends Actor {
      * @return the primaryKeySafe
      */
     public KeySafe<? extends Member> getPrimaryKeySafe() {
-        return primaryKeySafe;
+        return this.primaryKeySafe;
     }
 
     /**

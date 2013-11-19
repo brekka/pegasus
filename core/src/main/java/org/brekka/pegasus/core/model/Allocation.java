@@ -33,6 +33,7 @@ import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
+import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Type;
 
 /**
@@ -59,6 +60,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * Unique id
      */
     @Id
+    @AccessType("property")
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;
@@ -90,7 +92,6 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`DerivedFromID`")
     private Dispatch derivedFrom;
-
 
     /**
      * If set to to true, this allocation will be purged upon successful download.
@@ -285,6 +286,6 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
 
     public boolean expired() {
         return getExpires() != null
-                && getExpires().before(new Date());
+             && getExpires().before(new Date());
     }
 }
