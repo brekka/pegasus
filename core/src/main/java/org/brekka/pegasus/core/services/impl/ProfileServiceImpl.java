@@ -186,9 +186,11 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             // The bean is already unlocked
             return false;
         }
-        XmlEntity<ProfileDocument> released = this.xmlEntityService.release(profile.getXml(), ProfileDocument.class);
-        profile.setXml(released);
-        XmlEntity<ProfileDocument> xmlEntity = profile.getXml();
+        // Need a session attached profile
+        Profile managed = this.profileDAO.retrieveById(profile.getId());
+        XmlEntity<ProfileDocument> xmlEntity = managed.getXml();
+        // Apply back to the original profile
+        profile.setXml(xmlEntity);
         KeySafe<?> nKeySafe = xmlEntity.getKeySafe();
         Vault protectedBy = null;
         while (nKeySafe != null) {
