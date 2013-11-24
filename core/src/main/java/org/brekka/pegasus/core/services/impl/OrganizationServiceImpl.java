@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.dao.AssociateDAO;
 import org.brekka.pegasus.core.dao.DivisionDAO;
 import org.brekka.pegasus.core.dao.EnlistmentDAO;
@@ -58,7 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Organizations are groups of actors with a shared set of resources.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
@@ -113,14 +114,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Enlistment createOrganization(final UUID idToAssign, final String name, final String tokenStr, final String domainNameStr,
             final OrganizationType details, final Member owner, final String associateEMailStr, final KeySafe<? extends Member> protectWith) {
 
-        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(associateEMailStr);
+        EMailAddress eMailAddress = this.eMailAddressService.retrieveByAddress(associateEMailStr);
         if (eMailAddress == null) {
-            eMailAddress = eMailAddressService.createEMail(associateEMailStr, owner, false);
+            eMailAddress = this.eMailAddressService.createEMail(associateEMailStr, owner, false);
         }
 
         Organization organization = createOrganization(name, tokenStr, domainNameStr, idToAssign);
         Associate associate = createAssociate(organization, owner, eMailAddress);
-        Enlistment enlistment = divisionService.createDivisionEnlistment(associate, protectWith, null, null);
+        Enlistment enlistment = this.divisionService.createDivisionEnlistment(associate, protectWith, null, null);
         Division<Organization> globalDivision = enlistment.getDivision();
         organization.setGlobalDivision(globalDivision);
         applyDetailsXML(details, globalDivision);
@@ -136,7 +137,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public <Owner extends Actor> Partnership<Owner, Organization> createOrganization(final UUID idToAssign, final String name,
             final String tokenStr, final String domainNameStr, final OrganizationType details, final Owner owner, final Division<Owner> owningDivision) {
         Organization organization = createOrganization(name, tokenStr, domainNameStr, idToAssign);
-        Partnership<Owner, Organization> partnership = divisionService.createDivisionPartnership(owningDivision, organization, null, null);
+        Partnership<Owner, Organization> partnership = this.divisionService.createDivisionPartnership(owningDivision, organization, null, null);
         Division<Organization> globalDivision = partnership.getTarget();
         organization.setGlobalDivision(globalDivision);
         applyDetailsXML(details, globalDivision);
@@ -146,19 +147,19 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
     public XmlEntity<OrganizationDocument> updateOrganizationDetails(final UUID orgId, final XmlEntity<OrganizationDocument> orgXml) {
-        Organization organization = organizationDAO.retrieveById(orgId);
-        XmlEntity<OrganizationDocument> entity = xmlEntityService.updateEntity(orgXml, organization.getXml(), OrganizationDocument.class);
+        Organization organization = this.organizationDAO.retrieveById(orgId);
+        XmlEntity<OrganizationDocument> entity = this.xmlEntityService.updateEntity(orgXml, organization.getXml(), OrganizationDocument.class);
         organization.setXml(entity);
-        organizationDAO.update(organization);
+        this.organizationDAO.update(organization);
         return entity;
     }
 
     @Override
     @Transactional()
     public XmlEntity<OrganizationDocument> createOrganizationDetails(final UUID orgId, final OrganizationType organizationType) {
-        Organization organization = organizationDAO.retrieveById(orgId);
+        Organization organization = this.organizationDAO.retrieveById(orgId);
         XmlEntity<OrganizationDocument> entity = applyDetailsXML(organizationType, organization.getGlobalDivision());
-        organizationDAO.update(organization);
+        this.organizationDAO.update(organization);
         return entity;
     }
 
@@ -168,7 +169,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly=true)
     public Organization retrieveById(final UUID orgId, final boolean releaseXml) {
-        Organization organization = organizationDAO.retrieveById(orgId);
+        Organization organization = this.organizationDAO.retrieveById(orgId);
         if (organization == null) {
             return null;
         }
@@ -182,8 +183,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly=true)
     public Organization retrieveByToken(final String tokenPath, final boolean releaseXml) {
-        Token token = tokenService.retrieveByPath(tokenPath);
-        Organization organization = organizationDAO.retrieveByToken(token);
+        Token token = this.tokenService.retrieveByPath(tokenPath);
+        Organization organization = this.organizationDAO.retrieveByToken(token);
         releaseXml(releaseXml, organization);
         return organization;
     }
@@ -197,7 +198,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         associate.setStatus(ActorStatus.ACTIVE);
         associate.setMember(owner);
         associate.setPrimaryEMailAddress(eMailAddress);
-        associateDAO.create(associate);
+        this.associateDAO.create(associate);
         return associate;
     }
 
@@ -207,7 +208,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly=true)
     public boolean organizationExists(final UUID orgId) {
-        return organizationDAO.retrieveById(orgId) != null;
+        return this.organizationDAO.retrieveById(orgId) != null;
     }
 
 
@@ -218,7 +219,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly=true)
     public Associate retrieveAssociate(final Organization organization, final Member member) {
-        Associate associate = associateDAO.retrieveByOrgAndMember(organization, member);
+        Associate associate = this.associateDAO.retrieveByOrgAndMember(organization, member);
         return associate;
     }
 
@@ -228,7 +229,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly=true)
     public List<Associate> retrieveAssociates(final Member member) {
-        List<Associate> asociateList = associateDAO.retrieveAssociates(member);
+        List<Associate> asociateList = this.associateDAO.retrieveAssociates(member);
         return asociateList;
     }
 
@@ -238,8 +239,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional(readOnly=true)
     public Enlistment retrieveEnlistment(final Member member, final Division<Organization> target) {
-        Associate associate = retrieveAssociate(target.getOwner(), member);
-        Enlistment enlistment = enlistmentDAO.retrieveEnlistmentByTarget(target, associate);
+        Organization org = EntityUtils.narrow(target.getOwner(), Organization.class);
+        Associate associate = retrieveAssociate(org, member);
+        Enlistment enlistment = this.enlistmentDAO.retrieveEnlistmentByTarget(target, associate);
         return enlistment;
     }
 
@@ -250,10 +252,10 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional()
     public void deleteAssociates(final Member member) {
-        List<Associate> associates = associateDAO.retrieveByMember(member);
+        List<Associate> associates = this.associateDAO.retrieveByMember(member);
         for (Associate associate : associates) {
-            applicationEventPublisher.publishEvent(new AssociateDeleteEvent(associate));
-            associateDAO.delete(associate.getId());
+            this.applicationEventPublisher.publishEvent(new AssociateDeleteEvent(associate));
+            this.associateDAO.delete(associate.getId());
         }
     }
 
@@ -269,7 +271,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationDocument.setOrganization(organizationType);
         }
         Organization organization = globalDivision.getOwner();
-        XmlEntity<OrganizationDocument> entity = xmlEntityService.persistEncryptedEntity(organizationDocument, globalDivision, false);
+        XmlEntity<OrganizationDocument> entity = this.xmlEntityService.persistEncryptedEntity(organizationDocument, globalDivision, false);
         organization.setXml(entity);
         return entity;
     }
@@ -281,7 +283,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
     protected void releaseXml(final boolean releaseXml, final Organization organization) {
         if (organization.getXml() != null && releaseXml) {
-            XmlEntity<OrganizationDocument> entity = xmlEntityService.retrieveEntity(organization.getXml().getId(), OrganizationDocument.class);
+            XmlEntity<OrganizationDocument> entity = this.xmlEntityService.retrieveEntity(organization.getXml().getId(), OrganizationDocument.class);
             organization.setXml(entity);
         }
     }
@@ -293,12 +295,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setName(name);
 
         if (StringUtils.isNotBlank(domainNameStr)) {
-            DomainName domainName = eMailAddressService.toDomainName(domainNameStr);
+            DomainName domainName = this.eMailAddressService.toDomainName(domainNameStr);
             organization.setPrimaryDomainName(domainName);
         }
-        Token token = tokenService.createToken(tokenStr, PegasusTokenType.ORG);
+        Token token = this.tokenService.createToken(tokenStr, PegasusTokenType.ORG);
         organization.setToken(token);
-        organizationDAO.create(organization);
+        this.organizationDAO.create(organization);
         return organization;
     }
 }

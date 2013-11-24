@@ -41,9 +41,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * Retains the details for a logged-in member. It forms the basis of the {@link UserDetails} that is bound to the security 
+ * Retains the details for a logged-in member. It forms the basis of the {@link UserDetails} that is bound to the security
  * context for a given user.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public abstract class AuthenticatedMemberBase<T extends Member> implements AuthenticatedMember<T>, UserDetails {
@@ -52,7 +52,7 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * Serial UID
      */
     private static final long serialVersionUID = -5476667151062439957L;
-    
+
     /**
      * Will always be the person instance that corresponds to the login.
      */
@@ -62,136 +62,142 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * What access rights does this member have.
      */
     private final Set<GrantedAuthority> authorities;
-    
+
     /**
      * Determines which actor is active. Normally this will be the same as 'person' but the user
      * can switch 'context' to for instance their associate entry.
      */
     private transient Actor activeActor;
-    
+
     /**
      * The user-selected active profile
      */
     private transient Profile activeProfile;
-    
+
     /**
      * The collection of Phalanx vault key references that are currently unlocked.
      */
-    private EntityUnlockKeyCache<AuthenticatedPrincipal> vaultKeyCache = new EntityUnlockKeyCache<>();
-    
+    private final EntityUnlockKeyCache<AuthenticatedPrincipal> vaultKeyCache = new EntityUnlockKeyCache<>();
+
     /**
      * Collection of unlocked Phalanx private key references.
      */
-    private EntityUnlockKeyCache<PrivateKeyToken> privateKeyCache = new EntityUnlockKeyCache<>();
-    
+    private final EntityUnlockKeyCache<PrivateKeyToken> privateKeyCache = new EntityUnlockKeyCache<>();
+
     /**
      * Essentially a cache of expensive to generate values (non-serializable).
      */
     private final AccessorContext context = new AccessorContextImpl();
-    
+
     /**
-     * 
+     * Make sure the username is always available
      */
-    protected AuthenticatedMemberBase(T member, Set<GrantedAuthority> authorities) {
+    private final String username;
+
+    /**
+     *
+     */
+    protected AuthenticatedMemberBase(final T member, final Set<GrantedAuthority> authorities) {
         this.member = member;
         setActiveActor(member);
         this.authorities = authorities;
+        this.username = member.getAuthenticationToken().getUsername();
     }
-    
+
     @SafeVarargs
-    protected AuthenticatedMemberBase(T member, GrantedAuthority... authorities) {
+    protected AuthenticatedMemberBase(final T member, final GrantedAuthority... authorities) {
         this(member, toSet(authorities));
     }
-    
+
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#getActiveActor()
      */
     @Override
     public Actor getActiveActor() {
-        return activeActor;
+        return this.activeActor;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#getProfile()
      */
     @Override
     public ProfileType getProfile() {
-        if (activeProfile == null) {
+        if (this.activeProfile == null) {
             return null;
         }
-        XmlEntity<ProfileDocument> xmlEntity = activeProfile.getXml();
+        XmlEntity<ProfileDocument> xmlEntity = this.activeProfile.getXml();
         ProfileDocument bean = xmlEntity.getBean();
         if (bean == null) {
             return null;
         }
         return bean.getProfile();
     }
-    
+
     /**
      * @param user
      */
-    protected void addAuthority(GrantedAuthority authority) {
-        authorities.add(authority);
+    protected void addAuthority(final GrantedAuthority authority) {
+        this.authorities.add(authority);
     }
 
     /**
      * @param memberSignup
      */
-    protected void removeAuthority(GrantedAuthority authority) {
-        authorities.remove(authority);
+    protected void removeAuthority(final GrantedAuthority authority) {
+        this.authorities.remove(authority);
     }
-    
-    void setMember(T member) {
+
+    void setMember(final T member) {
         this.member = member;
     }
-    
+
     /**
      * @param activeProfile the activeProfile to set
      */
-    void setActiveProfile(Profile activeProfile) {
+    void setActiveProfile(final Profile activeProfile) {
         this.activeProfile = activeProfile;
     }
-    
+
     /**
      * @return the activeProfile
      */
     Profile getActiveProfile() {
-        return activeProfile;
+        return this.activeProfile;
     }
-    
+
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#getVault(java.util.UUID)
      */
-    AuthenticatedPrincipal getVaultKey(Vault vault) {
-        return vaultKeyCache.get(vault.getId());
+    AuthenticatedPrincipal getVaultKey(final Vault vault) {
+        return this.vaultKeyCache.get(vault.getId());
     }
 
     /**
      * @param openVault
      */
-    void retainVaultKey(Vault vault) {
-        vaultKeyCache.put(vault.getId(), vault.getAuthenticatedPrincipal());
+    void retainVaultKey(final Vault vault) {
+        this.vaultKeyCache.put(vault.getId(), vault.getAuthenticatedPrincipal());
     }
-    
-    PrivateKeyToken getPrivateKey(KeyPair keyPair) {
-        return privateKeyCache.get(keyPair.getId());
+
+    PrivateKeyToken getPrivateKey(final KeyPair keyPair) {
+        return this.privateKeyCache.get(keyPair.getId());
     }
-    
-    void retainPrivateKey(KeyPair keyPair, PrivateKeyToken privateKeyToken) {
+
+    void retainPrivateKey(final KeyPair keyPair, final PrivateKeyToken privateKeyToken) {
         if (!keyPair.getId().equals(privateKeyToken.getKeyPair().getId())) {
-            throw new PegasusException(PegasusErrorCode.PG104, 
+            throw new PegasusException(PegasusErrorCode.PG104,
                     "Private key token does not belong to keyPair '%s'. It instead belongs to '%s'",
                     keyPair.getId(), privateKeyToken.getKeyPair().getId());
         }
-        privateKeyCache.put(keyPair.getId(), privateKeyToken);
+        this.privateKeyCache.put(keyPair.getId(), privateKeyToken);
     }
-    
+
     /**
      * @param activeActor the activeActor to set
      */
-    protected void setActiveActor(Actor activeActor) {
+    protected void setActiveActor(final Actor activeActor) {
         this.activeActor = activeActor;
     }
 
@@ -199,43 +205,43 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * @return
      */
     synchronized List<AuthenticatedPrincipal> clearVaults() {
-        return vaultKeyCache.clear();
+        return this.vaultKeyCache.clear();
     }
-    
-    synchronized void clearVault(Vault vault) {
-        vaultKeyCache.remove(vault.getId());
+
+    synchronized void clearVault(final Vault vault) {
+        this.vaultKeyCache.remove(vault.getId());
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.Accessor#getContext()
      */
     @Override
     public AccessorContext getContext() {
-        return context;
+        return this.context;
     }
-    
+
     /**
      * @return the member
      */
     @Override
     public T getMember() {
-        return member;
+        return this.member;
     }
-    
+
 
     /* (non-Javadoc)
      * @see org.springframework.security.core.userdetails.UserDetails#getAuthorities()
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return this.authorities;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.model.AuthenticatedMember#hasAccess(org.springframework.security.core.GrantedAuthority)
      */
     @Override
-    public boolean hasAccess(GrantedAuthority grantedAuthority) {
+    public boolean hasAccess(final GrantedAuthority grantedAuthority) {
         return getAuthorities().contains(grantedAuthority);
     }
 
@@ -252,7 +258,7 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      */
     @Override
     public String getUsername() {
-        return member.getAuthenticationToken().getUsername();
+        return this.username;
     }
 
     /* (non-Javadoc)
@@ -286,9 +292,9 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
     public boolean isEnabled() {
         return true;
     }
-    
-    
-    static <T extends Member> AuthenticatedMemberBase<T> getCurrent(MemberService memberService, Class<T> expectedType) {
+
+
+    static <T extends Member> AuthenticatedMemberBase<T> getCurrent(final MemberService memberService, final Class<T> expectedType) {
         AuthenticatedMember<T> current = memberService.getCurrent(expectedType);
         if (current == null) {
             return null;
@@ -299,8 +305,8 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
         throw new PegasusException(PegasusErrorCode.PG102, "'%s' is not a managed instance of '%s'",
                 current.getClass().getName(), AuthenticatedMemberBase.class.getName());
     }
-    
-    public static boolean isAvailable(MemberService memberService) {
+
+    public static boolean isAvailable(final MemberService memberService) {
         return memberService.getCurrent() != null;
     }
 
@@ -309,7 +315,7 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      * @param authorities2
      * @return
      */
-    protected static <GA extends GrantedAuthority> Set<GA> toSet(GA[] authoritiesArr) {
+    protected static <GA extends GrantedAuthority> Set<GA> toSet(final GA[] authoritiesArr) {
         Set<GA> authorities = new LinkedHashSet<>();
         for (GA pegasusAuthority : authoritiesArr) {
             authorities.add(pegasusAuthority);

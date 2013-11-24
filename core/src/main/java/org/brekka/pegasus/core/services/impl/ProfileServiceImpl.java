@@ -129,6 +129,25 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
     }
 
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.ProfileService#delete(org.brekka.pegasus.core.model.Profile)
+     */
+    @Override
+    @Transactional()
+    public void delete(final Profile profile) {
+        this.profileDAO.delete(profile.getId());
+    }
+
+    @Override
+    @Transactional()
+    public void deleteFor(final Member member) {
+        Member nMember = EntityUtils.narrow(member, Member.class);
+        List<Profile> profileList = this.profileDAO.retrieveByMember(nMember);
+        for (Profile profile : profileList) {
+            this.profileDAO.delete(profile.getId());
+        }
+    }
+
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.ProfileService#currentUserProfileUpdated()
      */
     @Override

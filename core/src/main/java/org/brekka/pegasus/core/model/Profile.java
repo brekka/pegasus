@@ -1,10 +1,11 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,7 +23,7 @@ import org.hibernate.annotations.Type;
 /**
  * Contains the profile information for a user. Depending on what the user selects, this data may be stored encrypted
  * or in compressed plaintext.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -52,7 +53,7 @@ public class Profile extends LongevousEntity<UUID> {
     /**
      * The profile XML
      */
-    @OneToOne(fetch=FetchType.LAZY)
+    @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.REMOVE)
     @JoinColumn(name="`XmlEntityID`", nullable=false)
     private XmlEntity<ProfileDocument> xml;
 
@@ -62,7 +63,7 @@ public class Profile extends LongevousEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -74,7 +75,7 @@ public class Profile extends LongevousEntity<UUID> {
     }
 
     public Member getOwner() {
-        return owner;
+        return this.owner;
     }
 
     public void setOwner(final Member owner) {
@@ -82,7 +83,7 @@ public class Profile extends LongevousEntity<UUID> {
     }
 
     public XmlEntity<ProfileDocument> getXml() {
-        return xml;
+        return this.xml;
     }
 
     public void setXml(final XmlEntity<ProfileDocument> xml) {

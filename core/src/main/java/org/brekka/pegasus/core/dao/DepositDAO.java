@@ -46,7 +46,8 @@ public interface DepositDAO extends EntityDAO<UUID, Deposit> {
      * @param allocationDisposition
      * @return
      */
-    List<Deposit> retrieveDepositsForParticipant(Member member, AllocationDisposition allocationDisposition, boolean personalOnly);
+    List<Deposit> retrieveDepositsForParticipant(Member member, AllocationDisposition allocationDisposition,
+            boolean personalOnly, boolean includeExpired);
 
     /**
      * @param owner
@@ -54,7 +55,7 @@ public interface DepositDAO extends EntityDAO<UUID, Deposit> {
      * @param includePersonal
      * @return
      */
-    List<Deposit> retrieveDepositsForCollectiveOwner(Actor owner, AllocationDisposition allocationDisposition, boolean includePersonal);
-
+    List<Deposit> retrieveDepositsForCollectiveOwner(Actor owner, AllocationDisposition allocationDisposition,
+            boolean includePersonal, boolean includeExpired);
 
 }

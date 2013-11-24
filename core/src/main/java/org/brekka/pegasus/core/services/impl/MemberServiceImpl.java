@@ -98,12 +98,12 @@ public class MemberServiceImpl implements MemberService {
     public void activateOrganization(final Organization organization) {
         AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
         Member member = current.getMember();
-        Associate associate = organizationService.retrieveAssociate(organization, member);
+        Associate associate = this.organizationService.retrieveAssociate(organization, member);
         if (associate == null) {
             throw new PegasusException(PegasusErrorCode.PG904,
                     "Current member '%s' is not an associate of organization '%s'", member.getId(), organization.getId());
         }
-        Organization managedOrganization = organizationService.retrieveById(associate.getOrganization().getId(), true);
+        Organization managedOrganization = this.organizationService.retrieveById(associate.getOrganization().getId(), true);
         associate.setOrganization(managedOrganization);
         associate.setMember(member);
         current.setActiveActor(associate);
@@ -116,7 +116,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly=true)
     public <T extends Member> T retrieveById(final UUID memberId, final Class<T> expectedType) {
-        Member member = memberDAO.retrieveById(memberId);
+        Member member = this.memberDAO.retrieveById(memberId);
         if (!expectedType.isAssignableFrom(member.getClass())) {
             throw new PegasusException(PegasusErrorCode.PG903,
                     "Member is '%s' not the expected '%s'", member.getClass().getName(), expectedType.getName());
@@ -131,7 +131,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(readOnly=true)
     public <T extends Member> T retrieveMember(final AuthenticationToken token, final Class<T> expectedType) {
-        Member member = memberDAO.retrieveByAuthenticationToken(token);
+        Member member = this.memberDAO.retrieveByAuthenticationToken(token);
         if (member == null) {
             return null;
         }
@@ -167,7 +167,7 @@ public class MemberServiceImpl implements MemberService {
     public void setupPerson(final ProfileType profileType, final String vaultPassword, final boolean encryptedProfile) {
         Person managed = (Person) getManaged();
         populatePerson(managed, profileType, vaultPassword, encryptedProfile, false, true);
-        memberDAO.update(managed);
+        this.memberDAO.update(managed);
     }
 
     /* (non-Javadoc)
@@ -191,7 +191,7 @@ public class MemberServiceImpl implements MemberService {
     public Person createPerson(final AuthenticationToken authenticationToken) {
         Person person = new Person();
         person.setAuthenticationToken(authenticationToken);
-        memberDAO.create(person);
+        this.memberDAO.create(person);
         return person;
     }
 
@@ -206,7 +206,7 @@ public class MemberServiceImpl implements MemberService {
         if (authenticatedMember != null) {
             List<AuthenticatedPrincipal> authenticatedPrincipals = authenticatedMember.clearVaults();
             for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
-                phalanxService.logout(authenticatedPrincipal);
+                this.phalanxService.logout(authenticatedPrincipal);
             }
         }
     }
@@ -233,7 +233,7 @@ public class MemberServiceImpl implements MemberService {
             // Attempt to locate the user profile
             if (member.getStatus() == ActorStatus.ACTIVE
                     && authMember.getActiveProfile() == null) {
-                Profile profile = profileService.retrieveProfile(member);
+                Profile profile = this.profileService.retrieveProfile(member);
                 authMember.setActiveProfile(profile);
             }
         }
@@ -246,14 +246,20 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void resetMember(final Member member) {
-        Member managedMember = memberDAO.retrieveById(member.getId());
-        Vault vault = managedMember.getDefaultVault();
-        vaultService.deleteVault(vault);
-        managedMember.setDefaultVault(null);
-        memberDAO.update(managedMember);
+        Member managedMember = this.memberDAO.retrieveById(member.getId());
 
-        // Makes no sense to do this
-        //        organizationService.deleteAssociates(member);
+        // Clear all profiles for the member
+        this.profileService.deleteFor(managedMember);
+
+        // Delete the vault
+        Vault vault = managedMember.getDefaultVault();
+        if (vault != null) {
+            this.vaultService.deleteVault(vault);
+            managedMember.setDefaultVault(null);
+        }
+
+        // Update
+        this.memberDAO.update(managedMember);
 
         // Update the context user, if appropriate.
         AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
@@ -278,15 +284,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void updateStatus(final UUID actorId, final ActorStatus status) {
-        Actor managed = actorDAO.retrieveById(actorId);
+        Actor managed = this.actorDAO.retrieveById(actorId);
         managed.setStatus(status);
-        actorDAO.update(managed);
+        this.actorDAO.update(managed);
     }
 
     protected Member getManaged() {
         AuthenticatedMember<Member> current = getCurrent(Member.class);
         Member member = current.getMember();
-        return memberDAO.retrieveById(member.getId());
+        return this.memberDAO.retrieveById(member.getId());
     }
 
     protected void populatePerson(final Person person, final ProfileType profileType, final String vaultPassword,
@@ -295,23 +301,23 @@ public class MemberServiceImpl implements MemberService {
         person.setStatus(ActorStatus.ACTIVE);
         if (create) {
             // Need to save now, person is reference
-            memberDAO.create(person);
+            this.memberDAO.create(person);
         }
 
 
         // Vault
-        Vault defaultVault = vaultService.createVault("Default", vaultPassword, person);
+        Vault defaultVault = this.vaultService.createVault("Default", vaultPassword, person);
         person.setDefaultVault(defaultVault);
-        defaultVault = vaultService.openVault(defaultVault.getId(), vaultPassword);
-        Division<Member> primaryDivision = divisionService.createDivision(defaultVault, null, "Primary");
+        defaultVault = this.vaultService.openVault(defaultVault.getId(), vaultPassword);
+        Division<Member> primaryDivision = this.divisionService.createDivision(defaultVault, null, "Primary");
         person.setPrimaryKeySafe(primaryDivision);
 
         List<EMailType> eMailList = profileType.getEMailList();
         for (EMailType eMailType : eMailList) {
             String address = eMailType.getAddress().toLowerCase();
-            EMailAddress emailAddress = eMailAddressService.retrieveByAddress(address);
+            EMailAddress emailAddress = this.eMailAddressService.retrieveByAddress(address);
             if (emailAddress == null) {
-                emailAddress = eMailAddressService.createEMail(address, person, false);
+                emailAddress = this.eMailAddressService.createEMail(address, person, false);
             }
             person.setDefaultEmailAddress(emailAddress);
             eMailType.setUUID(emailAddress.getId().toString());
@@ -322,9 +328,9 @@ public class MemberServiceImpl implements MemberService {
         // Profile
         Profile profile;
         if (encryptProfile) {
-            profile = profileService.createEncryptedProfile(person, profileType, primaryDivision);
+            profile = this.profileService.createEncryptedProfile(person, profileType, primaryDivision);
         } else {
-            profile = profileService.createPlainProfile(person, profileType);
+            profile = this.profileService.createPlainProfile(person, profileType);
         }
 
         if (currentUser) {

@@ -108,9 +108,9 @@ public interface InboxService {
      * @return
      */
     List<Deposit> retrieveDepositsByMember(Member member, AllocationDisposition allocationDisposition,
-            boolean personalOnly);
+            boolean personalOnly, boolean includeExpired);
 
-    List<Deposit> retrieveDepositsByOwner(Actor owner, AllocationDisposition allocationDisposition, boolean includePersonal);
+    List<Deposit> retrieveDepositsByOwner(Actor owner, AllocationDisposition allocationDisposition, boolean includePersonal, boolean includeExpired);
 
     /**
      * Retrieve the specified deposit which will contain the file decryption key metadata.

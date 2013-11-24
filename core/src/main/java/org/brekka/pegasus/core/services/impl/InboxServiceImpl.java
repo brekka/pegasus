@@ -195,21 +195,24 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.AllocationDisposition)
-     */
+     *
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Member,
+     * org.brekka.pegasus.core.model.AllocationDisposition) */
     @Override
-    public List<Deposit> retrieveDepositsByMember(final Member member, final AllocationDisposition allocationDisposition, final boolean personalOnly) {
-        return this.depositDAO.retrieveDepositsForParticipant(member, allocationDisposition, personalOnly);
+    public List<Deposit> retrieveDepositsByMember(final Member member,
+            final AllocationDisposition allocationDisposition, final boolean personalOnly, final boolean includeExpired) {
+        return this.depositDAO.retrieveDepositsForParticipant(member, allocationDisposition, personalOnly, includeExpired);
     }
 
     @Override
-    public List<Deposit> retrieveDepositsByOwner(final Actor owner, final AllocationDisposition allocationDisposition, final boolean includePersonal) {
-        return this.depositDAO.retrieveDepositsForCollectiveOwner(owner, allocationDisposition, includePersonal);
+    public List<Deposit> retrieveDepositsByOwner(final Actor owner, final AllocationDisposition allocationDisposition,
+            final boolean includePersonal, final boolean includeExpired) {
+        return this.depositDAO.retrieveDepositsForCollectiveOwner(owner, allocationDisposition, includePersonal, includeExpired);
     }
 
     /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit)
-     */
+     *
+     * @see org.brekka.pegasus.core.services.InboxService#unlock(org.brekka.pegasus.core.model.Deposit) */
     @Override
     @Transactional(readOnly=true)
     public Deposit retrieveDeposit(final UUID depositId, final boolean populateDispatches) {

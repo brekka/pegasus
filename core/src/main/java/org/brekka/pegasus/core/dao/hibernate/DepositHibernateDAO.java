@@ -129,7 +129,8 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> retrieveDepositsForParticipant(final Member member, final AllocationDisposition allocationDisposition, final boolean personalOnly) {
+    public List<Deposit> retrieveDepositsForParticipant(final Member member, final AllocationDisposition allocationDisposition, final boolean personalOnly,
+            final boolean includeExpired) {
         String hql = "select d, df "
                   + "  from Participant p "
                   + "  join p.collective as c "
@@ -144,6 +145,9 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
         if (personalOnly) {
             hql +=  "   and c.personal=:personal";
         }
+        if (!includeExpired) {
+            hql +=   "  and d.expires>:now";
+        }
         hql +=      " order by d.created desc";
         Query q = getCurrentSession().createQuery(hql)
               .setParameter("member", member);
@@ -152,6 +156,9 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
         }
         if (personalOnly) {
             q.setParameter("personal", personalOnly);
+        }
+        if (!includeExpired) {
+            q.setTimestamp("now", new Date());
         }
         q.setResultTransformer(FirstResultTransformer.INSTANCE);
         return q.list();
@@ -162,7 +169,8 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Deposit> retrieveDepositsForCollectiveOwner(final Actor owner, final AllocationDisposition allocationDisposition, final boolean includePersonal) {
+    public List<Deposit> retrieveDepositsForCollectiveOwner(final Actor owner, final AllocationDisposition allocationDisposition,
+            final boolean includePersonal, final boolean includeExpired) {
         String hql = "select d, df "
                    + "  from Collective c "
                    + "  join c.inbox as i "
@@ -174,6 +182,9 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
         if  (allocationDisposition != null) {
             hql +=   "   and d.disposition=:disposition";
         }
+        if (!includeExpired) {
+            hql +=   "  and d.expires>:now";
+        }
         hql +=       " order by d.created desc";
         Query q = getCurrentSession().createQuery(hql)
               .setParameter("owner", owner);
@@ -181,6 +192,9 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
             q.setParameter("disposition", allocationDisposition);
         }
         q.setParameter("personal", includePersonal);
+        if (!includeExpired) {
+            q.setTimestamp("now", new Date());
+        }
         q.setResultTransformer(FirstResultTransformer.INSTANCE);
         return q.list();
     }

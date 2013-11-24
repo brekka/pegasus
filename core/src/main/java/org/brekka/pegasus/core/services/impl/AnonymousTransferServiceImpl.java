@@ -165,6 +165,7 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
             checkAttempts(e, transfer);
             throw e;
         }
+        bindToContext(token, transfer);
         return transfer;
     }
 
