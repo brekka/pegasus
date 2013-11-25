@@ -1,5 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.brekka</groupId>
+        <artifactId>root</artifactId>
+        <version>1.0</version>
+    </parent>
     <groupId>org.brekka.pegasus</groupId>
     <artifactId>pegasus</artifactId>
     <version>2.5-SNAPSHOT</version>
@@ -26,17 +31,6 @@
         </license>
     </licenses>
 
-    <distributionManagement>
-        <repository>
-            <id>brekka.org</id>
-            <url>https://brekka.org/maven/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>brekka.org</id>
-            <url>https://brekka.org/maven/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <developers>
         <developer>
             <name>Andrew Taylor</name>
@@ -51,14 +45,13 @@
     </modules>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <xmlbeans-version>2.5.0</xmlbeans-version>
         <spring-version>3.1.2.RELEASE</spring-version>
         <spring-security-version>3.1.2.RELEASE</spring-security-version>
         <hibernate-version>4.1.7.Final</hibernate-version>
         <servlet-api-release-version>2.5</servlet-api-release-version>
-        <stillingar-core-version>1.0.0</stillingar-core-version>
-        <stillingar-spring-version>1.0.0</stillingar-spring-version>
-        <stillingar-xmlbeans-version>1.0.0</stillingar-xmlbeans-version>
+        <stillingar-core-version>1.0.2</stillingar-core-version>
+        <stillingar-spring-version>1.0.3</stillingar-spring-version>
+        <stillingar-xmlbeans-version>1.0.2</stillingar-xmlbeans-version>
     </properties>
 </project>
