@@ -16,12 +16,14 @@
 
 package org.brekka.pegasus.core.support;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.model.EMailMessage;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.services.EMailSendingService;
@@ -40,83 +42,82 @@ public class TemplatedEMail {
     /**
      * @param prefix
      */
-    public TemplatedEMail(String prefix) {
+    public TemplatedEMail(final String prefix) {
         this.subjectSlug = prefix + "_SUBJECT";
         this.bodySlug = prefix + "_BODY";
     }
-    
-    public EMailBuilder buildEMail(TemplateService templateService) {
-        Template bodyTemplate = retrieveTemplate(templateService, bodySlug);
-        Template subjectTemplate = retrieveTemplate(templateService, subjectSlug);
+
+    public EMailBuilder buildEMail(final TemplateService templateService) {
+        Template bodyTemplate = retrieveTemplate(templateService, this.bodySlug);
+        Template subjectTemplate = retrieveTemplate(templateService, this.subjectSlug);
         return new EMailBuilder(templateService, bodyTemplate, subjectTemplate);
     }
-    
-    protected Template retrieveTemplate(TemplateService templateService, String templateSlug) {
+
+    protected Template retrieveTemplate(final TemplateService templateService, final String templateSlug) {
         Template template = templateService.retrieveBySlug(templateSlug);
         if (template == null) {
             throw new PegasusException(PegasusErrorCode.PG871, "Template '%s' not found", templateSlug);
         }
         return template;
     }
-    
-    
+
+
     public class EMailBuilder {
         private final Map<String, Object> context = new HashMap<>();
-        
+
         private final TemplateService templateService;
         private final Template bodyTemplate;
         private final Template subjectTemplate;
-        
+
         private String sender;
-        
+
         /**
          * @param bodyTemplate
          * @param subjectTemplate
          */
-        private EMailBuilder(TemplateService templateService, Template bodyTemplate, Template subjectTemplate) {
+        private EMailBuilder(final TemplateService templateService, final Template bodyTemplate, final Template subjectTemplate) {
             this.templateService = templateService;
             this.bodyTemplate = bodyTemplate;
             this.subjectTemplate = subjectTemplate;
         }
-        
+
         /**
          * @param sender the sender to set
          */
-        public EMailBuilder setSender(String sender) {
+        public EMailBuilder setSender(final String sender) {
             this.sender = sender;
             return this;
         }
-        
+
         /**
          * Add a value to the context
          * @param key
          * @param value
          */
-        public EMailBuilder append(String key, Object value) {
-            context.put(key, value);
+        public EMailBuilder append(final String key, final Object value) {
+            this.context.put(key, value);
             return this;
         }
-        
+
         /**
          * Add multiple values
          * @param map
          */
-        public EMailBuilder appendAll(Map<String, Object> map) {
-            context.putAll(map);
+        public EMailBuilder appendAll(final Map<String, Object> map) {
+            this.context.putAll(map);
             return this;
         }
-        
-        public void send(String recipient, EMailSendingService eMailSendingService, KeySafe<?> keySafe) {
-            String subject = templateService.merge(subjectTemplate, context);
-            String body = templateService.merge(bodyTemplate, context);
-            eMailSendingService.send(recipient, sender, subject, body, null, keySafe);
+
+        public boolean send(final String recipient, final EMailSendingService eMailSendingService, final KeySafe<?> keySafe) {
+            return send(Arrays.asList(recipient), eMailSendingService, keySafe);
         }
-        
-        public void send(List<String> recipients, EMailSendingService eMailSendingService, KeySafe<?> keySafe) {
-            String subject = templateService.merge(subjectTemplate, context);
-            String body = templateService.merge(bodyTemplate, context);
-            eMailSendingService.send(recipients, sender, subject, body, null, keySafe);
+
+        public boolean send(final List<String> recipients, final EMailSendingService eMailSendingService, final KeySafe<?> keySafe) {
+            String subject = this.templateService.merge(this.subjectTemplate, this.context);
+            String body = this.templateService.merge(this.bodyTemplate, this.context);
+            EMailMessage mail = eMailSendingService.send(recipients, this.sender, subject, body, null, keySafe);
+            return (mail.getReference() == null);
         }
     }
-    
+
 }
