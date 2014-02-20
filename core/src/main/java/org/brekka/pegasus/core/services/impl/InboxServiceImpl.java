@@ -367,7 +367,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         AllocationType allocationType = prepareAllocationType(newBundleType, details);
 
         // Encrypt the document
-        encryptDocument(deposit, allocationType, keySafe);
+        prepareDocument(deposit, allocationType, keySafe);
 
         deposit.setInbox(inbox);
         deposit.setKeySafe(keySafe);
@@ -414,6 +414,10 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         if (deposit == null) {
             // Need to extract the metadata
             deposit = depositLookup.retrieve(depositId);
+            if (deposit.getDeleted() != null) {
+                // Deposit has been deleted, unable to decrypt
+                return deposit;
+            }
             if (populateDispatches) {
                 decryptDocument(deposit.getDerivedFrom());
             } else {

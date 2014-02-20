@@ -93,7 +93,7 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
 
         // Copy the allocation to
         AllocationType allocationType = prepareAllocationType(bundleType, details);
-        encryptDocument(dispatch, allocationType, nKeySafe);
+        prepareDocument(dispatch, allocationType, nKeySafe);
 
         if (nKeySafe instanceof Division) {
             dispatch.setDivision((Division<?>) nKeySafe);
