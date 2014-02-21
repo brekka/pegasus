@@ -116,7 +116,7 @@ public class TemplatedEMail {
             String subject = this.templateService.merge(this.subjectTemplate, this.context);
             String body = this.templateService.merge(this.bodyTemplate, this.context);
             EMailMessage mail = eMailSendingService.send(recipients, this.sender, subject, body, null, keySafe);
-            return (mail.getReference() == null);
+            return (mail.getReference() != null);
         }
     }
 
