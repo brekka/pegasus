@@ -16,6 +16,8 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -61,19 +63,19 @@ import org.springframework.util.ClassUtils;
 @Service
 @Transactional
 public class TemplateServiceImpl implements TemplateService {
-    
+
     @Autowired
     private TemplateDAO templateDAO;
-    
+
     @Autowired
     private XmlEntityService xmlEntityService;
-    
-    
+
+
     public Map<TemplateEngine, TemplateEngineAdapter> adapters;
-    
+
     @PostConstruct
     public void init() {
-        if (adapters != null) {
+        if (this.adapters != null) {
             // externally configured
             return;
         }
@@ -81,7 +83,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (ClassUtils.isPresent("org.apache.velocity.app.VelocityEngine", getClass().getClassLoader())) {
             // Velocity is present, add it
             TemplateEngineAdapter templateEngineAdapter = new org.brekka.pegasus.core.services.impl.VelocityTemplateEngine();
-            templateEngineAdapter.init(templateDAO, xmlEntityService);
+            templateEngineAdapter.init(this.templateDAO, this.xmlEntityService);
             adapters.put(TemplateEngine.VELOCITY, templateEngineAdapter);
         }
         this.adapters = adapters;
@@ -92,33 +94,49 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Nullable
-    public String merge(@Nonnull Template template, @Nonnull Map<String, Object> context) {
-        String merged;
-        TemplateEngineAdapter templateEngineAdapter = adapters.get(template.getEngine());
+    public String merge(@Nonnull final Template template, @Nonnull final Map<String, Object> context) {
+        StringWriter writer = new StringWriter();
+        merge(template, context, writer);
+        return writer.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#merge(org.brekka.pegasus.core.model.Template, java.util.Map, java.io.Writer)
+     */
+    @Override
+    public void merge(final Template template, final Map<String, Object> context, final Writer out) {
+        TemplateEngineAdapter templateEngineAdapter = this.adapters.get(template.getEngine());
         if (templateEngineAdapter != null) {
-            merged = templateEngineAdapter.merge(template, context);
+            templateEngineAdapter.merge(template, context, out);
         } else {
-            throw new PegasusException(PegasusErrorCode.PG773, 
+            throw new PegasusException(PegasusErrorCode.PG773,
                     "No logic configured for engine '%s'", template.getEngine());
         }
-        return merged;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#preview(java.lang.String, org.brekka.pegasus.core.model.TemplateEngine, java.util.Map)
      */
     @Override
     @Nullable
-    public String preview(String templateContent, TemplateEngine templateEngine, Map<String, Object> context) {
-        String merged;
-        TemplateEngineAdapter templateEngineAdapter = adapters.get(templateEngine);
+    public String preview(final String templateContent, final TemplateEngine templateEngine, final Map<String, Object> context) {
+        StringWriter writer = new StringWriter();
+        preview(templateContent, templateEngine, context, writer);
+        return writer.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#preview(java.lang.String, org.brekka.pegasus.core.model.TemplateEngine, java.util.Map, java.io.Writer)
+     */
+    @Override
+    public void preview(final String templateContent, final TemplateEngine templateEngine, final Map<String, Object> context, final Writer out) {
+        TemplateEngineAdapter templateEngineAdapter = this.adapters.get(templateEngine);
         if (templateEngineAdapter != null) {
-            merged = templateEngineAdapter.preview(templateContent, context);
+            templateEngineAdapter.preview(templateContent, context, out);
         } else {
-            throw new PegasusException(PegasusErrorCode.PG773, 
+            throw new PegasusException(PegasusErrorCode.PG773,
                     "No logic configured for engine '%s'", templateEngine);
         }
-        return merged;
     }
 
     /* (non-Javadoc)
@@ -127,8 +145,8 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Nullable
     @Transactional(readOnly=true)
-    public Template retrieveByToken(@Nonnull Token token) {
-        return templateDAO.retrieveByToken(token);
+    public Template retrieveByToken(@Nonnull final Token token) {
+        return this.templateDAO.retrieveByToken(token);
     }
 
     /* (non-Javadoc)
@@ -137,8 +155,8 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Nullable
     @Transactional(readOnly=true)
-    public Template retrieveBySlug(@Nonnull String slug) {
-        return templateDAO.retrieveBySlug(slug);
+    public Template retrieveBySlug(@Nonnull final String slug) {
+        return this.templateDAO.retrieveBySlug(slug);
     }
 
     /* (non-Javadoc)
@@ -147,8 +165,8 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Nullable
     @Transactional(readOnly=true)
-    public Template retrieveById(@Nonnull UUID templateId) {
-        return templateDAO.retrieveById(templateId);
+    public Template retrieveById(@Nonnull final UUID templateId) {
+        return this.templateDAO.retrieveById(templateId);
     }
 
     /* (non-Javadoc)
@@ -157,26 +175,26 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Nonnull
     @Transactional()
-    public Template create(@Nonnull TemplateType details, @Nonnull TemplateEngine engine, @Nullable KeySafe<?> keySafe,
-            @Nullable String slug, @Nullable Token token, @Nullable String label) {
+    public Template create(@Nonnull final TemplateType details, @Nonnull final TemplateEngine engine, @Nullable final KeySafe<?> keySafe,
+            @Nullable final String slug, @Nullable final Token token, @Nullable final String label) {
         Template template = new Template();
-        
+
         fixDetails(details);
         TemplateDocument templateDocument = TemplateDocument.Factory.newInstance();
         templateDocument.setTemplate(details);
-        
+
         XmlEntity<TemplateDocument> xml;
         if (keySafe == null) {
-            xml = xmlEntityService.persistPlainEntity(templateDocument, false);
+            xml = this.xmlEntityService.persistPlainEntity(templateDocument, false);
         } else {
-            xml = xmlEntityService.persistEncryptedEntity(templateDocument, keySafe, false);
+            xml = this.xmlEntityService.persistEncryptedEntity(templateDocument, keySafe, false);
         }
         template.setEngine(engine);
         template.setSlug(slug);
         template.setToken(token);
         template.setXml(xml);
         template.setLabel(label);
-        templateDAO.create(template);
+        this.templateDAO.create(template);
         return template;
     }
 
@@ -185,20 +203,20 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
-    public void update(@Nonnull Template template) {
-        Template managed = templateDAO.retrieveById(template.getId());
+    public void update(@Nonnull final Template template) {
+        Template managed = this.templateDAO.retrieveById(template.getId());
         fixDetails(template.getXml().getBean().getTemplate());
         XmlEntity<TemplateDocument> incoming = template.getXml();
         XmlEntity<TemplateDocument> current = managed.getXml();
-        XmlEntity<TemplateDocument> xml = xmlEntityService.updateEntity(incoming, current, TemplateDocument.class);
+        XmlEntity<TemplateDocument> xml = this.xmlEntityService.updateEntity(incoming, current, TemplateDocument.class);
         managed.setXml(xml);
         // Allow the caller to update the slug/token.
         managed.setSlug(template.getSlug());
         managed.setToken(template.getToken());
         managed.setEngine(template.getEngine());
         managed.setLabel(template.getLabel());
-        
-        templateDAO.update(managed);
+
+        this.templateDAO.update(managed);
         template.setXml(xml);
     }
 
@@ -207,40 +225,40 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional()
-    public void delete(UUID templateId) {
-        templateDAO.delete(templateId);
+    public void delete(final UUID templateId) {
+        this.templateDAO.delete(templateId);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#retrieveListing(org.brekka.commons.persistence.model.ListingCriteria)
      */
     @Override
     @Transactional(readOnly=true)
-    public List<Template> retrieveListing(ListingCriteria listingCriteria) {
-        return templateDAO.retrieveListing(listingCriteria);
+    public List<Template> retrieveListing(final ListingCriteria listingCriteria) {
+        return this.templateDAO.retrieveListing(listingCriteria);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#retrieveListingRowCount()
      */
     @Override
     @Transactional(readOnly=true)
     public int retrieveListingRowCount() {
-        return templateDAO.retrieveListingRowCount();
+        return this.templateDAO.retrieveListingRowCount();
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#exportAll()
      */
     @Override
     @Transactional(readOnly=true)
     public ExportedTemplatesDocument exportAll() {
-        int count = templateDAO.retrieveListingRowCount();
+        int count = this.templateDAO.retrieveListingRowCount();
         List<Template> listing = retrieveListing(new ListingCriteria(0, count, Arrays.<OrderByPart>asList(new OrderByProperty("created", false))));
         ExportedTemplatesDocument doc = ExportedTemplatesDocument.Factory.newInstance();
         ExportedTemplates templates = doc.addNewExportedTemplates();
         for (Template template : listing) {
-            xmlEntityService.release(template, TemplateDocument.class);
+            this.xmlEntityService.release(template, TemplateDocument.class);
             TemplateType templateXml = template.getXml().getBean().getTemplate();
             ExportedTemplateType exportedTemplate = templates.addNewExportedTemplate();
             exportedTemplate.setSlug(template.getSlug());
@@ -253,19 +271,19 @@ public class TemplateServiceImpl implements TemplateService {
         }
         return doc;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#importFrom(org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument)
      */
     @Override
     @Transactional()
-    public int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, KeySafe<?> keySafe) {
+    public int importFrom(final ExportedTemplatesDocument exportedTemplatesDocument, final KeySafe<?> keySafe) {
         int count = 0;
         ExportedTemplates exportedTemplates = exportedTemplatesDocument.getExportedTemplates();
         List<ExportedTemplateType> exportedTemplateList = exportedTemplates.getExportedTemplateList();
         for (ExportedTemplateType exportedTemplateType : exportedTemplateList) {
             String slug = exportedTemplateType.getSlug();
-            if (templateDAO.retrieveBySlug(slug) != null) {
+            if (this.templateDAO.retrieveBySlug(slug) != null) {
                 // Already exists, don't overwrite
                 continue;
             }
@@ -280,24 +298,24 @@ public class TemplateServiceImpl implements TemplateService {
         }
         return count;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.TemplateService#getAvailableEngines()
      */
     @Override
     public Set<TemplateEngine> getAvailableEngines() {
-        Set<TemplateEngine> engines = EnumSet.copyOf(adapters.keySet());
+        Set<TemplateEngine> engines = EnumSet.copyOf(this.adapters.keySet());
         return engines;
     }
 
     /**
      * @param details
      */
-    protected void fixDetails(TemplateType details) {
+    protected void fixDetails(final TemplateType details) {
         if (details == null) {
             return;
         }
-        if (details.isSetDocumentation() 
+        if (details.isSetDocumentation()
                 && details.getDocumentation() == null) {
             details.unsetDocumentation();
         }
@@ -305,11 +323,11 @@ public class TemplateServiceImpl implements TemplateService {
             details.setContent(StringUtils.EMPTY);
         }
     }
-    
+
     /**
      * @param adapters the adapters to set
      */
-    public void setAdapters(Map<TemplateEngine, TemplateEngineAdapter> adapters) {
+    public void setAdapters(final Map<TemplateEngine, TemplateEngineAdapter> adapters) {
         this.adapters = adapters;
     }
 }

@@ -152,8 +152,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <tag>v2.5.1</tag>
-  </scm>
 </project>

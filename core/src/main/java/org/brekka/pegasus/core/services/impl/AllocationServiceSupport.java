@@ -210,6 +210,9 @@ class AllocationServiceSupport {
             return;
         }
         XmlEntity<AllocationDocument> existing = nAllocation.getXml();
+        if (existing == null) {
+            existing = this.allocationDAO.retrieveById(allocation.getId()).getXml();
+        }
         if (existing.getBean() != null) {
             // Already decrypted
             return;

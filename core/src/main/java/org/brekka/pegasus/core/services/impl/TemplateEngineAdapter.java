@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.io.Writer;
 import java.util.Map;
 
 import org.brekka.pegasus.core.dao.TemplateDAO;
@@ -35,13 +36,13 @@ public interface TemplateEngineAdapter {
      * @param xmlEntityService
      */
     void init(TemplateDAO templateDAO, XmlEntityService xmlEntityService);
-    
+
     /**
      * @param template
      * @param context
      */
-    String merge(Template template, Map<String, Object> context);
-    
-    
-    String preview(String templateContent, Map<String, Object> context);
+    void merge(Template template, Map<String, Object> context, Writer writer);
+
+
+    void preview(String templateContent, Map<String, Object> context, Writer writer);
 }

@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A dispatch is an allocation created by a registered user with the goal of assigning it to another user.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
@@ -86,8 +86,11 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
             final DateTime expires, final Integer maxDownloads, final UploadedFiles files) {
         KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         Dispatch dispatch = new Dispatch();
-        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
-        Actor activeActor = authenticatedMember.getActiveActor();
+        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
+        Actor activeActor = null;
+        if (authenticatedMember != null) {
+            activeActor = authenticatedMember.getActiveActor();
+        }
 
         BundleType bundleType = completeFiles(0, files);
 
@@ -100,13 +103,13 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         }
         dispatch.setKeySafe(nKeySafe);
         dispatch.setActor(activeActor);
-        dispatch.setExpires(expires.toDate());
+        dispatch.setExpires(expires != null ? expires.toDate() : null);
         dispatch.setDisposition(disposition);
 
-        Token token = tokenService.generateToken(PegasusTokenType.DISPATCH);
+        Token token = this.tokenService.generateToken(PegasusTokenType.DISPATCH);
         dispatch.setToken(token);
 
-        dispatchDAO.create(dispatch);
+        this.dispatchDAO.create(dispatch);
         createAllocationFiles(dispatch);
         return dispatch;
     }
@@ -122,17 +125,17 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
 
         Inbox inbox = null;
         if (StringUtils.isNotBlank(recipientEMail)) {
-            EMailAddress address = eMailAddressService.retrieveByAddress(recipientEMail);
+            EMailAddress address = this.eMailAddressService.retrieveByAddress(recipientEMail);
             if (address != null) {
                 // Known to the system.
-                inbox = inboxService.retrieveForEMailAddress(address);
+                inbox = this.inboxService.retrieveForEMailAddress(address);
             }
         }
         Allocation allocation;
         if (inbox != null) {
-            allocation = inboxService.createDeposit(inbox, null, details, allocationExpires, dispatch);
+            allocation = this.inboxService.createDeposit(inbox, null, details, allocationExpires, dispatch);
         } else {
-            allocation = anonymousService.createTransfer(null, details, allocationExpires, maxDownloads, null, dispatch, null);
+            allocation = this.anonymousService.createTransfer(null, details, allocationExpires, maxDownloads, null, dispatch, null);
         }
         return allocation;
     }
@@ -144,9 +147,9 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(readOnly=true)
     public List<Dispatch> retrieveCurrentForInterval(final KeySafe<?> keySafe, final DateTime from, final DateTime until) {
-        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(memberService, Member.class);
+        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
         Actor activeActor = authenticatedMember.getActiveActor();
-        return dispatchDAO.retrieveForInterval(keySafe, activeActor, from.toDate(), until.toDate());
+        return this.dispatchDAO.retrieveForInterval(keySafe, activeActor, from.toDate(), until.toDate());
     }
 
     /* (non-Javadoc)
@@ -155,8 +158,17 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void delete(final UUID dispatchId) {
-        Dispatch dispatch = dispatchDAO.retrieveById(dispatchId);
+        Dispatch dispatch = this.dispatchDAO.retrieveById(dispatchId);
+        delete(dispatch);
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DispatchService#delete(org.brekka.pegasus.core.model.Dispatch)
+     */
+    @Override
+    @Transactional
+    public void delete(final Dispatch dispatch) {
         dispatch.setExpires(new Date());
-        dispatchDAO.update(dispatch);
+        this.dispatchDAO.update(dispatch);
     }
 }
