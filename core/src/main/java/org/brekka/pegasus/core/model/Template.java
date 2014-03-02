@@ -96,11 +96,18 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     private XmlEntity<TemplateDocument> xml;
 
     /**
+     * Was this template imported and has it not been changed by an operator since it was imported?
+     * Used to detect whether a template can be updated automatically.
+     */
+    @Column(name="`Imported`")
+    private Boolean imported;
+
+    /**
      * @return the id
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -115,7 +122,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      * @return the token
      */
     public Token getToken() {
-        return token;
+        return this.token;
     }
 
     /**
@@ -129,7 +136,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      * @return the slug
      */
     public String getSlug() {
-        return slug;
+        return this.slug;
     }
 
     /**
@@ -144,7 +151,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      */
     @Override
     public XmlEntity<TemplateDocument> getXml() {
-        return xml;
+        return this.xml;
     }
 
     /**
@@ -159,7 +166,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      * @return the engine
      */
     public TemplateEngine getEngine() {
-        return engine;
+        return this.engine;
     }
 
     /**
@@ -174,7 +181,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      * @return the label
      */
     public String getLabel() {
-        return label;
+        return this.label;
     }
 
     /**
@@ -188,6 +195,15 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
         return details(TemplateType.class);
     }
 
+
+    public Boolean getImported() {
+        return this.imported;
+    }
+
+    public void setImported(final Boolean imported) {
+        this.imported = imported;
+    }
+
     /**
      * Retrieve the details contained within the XML. Named without 'get' so as not to be handled as property.
      * @param expectedType
@@ -195,7 +211,7 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
      */
     @SuppressWarnings("unchecked")
     public <T extends TemplateType> T details(final Class<T> expectedType) {
-        TemplateDocument doc = xml.getBean();
+        TemplateDocument doc = this.xml.getBean();
         if (doc == null) {
             throw new PegasusException(PegasusErrorCode.PG876, "Template[%s] XML entity is locked", getId());
         }
@@ -217,12 +233,12 @@ public class Template extends SnapshotEntity<UUID> implements XmlEntityAware<Tem
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-        .append("id", id)
-        .append("slug", slug)
-        .append("token", token)
-        .append("engine", engine)
-        .append("label", label)
-        .append("xml", xml)
+        .append("id", this.id)
+        .append("slug", this.slug)
+        .append("token", this.token)
+        .append("engine", this.engine)
+        .append("label", this.label)
+        .append("xml", this.xml)
         .toString();
     }
 }

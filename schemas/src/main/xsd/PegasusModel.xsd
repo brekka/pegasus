@@ -196,6 +196,7 @@
                     <xsd:element name="Slug" type="xsd:string" />
                     <xsd:element name="Engine" type="xsd:string" />
                     <xsd:element name="PlainLabel" type="xsd:string" />
+                    <xsd:element name="Encrypt" type="xsd:boolean" />
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>

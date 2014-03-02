@@ -30,7 +30,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.model.OrderByPart;
 import org.brekka.commons.persistence.model.OrderByProperty;
@@ -63,6 +66,8 @@ import org.springframework.util.ClassUtils;
 @Service
 @Transactional
 public class TemplateServiceImpl implements TemplateService {
+
+    private static final Log log = LogFactory.getLog(TemplateServiceImpl.class);
 
     @Autowired
     private TemplateDAO templateDAO;
@@ -177,25 +182,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional()
     public Template create(@Nonnull final TemplateType details, @Nonnull final TemplateEngine engine, @Nullable final KeySafe<?> keySafe,
             @Nullable final String slug, @Nullable final Token token, @Nullable final String label) {
-        Template template = new Template();
-
-        fixDetails(details);
-        TemplateDocument templateDocument = TemplateDocument.Factory.newInstance();
-        templateDocument.setTemplate(details);
-
-        XmlEntity<TemplateDocument> xml;
-        if (keySafe == null) {
-            xml = this.xmlEntityService.persistPlainEntity(templateDocument, false);
-        } else {
-            xml = this.xmlEntityService.persistEncryptedEntity(templateDocument, keySafe, false);
-        }
-        template.setEngine(engine);
-        template.setSlug(slug);
-        template.setToken(token);
-        template.setXml(xml);
-        template.setLabel(label);
-        this.templateDAO.create(template);
-        return template;
+        return create(details, engine, keySafe, slug, token, label, false);
     }
 
     /* (non-Javadoc)
@@ -215,6 +202,7 @@ public class TemplateServiceImpl implements TemplateService {
         managed.setToken(template.getToken());
         managed.setEngine(template.getEngine());
         managed.setLabel(template.getLabel());
+        managed.setImported(template.getImported());
 
         this.templateDAO.update(managed);
         template.setXml(xml);
@@ -268,6 +256,7 @@ public class TemplateServiceImpl implements TemplateService {
             exportedTemplate.setDocumentation(templateXml.getDocumentation());
             exportedTemplate.setEngine(template.getEngine().toString());
             exportedTemplate.setExampleVariables(templateXml.getExampleVariables());
+            exportedTemplate.setEncrypt(template.getXml().getCryptedDataId() != null);
         }
         return doc;
     }
@@ -283,18 +272,37 @@ public class TemplateServiceImpl implements TemplateService {
         List<ExportedTemplateType> exportedTemplateList = exportedTemplates.getExportedTemplateList();
         for (ExportedTemplateType exportedTemplateType : exportedTemplateList) {
             String slug = exportedTemplateType.getSlug();
-            if (this.templateDAO.retrieveBySlug(slug) != null) {
-                // Already exists, don't overwrite
-                continue;
-            }
             TemplateType template = TemplateType.Factory.newInstance();
             template.setLabel(exportedTemplateType.getLabel());
             template.setContent(exportedTemplateType.getContent());
             template.setDocumentation(exportedTemplateType.getDocumentation());
             template.setExampleVariables(exportedTemplateType.getExampleVariables());
             TemplateEngine templateEngine = TemplateEngine.valueOf(exportedTemplateType.getEngine());
-            create(template, templateEngine, keySafe, slug, null, exportedTemplateType.getPlainLabel());
-            count++;
+            Template existing = this.templateDAO.retrieveBySlug(slug);
+            if (existing == null) {
+                KeySafe<?> keySafeForCreate = (exportedTemplateType.getEncrypt() ? keySafe : null);
+                create(template, templateEngine, keySafeForCreate, slug, null, exportedTemplateType.getPlainLabel(), true);
+                count++;
+            } else if (BooleanUtils.isTrue(existing.getImported())) {
+                if (existing.getXml().getCryptedDataId() != null) {
+                    // We are unable to update encrypted templates, unable to decrypt.
+                    continue;
+                }
+                // The template was originally imported, we can update it.
+                existing.setEngine(templateEngine);
+                existing.setLabel(exportedTemplateType.getLabel());
+                this.xmlEntityService.release(existing, TemplateDocument.class);
+                XmlEntity<TemplateDocument> xml = existing.getXml();
+                TemplateType newXml = xml.getBean().getTemplate();
+                newXml.setContent(exportedTemplateType.getContent());
+                newXml.setDocumentation(exportedTemplateType.getDocumentation());
+                newXml.setExampleVariables(exportedTemplateType.getExampleVariables());
+                newXml.setLabel(exportedTemplateType.getLabel());
+                update(existing);
+                if (xml.getVersion() != existing.getXml().getVersion()) {
+                    count++;
+                }
+            }
         }
         return count;
     }
@@ -306,6 +314,30 @@ public class TemplateServiceImpl implements TemplateService {
     public Set<TemplateEngine> getAvailableEngines() {
         Set<TemplateEngine> engines = EnumSet.copyOf(this.adapters.keySet());
         return engines;
+    }
+
+    protected Template create(@Nonnull final TemplateType details, @Nonnull final TemplateEngine engine, @Nullable final KeySafe<?> keySafe,
+            @Nullable final String slug, @Nullable final Token token, @Nullable final String label, final boolean imported) {
+        Template template = new Template();
+
+        fixDetails(details);
+        TemplateDocument templateDocument = TemplateDocument.Factory.newInstance();
+        templateDocument.setTemplate(details);
+
+        XmlEntity<TemplateDocument> xml;
+        if (keySafe == null) {
+            xml = this.xmlEntityService.persistPlainEntity(templateDocument, false);
+        } else {
+            xml = this.xmlEntityService.persistEncryptedEntity(templateDocument, keySafe, false);
+        }
+        template.setEngine(engine);
+        template.setSlug(slug);
+        template.setToken(token);
+        template.setXml(xml);
+        template.setLabel(label);
+        template.setImported(imported);
+        this.templateDAO.create(template);
+        return template;
     }
 
     /**
