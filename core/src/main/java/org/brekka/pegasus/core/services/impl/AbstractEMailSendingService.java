@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.dao.EMailMessageDAO;
 import org.brekka.pegasus.core.model.Attachment;
@@ -44,6 +46,8 @@ import org.brekka.xml.pegasus.v2.model.EMailMessageType.Content;
 import org.brekka.xml.pegasus.v2.model.EMailType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -54,36 +58,38 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public abstract class AbstractEMailSendingService implements EMailSendingService {
 
-    
+    private static final Log log = LogFactory.getLog(AbstractEMailSendingService.class);
+
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
     private EMailAddressService eMailAddressService;
-    
+
     @Autowired
     private EMailMessageDAO eMailMessageDAO;
-    
+
     @Autowired
     private XmlEntityService xmlEntityService;
-    
+
     private String defaultSourceAddress;
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional()
-    public EMailMessage send(String recipient, String sender, String subject, String plainBody, String htmlBody, KeySafe<?> keySafe) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public EMailMessage send(final String recipient, final String sender, final String subject, final String plainBody, final String htmlBody, final KeySafe<?> keySafe) {
         return send(Arrays.asList(recipient), sender, subject, plainBody, htmlBody, keySafe);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.util.Collection, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.List, org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    public EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody,
-            String htmlBody, KeySafe<?> keySafe) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public EMailMessage send(final Collection<String> recipients, final String sender, final String subject, final String plainBody,
+            final String htmlBody, final KeySafe<?> keySafe) {
         return send(recipients, sender, subject, plainBody, htmlBody, Collections.<Attachment>emptyList(), keySafe);
     }
 
@@ -91,15 +97,15 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @see org.brekka.pegasus.core.services.EMailSendingService#send(java.util.Collection, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    @Transactional()
-    public EMailMessage send(Collection<String> recipients, String sender, String subject, String plainBody,
-            String htmlBody, List<Attachment> attachments, KeySafe<?> keySafe) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public EMailMessage send(final Collection<String> recipients, String sender, final String subject, final String plainBody,
+            final String htmlBody, final List<Attachment> attachments, final KeySafe<?> keySafe) {
         if (sender == null) {
-            sender = defaultSourceAddress;
+            sender = this.defaultSourceAddress;
         }
-        
+
         Member member = null;
-        AuthenticatedMember<Member> current = memberService.getCurrent();
+        AuthenticatedMember<Member> current = this.memberService.getCurrent();
         if (current != null) {
             member = current.getMember();
         }
@@ -108,7 +114,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         message.setId(UUID.randomUUID());
         message.setOwner(member);
         message.setSender(toAddress(sender));
-        
+
         List<EMailRecipient> eMailRecipientList = new ArrayList<>();
         for (String recipient : recipients) {
             EMailRecipient eMailRecipient = new EMailRecipient();
@@ -117,7 +123,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
             eMailRecipientList.add(eMailRecipient);
         }
         message.setRecipients(eMailRecipientList);
-        
+
         EMailMessageDocument document = EMailMessageDocument.Factory.newInstance();
         EMailMessageType eMailMessage = document.addNewEMailMessage();
         EMailType senderXml = eMailMessage.addNewSender();
@@ -146,20 +152,23 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
             fileType.setMimeType(attachment.getContentType());
             fileType.setUUID(UUID.randomUUID().toString());
         }
-        
+
         XmlEntity<EMailMessageDocument> xml;
         if (keySafe == null) {
-            xml = xmlEntityService.persistPlainEntity(document, false);
+            xml = this.xmlEntityService.persistPlainEntity(document, false);
         } else {
-            xml = xmlEntityService.persistEncryptedEntity(document, keySafe, false);
+            xml = this.xmlEntityService.persistEncryptedEntity(document, keySafe, false);
         }
-        
+
         message.setXml(xml);
-        
-        
-        String reference = sendInternal(recipients, sender, subject, plainBody, htmlBody, attachments);
-        message.setReference(reference);
-        eMailMessageDAO.create(message);
+
+        try {
+            String reference = sendInternal(recipients, sender, subject, plainBody, htmlBody, attachments);
+            message.setReference(reference);
+        } catch (DataAccessException e) {
+            log.error(String.format("Failed to send E-Mail '%s'", message.getId()), e);
+        }
+        this.eMailMessageDAO.create(message);
         return message;
     }
 
@@ -169,51 +178,51 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      */
     @Override
     @Transactional(readOnly=true)
-    public EMailMessage retrieveById(UUID emailMessageId) {
-        return eMailMessageDAO.retrieveById(emailMessageId);
+    public EMailMessage retrieveById(final UUID emailMessageId) {
+        return this.eMailMessageDAO.retrieveById(emailMessageId);
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailSendingService#retrieveForRecipient(java.lang.String, org.brekka.commons.persistence.model.ListingCriteria)
      */
     @Override
     @Transactional(readOnly=true)
-    public List<EMailMessage> retrieveForRecipient(String recipientAddress, ListingCriteria listingCriteria) {
-        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(recipientAddress);
-        List<EMailMessage> eMailList = eMailMessageDAO.retrieveForRecipient(eMailAddress, listingCriteria);
-        xmlEntityService.releaseAll(eMailList, EMailMessageDocument.class);
+    public List<EMailMessage> retrieveForRecipient(final String recipientAddress, final ListingCriteria listingCriteria) {
+        EMailAddress eMailAddress = this.eMailAddressService.retrieveByAddress(recipientAddress);
+        List<EMailMessage> eMailList = this.eMailMessageDAO.retrieveForRecipient(eMailAddress, listingCriteria);
+        this.xmlEntityService.releaseAll(eMailList, EMailMessageDocument.class);
         return eMailList;
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailSendingService#retrieveForRecipientRowCount(org.brekka.pegasus.core.model.EMailAddress)
      */
     @Override
     @Transactional(readOnly=true)
-    public int retrieveForRecipientRowCount(String recipientAddress) {
-        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(recipientAddress);
-        return eMailMessageDAO.retrieveForRecipientRowCount(eMailAddress);
+    public int retrieveForRecipientRowCount(final String recipientAddress) {
+        EMailAddress eMailAddress = this.eMailAddressService.retrieveByAddress(recipientAddress);
+        return this.eMailMessageDAO.retrieveForRecipientRowCount(eMailAddress);
     }
-    
+
     protected abstract String sendInternal(Collection<String> recipients, String sender, String subject, String plainBody, String htmlBody, List<Attachment> attachments);
-    
-    
+
+
     /**
      * @param sender
      * @return
      */
-    private EMailAddress toAddress(String address) {
-        EMailAddress eMailAddress = eMailAddressService.retrieveByAddress(address);
+    private EMailAddress toAddress(final String address) {
+        EMailAddress eMailAddress = this.eMailAddressService.retrieveByAddress(address);
         if (eMailAddress == null) {
-            eMailAddress = eMailAddressService.createEMail(address, null, false);
+            eMailAddress = this.eMailAddressService.createEMail(address, null, false);
         }
         return eMailAddress;
     }
-    
+
     /**
      * @param defaultSourceAddress the defaultSourceAddress to set
      */
-    protected void setDefaultSourceAddress(String defaultSourceAddress) {
+    protected void setDefaultSourceAddress(final String defaultSourceAddress) {
         this.defaultSourceAddress = defaultSourceAddress;
     }
 
@@ -221,7 +230,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @param senderXml
      * @param sender
      */
-    private static void populateAddress(EMailType xml, EMailAddress address) {
+    private static void populateAddress(final EMailType xml, final EMailAddress address) {
         xml.setAddress(address.getAddress());
         xml.setUUID(address.getId().toString());
     }

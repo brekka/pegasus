@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.services;
 
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,14 +35,14 @@ import org.brekka.xml.pegasus.v2.model.TemplateType;
 
 /**
  * The template service
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface TemplateService {
 
     /**
      * Merge the variables in the specified context into the template to produce the resulting string.
-     * 
+     *
      * @param template
      *            the template to merge values into
      * @param context
@@ -51,22 +52,51 @@ public interface TemplateService {
      */
     @Nullable
     String merge(@Nonnull Template template, @Nonnull Map<String, Object> context);
-    
+
+    /**
+     * Merge the variables in the specified context into the template to produce the resulting string.
+     *
+     * @param template
+     *            the template to merge values into
+     * @param context
+     *            contains the variables to merge into the template.
+     * @param out
+     *            the merged template will be written to this writer.
+     */
+    @Nullable
+    void merge(@Nonnull Template template, @Nonnull Map<String, Object> context, Writer out);
+
     /**
      * Perform a dynamic render of the specified template string for the purpose of previewing. Naturally this will be quite
      * slow and so should be used sparingly.
-     * 
-     * @param templateContent
-     * @param templateEngine
+     *
+     * @param templateContent the string content to merge
+     * @param templateEngine which engine will be used
      * @param context
+     *            contains the variables to merge into the template.
      * @return
      */
     @Nullable
     String preview(@Nonnull String templateContent, @Nonnull TemplateEngine templateEngine, @Nonnull Map<String, Object> context);
 
     /**
+     * Perform a dynamic render of the specified template string for the purpose of previewing. Naturally this will be quite
+     * slow and so should be used sparingly.
+     *
+     * @param templateContent the string content to merge
+     * @param templateEngine which engine will be used
+     * @param context
+     *            contains the variables to merge into the template.
+     * @param out
+     *            the merged template will be written to this writer.
+     * @return
+     */
+    @Nullable
+    void preview(@Nonnull String templateContent, @Nonnull TemplateEngine templateEngine, @Nonnull Map<String, Object> context, Writer out);
+
+    /**
      * Retrieve a template by token
-     * 
+     *
      * @param token
      * @return the template or null if it cannot be found
      */
@@ -75,7 +105,7 @@ public interface TemplateService {
 
     /**
      * Retrieve a template by its slug.
-     * 
+     *
      * @param slug
      * @return the template or null if it cannot be found
      */
@@ -84,7 +114,7 @@ public interface TemplateService {
 
     /**
      * Retrieve a template via its unique id.
-     * 
+     *
      * @param templateId
      * @return the template or null if it cannot be found
      */
@@ -93,7 +123,7 @@ public interface TemplateService {
 
     /**
      * Create a template with the specified details and optionally a slug and/or token.
-     * 
+     *
      * @param details
      *            the details of this template (documentation, content, engine type).
      * @param engine
@@ -106,7 +136,7 @@ public interface TemplateService {
      *            the token to identify this template (optional)
      * @param label
      *            optional plaintext label to assign (useful for listing).
-     * 
+     *
      * @return the newly created template
      */
     @Nonnull
@@ -115,7 +145,7 @@ public interface TemplateService {
 
     /**
      * Update the specified template. Changes to the XML should be sure to include the version number.
-     * 
+     *
      * @param template
      *            the template to update
      */
@@ -123,12 +153,12 @@ public interface TemplateService {
 
     /**
      * Delete the template with the specified id.
-     * 
+     *
      * @param templateId
      *            if of the template to remove.
      */
     void delete(UUID templateId);
-    
+
     /**
      * Retrieve the set of available engines
      * @return the engine set.
@@ -145,13 +175,13 @@ public interface TemplateService {
      * @return
      */
     List<Template> retrieveListing(ListingCriteria listingCriteria);
-    
+
     /**
      * Export all templates.
      * @return
      */
     ExportedTemplatesDocument exportAll();
-    
+
     /**
      * Import from exported templates
      * @param exportedTemplatesDocument

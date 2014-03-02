@@ -17,10 +17,8 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
 
@@ -39,7 +37,7 @@ import org.brekka.pegasus.core.services.XmlEntityService;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public class VelocityTemplateEngine implements TemplateEngineAdapter {
-    
+
     public static final String NAME = "pegasus";
 
     public static final String RESOURCE_LOADER_CLASS = "pegasus.resource.loader.class";
@@ -52,7 +50,7 @@ public class VelocityTemplateEngine implements TemplateEngineAdapter {
      * @see org.brekka.pegasus.core.services.impl.TemplateEngineAdapter#init(org.brekka.pegasus.core.dao.TemplateDAO, org.brekka.pegasus.core.services.XmlEntityService)
      */
     @Override
-    public void init(TemplateDAO templateDAO, XmlEntityService xmlEntityService) {
+    public void init(final TemplateDAO templateDAO, final XmlEntityService xmlEntityService) {
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, NAME);
         velocityEngine.setProperty(RuntimeConstants.VM_LIBRARY, "");
@@ -64,44 +62,35 @@ public class VelocityTemplateEngine implements TemplateEngineAdapter {
         velocityEngine.init();
         this.velocityEngine = velocityEngine;
     }
-    
+
     /**
      * @param template
      * @param context
      * @return
      */
     @Override
-    public String merge(Template template, Map<String, Object> context) {
+    public void merge(final Template template, final Map<String, Object> context, final Writer out) {
         String templateName = template.getId().toString();
         VelocityContext velocityContext = new VelocityContext(context);
-        StringWriter out = new StringWriter();
-        try (Writer writer = new PrintWriter(out)) {
-            if (!velocityEngine.mergeTemplate(templateName, "UTF-8", velocityContext, writer)) {
-                throw new PegasusException(PegasusErrorCode.PG431, 
-                        "Velocity failed to merge template '%s' with context %s", templateName, context);
-            }
-        } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG453, e, 
-                    "Error from velocity merging template '%s' with context %s", templateName, context);
+        if (!this.velocityEngine.mergeTemplate(templateName, "UTF-8", velocityContext, out)) {
+            throw new PegasusException(PegasusErrorCode.PG431,
+                    "Velocity failed to merge template '%s' with context %s", templateName, context);
         }
-        return out.toString();
     }
-    
+
     @Override
-    public String preview(String templateContent, Map<String, Object> context) {
+    public void preview(final String templateContent, final Map<String, Object> context, final Writer out) {
         VelocityContext velocityContext = new VelocityContext(context);
-        StringWriter out = new StringWriter();
-        try (Writer writer = new PrintWriter(out); Reader reader = new StringReader(templateContent)) {
-            if (!velocityEngine.evaluate(velocityContext, writer, "Dynamic", reader)) {
-                throw new PegasusException(PegasusErrorCode.PG431, 
+        try (Reader reader = new StringReader(templateContent)) {
+            if (!this.velocityEngine.evaluate(velocityContext, out, "Dynamic", reader)) {
+                throw new PegasusException(PegasusErrorCode.PG431,
                         "Velocity preview failed to merge dynamic template with context");
             }
         } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG453, e, 
+            throw new PegasusException(PegasusErrorCode.PG453, e,
                     "Error from velocity preview merging template with context");
         }
-        return out.toString();
-        
+
     }
 
 }

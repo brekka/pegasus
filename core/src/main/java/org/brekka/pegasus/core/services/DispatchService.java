@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services;
 
@@ -22,7 +22,7 @@ import org.joda.time.DateTime;
 public interface DispatchService {
 
     /**
-     * 
+     *
      * @param keySafe
      * @param details
      * @param maxDownloads
@@ -56,5 +56,10 @@ public interface DispatchService {
      * @param fromString
      */
     void delete(UUID dispatchId);
+
+    /**
+     * @param dispatch
+     */
+    void delete(Dispatch dispatch);
 
 }
