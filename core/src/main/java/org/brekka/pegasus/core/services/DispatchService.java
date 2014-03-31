@@ -62,4 +62,11 @@ public interface DispatchService {
      */
     void delete(Dispatch dispatch);
 
+    /**
+     * @param clientGlobalDivision
+     * @param upload
+     * @return
+     */
+    List<Dispatch> find(KeySafe<?> keySafe, AllocationDisposition disposition);
+
 }

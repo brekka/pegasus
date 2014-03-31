@@ -57,6 +57,8 @@ public class VelocityTemplateEngine implements TemplateEngineAdapter {
         velocityEngine.setProperty(RESOURCE_LOADER_CLASS, VelocityTemplateLoader.class.getName());
         // Disable caching as it seems a bit shit
         velocityEngine.setProperty(RESOURCE_LOADER_CACHE, Boolean.FALSE.toString());
+        velocityEngine.setProperty("velocimacro.permissions.allow.inline.local.scope", Boolean.TRUE.toString());
+
         velocityEngine.setApplicationAttribute(TemplateDAO.class.getName(), templateDAO);
         velocityEngine.setApplicationAttribute(XmlEntityService.class.getName(), xmlEntityService);
         velocityEngine.init();

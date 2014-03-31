@@ -171,4 +171,13 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         dispatch.setExpires(new Date());
         this.dispatchDAO.update(dispatch);
     }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.DispatchService#find(org.brekka.pegasus.core.model.KeySafe, org.brekka.pegasus.core.model.AllocationDisposition)
+     */
+    @Override
+    @Transactional(readOnly=true)
+    public List<Dispatch> find(final KeySafe<?> keySafe, final AllocationDisposition disposition) {
+        return this.dispatchDAO.find(keySafe, disposition);
+    }
 }

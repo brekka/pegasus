@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.dao;
 
@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Actor;
+import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafe;
 
@@ -25,5 +26,12 @@ public interface DispatchDAO extends EntityDAO<UUID, Dispatch> {
      * @return
      */
     List<Dispatch> retrieveForInterval(KeySafe<?> keySafe, Actor activeActor, Date date, Date date2);
+
+    /**
+     * @param keySafe
+     * @param disposition
+     * @return
+     */
+    List<Dispatch> find(KeySafe<?> keySafe, AllocationDisposition disposition);
 
 }

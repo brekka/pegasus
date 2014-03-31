@@ -362,7 +362,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         // Bring the inbox under management
         inbox = this.inboxDAO.retrieveById(inbox.getId());
         KeySafe<?> keySafe = inbox.getKeySafe();
-        deposit.setExpires(expires.toDate());
+        deposit.setExpires(expires == null ? null : expires.toDate());
 
         AllocationType allocationType = prepareAllocationType(newBundleType, details);
 
