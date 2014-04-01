@@ -18,6 +18,7 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -388,20 +389,22 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         return deposit;
     }
 
-    protected void populateNames(final List<Inbox> inboxList) {
+    protected void populateNames(final Collection<Inbox> inboxes) {
         AuthenticatedMember<Member> authenticatedMember = this.memberService.getCurrent(Member.class);
         if (authenticatedMember == null) {
             return;
         }
         ProfileType profile = authenticatedMember.getProfile();
         if (profile != null) {
-            for (Inbox inbox : inboxList) {
-                for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
-                    InboxType inboxXml = profile.getInboxArray(i);
-                    if (inboxXml.getUUID().equals(inbox.getId().toString())) {
-                        String name = inboxXml.getName();
-                        inbox.setName(name);
-                        break;
+            for (Inbox inbox : inboxes) {
+                if (inbox != null) {
+                    for (int i = 0; i < profile.sizeOfInboxArray(); i++) {
+                        InboxType inboxXml = profile.getInboxArray(i);
+                        if (inboxXml.getUUID().equals(inbox.getId().toString())) {
+                            String name = inboxXml.getName();
+                            inbox.setName(name);
+                            break;
+                        }
                     }
                 }
             }
