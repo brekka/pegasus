@@ -27,7 +27,6 @@ import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.ReaperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,8 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Andrew Taylor (andrew@brekka.org)
  */
-@Transactional
-@Service
+// Should be declared explicitly
+// @Service
 public class ReaperServiceImpl implements ReaperService {
 
     @Autowired
