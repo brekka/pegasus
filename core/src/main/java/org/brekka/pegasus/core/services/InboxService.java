@@ -168,6 +168,9 @@ public interface InboxService {
     List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
             ListingCriteria listingCriteria, boolean populateDispatches);
 
+    List<Deposit> retrieveDepositListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
+            ListingCriteria listingCriteria, boolean populateDispatches, List<? extends Actor> sentByActors);
+
     /**
      * @param fromString
      * @return

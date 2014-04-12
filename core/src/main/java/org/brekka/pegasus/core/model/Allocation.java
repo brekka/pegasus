@@ -163,7 +163,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * @return the id
      */
     @Override
-    public final UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
@@ -171,7 +171,7 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      * @param id the id to set
      */
     @Override
-    public final void setId(final UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 

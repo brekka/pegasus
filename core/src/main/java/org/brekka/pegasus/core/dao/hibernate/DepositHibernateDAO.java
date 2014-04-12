@@ -18,6 +18,7 @@ import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.Member;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
@@ -77,16 +78,21 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
     @SuppressWarnings("unchecked")
     @Override
     public List<Deposit> retrieveListing(final Inbox inbox, final DateTime from, final DateTime until, final boolean showExpired,
-            final ListingCriteria listingCriteria, final boolean dispatchBased) {
+            final ListingCriteria listingCriteria, final boolean dispatchBased, final List<? extends Actor> sentByActors) {
         Criteria criteria = getCurrentSession().createCriteria(Deposit.class);
         criteria.add(Restrictions.eq("inbox", inbox));
         criteria.add(Restrictions.gt("created", from.toDate()));
         criteria.add(Restrictions.lt("created", until.toDate()));
+        if (sentByActors != null) {
+            criteria.add(Restrictions.in("actor", sentByActors));
+        }
+
+        LogicalExpression expiresGtOrNull = Restrictions.or(Restrictions.gt("expires", new Date()), Restrictions.isNull("expires"));
         if (dispatchBased) {
             Criteria joinCriteria = criteria.createCriteria("derivedFrom", JoinType.LEFT_OUTER_JOIN);
-            joinCriteria.add(Restrictions.gt("expires", new Date()));
+            joinCriteria.add(expiresGtOrNull);
         } else if (!showExpired) {
-            criteria.add(Restrictions.gt("expires", new Date()));
+            criteria.add(expiresGtOrNull);
         }
         HibernateUtils.applyCriteria(criteria, listingCriteria);
         List<Deposit> list = criteria.list();

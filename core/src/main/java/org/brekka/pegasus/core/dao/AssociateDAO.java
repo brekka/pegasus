@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.dao;
 
@@ -29,6 +29,13 @@ public interface AssociateDAO extends EntityDAO<UUID, Associate> {
      * @return
      */
     Associate retrieveByOrgAndMember(Organization organization, Member member);
+
+    /**
+     * Retrieve associates that belong to this organization
+     * @param organization
+     * @return
+     */
+    List<Associate> retrieveForOrganization(Organization organization);
 
     /**
      * @param member

@@ -315,8 +315,17 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     @Transactional(readOnly=true)
     public List<Deposit> retrieveDepositListing(final Inbox inbox, final DateTime from, final DateTime until, final boolean showExpired,
             final ListingCriteria listingCriteria, final boolean dispatchBased) {
+        return retrieveDepositListing(inbox, from, until, showExpired, listingCriteria, dispatchBased, null);
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.InboxService#retrieveDepositListing(org.brekka.pegasus.core.model.Inbox, org.joda.time.DateTime, org.joda.time.DateTime, boolean, org.brekka.commons.persistence.model.ListingCriteria, boolean, java.util.List)
+     */
+    @Override
+    public List<Deposit> retrieveDepositListing(final Inbox inbox, final DateTime from, final DateTime until, final boolean showExpired,
+            final ListingCriteria listingCriteria, final boolean dispatchBased, final List<? extends Actor> sentByActors) {
         List<Deposit> depositList = this.depositDAO.retrieveListing(inbox, defaultMin(from), defaultMax(until), showExpired,
-                listingCriteria, dispatchBased);
+                listingCriteria, dispatchBased, sentByActors);
         if (dispatchBased) {
             List<Dispatch> dispatchList = new ArrayList<>();
             for (Deposit deposit : depositList) {

@@ -39,7 +39,7 @@ public interface DepositDAO extends EntityDAO<UUID, Deposit> {
     int retrieveListingRowCount(Inbox inbox, DateTime from, DateTime until, boolean showExpired, boolean dispatchBased);
 
     List<Deposit> retrieveListing(Inbox inbox, DateTime from, DateTime until, boolean showExpired,
-            ListingCriteria listingCriteria, boolean dispatchBased);
+            ListingCriteria listingCriteria, boolean dispatchBased, List<? extends Actor> sentByActors);
 
     /**
      * @param member
