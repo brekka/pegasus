@@ -16,6 +16,7 @@
 
 package org.brekka.pegasus.core.support;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
+import org.brekka.pegasus.core.model.Attachment;
 import org.brekka.pegasus.core.model.EMailMessage;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Template;
@@ -68,6 +70,7 @@ public class TemplatedEMail {
         private final TemplateService templateService;
         private final Template bodyTemplate;
         private final Template subjectTemplate;
+        private final List<Attachment> attachments = new ArrayList<>();
 
         private String sender;
 
@@ -115,8 +118,18 @@ public class TemplatedEMail {
         public boolean send(final List<String> recipients, final EMailSendingService eMailSendingService, final KeySafe<?> keySafe) {
             String subject = this.templateService.merge(this.subjectTemplate, this.context);
             String body = this.templateService.merge(this.bodyTemplate, this.context);
-            EMailMessage mail = eMailSendingService.send(recipients, this.sender, subject, body, null, keySafe);
+            EMailMessage mail = eMailSendingService.send(recipients, this.sender, subject, body, null, this.attachments, keySafe);
             return (mail.getReference() != null);
+        }
+
+        /**
+         * @param string
+         * @param inputStreamSource
+         * @return
+         */
+        public EMailBuilder addAttachment(final Attachment attachment) {
+            this.attachments.add(attachment);
+            return this;
         }
     }
 

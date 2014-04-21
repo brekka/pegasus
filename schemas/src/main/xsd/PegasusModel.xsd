@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://brekka.org/xml/pegasus/v2/model"
-	xmlns:pgm="http://brekka.org/xml/pegasus/v2/model" elementFormDefault="qualified"
-	attributeFormDefault="unqualified">
+    xmlns:pgm="http://brekka.org/xml/pegasus/v2/model" elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
 
-	<xsd:element name="Bundle"              type="pgm:BundleType" />
-	<xsd:element name="Allocation"          type="pgm:AllocationType" />
-	<xsd:element name="Profile"             type="pgm:ProfileType" />
-	<xsd:element name="Organization"        type="pgm:OrganizationType" />
+    <xsd:element name="Bundle"              type="pgm:BundleType" />
+    <xsd:element name="Allocation"          type="pgm:AllocationType" />
+    <xsd:element name="Profile"             type="pgm:ProfileType" />
+    <xsd:element name="Organization"        type="pgm:OrganizationType" />
     <xsd:element name="Robot"               type="pgm:RobotType" />
-	<xsd:element name="Division"            type="pgm:DivisionType" />
-	<xsd:element name="Invitation"          type="pgm:InvitationType" />
+    <xsd:element name="Division"            type="pgm:DivisionType" />
+    <xsd:element name="Invitation"          type="pgm:InvitationType" />
     <xsd:element name="Template"            type="pgm:TemplateType" />
     <xsd:element name="ExportedTemplate"    type="pgm:ExportedTemplateType" />
     <xsd:element name="ExportedTemplates">
@@ -22,17 +22,17 @@
     <xsd:element name="EMailMessage"    type="pgm:EMailMessageType" />
     
     <xsd:complexType name="BundleType">
-		<xsd:sequence>
-			<xsd:element name="File"        type="pgm:FileType"     minOccurs="1" maxOccurs="unbounded" />
-		</xsd:sequence>
-	</xsd:complexType>
+        <xsd:sequence>
+            <xsd:element name="File"        type="pgm:FileType"     minOccurs="1" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="AllocationType">
-		<xsd:sequence>
-			<xsd:element name="Details"     type="pgm:DetailsType"  minOccurs="0" maxOccurs="1" />
-			<xsd:element name="Bundle"      type="pgm:BundleType"   minOccurs="0" maxOccurs="1" />
-		</xsd:sequence>
-	</xsd:complexType>
+        <xsd:sequence>
+            <xsd:element name="Details"     type="pgm:DetailsType"  minOccurs="0" maxOccurs="1" />
+            <xsd:element name="Bundle"      type="pgm:BundleType"   minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="DetailsType">
         <xsd:sequence>
@@ -45,28 +45,28 @@
     </xsd:complexType>
     
     <xsd:complexType name="FileType">
-		<xsd:sequence>
-			<xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
-			<xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
-			<xsd:element name="Length"      type="xsd:long"         minOccurs="1" maxOccurs="1" />
-			<xsd:element name="MimeType"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
-			<xsd:element name="Key"         type="xsd:base64Binary" minOccurs="0" maxOccurs="1" />
+        <xsd:sequence>
+            <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Length"      type="xsd:long"         minOccurs="1" maxOccurs="1" />
+            <xsd:element name="MimeType"    type="xsd:string"       minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Key"         type="xsd:base64Binary" minOccurs="0" maxOccurs="1" />
             <xsd:element name="MaxDownloads" type="xsd:int"         minOccurs="0" maxOccurs="1" />
-		</xsd:sequence>
-	</xsd:complexType>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="ProfileType">
-		<xsd:sequence>
+        <xsd:sequence>
             <xsd:element name="FullName"    type="xsd:string"       minOccurs="0" maxOccurs="1" />
             <xsd:element name="EMail"       type="pgm:EMailType"    minOccurs="0" maxOccurs="unbounded" />
-			<xsd:element name="Inbox"       type="pgm:InboxType"    minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element name="Inbox"       type="pgm:InboxType"    minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="TOTPSecret"  type="xsd:base64Binary" minOccurs="0" maxOccurs="1" />
-		</xsd:sequence>
-	</xsd:complexType>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="InvitationType">
 
-	</xsd:complexType>
+    </xsd:complexType>
     
 
     <xsd:complexType name="DivisionInvitationType">
@@ -100,14 +100,14 @@
     </xsd:complexType>
     
     <xsd:complexType name="OrganizationType">
-		<xsd:sequence>
+        <xsd:sequence>
             <xsd:element name="Name"      type="xsd:string" minOccurs="0" >
                 <xsd:annotation>
                     <xsd:documentation>The name of this organization,</xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-		</xsd:sequence>
-	</xsd:complexType>
+        </xsd:sequence>
+    </xsd:complexType>
     
     
     <xsd:complexType name="RobotType">
@@ -135,24 +135,24 @@
     </xsd:complexType>
     
     <xsd:complexType name="DivisionType">
-		<xsd:sequence>
+        <xsd:sequence>
             
-		</xsd:sequence>
-	</xsd:complexType>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="EMailType">
-		<xsd:sequence>
-			<xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
-			<xsd:element name="Address"     type="xsd:anyURI"       minOccurs="1" maxOccurs="1" />
-		</xsd:sequence>
-	</xsd:complexType>
+        <xsd:sequence>
+            <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
+            <xsd:element name="Address"     type="xsd:anyURI"       minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="InboxType">
-		<xsd:sequence>
+        <xsd:sequence>
             <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
             <xsd:element name="Name"        type="xsd:string"       minOccurs="1" maxOccurs="1" />
-		</xsd:sequence>
-	</xsd:complexType>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="EMailMessageType">
         <xsd:sequence>
@@ -204,8 +204,8 @@
     
     
     <xsd:simpleType name="UUIDType">
-    	<xsd:restriction base="xsd:string">
-    		<xsd:pattern value="[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}" />
-    	</xsd:restriction>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}" />
+        </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>
