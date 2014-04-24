@@ -83,7 +83,8 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
         criteria.add(Restrictions.eq("inbox", inbox));
         criteria.add(Restrictions.gt("created", from.toDate()));
         criteria.add(Restrictions.lt("created", until.toDate()));
-        if (sentByActors != null) {
+        if (sentByActors != null
+                && !sentByActors.isEmpty()) {
             criteria.add(Restrictions.in("actor", sentByActors));
         }
 
