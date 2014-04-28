@@ -293,6 +293,23 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return this.username.hashCode();
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        AuthenticatedMemberBase<?> other = this.getClass().cast(obj);
+        return getUsername().equals(other.getUsername());
+    }
+
 
     static <T extends Member> AuthenticatedMemberBase<T> getCurrent(final MemberService memberService, final Class<T> expectedType) {
         AuthenticatedMember<T> current = memberService.getCurrent(expectedType);
