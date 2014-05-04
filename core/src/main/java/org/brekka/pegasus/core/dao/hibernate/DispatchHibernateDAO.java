@@ -11,6 +11,7 @@ import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AllocationDisposition;
 import org.brekka.pegasus.core.model.Dispatch;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -53,6 +54,7 @@ public class DispatchHibernateDAO extends AbstractPegasusHibernateDAO<Dispatch> 
         return getCurrentSession().createCriteria(Dispatch.class)
                 .add(Restrictions.eq("keySafe", keySafe))
                 .add(Restrictions.eq("disposition", disposition))
+                .addOrder(Order.desc("created"))
                 .list();
     }
 }

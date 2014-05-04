@@ -91,4 +91,14 @@ public class AllocationHibernateDAO extends AbstractPegasusHibernateDAO<Allocati
                 .add(Restrictions.eq("token", token))
                 .uniqueResult();
     }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.dao.AllocationDAO#retrieveAll()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Allocation> retrieveAll() {
+        Criteria criteria = getCurrentSession().createCriteria(Allocation.class);
+        return criteria.list();
+    }
 }

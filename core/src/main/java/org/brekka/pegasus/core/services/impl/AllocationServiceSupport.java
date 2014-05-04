@@ -36,6 +36,7 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
+import org.brekka.pegasus.core.event.AllocationFileCreateEvent;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
@@ -59,6 +60,7 @@ import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.DetailsType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Methods common to all allocation services that should not be exposed via {@link AllocationService}.
@@ -105,6 +107,9 @@ class AllocationServiceSupport {
 
     @Autowired
     protected XmlEntityService xmlEntityService;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
 
 
@@ -269,6 +274,8 @@ class AllocationServiceSupport {
                 allocationFile.setDerivedFrom(source);
                 this.allocationFileDAO.create(allocationFile);
                 allocationFiles.add(allocationFile);
+                this.applicationEventPublisher.publishEvent(new AllocationFileCreateEvent(allocationFile));
+
             }
         } else {
             List<FileType> fileList = bundle.getFileList();
@@ -280,6 +287,7 @@ class AllocationServiceSupport {
                 allocationFile.setXml(fileType);
                 this.allocationFileDAO.create(allocationFile);
                 allocationFiles.add(allocationFile);
+                this.applicationEventPublisher.publishEvent(new AllocationFileCreateEvent(allocationFile));
             }
         }
         allocation.setFiles(allocationFiles);

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.dao;
 
@@ -20,10 +20,10 @@ public interface AllocationDAO extends EntityDAO<UUID, Allocation> {
 
     /**
      * @param bundle
-     * @return 
+     * @return
      */
     void refresh(Allocation allocation);
-    
+
     /**
      * @param token
      * @return
@@ -35,8 +35,13 @@ public interface AllocationDAO extends EntityDAO<UUID, Allocation> {
      * @return
      */
     List<Allocation> retrieveOldestExpired(int maxAllocationCount);
-    
+
     int retrieveDerivedFromListingRowCount(Dispatch derivedFrom);
-    
+
     List<Allocation> retrieveDerivedFromListing(Dispatch derivedFrom, ListingCriteria listingCriteria);
+
+    /**
+     * @return
+     */
+    List<Allocation> retrieveAll();
 }
