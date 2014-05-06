@@ -26,6 +26,7 @@ import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
+import org.brekka.pegasus.core.event.AllocationFileDeleteEvent;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Allocation;
 import org.brekka.pegasus.core.model.AllocationFile;
@@ -39,6 +40,7 @@ import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.FileType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -66,6 +68,9 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
 
     @Autowired
     private CryptedFileDAO cryptedFileDAO;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
 
     /* (non-Javadoc)
@@ -254,6 +259,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
      */
     protected void clearAllocationFile(final AllocationFile file, final boolean deleteAllocationIfPossible) {
         AllocationFile allocationFile = this.allocationFileDAO.retrieveById(file.getId());
+        this.applicationEventPublisher.publishEvent(new AllocationFileDeleteEvent(allocationFile));
 
         if (allocationFile.getDeleted() != null) {
             // Already deleted

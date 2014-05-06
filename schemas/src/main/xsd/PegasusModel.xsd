@@ -61,6 +61,7 @@
             <xsd:element name="EMail"       type="pgm:EMailType"    minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="Inbox"       type="pgm:InboxType"    minOccurs="0" maxOccurs="unbounded" />
             <xsd:element name="TOTPSecret"  type="xsd:base64Binary" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="PhoneNumber" type="pgm:PhoneNumberType"  minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
     
@@ -147,6 +148,21 @@
         </xsd:sequence>
     </xsd:complexType>
     
+    <xsd:complexType name="PhoneNumberType">
+        <xsd:sequence>
+            <xsd:element name="Type" minOccurs="1" maxOccurs="1">
+            	<xsd:simpleType>
+            		<xsd:restriction base="xsd:token">
+            			<xsd:enumeration value="WORK" />
+            			<xsd:enumeration value="MOBILE" />
+            			<xsd:enumeration value="OTHER" />
+            		</xsd:restriction>
+            	</xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="Number" type="xsd:token" minOccurs="1" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
     <xsd:complexType name="InboxType">
         <xsd:sequence>
             <xsd:element name="UUID"        type="pgm:UUIDType"     minOccurs="1" maxOccurs="1" />
@@ -208,4 +224,5 @@
             <xsd:pattern value="[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}" />
         </xsd:restriction>
     </xsd:simpleType>
+    
 </xsd:schema>
