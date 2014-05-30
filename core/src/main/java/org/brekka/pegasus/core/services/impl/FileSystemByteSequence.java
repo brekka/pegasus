@@ -1,8 +1,10 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,17 +26,26 @@ import org.joda.time.LocalDate;
  *
  */
 public class FileSystemByteSequence implements ByteSequence {
-    
+
+    private static final int DEFAULT_BUFFER_SIZE = (1 << 13); // 8096
+
     private static final Log log = LogFactory.getLog(FileSystemByteSequence.class);
 
     private final UUID id;
-    
+
     private final File file;
-    
-    
-    public FileSystemByteSequence(UUID id, File file, boolean create) {
+
+    private final int bufferSize;
+
+
+    public FileSystemByteSequence(final UUID id, final File file, final boolean create) {
+        this(id, file, create, DEFAULT_BUFFER_SIZE);
+    }
+
+    public FileSystemByteSequence(final UUID id, final File file, final boolean create, final int bufferSize) {
         this.id = id;
         this.file = file;
+        this.bufferSize = bufferSize;
     }
 
     /* (non-Javadoc)
@@ -42,7 +53,7 @@ public class FileSystemByteSequence implements ByteSequence {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /* (non-Javadoc)
@@ -51,7 +62,7 @@ public class FileSystemByteSequence implements ByteSequence {
     @Override
     public OutputStream getOutputStream() {
         try {
-            return new FileOutputStream(file) { 
+            return new BufferedOutputStream(new FileOutputStream(this.file) {
                 @Override
                 public void close() throws IOException {
                     super.close();
@@ -59,25 +70,25 @@ public class FileSystemByteSequence implements ByteSequence {
                         // Reduce information leakage by setting modified timestamp to the beginning of the day
                         // The reason for not setting to the epoch is so that incremental backups can still be performed.
                         long stamp = LocalDate.now().toDate().getTime();
-                        file.setLastModified(stamp);
+                        FileSystemByteSequence.this.file.setLastModified(stamp);
                         // Also clear the parent
-                        file.getParentFile().setLastModified(stamp);
+                        FileSystemByteSequence.this.file.getParentFile().setLastModified(stamp);
                         // And it's parent
-                        File parentFile = file.getParentFile().getParentFile();
+                        File parentFile = FileSystemByteSequence.this.file.getParentFile().getParentFile();
                         if (parentFile.lastModified() > stamp) {
                             // Needs to be amended
-                            file.getParentFile().getParentFile().setLastModified(stamp);
+                            FileSystemByteSequence.this.file.getParentFile().getParentFile().setLastModified(stamp);
                         }
                     } catch (Exception e) {
                         if (log.isDebugEnabled()) {
-                            log.debug(String.format("Failed to reset last modified for '%s'", file), e);
+                            log.debug(String.format("Failed to reset last modified for '%s'", FileSystemByteSequence.this.file), e);
                         }
                     }
                 }
-            };
+            }, this.bufferSize);
         } catch (FileNotFoundException e) {
-            throw new PegasusException(PegasusErrorCode.PG100, 
-                    "Failed to copy data for resource id '%s'", id);
+            throw new PegasusException(PegasusErrorCode.PG100,
+                    "Failed to copy data for resource id '%s'", this.id);
         }
     }
 
@@ -87,10 +98,10 @@ public class FileSystemByteSequence implements ByteSequence {
     @Override
     public InputStream getInputStream() {
         try {
-            return new FileInputStream(file);
+            return new BufferedInputStream(new FileInputStream(this.file), this.bufferSize);
         } catch (IOException e) {
-            throw new PegasusException(PegasusErrorCode.PG101, 
-                    "Failed to read data for resource id '%s'", id);
+            throw new PegasusException(PegasusErrorCode.PG101,
+                    "Failed to read data for resource id '%s'", this.id);
         }
     }
 
