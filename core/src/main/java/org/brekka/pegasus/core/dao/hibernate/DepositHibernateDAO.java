@@ -153,7 +153,7 @@ public class DepositHibernateDAO extends AbstractPegasusHibernateDAO<Deposit> im
             hql +=  "   and c.personal=:personal";
         }
         if (!includeExpired) {
-            hql +=   "  and d.expires>:now";
+            hql +=   "  and (d.expires is null or d.expires>:now)";
         }
         hql +=      " order by d.created desc";
         Query q = getCurrentSession().createQuery(hql)

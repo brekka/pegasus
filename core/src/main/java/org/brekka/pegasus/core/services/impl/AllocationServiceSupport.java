@@ -182,8 +182,11 @@ class AllocationServiceSupport {
      * @return
      */
     protected BundleType copyDispatchBundle(final Dispatch dispatch, final Integer maxDownloads) {
-        XmlEntity<AllocationDocument> xml = this.xmlEntityService.retrieveEntity(dispatch.getXml().getId(), AllocationDocument.class);
-        AllocationType dispatchXml = xml.getBean().getAllocation();
+        XmlEntity<AllocationDocument> xmlEntity = dispatch.getXml();
+        if (xmlEntity.getBean() == null) {
+            xmlEntity = this.xmlEntityService.retrieveEntity(xmlEntity.getId(), AllocationDocument.class);
+        }
+        AllocationType dispatchXml = xmlEntity.getBean().getAllocation();
         BundleType dispatchBundle = copyBundle(maxDownloads, dispatchXml.getBundle());
         return dispatchBundle;
     }
