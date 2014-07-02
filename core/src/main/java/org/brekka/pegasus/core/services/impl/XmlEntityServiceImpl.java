@@ -150,6 +150,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
             return;
         }
         XmlEntity<?> xml = entity.getXml();
+        if (xml == null) {
+            // No XML, can't release that either
+            return;
+        }
         if (xml.getBean() == null) {
             XmlEntity<T> released = retrieveEntity(xml.getId(), expectedType);
             entity.setXml(released);
