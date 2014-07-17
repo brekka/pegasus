@@ -4,12 +4,12 @@
     <parent>
         <groupId>org.brekka.pegasus</groupId>
         <artifactId>pegasus</artifactId>
-        <version>2.9-SNAPSHOT</version>
+        <version>2.9</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>pegasus-core</artifactId>
-    <version>2.9.0-SNAPSHOT</version>
+    <version>2.9.0</version>
 
     <dependencies>
         <dependency>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.brekka.pegasus</groupId>
             <artifactId>pegasus-schemas</artifactId>
-            <version>2.9.0-SNAPSHOT</version>
+            <version>2.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.brekka.paveway</groupId>
