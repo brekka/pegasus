@@ -101,7 +101,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
     public EMailMessage send(final Collection<String> recipients, String sender, final String subject, final String plainBody,
             final String htmlBody, final List<Attachment> attachments, final KeySafe<?> keySafe) {
         if (sender == null) {
-            sender = this.defaultSourceAddress;
+            sender = getDefaultSourceAddress();
         }
 
         Member member = null;
@@ -217,6 +217,13 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
             eMailAddress = this.eMailAddressService.createEMail(address, null, false);
         }
         return eMailAddress;
+    }
+    
+    /**
+     * @return the defaultSourceAddress
+     */
+    protected String getDefaultSourceAddress() {
+        return defaultSourceAddress;
     }
 
     /**
