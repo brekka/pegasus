@@ -15,6 +15,10 @@ public enum PegasusErrorCode implements ErrorCode {
     PG103,
     PG104,
     PG105,
+    /**
+     * No user context available to resolve private keys in.
+     */
+    PG106,
 
     PG200,
     PG265,

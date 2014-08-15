@@ -340,6 +340,38 @@ public class TemplateServiceImpl implements TemplateService {
         return template;
     }
 
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#applyEncryption(java.util.UUID, org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    @Transactional
+    public void applyEncryption(final UUID templateId, final KeySafe<?> keySafe) {
+        Template managed = this.templateDAO.retrieveById(templateId);
+        if (managed.getXml().getCryptedDataId() != null) {
+            // Already encrypted
+            return;
+        }
+        XmlEntity<TemplateDocument> xml = this.xmlEntityService.applyEncryption(managed.getXml(), keySafe, TemplateDocument.class);
+        managed.setXml(xml);
+        this.templateDAO.update(managed);
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.TemplateService#removeEncryption(java.util.UUID)
+     */
+    @Override
+    @Transactional
+    public void removeEncryption(final UUID templateId) {
+        Template managed = this.templateDAO.retrieveById(templateId);
+        if (managed.getXml().getCryptedDataId() == null) {
+            // Already plain
+            return;
+        }
+        XmlEntity<TemplateDocument> xml = this.xmlEntityService.removeEncryption(managed.getXml(), TemplateDocument.class);
+        managed.setXml(xml);
+        this.templateDAO.update(managed);
+    }
+
     /**
      * @param details
      */

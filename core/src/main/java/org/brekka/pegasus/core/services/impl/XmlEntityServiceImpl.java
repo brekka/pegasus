@@ -258,6 +258,37 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     }
 
     /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.XmlEntityService#applyEncryption(org.brekka.pegasus.core.model.XmlEntity, org.brekka.pegasus.core.model.KeySafe)
+     */
+    @Override
+    @Transactional
+    public <T extends XmlObject>  XmlEntity<T> applyEncryption(final XmlEntity<T> xml, final KeySafe<?> keySafe, final Class<T> xmlType) {
+        XmlEntity<T> managed = retrieveEntity(xml.getId(), xmlType);
+        CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveDefault();
+        SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
+        CryptedData cryptedData = this.keySafeService.protect(secretKey.getEncoded(), keySafe);
+
+        UUID serial = managed.getSerial();
+        int newVersion = managed.getVersion() + 1;
+        boolean externalData = managed.isExternalData();
+
+        return createEncrypted(managed.getBean(), newVersion, serial, keySafe, cryptedData.getId(), cryptoProfile, secretKey, externalData);
+    }
+
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.XmlEntityService#removeEncryption(org.brekka.pegasus.core.model.XmlEntity)
+     */
+    @Override
+    @Transactional
+    public <T extends XmlObject>  XmlEntity<T> removeEncryption(final XmlEntity<T> xml, final Class<T> xmlType) {
+        XmlEntity<T> managed = release(xml, xmlType);
+        UUID serial = managed.getSerial();
+        int newVersion = managed.getVersion() + 1;
+        boolean externalData = managed.isExternalData();
+        return createPlainEntity(managed.getBean(), newVersion, serial, externalData);
+    }
+
+    /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.XmlEntityService#isEncrypted(java.util.UUID)
      */
     @Override
@@ -289,6 +320,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         }
         this.xmlEntityDAO.delete(xmlEntityId);
     }
+
+
 
     /* (non-Javadoc)
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)

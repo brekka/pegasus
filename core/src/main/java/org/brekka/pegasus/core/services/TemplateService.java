@@ -189,4 +189,18 @@ public interface TemplateService {
      * @return the number of templates imported.
      */
     int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, @Nullable KeySafe<?> keySafe);
+
+    /**
+     * If the specified template is encrypted, remove the encryption so that it becomes available to all.
+     *
+     * @param templateId
+     */
+    void removeEncryption(@Nonnull UUID templateId);
+
+    /**
+     * If the specified template is plain, apply encryption using the specified keySafe.
+     *
+     * @param templateId
+     */
+    void applyEncryption(@Nonnull UUID templateId, @Nonnull KeySafe<?> keySafe);
 }
