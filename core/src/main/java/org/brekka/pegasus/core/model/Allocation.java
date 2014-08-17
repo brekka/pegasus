@@ -251,7 +251,11 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
      */
     @SuppressWarnings("unchecked")
     public <T extends DetailsType> T details(final Class<T> expectedType) {
-        DetailsType details = allocationType().getDetails();
+        AllocationType allocationType = allocationType();
+        if (allocationType == null) {
+            return null;
+        }
+        DetailsType details = allocationType.getDetails();
         if (details == null) {
             // perfectly acceptable to be null.
             return null;
@@ -273,10 +277,16 @@ public abstract class Allocation extends SnapshotEntity<UUID> implements XmlEnti
 
     public AllocationType allocationType() {
         AllocationDocument doc = getAllocationDocument();
+        if (doc == null) {
+            return null;
+        }
         return doc.getAllocation();
     }
 
     private AllocationDocument getAllocationDocument() {
+        if (this.xml == null) {
+            return null;
+        }
         AllocationDocument doc = this.xml.getBean();
         if (doc == null) {
             throw new PegasusException(PegasusErrorCode.PG817, "Allocation[%s] XML entity is locked", getId());
