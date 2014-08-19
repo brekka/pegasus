@@ -286,9 +286,10 @@ public class TemplateServiceImpl implements TemplateService {
                 count++;
             } else if (BooleanUtils.isTrue(existing.getImported()) || forceUpdate) {
                 // The template was originally imported or force has been authorized, we can update it.
-                if (existing.getXml().getCryptedDataId() != null) {
+                if (existing.getXml().getCryptedDataId() != null && !forceUpdate) {
                     // Difficult to know at this point whether we can decrypt the XML. Really need a
                     // XmlEntityService release method that will not throw an exception and rollback our transaction.
+                    // Assume 'forceUpdate' ignores this.
                     continue;
                 }
                 existing.setEngine(templateEngine);
