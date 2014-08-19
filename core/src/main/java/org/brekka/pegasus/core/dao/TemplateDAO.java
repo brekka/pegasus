@@ -23,6 +23,7 @@ import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.model.Token;
+import org.joda.time.DateTime;
 
 /**
  * Manipulate Template objects
@@ -32,9 +33,9 @@ import org.brekka.pegasus.core.model.Token;
 public interface TemplateDAO extends EntityDAO<UUID, Template> {
 
     Template retrieveByToken(Token token);
-    
+
     Template retrieveBySlug(String slug);
-    
+
     /**
      * @return
      */
@@ -44,5 +45,5 @@ public interface TemplateDAO extends EntityDAO<UUID, Template> {
      * @param listingCriteria
      * @return
      */
-    List<Template> retrieveListing(ListingCriteria listingCriteria);
+    List<Template> retrieveListing(DateTime changedSince, ListingCriteria listingCriteria);
 }

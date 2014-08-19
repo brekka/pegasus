@@ -52,6 +52,7 @@ import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument;
 import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument.ExportedTemplates;
 import org.brekka.xml.pegasus.v2.model.TemplateDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -223,7 +224,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @Transactional(readOnly=true)
     public List<Template> retrieveListing(final ListingCriteria listingCriteria) {
-        return this.templateDAO.retrieveListing(listingCriteria);
+        return this.templateDAO.retrieveListing(null, listingCriteria);
     }
 
     /* (non-Javadoc)
@@ -240,9 +241,9 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional(readOnly=true)
-    public ExportedTemplatesDocument exportAll() {
+    public ExportedTemplatesDocument exportAll(final DateTime changedSince) {
         int count = this.templateDAO.retrieveListingRowCount();
-        List<Template> listing = retrieveListing(new ListingCriteria(0, count, Arrays.<OrderByPart>asList(new OrderByProperty("created", false))));
+        List<Template> listing = this.templateDAO.retrieveListing(changedSince, new ListingCriteria(0, count, Arrays.<OrderByPart>asList(new OrderByProperty("created", false))));
         ExportedTemplatesDocument doc = ExportedTemplatesDocument.Factory.newInstance();
         ExportedTemplates templates = doc.addNewExportedTemplates();
         for (Template template : listing) {
@@ -266,7 +267,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional()
-    public int importFrom(final ExportedTemplatesDocument exportedTemplatesDocument, final KeySafe<?> keySafe) {
+    public int importFrom(final ExportedTemplatesDocument exportedTemplatesDocument, final KeySafe<?> keySafe, final boolean forceUpdate) {
         int count = 0;
         ExportedTemplates exportedTemplates = exportedTemplatesDocument.getExportedTemplates();
         List<ExportedTemplateType> exportedTemplateList = exportedTemplates.getExportedTemplateList();
@@ -283,12 +284,13 @@ public class TemplateServiceImpl implements TemplateService {
                 KeySafe<?> keySafeForCreate = (exportedTemplateType.getEncrypt() ? keySafe : null);
                 create(template, templateEngine, keySafeForCreate, slug, null, exportedTemplateType.getPlainLabel(), true);
                 count++;
-            } else if (BooleanUtils.isTrue(existing.getImported())) {
+            } else if (BooleanUtils.isTrue(existing.getImported()) || forceUpdate) {
+                // The template was originally imported or force has been authorized, we can update it.
                 if (existing.getXml().getCryptedDataId() != null) {
-                    // We are unable to update encrypted templates, unable to decrypt.
+                    // Difficult to know at this point whether we can decrypt the XML. Really need a
+                    // XmlEntityService release method that will not throw an exception and rollback our transaction.
                     continue;
                 }
-                // The template was originally imported, we can update it.
                 existing.setEngine(templateEngine);
                 existing.setLabel(exportedTemplateType.getLabel());
                 this.xmlEntityService.release(existing, TemplateDocument.class);

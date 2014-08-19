@@ -32,6 +32,7 @@ import org.brekka.pegasus.core.model.TemplateEngine;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
+import org.joda.time.DateTime;
 
 /**
  * The template service
@@ -180,7 +181,7 @@ public interface TemplateService {
      * Export all templates.
      * @return
      */
-    ExportedTemplatesDocument exportAll();
+    ExportedTemplatesDocument exportAll(@Nullable DateTime changedSince);
 
     /**
      * Import from exported templates
@@ -188,7 +189,7 @@ public interface TemplateService {
      * @param keySafe
      * @return the number of templates imported.
      */
-    int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, @Nullable KeySafe<?> keySafe);
+    int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, @Nullable KeySafe<?> keySafe, boolean forceUpdate);
 
     /**
      * If the specified template is encrypted, remove the encryption so that it becomes available to all.

@@ -26,6 +26,7 @@ import org.brekka.pegasus.core.model.Token;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -40,7 +41,7 @@ public class TemplateHibernateDAO extends AbstractPegasusHibernateDAO<Template> 
      * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveByToken(org.brekka.pegasus.core.model.Token)
      */
     @Override
-    public Template retrieveByToken(Token token) {
+    public Template retrieveByToken(final Token token) {
         return (Template) getCurrentSession().createCriteria(Template.class)
                 .add(Restrictions.eq("token", token))
                 .uniqueResult();
@@ -50,23 +51,27 @@ public class TemplateHibernateDAO extends AbstractPegasusHibernateDAO<Template> 
      * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveBySlug(java.lang.String)
      */
     @Override
-    public Template retrieveBySlug(String slug) {
+    public Template retrieveBySlug(final String slug) {
         return (Template) getCurrentSession().createCriteria(Template.class)
                 .add(Restrictions.eq("slug", slug))
                 .uniqueResult();
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveListing(org.brekka.commons.persistence.model.ListingCriteria)
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Template> retrieveListing(ListingCriteria listingCriteria) {
+    public List<Template> retrieveListing(final DateTime changedSince, final ListingCriteria listingCriteria) {
         Criteria criteria = getCurrentSession().createCriteria(Template.class);
+        if (changedSince != null) {
+            Criteria xmlEntityCriteria = criteria.createCriteria("xml");
+            xmlEntityCriteria.add(Restrictions.gt("created", changedSince.toDate()));
+        }
         HibernateUtils.applyCriteria(criteria, listingCriteria);
         return criteria.list();
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.TemplateDAO#retrieveListingRowCount()
      */
