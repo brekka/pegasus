@@ -19,6 +19,10 @@ public enum PegasusErrorCode implements ErrorCode {
      * No user context available to resolve private keys in.
      */
     PG106,
+    /**
+     * Template not found
+     */
+    PG107,
 
     PG200,
     PG265,

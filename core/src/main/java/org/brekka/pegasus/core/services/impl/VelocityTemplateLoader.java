@@ -25,6 +25,8 @@ import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TemplateDAO;
 import org.brekka.pegasus.core.model.Template;
 import org.brekka.pegasus.core.services.XmlEntityService;
@@ -39,15 +41,15 @@ import org.brekka.xml.pegasus.v2.model.TemplateType;
 public class VelocityTemplateLoader extends ResourceLoader {
 
     private TemplateDAO templateDAO;
-    
+
     private XmlEntityService xmlEntityService;
-    
-    
+
+
     /* (non-Javadoc)
      * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#init(org.apache.commons.collections.ExtendedProperties)
      */
     @Override
-    public void init(ExtendedProperties configuration) {
+    public void init(final ExtendedProperties configuration) {
         this.templateDAO = (TemplateDAO) this.rsvc.getApplicationAttribute(TemplateDAO.class.getName());
         this.xmlEntityService = (XmlEntityService) this.rsvc.getApplicationAttribute(XmlEntityService.class.getName());
     }
@@ -56,10 +58,9 @@ public class VelocityTemplateLoader extends ResourceLoader {
      * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#getResourceStream(java.lang.String)
      */
     @Override
-    public InputStream getResourceStream(String tempateIdStr) throws ResourceNotFoundException {
-        UUID templateId = UUID.fromString(tempateIdStr);
-        Template template = templateDAO.retrieveById(templateId);
-        xmlEntityService.release(template, TemplateDocument.class);
+    public InputStream getResourceStream(final String tempateIdStr) throws ResourceNotFoundException {
+        Template template = findTemplate(tempateIdStr);
+        this.xmlEntityService.release(template, TemplateDocument.class);
         TemplateDocument templateDocument = template.getXml().getBean();
         TemplateType templateType = templateDocument.getTemplate();
         String content = templateType.getContent();
@@ -71,7 +72,7 @@ public class VelocityTemplateLoader extends ResourceLoader {
      * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#isSourceModified(org.apache.velocity.runtime.resource.Resource)
      */
     @Override
-    public boolean isSourceModified(Resource resource) {
+    public boolean isSourceModified(final Resource resource) {
         long cachedLastModified = resource.getLastModified();
         long currentLastModified = getLastModified(resource);
         boolean modified = currentLastModified != cachedLastModified;
@@ -82,12 +83,25 @@ public class VelocityTemplateLoader extends ResourceLoader {
      * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#getLastModified(org.apache.velocity.runtime.resource.Resource)
      */
     @Override
-    public long getLastModified(Resource resource) {
-        String name = resource.getName();
-        UUID templateId = UUID.fromString(name);
-        Template template = templateDAO.retrieveById(templateId);
+    public long getLastModified(final Resource resource) {
+        Template template = findTemplate(resource.getName());
         long lastModified = template.getXml().getCreated().getTime();
         return lastModified;
     }
 
+    protected Template findTemplate(final String resourceKey) {
+        Template template;
+        try {
+            UUID templateId = UUID.fromString(resourceKey);
+            template = this.templateDAO.retrieveById(templateId);
+        } catch (IllegalArgumentException e) {
+            // Not a UUID, try slug
+            template = this.templateDAO.retrieveBySlug(resourceKey);
+        }
+        if (template == null) {
+            throw new PegasusException(PegasusErrorCode.PG107,
+                    "Template not found key resource key '%s'. Only ids or slugs can be used to lookup templates.", resourceKey);
+        }
+        return template;
+    }
 }
