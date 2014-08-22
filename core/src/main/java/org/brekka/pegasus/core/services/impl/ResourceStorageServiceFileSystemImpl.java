@@ -57,8 +57,7 @@ public class ResourceStorageServiceFileSystemImpl implements ResourceStorageServ
     public ByteSequence retrieve(final UUID id) {
         File file = toFile(id);
         if (!file.exists()) {
-            throw new PegasusException(PegasusErrorCode.PG100,
-                    "No file found with the id '%s'", id);
+            return null;
         }
         return new FileSystemByteSequence(id, file, false);
     }

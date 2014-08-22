@@ -464,6 +464,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         try {
             if (xmlEntity.isExternalData()) {
                 ByteSequence byteSequence = this.resourceStorageService.retrieve(xmlEntity.getId());
+                if (byteSequence == null) {
+                    throw new PegasusException(PegasusErrorCode.PG100,
+                            "No entity XML file found with the id '%s'", xmlEntity.getId());
+                }
                 is = byteSequence.getInputStream();
             } else {
                 is = xmlEntity.getData().getBinaryStream();
