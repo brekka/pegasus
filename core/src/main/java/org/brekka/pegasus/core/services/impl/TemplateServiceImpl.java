@@ -294,6 +294,8 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 existing.setEngine(templateEngine);
                 existing.setLabel(exportedTemplateType.getLabel());
+                // If we force updated, treat it as not automatic import.
+                existing.setImported(Boolean.valueOf(!forceUpdate));
                 this.xmlEntityService.release(existing, TemplateDocument.class);
                 XmlEntity<TemplateDocument> xml = existing.getXml();
                 TemplateType newXml = xml.getBean().getTemplate();
