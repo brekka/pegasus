@@ -68,7 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
-@Transactional
 public class InboxServiceImpl extends AllocationServiceSupport implements InboxService, ApplicationListener<ApplicationEvent>  {
 
     @Autowired
@@ -355,7 +354,6 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
 
     @Override
-    @Transactional()
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;

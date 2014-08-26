@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
-@Transactional
 public class ConnectionServiceImpl implements ConnectionService, ApplicationListener<ApplicationEvent> {
 
     @Autowired
@@ -49,7 +48,6 @@ public class ConnectionServiceImpl implements ConnectionService, ApplicationList
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
-    @Transactional()
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;
