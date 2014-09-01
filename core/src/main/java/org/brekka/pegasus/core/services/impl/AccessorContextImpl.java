@@ -108,11 +108,14 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
         if (authentication instanceof Accessor) {
             return ((Accessor) authentication).getContext();
         }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Accessor) {
-            return ((Accessor) principal).getContext();
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof Accessor) {
+                return ((Accessor) principal).getContext();
+            }
         }
         throw new PegasusException(PegasusErrorCode.PG623, 
-                "No AccessorContext available for the current security context");
+                "No AccessorContext available for the current security context '%s'", 
+                authentication != null ? authentication.getClass().getName() : null);
     }
 }
