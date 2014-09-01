@@ -76,7 +76,6 @@ import difflib.PatchFailedException;
  *
  */
 @Service
-@Transactional
 @Configured
 public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListener<ApplicationEvent>  {
 

@@ -68,7 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
-@Transactional
 public class InboxServiceImpl extends AllocationServiceSupport implements InboxService, ApplicationListener<ApplicationEvent>  {
 
     @Autowired
@@ -200,12 +199,14 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      * @see org.brekka.pegasus.core.services.InboxService#retrieveDeposits(org.brekka.pegasus.core.model.Member,
      * org.brekka.pegasus.core.model.AllocationDisposition) */
     @Override
+    @Transactional(readOnly=true)
     public List<Deposit> retrieveDepositsByMember(final Member member,
             final AllocationDisposition allocationDisposition, final boolean personalOnly, final boolean includeExpired) {
         return this.depositDAO.retrieveDepositsForParticipant(member, allocationDisposition, personalOnly, includeExpired);
     }
 
     @Override
+    @Transactional(readOnly=true)
     public List<Deposit> retrieveDepositsByOwner(final Actor owner, final AllocationDisposition allocationDisposition,
             final boolean includePersonal, final boolean includeExpired) {
         return this.depositDAO.retrieveDepositsForCollectiveOwner(owner, allocationDisposition, includePersonal, includeExpired);
@@ -322,6 +323,7 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
      * @see org.brekka.pegasus.core.services.InboxService#retrieveDepositListing(org.brekka.pegasus.core.model.Inbox, org.joda.time.DateTime, org.joda.time.DateTime, boolean, org.brekka.commons.persistence.model.ListingCriteria, boolean, java.util.List)
      */
     @Override
+    @Transactional(readOnly=true)
     public List<Deposit> retrieveDepositListing(final Inbox inbox, final DateTime from, final DateTime until, final boolean showExpired,
             final ListingCriteria listingCriteria, final boolean dispatchBased, final List<? extends Actor> sentByActors) {
         List<Deposit> depositList = this.depositDAO.retrieveListing(inbox, defaultMin(from), defaultMax(until), showExpired,
@@ -355,7 +357,6 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
     }
 
     @Override
-    @Transactional()
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
             VaultDeleteEvent vaultDeleteEvent = (VaultDeleteEvent) event;

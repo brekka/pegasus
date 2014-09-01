@@ -50,7 +50,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Service
-@Transactional
 public class ProfileServiceImpl implements ProfileService, ApplicationListener<ApplicationEvent> {
 
     @Autowired
