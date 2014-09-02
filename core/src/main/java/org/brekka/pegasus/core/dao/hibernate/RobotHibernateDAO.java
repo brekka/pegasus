@@ -52,7 +52,9 @@ public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implem
     @Override
     public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
         Criteria criteria = getCurrentSession().createCriteria(Robot.class);
-        criteria.add(Restrictions.eq("owner", owner));
+        if (owner != null) {
+            criteria.add(Restrictions.eq("owner", owner));
+        }
         criteria.add(Restrictions.in("status", new Object[] { ActorStatus.ACTIVE, ActorStatus.DISABLED } ));
         HibernateUtils.applyCriteria(criteria, listingCriteria);
         return criteria.list();
@@ -63,11 +65,16 @@ public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implem
      */
     @Override
     public int retrieveListingRowCount(Actor owner) {
-        Query query = getCurrentSession().createQuery(
+        String sql = 
                 "select count(r) from Robot r" +
-                " where r.owner=:owner" +
-                "   and r.status in (:active, :disabled)");
-        query.setEntity("owner", owner);
+                " where r.status in (:active, :disabled)";
+        if (owner != null) {
+            sql += "   and r.owner=:owner";
+        }
+        Query query = getCurrentSession().createQuery(sql);
+        if (owner != null) {
+            query.setEntity("owner", owner);
+        }
         query.setParameter("active", ActorStatus.ACTIVE);
         query.setParameter("disabled", ActorStatus.DISABLED);
         return ((Number) query.uniqueResult()).intValue();
