@@ -41,6 +41,10 @@ public enum PegasusErrorCode implements ErrorCode {
     PG401,
     PG402,
     PG403,
+    /**
+     * The resource has been deleted and is not longer available 'GONE'.
+     */
+    PG410,
     PG423,
     PG431,
     PG443,

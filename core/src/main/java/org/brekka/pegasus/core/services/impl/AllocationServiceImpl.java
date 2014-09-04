@@ -24,6 +24,8 @@ import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CryptedFile;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
 import org.brekka.pegasus.core.event.AllocationFileDeleteEvent;
@@ -114,7 +116,12 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             return null;
         }
 
+        if (allocationFile.getDeleted() != null) {
+            throw new PegasusException(PegasusErrorCode.PG410, "Allocation file '%s' no longer exists", allocationFileId);
+        }
+
         Allocation allocation = allocationFile.getAllocation();
+
 
         Allocation unlockedAllocation = currentContext.retrieve(allocation.getId(), Allocation.class);
         if (unlockedAllocation == null) {
@@ -124,6 +131,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
             unlockedAllocation = allocation;
         }
         allocationFile.setAllocation(unlockedAllocation);
+
         BundleType bundle = unlockedAllocation.getXml().getBean().getAllocation().getBundle();
         List<FileType> fileList = bundle.getFileList();
         for (FileType fileType : fileList) {
