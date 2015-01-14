@@ -59,7 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractEMailSendingService implements EMailSendingService {
 
     private static final Log log = LogFactory.getLog(AbstractEMailSendingService.class);
-
+    
     @Autowired
     private MemberService memberService;
 
@@ -116,6 +116,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         message.setSender(toAddress(sender));
 
         List<EMailRecipient> eMailRecipientList = new ArrayList<>();
+        
         for (String recipient : recipients) {
             EMailRecipient eMailRecipient = new EMailRecipient();
             eMailRecipient.setAddress(toAddress(recipient));
@@ -162,8 +163,16 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
 
         message.setXml(xml);
 
+        // We will record who the mail should have gone to, but we'll remove any recipient we don't actually want to send to here.
+        List<String> filteredRecipients = new ArrayList<>();
+        for (String recipient : recipients) {
+            if (acceptDeliveryRecipient(recipient)) {
+                filteredRecipients.add(recipient);
+            }
+        }
+
         try {
-            String reference = sendInternal(recipients, sender, subject, plainBody, htmlBody, attachments);
+            String reference = sendInternal(filteredRecipients, sender, subject, plainBody, htmlBody, attachments);
             message.setReference(reference);
         } catch (DataAccessException e) {
             log.error(String.format("Failed to send E-Mail '%s'", message.getId()), e);
@@ -172,6 +181,13 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         return message;
     }
 
+    /**
+     * @param recipient
+     * @return
+     */
+    protected boolean acceptDeliveryRecipient(String recipient) {
+        return true;
+    }
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.EMailSendingService#retrieveById(java.util.UUID)

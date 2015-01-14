@@ -25,13 +25,17 @@ import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
+import org.brekka.pegasus.core.model.AuthenticationToken;
+import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Robot;
 import org.brekka.pegasus.core.model.UsernamePassword;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
+import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.RobotService;
 import org.brekka.pegasus.core.services.UsernamePasswordService;
@@ -66,6 +70,9 @@ public class RobotServiceImpl implements RobotService {
 
     @Autowired
     private XmlEntityService xmlEntityService;
+    
+    @Autowired
+    private DivisionService divisionService;
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.RobotService#createRobot(java.util.UUID, java.lang.String)
@@ -96,9 +103,11 @@ public class RobotServiceImpl implements RobotService {
         UsernamePassword usernamePassword = usernamePasswordService.create(key, code);
         robot.setAuthenticationToken(usernamePassword);
 
-        Vault vault = vaultService.createVault("Default", code, robot);
-        robot.setDefaultVault(vault);
-        robot.setPrimaryKeySafe(vault);
+        Vault defaultVault = vaultService.createVault("Default", code, robot);
+        robot.setDefaultVault(defaultVault);
+        defaultVault = this.vaultService.openVault(defaultVault.getId(), code);
+        Division<Member> primaryDivision = this.divisionService.createDivision(defaultVault, null, "Primary");
+        robot.setPrimaryKeySafe(primaryDivision);
 
         robot.setStatus(ActorStatus.ACTIVE);
         robot.setOwner(nOwner);
@@ -129,13 +138,28 @@ public class RobotServiceImpl implements RobotService {
         return robotDAO.retrieveListing(owner, listingCriteria);
     }
 
+    /**
+     * Best effort to release the resources of a robot.
+     */
     @Transactional()
     @Override
     public void delete(final Robot robot) {
         Robot managed = robotDAO.retrieveById(robot.getId());
-        vaultService.deleteVault(managed.getDefaultVault());
-        usernamePasswordService.delete((UsernamePassword) managed.getAuthenticationToken());
-        xmlEntityService.delete(managed.getXml().getId());
-        robotDAO.delete(managed.getId());
+        managed.setStatus(ActorStatus.DELETED);
+        Vault vault = managed.getDefaultVault();
+        managed.setDefaultVault(null);
+        if (EntityUtils.identityEquals(managed.getPrimaryKeySafe(), vault)) {
+            managed.setPrimaryKeySafe(null);
+        }
+        XmlEntity<RobotDocument> xml = managed.getXml();
+        managed.setXml(null);
+        robotDAO.update(managed);
+        AuthenticationToken authenticationToken = EntityUtils.narrow(managed.getAuthenticationToken(), AuthenticationToken.class);
+        if (authenticationToken instanceof UsernamePassword) {
+            // The user/pass will become inoperable, allowing the e-mail to be used again.
+            this.usernamePasswordService.scramble((UsernamePassword) authenticationToken);
+        }
+        vaultService.deleteVault(vault);
+        xmlEntityService.delete(xml.getId());
     }
 }
