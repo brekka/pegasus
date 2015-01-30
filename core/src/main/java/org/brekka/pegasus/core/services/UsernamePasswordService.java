@@ -59,4 +59,12 @@ public interface UsernamePasswordService {
      */
     void scramble(UsernamePassword usernamePassword);
 
+    
+    /**
+     * Change the username part of this username/password.
+     * 
+     * @param username the new username to set.
+     * @param usernamePassword the entry to update.
+     */
+    void changeUsername(String username, UsernamePassword usernamePassword);
 }

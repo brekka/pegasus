@@ -41,4 +41,9 @@ public interface ProfileService {
 
     void deleteFor(Member member);
 
+    /**
+     * @param profile
+     */
+    void update(Profile profile);
+
 }

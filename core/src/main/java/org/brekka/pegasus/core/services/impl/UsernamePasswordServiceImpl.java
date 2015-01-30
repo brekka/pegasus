@@ -91,6 +91,18 @@ public class UsernamePasswordServiceImpl implements UsernamePasswordService {
         return usernamePassword;
     }
     
+    /* (non-Javadoc)
+     * @see org.brekka.pegasus.core.services.UsernamePasswordService#changeUsername(java.lang.String, org.brekka.pegasus.core.model.UsernamePassword)
+     */
+    @Override
+    @Transactional()
+    public void changeUsername(String username, UsernamePassword usernamePassword) {
+        UsernamePassword managed = usernamePasswordDAO.retrieveById(usernamePassword.getId());
+        byte[] derivedUsername = deriveUsername(username);
+        managed.setUsernameDigest(derivedUsername);
+        usernamePasswordDAO.update(managed);
+    }
+    
 
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.UsernamePasswordService#verify(java.lang.String, java.lang.String)
