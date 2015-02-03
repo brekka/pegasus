@@ -8,6 +8,7 @@ import java.sql.Blob;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlObject;
 import org.brekka.pegasus.core.dao.XmlEntityDAO;
 import org.brekka.pegasus.core.model.KeySafe;
@@ -31,15 +32,6 @@ public class XmlEntityHibernateDAO extends AbstractPegasusHibernateDAO<XmlEntity
     @Override
     protected Class<XmlEntity<?>> type() {
         return (Class) XmlEntity.class;
-    }
-    
-    @Override
-    public void create(XmlEntity<?> xmlEntity, InputStream inputStream, long length) {
-        Session session = getCurrentSession();
-        LobCreator lobCreator = Hibernate.getLobCreator(session);
-        Blob blob = lobCreator.createBlob(inputStream, length);
-        xmlEntity.setData(blob);
-        create(xmlEntity);
     }
     
     /* (non-Javadoc)

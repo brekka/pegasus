@@ -403,7 +403,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
             }
             byte[] data = baos.toByteArray();
-            this.xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+            entity.setData(data);
+            this.xmlEntityDAO.create(entity);
         }
         return entity;
     }
@@ -438,7 +439,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
             }
             byte[] data = baos.toByteArray();
-            this.xmlEntityDAO.create(entity, new ByteArrayInputStream(data), data.length);
+            entity.setData(data);
+            this.xmlEntityDAO.create(entity);
         }
 
         return entity;
@@ -469,7 +471,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 }
                 is = byteSequence.getInputStream();
             } else {
-                is = xmlEntity.getData().getBinaryStream();
+                is = new ByteArrayInputStream(xmlEntity.getData());
             }
             UUID cryptedDataId = xmlEntity.getCryptedDataId();
             if (cryptedDataId != null) {
@@ -505,7 +507,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                         expectedType.getName(), xmlBean.getClass().getName());
             }
 
-        } catch (IOException | SQLException | XmlException e) {
+        } catch (IOException | XmlException e) {
             throw new PegasusException(PegasusErrorCode.PG401, e,
                     "Failed to extract Xml Entity '%s'", xmlEntity.getId());
         } finally {

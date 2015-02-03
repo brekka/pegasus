@@ -3,7 +3,6 @@
  */
 package org.brekka.pegasus.core.model;
 
-import java.sql.Blob;
 import java.util.Date;
 import java.util.UUID;
 
@@ -108,12 +107,13 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     private boolean externalData;
 
     /**
-     * Should not be more than 200KB of compressed data.
-     * Use a blob so that the raw data does not remain in memory. If null then the content will be
-     * held in the {@link ResourceStorageService}.
+     * Should not be more than 200KB of compressed data. Larger object will be stored with the
+     * {@link ResourceStorageService} and this column will be null. This used to be a BLOB but database handling of
+     * blobs seems to be a bit variable, or at least their handling via JDBC. Give the size restrictions placed on this
+     * column, we'll go for speed of retrieval over the slight memory impact it will have.
      */
     @Column(name="`Data`", length=MAX_DATA_LENGTH, updatable=false)
-    private Blob data;
+    private byte[] data;
 
     /**
      * XML entities are initially marked soft-deleted and then completely removed at a later date.
@@ -188,11 +188,11 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
         this.cryptedDataId = cryptedDataId;
     }
 
-    public Blob getData() {
+    public byte[] getData() {
         return this.data;
     }
 
-    public void setData(final Blob data) {
+    public void setData(final byte[] data) {
         this.data = data;
     }
 
