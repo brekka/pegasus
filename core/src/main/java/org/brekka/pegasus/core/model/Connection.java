@@ -18,6 +18,8 @@ package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -65,6 +67,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -104,7 +107,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -119,7 +122,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
      * @return the owner
      */
     public Owner getOwner() {
-        return owner;
+        return this.owner;
     }
 
     /**
@@ -133,7 +136,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
      * @return the source
      */
     public Source getSource() {
-        return source;
+        return this.source;
     }
 
     /**
@@ -147,7 +150,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
      * @return the keyPairId
      */
     public UUID getKeyPairId() {
-        return keyPairId;
+        return this.keyPairId;
     }
 
     /**
@@ -161,7 +164,7 @@ public class Connection<Owner extends Actor, Source extends KeySafe<? extends Ac
      * @return the target
      */
     public Target getTarget() {
-        return target;
+        return this.target;
     }
 
     /**

@@ -6,6 +6,8 @@ package org.brekka.pegasus.core.model;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -44,6 +46,7 @@ public class Invitation extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -92,7 +95,7 @@ public class Invitation extends SnapshotEntity<UUID> {
 
 
     public Actor getSender() {
-        return sender;
+        return this.sender;
     }
 
     public void setSender(final Actor sender) {
@@ -100,7 +103,7 @@ public class Invitation extends SnapshotEntity<UUID> {
     }
 
     public Member getRecipient() {
-        return recipient;
+        return this.recipient;
     }
 
     public void setRecipient(final Member recipient) {
@@ -108,7 +111,7 @@ public class Invitation extends SnapshotEntity<UUID> {
     }
 
     public Date getActioned() {
-        return actioned;
+        return this.actioned;
     }
 
     public void setActioned(final Date actioned) {
@@ -116,7 +119,7 @@ public class Invitation extends SnapshotEntity<UUID> {
     }
 
     public InvitationStatus getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(final InvitationStatus invitationStatus) {
@@ -124,7 +127,7 @@ public class Invitation extends SnapshotEntity<UUID> {
     }
 
     public XmlEntity<InvitationDocument> getXml() {
-        return xml;
+        return this.xml;
     }
 
     public void setXml(final XmlEntity<InvitationDocument> xml) {
@@ -136,7 +139,7 @@ public class Invitation extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -151,7 +154,7 @@ public class Invitation extends SnapshotEntity<UUID> {
      * @return the token
      */
     public Token getToken() {
-        return token;
+        return this.token;
     }
 
     /**

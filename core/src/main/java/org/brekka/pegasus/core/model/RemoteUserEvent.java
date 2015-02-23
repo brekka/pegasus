@@ -1,11 +1,13 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -19,7 +21,7 @@ import org.hibernate.annotations.Type;
 
 /**
  * An event executed by a remote user.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @MappedSuperclass
@@ -35,6 +37,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -72,7 +75,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     private Member member;
 
     public Date getInitiated() {
-        return initiated;
+        return this.initiated;
     }
 
     public void setInitiated(final Date initiated) {
@@ -80,7 +83,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     }
 
     public String getRemoteAddress() {
-        return remoteAddress;
+        return this.remoteAddress;
     }
 
     public void setRemoteAddress(final String remoteAddress) {
@@ -88,7 +91,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     }
 
     public String getOnBehalfOfAddress() {
-        return onBehalfOfAddress;
+        return this.onBehalfOfAddress;
     }
 
     public void setOnBehalfOfAddress(final String onBehalfOfAddress) {
@@ -96,7 +99,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     }
 
     public String getUserAgent() {
-        return userAgent;
+        return this.userAgent;
     }
 
     public void setUserAgent(final String userAgent) {
@@ -104,7 +107,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
     }
 
     public Member getMember() {
-        return member;
+        return this.member;
     }
 
     public void setMember(final Member member) {
@@ -116,7 +119,7 @@ public abstract class RemoteUserEvent implements IdentifiableEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**

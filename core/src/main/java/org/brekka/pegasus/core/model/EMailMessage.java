@@ -19,6 +19,8 @@ package org.brekka.pegasus.core.model;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -54,6 +56,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -101,7 +104,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      * @return the recipients
      */
     public List<EMailRecipient> getRecipients() {
-        return recipients;
+        return this.recipients;
     }
 
     /**
@@ -115,7 +118,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      * @return the sender
      */
     public EMailAddress getSender() {
-        return sender;
+        return this.sender;
     }
 
     /**
@@ -129,7 +132,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      * @return the owner
      */
     public Actor getOwner() {
-        return owner;
+        return this.owner;
     }
 
     /**
@@ -144,7 +147,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      */
     @Override
     public XmlEntity<EMailMessageDocument> getXml() {
-        return xml;
+        return this.xml;
     }
 
     /**
@@ -160,7 +163,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -175,7 +178,7 @@ public class EMailMessage extends SnapshotEntity<UUID> implements XmlEntityAware
      * @return the reference
      */
     public String getReference() {
-        return reference;
+        return this.reference;
     }
 
     /**

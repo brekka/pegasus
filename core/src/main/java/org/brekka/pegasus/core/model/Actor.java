@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -24,9 +26,9 @@ import org.hibernate.annotations.Type;
 /**
  * An actor can be either a {@link Member} or an {@link Associate}. An employee is simply an association
  * of a member with an organization.
- * 
+ *
  * TODO rename to Entity?
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -49,6 +51,7 @@ public abstract class Actor extends LongevousEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -61,7 +64,7 @@ public abstract class Actor extends LongevousEntity<UUID> {
 
 
     public ActorStatus getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(final ActorStatus status) {
@@ -73,7 +76,7 @@ public abstract class Actor extends LongevousEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**

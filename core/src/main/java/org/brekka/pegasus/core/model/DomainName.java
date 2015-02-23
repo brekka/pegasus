@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +18,7 @@ import org.hibernate.annotations.Type;
 
 /**
  * Represents an Internet domain name such as 'brekka.org'.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -33,6 +35,7 @@ public class DomainName extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -56,7 +59,7 @@ public class DomainName extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -68,7 +71,7 @@ public class DomainName extends SnapshotEntity<UUID> {
     }
 
     public byte[] getHash() {
-        return hash;
+        return this.hash;
     }
 
     public void setHash(final byte[] hash) {
@@ -76,7 +79,7 @@ public class DomainName extends SnapshotEntity<UUID> {
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public void setAddress(final String address) {

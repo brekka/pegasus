@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -20,7 +22,7 @@ import org.hibernate.annotations.Type;
 
 /**
  * A rule within the firewall
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -37,6 +39,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -72,7 +75,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -84,7 +87,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     }
 
     public Firewall getFirewall() {
-        return firewall;
+        return this.firewall;
     }
 
     public void setFirewall(final Firewall firewall) {
@@ -92,7 +95,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     }
 
     public NetworkGroup getNetworkGroup() {
-        return networkGroup;
+        return this.networkGroup;
     }
 
     public void setNetworkGroup(final NetworkGroup networkGroup) {
@@ -100,7 +103,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     }
 
     public FirewallAction getAction() {
-        return action;
+        return this.action;
     }
 
     public void setAction(final FirewallAction action) {
@@ -108,7 +111,7 @@ public class FirewallRule extends SnapshotEntity<UUID> {
     }
 
     public int getPriority() {
-        return priority;
+        return this.priority;
     }
 
     public void setPriority(final int priority) {

@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -19,7 +21,7 @@ import org.hibernate.annotations.Type;
 
 /**
  * A set of rules that can be used to control what remote users can access resources based on their IP address.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -36,6 +38,7 @@ public class Firewall extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -66,7 +69,7 @@ public class Firewall extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -78,7 +81,7 @@ public class Firewall extends SnapshotEntity<UUID> {
     }
 
     public UUID getOwningEntityId() {
-        return owningEntityId;
+        return this.owningEntityId;
     }
 
     public void setOwningEntityId(final UUID owningEntityId) {
@@ -86,7 +89,7 @@ public class Firewall extends SnapshotEntity<UUID> {
     }
 
     public FirewallAction getDefaultAction() {
-        return defaultAction;
+        return this.defaultAction;
     }
 
     public void setDefaultAction(final FirewallAction defaultAction) {
@@ -94,7 +97,7 @@ public class Firewall extends SnapshotEntity<UUID> {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(final String name) {

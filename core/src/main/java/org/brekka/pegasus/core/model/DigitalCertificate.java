@@ -19,6 +19,8 @@ package org.brekka.pegasus.core.model;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -53,6 +55,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -87,7 +90,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /* (non-Javadoc)
@@ -102,7 +105,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      * @return the expires
      */
     public Date getExpires() {
-        return expires;
+        return this.expires;
     }
 
     /**
@@ -116,7 +119,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      * @return the active
      */
     public Boolean getActive() {
-        return active;
+        return this.active;
     }
 
     /**
@@ -130,7 +133,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      * @return the signature
      */
     public byte[] getSignature() {
-        return signature;
+        return this.signature;
     }
 
     /**
@@ -144,7 +147,7 @@ public class DigitalCertificate extends SnapshotEntity<UUID> {
      * @return the certificateSubject
      */
     public CertificateSubject getCertificateSubject() {
-        return certificateSubject;
+        return this.certificateSubject;
     }
 
     /**

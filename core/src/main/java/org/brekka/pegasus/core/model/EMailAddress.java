@@ -1,11 +1,13 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,7 +27,7 @@ import org.hibernate.annotations.Type;
 /**
  * Encapsulates an e-mail address owned by a member (who can have more than one address). Note that the cleartext address itself may not be
  * stored here, but a hash which can be used to lookup the address always will be (ensuring uniqueness).
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -43,6 +45,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -78,7 +81,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     /**
      * Is this instance of the e-mail active or not. Once a single instance of a given hash can be
      * active at a time. If a user validates an e-mail to a new profile, then the old one becomes inactive.
-     * 
+     *
      * Should never be set to false, just true or null (so that multiple validations can take place at a time).
      */
     @Column(name="`Active`")
@@ -104,7 +107,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -116,7 +119,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public byte[] getHash() {
-        return hash;
+        return this.hash;
     }
 
     public void setHash(final byte[] hash) {
@@ -124,7 +127,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public DomainName getDomainName() {
-        return domainName;
+        return this.domainName;
     }
 
     public void setDomainName(final DomainName domainName) {
@@ -132,7 +135,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public Member getOwner() {
-        return owner;
+        return this.owner;
     }
 
     public void setOwner(final Member owner) {
@@ -140,7 +143,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public String getVerificationCode() {
-        return verificationCode;
+        return this.verificationCode;
     }
 
     public void setVerificationCode(final String verificationCode) {
@@ -148,7 +151,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public void setAddress(final String address) {
@@ -156,7 +159,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public Boolean getActive() {
-        return active;
+        return this.active;
     }
 
     public void setActive(final Boolean active) {
@@ -164,7 +167,7 @@ public class EMailAddress extends SnapshotEntity<UUID> {
     }
 
     public Date getVerified() {
-        return verified;
+        return this.verified;
     }
 
     public void setVerified(final Date verified) {

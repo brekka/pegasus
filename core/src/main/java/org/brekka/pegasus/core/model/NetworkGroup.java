@@ -1,11 +1,13 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,7 +26,7 @@ import org.hibernate.annotations.Type;
 /**
  * Groups one or more networks. Can be used to represent multiple networks
  * within an organization, country, or even continent.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -41,6 +43,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -70,7 +73,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -82,7 +85,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(final String name) {
@@ -90,7 +93,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     }
 
     public NetworkGroupCategory getNetworkGroupCategory() {
-        return networkGroupCategory;
+        return this.networkGroupCategory;
     }
 
     public void setNetworkGroupCategory(final NetworkGroupCategory networkGroupCategory) {
@@ -98,7 +101,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     }
 
     public List<Network> getNetworks() {
-        return networks;
+        return this.networks;
     }
 
     public void setNetworks(final List<Network> networks) {
@@ -106,7 +109,7 @@ public class NetworkGroup extends LongevousEntity<UUID> {
     }
 
     public List<FirewallRule> getRules() {
-        return rules;
+        return this.rules;
     }
 
     public void setRules(final List<FirewallRule> rules) {

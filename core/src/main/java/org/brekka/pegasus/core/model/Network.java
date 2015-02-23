@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -19,7 +21,7 @@ import org.hibernate.annotations.Type;
 
 /**
  * A network block such as "10.0.0.0/8".
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -36,6 +38,7 @@ public class Network extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -55,7 +58,7 @@ public class Network extends SnapshotEntity<UUID> {
     private String block;
 
     public NetworkGroup getNetworkGroup() {
-        return networkGroup;
+        return this.networkGroup;
     }
 
     public void setNetworkGroup(final NetworkGroup networkGroup) {
@@ -63,7 +66,7 @@ public class Network extends SnapshotEntity<UUID> {
     }
 
     public String getBlock() {
-        return block;
+        return this.block;
     }
 
     public void setBlock(final String block) {
@@ -75,7 +78,7 @@ public class Network extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**

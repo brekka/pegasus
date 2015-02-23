@@ -1,10 +1,12 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -19,7 +21,7 @@ import org.hibernate.annotations.Type;
 /**
  * A token is a URL-safe string fragment used to identify a resource at a moment in time to the outside world.
  * As such tokens may be reused so long as the thing it was referencing is no longer available.
- * 
+ *
  * @author Andrew Taylor
  */
 @Entity
@@ -36,6 +38,7 @@ public class Token extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -54,7 +57,7 @@ public class Token extends SnapshotEntity<UUID> {
 
 
     /**
-     * 
+     *
      */
     public Token() {
     }
@@ -68,7 +71,7 @@ public class Token extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -80,7 +83,7 @@ public class Token extends SnapshotEntity<UUID> {
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public void setPath(final String path) {
@@ -88,7 +91,7 @@ public class Token extends SnapshotEntity<UUID> {
     }
 
     public TokenType getType() {
-        return type;
+        return this.type;
     }
 
     @SuppressWarnings("unchecked")

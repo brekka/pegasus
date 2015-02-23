@@ -18,6 +18,8 @@ package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -48,6 +50,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
      */
     @Id
     @Type(type="pg-uuid")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`")
     private UUID id;
 
@@ -70,7 +73,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
      */
     @Override
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -85,7 +88,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
      * @return the address
      */
     public EMailAddress getAddress() {
-        return address;
+        return this.address;
     }
 
     /**
@@ -99,7 +102,7 @@ public class EMailRecipient extends SnapshotEntity<UUID> {
      * @return the message
      */
     public EMailMessage getMessage() {
-        return message;
+        return this.message;
     }
 
     /**
