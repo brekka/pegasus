@@ -165,7 +165,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void setupPerson(final ProfileType profileType, final String vaultPassword, final boolean encryptedProfile) {
-        Person managed = (Person) getManaged();
+        Person managed = getManaged(Person.class);
         populatePerson(managed, profileType, vaultPassword, encryptedProfile, false, true);
         this.memberDAO.update(managed);
     }
@@ -289,10 +289,11 @@ public class MemberServiceImpl implements MemberService {
         this.actorDAO.update(managed);
     }
 
-    protected Member getManaged() {
+    protected <M extends Member> M getManaged(final Class<M> memberType) {
         AuthenticatedMember<Member> current = getCurrent(Member.class);
         Member member = current.getMember();
-        return this.memberDAO.retrieveById(member.getId());
+        Member managed = this.memberDAO.retrieveById(member.getId());
+        return EntityUtils.narrow(managed, memberType);
     }
 
     protected void populatePerson(final Person person, final ProfileType profileType, final String vaultPassword,
