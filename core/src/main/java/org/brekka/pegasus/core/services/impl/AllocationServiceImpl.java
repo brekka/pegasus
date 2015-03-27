@@ -104,7 +104,7 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     @Override
     @Transactional(readOnly=true)
     public AllocationFile retrieveFile(final UUID allocationFileId) {
-        AccessorContext currentContext = AccessorContextImpl.getCurrent();
+        AccessorContext currentContext = AccessorContextImpl.getCurrent(true);
         AllocationFile unlockedAllocationFile = currentContext.retrieve(allocationFileId, AllocationFile.class);
         if (unlockedAllocationFile != null) {
             this.allocationFileDAO.refresh(unlockedAllocationFile);

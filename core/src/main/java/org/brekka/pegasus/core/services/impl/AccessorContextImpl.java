@@ -30,7 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * A non-serializable context for retaining expensive-to-calculate values for a session user.
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public class AccessorContextImpl implements Serializable, AccessorContext {
@@ -47,22 +47,22 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.brekka.pegasus.core.model.AccessorContext#retain(java.io.Serializable, java.lang.Object)
      */
     @Override
-    public synchronized void retain(Serializable key, Object value) {
+    public synchronized void retain(final Serializable key, final Object value) {
         map().put(key, value);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.brekka.pegasus.core.model.AccessorContext#retrieve(java.io.Serializable, java.lang.Class)
      */
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized <V> V retrieve(Serializable key, Class<V> expectedType) {
+    public synchronized <V> V retrieve(final Serializable key, final Class<V> expectedType) {
         Object object = map().get(key);
         if (object == null) {
             return null;
@@ -76,11 +76,11 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.brekka.pegasus.core.model.AccessorContext#remove(java.io.Serializable)
      */
     @Override
-    public synchronized void remove(Serializable key) {
+    public synchronized void remove(final Serializable key) {
         map().remove(key);
     }
 
@@ -88,21 +88,34 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
      * Map is lazy initialised so all operations should obtain a reference using this method.
      */
     private synchronized Map<Serializable, Object> map() {
-        if (map == null) {
-            map = new HashMap<>();
+        if (this.map == null) {
+            this.map = new HashMap<>();
         }
-        return map;
+        return this.map;
     }
 
     /**
      * Retrieve the current {@link AccessorContext} from the security context user (assuming there is one). If no user
      * is present then a {@link PegasusException} will be thrown.
-     * 
+     *
      * @return the {@link AccessorContext} bound to the current security context.
      * @throws PegasusException
      *             if there is no {@link AccessorContext} available.
      */
     public static AccessorContext getCurrent() {
+        return getCurrent(false);
+    }
+
+    /**
+     * Retrieve the current {@link AccessorContext} from the security context user (assuming there is one). If no user
+     * is present and <code>useStub</code> is false then a {@link PegasusException} will be thrown. otherwise a new
+     * stub {@link AccessorContext} will be returned that is not bound to anything.
+     *
+     * @return the {@link AccessorContext} bound to the current security context.
+     * @throws PegasusException
+     *             if <code>useStub</code> is false and there is no {@link AccessorContext} available.
+     */
+    public static AccessorContext getCurrent(final boolean useStub) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         if (authentication instanceof Accessor) {
@@ -114,8 +127,11 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
                 return ((Accessor) principal).getContext();
             }
         }
-        throw new PegasusException(PegasusErrorCode.PG623, 
-                "No AccessorContext available for the current security context '%s'", 
+        if (useStub) {
+            return new AccessorContextImpl();
+        }
+        throw new PegasusException(PegasusErrorCode.PG623,
+                "No AccessorContext available for the current security context '%s'",
                 authentication != null ? authentication.getClass().getName() : null);
     }
 }
