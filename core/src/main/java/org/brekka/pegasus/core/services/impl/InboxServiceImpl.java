@@ -427,6 +427,10 @@ public class InboxServiceImpl extends AllocationServiceSupport implements InboxS
         if (deposit == null) {
             // Need to extract the metadata
             deposit = depositLookup.retrieve(depositId);
+            if (deposit == null) {
+                // Does not exist
+                return null;
+            }
             if (deposit.getDeleted() != null) {
                 // Deposit has been deleted, unable to decrypt
                 return deposit;
