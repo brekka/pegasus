@@ -102,20 +102,20 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
      * @throws PegasusException
      *             if there is no {@link AccessorContext} available.
      */
-    public static AccessorContext getCurrent() {
-        return getCurrent(false);
+    public static AccessorContext retrieveCurrent() {
+        return accessorContext(false);
     }
 
     /**
-     * Retrieve the current {@link AccessorContext} from the security context user (assuming there is one). If no user
-     * is present and <code>useStub</code> is false then a {@link PegasusException} will be thrown. otherwise a new
-     * stub {@link AccessorContext} will be returned that is not bound to anything.
+     * Retrieve the current {@link AccessorContext} from the security context user, returning a stub context if there is none.
      *
-     * @return the {@link AccessorContext} bound to the current security context.
-     * @throws PegasusException
-     *             if <code>useStub</code> is false and there is no {@link AccessorContext} available.
+     * @return the {@link AccessorContext} bound to the current security context or a stub context if there is none.
      */
-    public static AccessorContext getCurrent(final boolean useStub) {
+    public static AccessorContext getCurrent() {
+        return accessorContext(true);
+    }
+
+    private static AccessorContext accessorContext(final boolean useStub) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         if (authentication instanceof Accessor) {
