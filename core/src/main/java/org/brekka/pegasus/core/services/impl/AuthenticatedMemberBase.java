@@ -28,6 +28,7 @@ import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Profile;
+import org.brekka.pegasus.core.model.Robot;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.MemberService;
@@ -199,6 +200,20 @@ public abstract class AuthenticatedMemberBase<T extends Member> implements Authe
      */
     protected void setActiveActor(final Actor activeActor) {
         this.activeActor = activeActor;
+    }
+
+    /**
+     * Prepare a background processing user who will possess all of the private keys held by the current user.
+     * @param robot
+     * @param authoritySet
+     * @return
+     */
+    public AuthenticatedMemberBase<Robot> prepareBackgroundProcessor(final Robot robot, final Set<GrantedAuthority> authoritySet) {
+        AuthenticatedMemberBase<Robot> processor = new AuthenticatedMemberBase<Robot>(robot, authoritySet) {
+            private static final long serialVersionUID = 1L;
+        };
+        processor.privateKeyCache.putAll(privateKeyCache);
+        return processor;
     }
 
     /**
