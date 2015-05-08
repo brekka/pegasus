@@ -264,7 +264,7 @@ public class MemberServiceImpl implements MemberService {
         // Update the context user, if appropriate.
         AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
         if (EntityUtils.identityEquals(current.getMember(), managedMember)) {
-            current.setMember(managedMember);
+            current.setMember(EntityUtils.narrow(managedMember, Member.class));
             current.setActiveActor(null);
             current.setActiveProfile(null);
         }
