@@ -25,6 +25,7 @@ import org.brekka.pegasus.core.event.XmlEntityDeleteEvent;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
@@ -64,9 +65,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
     @Autowired
     private KeySafeService keySafeService;
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#createPlainProfile(org.brekka.pegasus.core.model.Member)
-     */
     @Override
     @Transactional()
     public Profile createPlainProfile(final Member member, final ProfileType profileType) {
@@ -82,9 +80,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         return profile;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#createEncryptedProfile(org.brekka.pegasus.core.model.Member, org.brekka.pegasus.core.model.Vault)
-     */
     @Override
     @Transactional()
     public Profile createEncryptedProfile(final Member member, final ProfileType profileType, final KeySafe<? extends Member> keySafe) {
@@ -100,10 +95,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         return profile;
     }
 
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#retrieveProfile(org.brekka.pegasus.core.model.Member)
-     */
     @Override
     @Transactional(readOnly=true)
     public Profile retrieveProfile(final Member member) {
@@ -127,21 +118,15 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         return profile;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#delete(org.brekka.pegasus.core.model.Profile)
-     */
     @Override
     @Transactional()
     public void delete(final Profile profile) {
         this.profileDAO.delete(profile.getId());
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#update(org.brekka.pegasus.core.model.Profile)
-     */
+
     @Override
     @Transactional()
-    public void update(Profile profile) {
+    public void update(final Profile profile) {
         this.profileDAO.update(profile);
     }
 
@@ -155,9 +140,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#currentUserProfileUpdated()
-     */
     @Override
     public void currentUserProfileUpdated() {
         List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
@@ -167,27 +149,24 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
                 return;
             }
         }
-        AuthenticatedMemberBase<Member> current = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
+        MemberContext current = memberService.retrieveCurrent();
         Profile activeProfile = current.getActiveProfile();
         TransactionSynchronizationManager.registerSynchronization(new ProfileSynchronization(activeProfile));
     }
 
-    /* (non-Javadoc)
-     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
-     */
     @Override
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof VaultOpenEvent) {
             VaultOpenEvent openEvent = (VaultOpenEvent) event;
-            AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
+            MemberContext current = memberService.retrieveCurrent();
 
             // Check the profile, release it if necessary
-            Profile activeProfile = currentMember.getActiveProfile();
+            Profile activeProfile = current.getActiveProfile();
             boolean released = releaseProfile(activeProfile, openEvent.getVault());
-            Member nMember = EntityUtils.narrow(currentMember.getMember(), Member.class);
+            Member nMember = EntityUtils.narrow(current.getMember(), Member.class);
             if (released && nMember instanceof Person) {
                 String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
-                ((Person) currentMember.getMember()).setFullName(fullName);
+                ((Person) current.getMember()).setFullName(fullName);
             }
         } else if (event instanceof XmlEntityDeleteEvent) {
             XmlEntityDeleteEvent deleteEvent = (XmlEntityDeleteEvent) event;
@@ -202,9 +181,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         return profileDocument;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.ProfileService#releaseProfile(org.brekka.pegasus.core.model.Profile, org.brekka.pegasus.core.model.Vault)
-     */
     protected boolean releaseProfile(final Profile profile, final Vault vault) {
         if (profile == null) {
             return false;
@@ -251,9 +227,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             this.activeProfile = activeProfile;
         }
 
-        /* (non-Javadoc)
-         * @see org.springframework.transaction.support.TransactionSynchronizationAdapter#beforeCommit(boolean)
-         */
         @Override
         public void beforeCommit(final boolean readOnly) {
             ProfileDocument profileDocument = this.activeProfile.getXml().getBean();
@@ -271,9 +244,6 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             ProfileServiceImpl.this.profileDAO.update(this.activeProfile);
         }
 
-        /* (non-Javadoc)
-         * @see org.springframework.transaction.support.TransactionSynchronizationAdapter#getOrder()
-         */
         @Override
         public int getOrder() {
             // Execute before the Hibernate session logic.

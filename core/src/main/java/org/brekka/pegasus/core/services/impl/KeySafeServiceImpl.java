@@ -23,7 +23,7 @@ import org.brekka.pegasus.core.dao.KeySafeDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
@@ -49,9 +49,6 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
     @Autowired
     private KeySafeDAO keySafeDAO;
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.KeySafeService#protect(byte[], org.brekka.pegasus.core.model.KeySafe)
-     */
     @Override
     @Transactional()
     public CryptedData protect(final byte[] keyData, final KeySafe<?> keySafe) {
@@ -74,18 +71,12 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
         return cryptedData;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.KeySafeService#retrieveById(java.util.UUID)
-     */
     @Override
     @Transactional(readOnly=true)
     public KeySafe<? extends Actor> retrieveById(final UUID id) {
         return this.keySafeDAO.retrieveById(id);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.KeySafeService#release(java.util.UUID, org.brekka.pegasus.core.model.KeySafe)
-     */
     @Override
     @Transactional(readOnly=true)
     public byte[] release(final UUID cryptedDataId, final KeySafe<?> keySafe) {
@@ -93,31 +84,25 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
             throw new IllegalArgumentException("A keySafe must be specified");
         }
         byte[] data;
-        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
-        PrivateKeyToken privateKey = resolvePrivateKeyFor(keySafe, currentMember);
+        MemberContext memberContext = memberService.retrieveCurrent();
+        PrivateKeyToken privateKey = resolvePrivateKeyFor(keySafe, memberContext);
         data = this.phalanxService.asymDecrypt(new IdentityCryptedData(cryptedDataId), privateKey);
         return data;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.KeySafeService#createKeyPair(org.brekka.pegasus.core.model.KeySafe)
-     */
     @Override
     @Transactional()
     public KeyPair createKeyPair(final KeySafe<?> keySafe) {
         return super.createKeyPair(keySafe);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.KeySafeService#assignKeyPair(org.brekka.pegasus.core.model.KeySafe, org.brekka.phalanx.api.model.KeyPair)
-     */
     @Override
     @Transactional()
     public KeyPair assignKeyPair(final KeySafe<?> protectingKeySafe, final KeyPair keyPairToAssign, final KeySafe<?> assignToKeySafe) {
         KeySafe<?> nAssignToKeySafe = EntityUtils.narrow(assignToKeySafe, KeySafe.class);
         KeyPair keyPair;
-        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
-        PrivateKeyToken privateKeyToken = resolveAndUnlock(protectingKeySafe, keyPairToAssign, currentMember);
+        MemberContext memberContext = memberService.retrieveCurrent();
+        PrivateKeyToken privateKeyToken = resolveAndUnlock(protectingKeySafe, keyPairToAssign, memberContext);
 
         if (nAssignToKeySafe instanceof Vault) {
             Vault vault = (Vault) nAssignToKeySafe;

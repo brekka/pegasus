@@ -19,6 +19,7 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -28,15 +29,16 @@ import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
+import org.brekka.pegasus.core.security.AuthenticationTokenAware;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -89,14 +91,13 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private DivisionService divisionService;
 
+    private final WeakHashMap<AuthenticationToken, MemberContextImpl> contexts = new WeakHashMap<>();
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#activateOrganization(org.brekka.pegasus.core.model.Organization)
-     */
+
     @Override
     @Transactional()
     public void activateOrganization(final Organization organization) {
-        AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
+        MemberContextImpl current = currentContext(true);
         Member member = current.getMember();
         Associate associate = this.organizationService.retrieveAssociate(organization, member);
         if (associate == null) {
@@ -109,9 +110,6 @@ public class MemberServiceImpl implements MemberService {
         current.setActiveActor(associate);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#retrieveById(java.util.UUID, java.lang.Class)
-     */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly=true)
@@ -119,14 +117,11 @@ public class MemberServiceImpl implements MemberService {
         Member member = this.memberDAO.retrieveById(memberId);
         if (!expectedType.isAssignableFrom(member.getClass())) {
             throw new PegasusException(PegasusErrorCode.PG903,
-                    "Member is '%s' not the expected '%s'", member.getClass().getName(), expectedType.getName());
+                    "Member is '%s', not the expected '%s'", member.getClass().getName(), expectedType.getName());
         }
         return (T) member;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#retrievePerson(org.brekka.pegasus.core.model.AuthenticationToken)
-     */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(readOnly=true)
@@ -142,24 +137,18 @@ public class MemberServiceImpl implements MemberService {
         return (T) member;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#activateMember()
-     */
     @Override
     public void activateMember() {
-        AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
+        MemberContextImpl current = currentContext();
         Member member = current.getMember();
         current.setActiveActor(member);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#isNewMember()
-     */
     @Override
     public boolean isNewMember() {
-        AuthenticatedMember<Member> authMem = getCurrent(Member.class);
-        return authMem != null
-                && authMem.getMember().getStatus() == ActorStatus.NEW;
+        MemberContextImpl current = currentContext();
+        return current != null
+            && current.getMember().getStatus() == ActorStatus.NEW;
     }
 
     @Override
@@ -170,9 +159,6 @@ public class MemberServiceImpl implements MemberService {
         this.memberDAO.update(managed);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#createPerson(org.brekka.pegasus.core.model.AuthenticationToken, java.lang.String, java.lang.String, java.lang.String, boolean)
-     */
     @Override
     @Transactional()
     public Person createPerson(final AuthenticationToken authenticationToken, final ProfileType profileType,
@@ -183,9 +169,6 @@ public class MemberServiceImpl implements MemberService {
         return person;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#preparePerson(org.brekka.pegasus.core.model.OpenID)
-     */
     @Override
     @Transactional()
     public Person createPerson(final AuthenticationToken authenticationToken) {
@@ -195,25 +178,18 @@ public class MemberServiceImpl implements MemberService {
         return person;
     }
 
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#logout(org.springframework.security.core.context.SecurityContext)
-     */
     @Override
     @Transactional()
-    public void logout(final SecurityContext securityContext) {
-        AuthenticatedMemberBase<Member> authenticatedMember = getAuthenticatedMember(securityContext, Member.class);
-        if (authenticatedMember != null) {
-            List<AuthenticatedPrincipal> authenticatedPrincipals = authenticatedMember.clearVaults();
+    public void logout(final AuthenticationToken token) {
+        MemberContextImpl memberContext = contexts.get(token);
+        if (memberContext != null) {
+            List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
             for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
                 this.phalanxService.logout(authenticatedPrincipal);
             }
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#hasAccess(org.springframework.security.core.GrantedAuthority)
-     */
     @Override
     public boolean hasAccess(final GrantedAuthority authority) {
         SecurityContext context = SecurityContextHolder.getContext();
@@ -222,27 +198,16 @@ public class MemberServiceImpl implements MemberService {
         return authorities.contains(authority);
     }
 
-
     @Override
-    @Transactional(readOnly=true)
-    public <T extends Member> AuthenticatedMember<T> getCurrent(final Class<T> expectedType) {
-        SecurityContext context = SecurityContextHolder.getContext();
-        AuthenticatedMemberBase<T> authMember = getAuthenticatedMember(context, expectedType);
-        if (authMember != null) {
-            Member member = authMember.getMember();
-            // Attempt to locate the user profile
-            if (member.getStatus() == ActorStatus.ACTIVE
-                    && authMember.getActiveProfile() == null) {
-                Profile profile = this.profileService.retrieveProfile(member);
-                authMember.setActiveProfile(profile);
-            }
-        }
-        return authMember;
+    public MemberContext getCurrent() {
+        return currentContext();
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#resetMember(org.brekka.pegasus.core.model.Member)
-     */
+    @Override
+    public MemberContext retrieveCurrent() {
+        return currentContext(true);
+    }
+
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void resetMember(final Member member) {
@@ -262,7 +227,7 @@ public class MemberServiceImpl implements MemberService {
         this.memberDAO.update(managedMember);
 
         // Update the context user, if appropriate.
-        AuthenticatedMemberBase<Member> current = (AuthenticatedMemberBase<Member>) getCurrent(Member.class);
+        MemberContextImpl current = currentContext();
         if (EntityUtils.identityEquals(current.getMember(), managedMember)) {
             current.setMember(EntityUtils.narrow(managedMember, Member.class));
             current.setActiveActor(null);
@@ -270,17 +235,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#getCurrent()
-     */
-    @Override
-    public AuthenticatedMember<Member> getCurrent() {
-        return getCurrent(Member.class);
-    }
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.MemberService#updateStatus(java.util.UUID, org.brekka.pegasus.core.model.ActorStatus)
-     */
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void updateStatus(final UUID actorId, final ActorStatus status) {
@@ -289,14 +243,26 @@ public class MemberServiceImpl implements MemberService {
         this.actorDAO.update(managed);
     }
 
-    protected <M extends Member> M getManaged(final Class<M> memberType) {
-        AuthenticatedMember<Member> current = getCurrent(Member.class);
+    @Override
+    public void bind(final AuthenticationToken authenticationToken, final String vaultPassword) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void unbind(final AuthenticationToken authenticationToken) {
+        // TODO Auto-generated method stub
+
+    }
+
+    private <M extends Member> M getManaged(final Class<M> memberType) {
+        MemberContextImpl current = currentContext();
         Member member = current.getMember();
         Member managed = this.memberDAO.retrieveById(member.getId());
         return EntityUtils.narrow(managed, memberType);
     }
 
-    protected void populatePerson(final Person person, final ProfileType profileType, final String vaultPassword,
+    private void populatePerson(final Person person, final ProfileType profileType, final String vaultPassword,
             final boolean encryptProfile, final boolean create, final boolean currentUser) {
         person.setFullName(profileType.getFullName());
         person.setStatus(ActorStatus.ACTIVE);
@@ -336,29 +302,44 @@ public class MemberServiceImpl implements MemberService {
 
         if (currentUser) {
             // Binding to context
-            AuthenticatedMember<Person> current = getCurrent(Person.class);
-            AuthenticatedMemberBase<Person> authenticatedPersonImpl = (AuthenticatedMemberBase<Person>) current;
-            authenticatedPersonImpl.setMember(person);
-            authenticatedPersonImpl.setActiveProfile(profile);
+            MemberContextImpl current = currentContext();
+            current.setMember(person);
+            current.setActiveProfile(profile);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends Member> AuthenticatedMemberBase<T> getAuthenticatedMember(final SecurityContext securityContext, final Class<T> expectedType) {
+    private MemberContextImpl currentContext() {
+        return currentContext(false);
+    }
+
+    private MemberContextImpl currentContext(final boolean required) {
+        return currentContext(required, SecurityContextHolder.getContext());
+    }
+
+    private MemberContextImpl currentContext(final boolean required, final SecurityContext securityContext) {
+        MemberContextImpl memberContext = null;
         Authentication authentication = securityContext.getAuthentication();
-        if (authentication == null) {
-            return null;
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof AuthenticatedMemberBase) {
-            AuthenticatedMemberBase<?> base = (AuthenticatedMemberBase<?>) principal;
-            Member member = base.getMember();
-            if (!expectedType.isAssignableFrom(member.getClass())) {
-                throw new PegasusException(PegasusErrorCode.PG902,
-                        "Member is '%s' not the expected '%s'", member.getClass().getName(), expectedType.getName());
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof AuthenticationTokenAware) {
+                AuthenticationTokenAware tokenSource = (AuthenticationTokenAware) principal;
+                AuthenticationToken token = tokenSource.getAuthenticationToken();
+                memberContext = contexts.get(token);
             }
-            return (AuthenticatedMemberBase<T>) principal;
         }
-        return null;
+        if (memberContext == null) {
+            if (required) {
+                throw new PegasusException(PegasusErrorCode.PG902, "No member context present");
+            }
+        } else {
+            Member member = memberContext.getMember();
+            // Attempt to locate the user profile
+            if (member.getStatus() == ActorStatus.ACTIVE
+                    && memberContext.getActiveProfile() == null) {
+                Profile profile = profileService.retrieveProfile(member);
+                memberContext.setActiveProfile(profile);
+            }
+        }
+        return memberContext;
     }
 }

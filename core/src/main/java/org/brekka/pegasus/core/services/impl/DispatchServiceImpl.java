@@ -32,14 +32,13 @@ import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.Inbox;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.services.AnonymousTransferService;
 import org.brekka.pegasus.core.services.DispatchService;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.InboxService;
-import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
 import org.brekka.xml.pegasus.v2.model.BundleType;
@@ -72,24 +71,18 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     private AnonymousTransferService anonymousService;
 
     @Autowired
-    private KeySafeService keySafeService;
-
-    @Autowired
     private DispatchDAO dispatchDAO;
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#createDispatch(org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, java.lang.Integer, java.util.List)
-     */
     @Override
     @Transactional()
     public Dispatch createDispatch(final KeySafe<?> keySafe, final AllocationDisposition disposition, final DetailsType details,
             final DateTime expires, final Integer maxDownloads, final UploadedFiles files) {
         KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         Dispatch dispatch = new Dispatch();
-        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
+        MemberContext memberContext = memberService.getCurrent();
         Actor activeActor = null;
-        if (authenticatedMember != null) {
-            activeActor = authenticatedMember.getActiveActor();
+        if (memberContext != null) {
+            activeActor = memberContext.getActiveActor();
         }
 
         BundleType bundleType = completeFiles(0, files);
@@ -114,9 +107,6 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         return dispatch;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#createDispatchAndAllocate(java.lang.String, org.brekka.pegasus.core.model.Division, org.brekka.pegasus.core.model.KeySafe, org.brekka.xml.pegasus.v2.model.DetailsType, int, java.util.List)
-     */
     @Override
     @Transactional()
     public Allocation createDispatchAndAllocate(final String recipientEMail, final Division<?> division, final KeySafe<?> keySafe,
@@ -141,20 +131,14 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
     }
 
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#retrieveCurrentForInterval(org.joda.time.DateTime, org.joda.time.DateTime)
-     */
     @Override
     @Transactional(readOnly=true)
     public List<Dispatch> retrieveCurrentForInterval(final KeySafe<?> keySafe, final DateTime from, final DateTime until) {
-        AuthenticatedMemberBase<Member> authenticatedMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
-        Actor activeActor = authenticatedMember.getActiveActor();
+        MemberContext memberContext = memberService.getCurrent();
+        Actor activeActor = memberContext.getActiveActor();
         return this.dispatchDAO.retrieveForInterval(keySafe, activeActor, from.toDate(), until.toDate());
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#delete(java.util.UUID)
-     */
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void delete(final UUID dispatchId) {
@@ -162,9 +146,6 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         delete(dispatch);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#delete(org.brekka.pegasus.core.model.Dispatch)
-     */
     @Override
     @Transactional
     public void delete(final Dispatch dispatch) {
@@ -172,9 +153,6 @@ public class DispatchServiceImpl extends AllocationServiceSupport implements Dis
         this.dispatchDAO.update(dispatch);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#find(org.brekka.pegasus.core.model.KeySafe, org.brekka.pegasus.core.model.AllocationDisposition)
-     */
     @Override
     @Transactional(readOnly=true)
     public List<Dispatch> find(final KeySafe<?> keySafe, final AllocationDisposition disposition) {

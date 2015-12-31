@@ -1,19 +1,18 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services;
 
 import java.util.UUID;
 
 import org.brekka.pegasus.core.model.ActorStatus;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 
 /**
  * @author Andrew Taylor
@@ -27,17 +26,17 @@ public interface MemberService {
     boolean isNewMember();
 
     void setupPerson(ProfileType profileType, String vaultPassword, boolean encryptedProfile);
-    
+
     Person createPerson(AuthenticationToken authenticationToken, ProfileType profileType, String vaultPassword, boolean encryptProfile);
-    
-    <T extends Member> AuthenticatedMember<T> getCurrent(Class<T> expectedType);
-    
-    AuthenticatedMember<Member> getCurrent();
+
+    MemberContext getCurrent();
+
+    MemberContext retrieveCurrent();
 
     /**
      * @param securityContext
      */
-    void logout(SecurityContext securityContext);
+    void logout(AuthenticationToken token);
 
     /**
      * @param organization
@@ -45,7 +44,7 @@ public interface MemberService {
     void activateOrganization(Organization organization);
 
     /**
-     * 
+     *
      */
     void activateMember();
 
@@ -85,5 +84,8 @@ public interface MemberService {
      */
     void updateStatus(UUID actorId, ActorStatus status);
 
+    void bind(AuthenticationToken authenticationToken, String vaultPassword);
+
+    void unbind(AuthenticationToken authenticationToken);
 }
 

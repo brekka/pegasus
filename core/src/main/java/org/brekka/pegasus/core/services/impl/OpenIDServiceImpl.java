@@ -16,24 +16,12 @@
 
 package org.brekka.pegasus.core.services.impl;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.brekka.pegasus.core.dao.OpenIdDAO;
-import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.OpenID;
-import org.brekka.pegasus.core.model.Person;
-import org.brekka.pegasus.core.security.PegasusAuthority;
-import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.pegasus.core.services.OpenIDService;
 import org.brekka.stillingar.api.annotations.Configured;
 import org.brekka.xml.pegasus.v2.config.OpenIDServiceDocument;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,59 +33,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("openIdService")
 @Transactional
 @Configured
-public class OpenIDServiceImpl implements OpenIDService, UserDetailsService {
+public class OpenIDServiceImpl implements OpenIDService {
 
     @Autowired
-    private MemberService memberService;
-    
-    @Autowired
     private OpenIdDAO openIdDAO;
-    
+
     @Configured
     private OpenIDServiceDocument.OpenIDService config;
-    
-    /* (non-Javadoc)
-     * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
-     */
-    @Override
-    @Transactional()
-    public UserDetails loadUserByUsername(String openIdUri) throws UsernameNotFoundException {
-        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
-        OpenID openID = openIdDAO.retrieveByURI(openIdUri);
-        if (openID == null) {
-            openID = new OpenID();
-            openID.setUri(openIdUri);
-            openIdDAO.create(openID);
-        }
-        
-        Person person = memberService.retrieveMember(openID, Person.class);
-        if (person != null 
-                && person.getStatus() != ActorStatus.NEW) {
-            List<String> userOpenIDList = config.getAdminOpenIDList();
-            for (String adminOpenId : userOpenIDList) {
-                if (adminOpenId.equals(openIdUri)) {
-                    authorities.add(PegasusAuthority.ADMIN);
-                    break;
-                }
-            }
-            authorities.add(PegasusAuthority.USER);
-        } else {
-            person = memberService.createPerson(openID);
-            authorities.add(PegasusAuthority.MEMBER_SIGNUP);
-            authorities.add(PegasusAuthority.ANONYMOUS);
-        }
-        AuthenticatedMemberBase<Person> authMember = new AuthenticatedPersonImpl(person, authorities);
-        return authMember;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.OpenIDService#retreieveByOpenID(java.lang.String)
-     */
+
+//    @Override
+//    @Transactional()
+//    public OpenID loadUserByUsername(final String openIdUri) throws UsernameNotFoundException {
+//        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
+//        OpenID openID = openIdDAO.retrieveByURI(openIdUri);
+//        if (openID == null) {
+//            openID = new OpenID();
+//            openID.setUri(openIdUri);
+//            openIdDAO.create(openID);
+//        }
+//
+//        Person person = memberService.retrieveMember(openID, Person.class);
+//        if (person != null
+//                && person.getStatus() != ActorStatus.NEW) {
+//            List<String> userOpenIDList = config.getAdminOpenIDList();
+//            for (String adminOpenId : userOpenIDList) {
+//                if (adminOpenId.equals(openIdUri)) {
+//                    authorities.add(PegasusAuthority.ADMIN);
+//                    break;
+//                }
+//            }
+//            authorities.add(PegasusAuthority.USER);
+//        } else {
+//            person = memberService.createPerson(openID);
+//            authorities.add(PegasusAuthority.MEMBER_SIGNUP);
+//            authorities.add(PegasusAuthority.ANONYMOUS);
+//        }
+//        MemberContext authMember = new AuthenticatedPersonImpl(person, authorities);
+//        return authMember;
+//    }
+
     @Override
     @Transactional(readOnly=true)
-    public OpenID retreieveByOpenID(String openIdUri) {
+    public OpenID retreieveByOpenID(final String openIdUri) {
         return openIdDAO.retrieveByURI(openIdUri);
     }
-    
-    
 }

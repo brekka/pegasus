@@ -29,12 +29,12 @@ import org.apache.commons.logging.LogFactory;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.dao.EMailMessageDAO;
 import org.brekka.pegasus.core.model.Attachment;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.EMailAddress;
 import org.brekka.pegasus.core.model.EMailMessage;
 import org.brekka.pegasus.core.model.EMailRecipient;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.EMailSendingService;
@@ -59,7 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractEMailSendingService implements EMailSendingService {
 
     private static final Log log = LogFactory.getLog(AbstractEMailSendingService.class);
-    
+
     @Autowired
     private MemberService memberService;
 
@@ -105,7 +105,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         }
 
         Member member = null;
-        AuthenticatedMember<Member> current = this.memberService.getCurrent();
+        MemberContext current = this.memberService.getCurrent();
         if (current != null) {
             member = current.getMember();
         }
@@ -116,7 +116,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         message.setSender(toAddress(sender));
 
         List<EMailRecipient> eMailRecipientList = new ArrayList<>();
-        
+
         for (String recipient : recipients) {
             EMailRecipient eMailRecipient = new EMailRecipient();
             eMailRecipient.setAddress(toAddress(recipient));
@@ -185,7 +185,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
      * @param recipient
      * @return
      */
-    protected boolean acceptDeliveryRecipient(String recipient) {
+    protected boolean acceptDeliveryRecipient(final String recipient) {
         return true;
     }
 
@@ -234,7 +234,7 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
         }
         return eMailAddress;
     }
-    
+
     /**
      * @return the defaultSourceAddress
      */

@@ -24,11 +24,11 @@ import org.brekka.pegasus.core.dao.RobotDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.Associate;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Robot;
@@ -70,13 +70,10 @@ public class RobotServiceImpl implements RobotService {
 
     @Autowired
     private XmlEntityService xmlEntityService;
-    
+
     @Autowired
     private DivisionService divisionService;
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.RobotService#createRobot(java.util.UUID, java.lang.String)
-     */
     @Transactional()
     @Override
     public Robot create(final String key, final String code, final Actor owner, final RobotType details) {
@@ -119,8 +116,8 @@ public class RobotServiceImpl implements RobotService {
         XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy, false);
         robot.setXml(encryptedEntity);
 
-        AuthenticatedMember<Person> current = memberService.getCurrent(Person.class);
-        robot.setCreatedBy(current.getMember());
+        MemberContext current = memberService.retrieveCurrent();
+        robot.setCreatedBy((Person) current.getMember());
 
         robotDAO.create(robot);
         return robot;

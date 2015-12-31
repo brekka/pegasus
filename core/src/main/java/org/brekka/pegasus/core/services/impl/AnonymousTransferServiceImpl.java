@@ -26,19 +26,16 @@ import org.brekka.pegasus.core.dao.AnonymousTransferDAO;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.AnonymousTransfer;
-import org.brekka.pegasus.core.model.AuthenticatedMember;
 import org.brekka.pegasus.core.model.Dispatch;
-import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.PegasusTokenType;
 import org.brekka.pegasus.core.model.Token;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
 import org.brekka.pegasus.core.services.AnonymousTransferService;
-import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.PhalanxErrorCode;
 import org.brekka.phalanx.api.PhalanxException;
-import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.AllocationType;
@@ -68,13 +65,7 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
     private AnonymousTransferDAO anonymousTransferDAO;
 
     @Autowired
-    private PhalanxService phalanxService;
-
-    @Autowired
     private RandomCryptoService randomCryptoService;
-
-    @Autowired
-    private EventService eventService;
 
     @Autowired
     private AllocationService allocationService;
@@ -83,9 +74,6 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
     private MemberService memberService;
 
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#createBundle(java.util.List)
-     */
     @Override
     @Transactional()
     public AnonymousTransfer createTransfer(final Token token, final DetailsType details, final DateTime expires, final Integer maxDownloads,
@@ -94,9 +82,6 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         return createTransfer(token, details, expires, maxUnlockAttempts, null, bundleType, code);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#createTransfer(org.brekka.xml.pegasus.v2.model.DetailsType, org.brekka.pegasus.core.model.Dispatch)
-     */
     @Override
     @Transactional()
     public AnonymousTransfer createTransfer(final Token token, final DetailsType details, final DateTime expires, final Integer maxDownloads,
@@ -105,10 +90,6 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         return createTransfer(token, details, expires, maxUnlockAttempts, dispatch, dispatchBundle, code);
     }
 
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#retrieveTransfer(java.lang.String)
-     */
     @Override
     @Transactional(readOnly=true)
     public AnonymousTransfer retrieveUnlockedTransfer(final String token) {
@@ -121,9 +102,6 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         return transfer;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#retrieveTransfer(java.lang.String)
-     */
     @Override
     @Transactional(readOnly=true)
     public AnonymousTransfer retrieveTransfer(final String token) {
@@ -131,10 +109,6 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         return transfer;
     }
 
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#agreementAccepted(java.lang.String)
-     */
     @Override
     @Transactional()
     public void agreementAccepted(final String token) {
@@ -142,18 +116,12 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         this.eventService.agreementAccepted(transfer);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#isAccepted(org.brekka.pegasus.core.model.Bundle)
-     */
     @Override
     @Transactional(readOnly=true)
     public boolean isAccepted(final AnonymousTransfer anonymousTransfer) {
         return this.eventService.isAccepted(anonymousTransfer);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#unlock(java.lang.String, java.lang.String)
-     */
     @Override
     @Transactional()
     public AnonymousTransfer unlock(final String token, final String code) {
@@ -169,9 +137,6 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         return transfer;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AnonymousTransferService#deleteTransfer(org.brekka.pegasus.core.model.AnonymousTransfer)
-     */
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void deleteTransfer(final String token) {
@@ -217,7 +182,7 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         XmlEntity<AllocationDocument> xmlEntity = this.xmlEntityService.persistEncryptedEntity(document, code, true);
         anonTransfer.setXml(xmlEntity);
 
-        AuthenticatedMember<Member> current = this.memberService.getCurrent();
+        MemberContext current = this.memberService.getCurrent();
         if (current != null) {
             Actor activeActor = current.getActiveActor();
             anonTransfer.setActor(activeActor);

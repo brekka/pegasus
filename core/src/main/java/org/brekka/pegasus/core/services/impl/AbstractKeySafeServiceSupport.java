@@ -27,7 +27,7 @@ import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.Division;
 import org.brekka.pegasus.core.model.KeySafe;
-import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.MemberService;
 import org.brekka.phalanx.api.beans.IdentityKeyPair;
@@ -53,7 +53,7 @@ abstract class AbstractKeySafeServiceSupport {
     @Autowired
     protected MemberService memberService;
 
-    protected PrivateKeyToken resolvePrivateKeyFor(final KeySafe<?> keySafe, final AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken resolvePrivateKeyFor(final KeySafe<?> keySafe, final MemberContext currentMember) {
         KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         PrivateKeyToken privateKeyToken;
         if (currentMember == null) {
@@ -111,10 +111,8 @@ abstract class AbstractKeySafeServiceSupport {
         return privateKeyToken;
     }
 
-    protected <Owner extends Actor, Source extends KeySafe<? extends Actor>,
-    Target extends KeySafe<?>, T extends Connection< Owner, Source, Target >>
-    T createConnection(final T connection, final Owner owner,
-            final Source source, final Target target, final KeyPair connectionKeyPair) {
+    protected <Owner extends Actor, Source extends KeySafe<? extends Actor>, Target extends KeySafe<?>, T extends Connection<Owner, Source, Target>> T
+            createConnection(final T connection, final Owner owner, final Source source, final Target target, final KeyPair connectionKeyPair) {
         connection.setOwner(owner);
         connection.setSource(source);
         connection.setTarget(target);
@@ -147,7 +145,7 @@ abstract class AbstractKeySafeServiceSupport {
      * @return
      */
     protected PrivateKeyToken resolveAndUnlock(final KeySafe<?> parent, final UUID keyPairId,
-            final AuthenticatedMemberBase<?> currentMember) {
+            final MemberContext currentMember) {
         KeyPair keyPair = new IdentityKeyPair(keyPairId);
         return resolveAndUnlock(parent, keyPair, currentMember);
     }
@@ -158,7 +156,7 @@ abstract class AbstractKeySafeServiceSupport {
      * @return
      */
     protected PrivateKeyToken resolveAndUnlock(final KeySafe<?> parent, final KeyPair keyPair,
-            final AuthenticatedMemberBase<?> currentMember) {
+            final MemberContext currentMember) {
         PrivateKeyToken privateKeyToken = currentMember.getPrivateKey(keyPair);
         if (privateKeyToken == null) {
             /*
@@ -179,7 +177,7 @@ abstract class AbstractKeySafeServiceSupport {
      * @param keySafe
      * @return
      */
-    private PrivateKeyToken traverseChain(final KeySafe<?> keySafe, final AuthenticatedMemberBase<?> currentMember) {
+    private PrivateKeyToken traverseChain(final KeySafe<?> keySafe, final MemberContext currentMember) {
         KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
         PrivateKeyToken privateKeyToken;
         if (nKeySafe instanceof Vault) {
@@ -217,7 +215,7 @@ abstract class AbstractKeySafeServiceSupport {
         return privateKeyToken;
     }
 
-    protected PrivateKeyToken unlockPrivateKey(final KeyPair keyPair, final Vault vault, final AuthenticatedMemberBase<?> currentMember) {
+    protected PrivateKeyToken unlockPrivateKey(final KeyPair keyPair, final Vault vault, final MemberContext currentMember) {
         AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
         PrivateKeyToken userPrivateKey = vaultKey.getDefaultPrivateKey();
         PrivateKeyToken privateKeyToken = this.phalanxService.decryptKeyPair(new IdentityKeyPair(keyPair.getId()),
@@ -226,7 +224,7 @@ abstract class AbstractKeySafeServiceSupport {
     }
 
     protected AuthenticatedPrincipal getVaultKey(final Vault vault) {
-        AuthenticatedMemberBase<Member> currentMember = AuthenticatedMemberBase.getCurrent(this.memberService, Member.class);
+        MemberContext currentMember = memberService.getCurrent();
         AuthenticatedPrincipal authenticatedPrincipal = currentMember.getVaultKey(vault);
         if (authenticatedPrincipal == null) {
             // not unlocked
