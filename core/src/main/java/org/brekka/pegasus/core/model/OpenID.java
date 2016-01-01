@@ -51,13 +51,10 @@ public class OpenID extends AuthenticationToken {
     /**
      * @param uri the uri to set
      */
-    public void setUri(String uri) {
+    public void setUri(final String uri) {
         this.uri = uri;
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
-     */
+
     @Override
     public String getUsername() {
         return getUri();

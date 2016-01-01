@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services;
 
@@ -12,7 +12,7 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 
 /**
- * 
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 public interface VaultService {
@@ -21,7 +21,7 @@ public interface VaultService {
 
     /**
      * Open the vault specified by the id and return it.
-     * 
+     *
      * @param vault
      * @param vaultPassword
      * @return

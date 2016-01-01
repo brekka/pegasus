@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.security;
 
@@ -21,31 +21,28 @@ import org.springframework.security.core.userdetails.User;
 public class AnonymousTransferUser extends User implements Accessor {
 
     private static final Collection<GrantedAuthority> AUTHORITIES = Arrays.<GrantedAuthority>asList(PegasusAuthority.ANONYMOUS_TRANSFER);
-    
+
     /**
      * Serial UID
      */
     private static final long serialVersionUID = -353817580361469260L;
-    
+
     private final AccessorContextImpl context = new AccessorContextImpl();
-    
+
     /**
      * @param username
      * @param password
      * @param authorities
      */
-    public AnonymousTransferUser(String token) {
+    public AnonymousTransferUser(final String token) {
         super(token, token, AUTHORITIES);
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.Accessor#getContext()
-     */
+
     @Override
     public AccessorContextImpl getContext() {
         return context;
     }
-    
+
     public static AnonymousTransferUser getCurrent() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
@@ -63,7 +60,7 @@ public class AnonymousTransferUser extends User implements Accessor {
      * @param token
      * @return
      */
-    public static boolean verifyToken(String token) {
+    public static boolean verifyToken(final String token) {
         AnonymousTransferUser current = getCurrent();
         if (current == null) {
             return false;

@@ -43,48 +43,43 @@ public class UsernamePassword extends AuthenticationToken implements DerivedKey 
      */
     @Column(name="`Username`", unique=true, length=255)
     private byte[] usernameDigest;
-    
+
     /**
      * The password digest
      */
     @Column(name="`Password`")
     private byte[] password;
-    
+
     /**
      * The salt to combine with the username/password.
      */
     @Column(name="`Salt`")
     private byte[] salt;
-    
+
     /**
      * The number of iterations of the algorthm to perform.
      */
     @Column(name="`Iterations`")
     private int iterations;
-    
+
     /**
      * Identifies which checksum algorithm to use.
      */
     @Column(name="`Profile`")
     private int profile;
-    
+
     /**
      * The un-digested username
      */
     @Transient
     private transient String username;
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
-     */
+
+
     @Override
     public String getUsername() {
         return username;
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
-     */
+
     public byte[] getUsernameDigest() {
         return usernameDigest;
     }
@@ -99,13 +94,14 @@ public class UsernamePassword extends AuthenticationToken implements DerivedKey 
     /**
      * @param password the password to set
      */
-    public void setPassword(byte[] password) {
+    public void setPassword(final byte[] password) {
         this.password = password;
     }
 
     /**
      * @return the salt
      */
+    @Override
     public byte[] getSalt() {
         return salt;
     }
@@ -113,13 +109,14 @@ public class UsernamePassword extends AuthenticationToken implements DerivedKey 
     /**
      * @param salt the salt to set
      */
-    public void setSalt(byte[] salt) {
+    public void setSalt(final byte[] salt) {
         this.salt = salt;
     }
 
     /**
      * @return the iterations
      */
+    @Override
     public Integer getIterations() {
         return iterations;
     }
@@ -127,7 +124,7 @@ public class UsernamePassword extends AuthenticationToken implements DerivedKey 
     /**
      * @param iterations the iterations to set
      */
-    public void setIterations(int iterations) {
+    public void setIterations(final int iterations) {
         this.iterations = iterations;
     }
 
@@ -141,35 +138,29 @@ public class UsernamePassword extends AuthenticationToken implements DerivedKey 
     /**
      * @param profile the profile to set
      */
-    public void setProfile(int profile) {
+    public void setProfile(final int profile) {
         this.profile = profile;
     }
 
     /**
      * @param usernameDigest the usernameDigest to set
      */
-    public void setUsernameDigest(byte[] usernameDigest) {
+    public void setUsernameDigest(final byte[] usernameDigest) {
         this.usernameDigest = usernameDigest;
     }
-    
+
     /**
      * @param username the username to set
      */
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.phoenix.api.DerivedKey#getDerivedKey()
-     */
+
     @Override
     public byte[] getDerivedKey() {
         return getPassword();
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.phoenix.api.CryptoSpec#getCryptoProfile()
-     */
+
     @Override
     public CryptoProfile getCryptoProfile() {
         return CryptoProfile.Static.of(getProfile());

@@ -16,6 +16,8 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import static org.brekka.commons.persistence.support.EntityUtils.narrow;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.ActorDAO;
+import org.brekka.pegasus.core.dao.AuthenticationTokenDAO;
 import org.brekka.pegasus.core.dao.MemberDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.ActorStatus;
@@ -38,7 +41,8 @@ import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
 import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
-import org.brekka.pegasus.core.security.AuthenticationTokenAware;
+import org.brekka.pegasus.core.security.PegasusPrincipal;
+import org.brekka.pegasus.core.security.PegasusPrincipalAware;
 import org.brekka.pegasus.core.services.DivisionService;
 import org.brekka.pegasus.core.services.EMailAddressService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -56,6 +60,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -91,7 +96,10 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private DivisionService divisionService;
 
-    private final WeakHashMap<AuthenticationToken, MemberContextImpl> contexts = new WeakHashMap<>();
+    @Autowired
+    private AuthenticationTokenDAO authenticationTokenDAO;
+
+    private final WeakHashMap<PegasusPrincipal, MemberContextImpl> contexts = new WeakHashMap<>();
 
 
     @Override
@@ -180,8 +188,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional()
-    public void logout(final AuthenticationToken token) {
-        MemberContextImpl memberContext = contexts.get(token);
+    public void logout(final PegasusPrincipal token) {
+        MemberContextImpl memberContext;
+        synchronized (contexts) {
+            memberContext  = contexts.remove(token);
+        }
         if (memberContext != null) {
             List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
             for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
@@ -244,15 +255,29 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void bind(final AuthenticationToken authenticationToken, final String vaultPassword) {
-        // TODO Auto-generated method stub
-
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public MemberContext bind(final PegasusPrincipalAware principalSource, final String password, final Organization organization) {
+        PegasusPrincipal pegasusPrincipal = principalSource.getPegasusPrincipal();
+        AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(pegasusPrincipal.getAuthenticationTokenId());
+        Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+        Vault vault = member.getDefaultVault();
+        vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
+        member = narrow(member, Member.class);
+        member.setDefaultVault(vault);
+        MemberContextImpl memberContext = new MemberContextImpl(member);
+        memberContext.retainVaultKey(vault);
+        synchronized (contexts) {
+            contexts.put(pegasusPrincipal, memberContext);
+        }
+        if (organization != null) {
+            activateOrganization(organization);
+        }
+        return memberContext;
     }
 
     @Override
-    public void unbind(final AuthenticationToken authenticationToken) {
-        // TODO Auto-generated method stub
-
+    public void unbind(final PegasusPrincipalAware principalSource) {
+        logout(principalSource.getPegasusPrincipal());
     }
 
     private <M extends Member> M getManaged(final Class<M> memberType) {
@@ -321,10 +346,10 @@ public class MemberServiceImpl implements MemberService {
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
-            if (principal instanceof AuthenticationTokenAware) {
-                AuthenticationTokenAware tokenSource = (AuthenticationTokenAware) principal;
-                AuthenticationToken token = tokenSource.getAuthenticationToken();
-                memberContext = contexts.get(token);
+            if (principal instanceof PegasusPrincipalAware) {
+                PegasusPrincipalAware tokenSource = (PegasusPrincipalAware) principal;
+                PegasusPrincipal pegasusPrincipal = tokenSource.getPegasusPrincipal();
+                memberContext = contexts.get(pegasusPrincipal);
             }
         }
         if (memberContext == null) {

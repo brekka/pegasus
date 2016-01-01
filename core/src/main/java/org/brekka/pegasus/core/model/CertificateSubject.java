@@ -41,22 +41,20 @@ public class CertificateSubject extends AuthenticationToken {
      */
     @Column(name="`DistinguishedName`", unique=true, length=255)
     private byte[] distinguishedNameDigest;
-    
+
     /**
      * The un-digested distinguished name
      */
     @Transient
     private transient String distinguishedName;
-    
+
     /**
      * Normally the CN part of the distinguished name
      */
     @Transient
     private transient String commonName;
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.model.AuthenticationToken#getUsername()
-     */
+
+
     @Override
     public String getUsername() {
         return getCommonName();
@@ -72,7 +70,7 @@ public class CertificateSubject extends AuthenticationToken {
     /**
      * @param distinguishedNameDigest the distinguishedNameDigest to set
      */
-    public void setDistinguishedNameDigest(byte[] distinguishedNameDigest) {
+    public void setDistinguishedNameDigest(final byte[] distinguishedNameDigest) {
         this.distinguishedNameDigest = distinguishedNameDigest;
     }
 
@@ -86,17 +84,17 @@ public class CertificateSubject extends AuthenticationToken {
     /**
      * @param distinguishedName the distinguishedName to set
      */
-    public void setDistinguishedName(String distinguishedName) {
+    public void setDistinguishedName(final String distinguishedName) {
         this.distinguishedName = distinguishedName;
     }
 
     /**
      * @param commonName the commonName to set
      */
-    public void setCommonName(String commonName) {
+    public void setCommonName(final String commonName) {
         this.commonName = commonName;
     }
-    
+
     /**
      * @return the commonName
      */

@@ -175,9 +175,12 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
         if (vault == null) {
             return false;
         }
-        MemberContext currentMember = memberService.retrieveCurrent();
-        AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
-        return (vaultKey != null);
+        MemberContext currentMember = memberService.getCurrent();
+        if (currentMember != null) {
+            AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
+            return (vaultKey != null);
+        }
+        return false;
     }
 
     @Override
