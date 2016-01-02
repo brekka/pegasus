@@ -86,5 +86,9 @@ public interface MemberService {
     MemberContext loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization);
 
     void unbind();
+
+    PegasusPrincipal principal(AuthenticationToken token);
+
+    void restore(final PegasusPrincipal principal, final byte[] secret);
 }
 

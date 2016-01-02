@@ -28,7 +28,7 @@ import org.brekka.pegasus.core.model.AuthenticationToken;
 /**
  *
  */
-public final class PegasusPrincipal implements Principal, Serializable {
+public abstract class PegasusPrincipal implements Principal, Serializable {
 
     /**
      * Serial UID
@@ -39,13 +39,16 @@ public final class PegasusPrincipal implements Principal, Serializable {
 
     private final String username;
 
+    protected transient byte[] restoreSecret;
 
-    public PegasusPrincipal(final UUID authenticationTokenId, final String username) {
+
+
+    protected PegasusPrincipal(final UUID authenticationTokenId, final String username) {
         this.authenticationTokenId = authenticationTokenId;
         this.username = username;
     }
 
-    public PegasusPrincipal(final AuthenticationToken authenticationToken) {
+    protected PegasusPrincipal(final AuthenticationToken authenticationToken) {
         this(authenticationToken.getId(), authenticationToken.getUsername());
     }
 
@@ -76,6 +79,10 @@ public final class PegasusPrincipal implements Principal, Serializable {
     @Override
     public int hashCode() {
         return authenticationTokenId.hashCode();
+    }
+
+    public byte[] getRestoreSecret() {
+        return restoreSecret;
     }
 
     @Override

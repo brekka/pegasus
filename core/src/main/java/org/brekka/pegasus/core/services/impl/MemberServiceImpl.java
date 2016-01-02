@@ -53,7 +53,9 @@ import org.brekka.pegasus.core.services.OrganizationService;
 import org.brekka.pegasus.core.services.ProfileService;
 import org.brekka.pegasus.core.services.VaultService;
 import org.brekka.phalanx.api.model.AuthenticatedPrincipal;
+import org.brekka.phalanx.api.model.ExportedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
+import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.brekka.xml.pegasus.v2.model.EMailType;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +80,8 @@ import com.google.common.base.Stopwatch;
 public class MemberServiceImpl implements MemberService {
 
     private static final Log log = LogFactory.getLog(MemberServiceImpl.class);
+
+    private static final PegasusPrincipal PegasusPrincipalImpl = null;
 
     @Autowired
     private ActorDAO actorDAO;
@@ -105,6 +109,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Autowired
     private AuthenticationTokenDAO authenticationTokenDAO;
+
+    @Autowired
+    private RandomCryptoService randomCryptoService;
+
 
     private final WeakHashMap<PegasusPrincipal, MemberContextImpl> contexts = new WeakHashMap<>();
 
@@ -289,6 +297,11 @@ public class MemberServiceImpl implements MemberService {
         if (organization != null) {
             activateOrganization(organization);
         }
+        if (pegasusPrincipal instanceof PegasusPrincipalImpl) {
+            PegasusPrincipalImpl ppi = (PegasusPrincipalImpl) pegasusPrincipal;
+            prepareRestore(ppi, vault);
+            ppi.setOrganizationId(organization != null ? organization.getId() : null);
+        }
         if (log.isInfoEnabled()) {
             log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
                     pegasusPrincipal.getName(), organization != null ? organization.getName() : null, sw.elapsed(TimeUnit.MILLISECONDS)));
@@ -300,6 +313,45 @@ public class MemberServiceImpl implements MemberService {
     public void unbind() {
         threadLocalContexts.remove();
     }
+
+    @Override
+    public PegasusPrincipal principal(final AuthenticationToken token) {
+        return new PegasusPrincipalImpl(token);
+    }
+
+    @Override
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void restore(final PegasusPrincipal principal, final byte[] secret) {
+        PegasusPrincipalImpl principalImpl = (PegasusPrincipalImpl) principal;
+        AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(principalImpl.getExportedPrincipal(), secret);
+        AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
+        Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+        Vault vault = member.getDefaultVault();
+
+        member = narrow(member, Member.class);
+        MemberContextImpl memberContext = new MemberContextImpl(member);
+        memberContext.setActiveProfile(profileService.retrieveProfile(member));
+        try {
+            threadLocalContexts.set(memberContext);
+
+            vault = narrow(vault, Vault.class);
+            member.setDefaultVault(vault);
+            vault.setAuthenticatedPrincipal(importedPrincipal);
+            memberContext.retainVaultKey(vault);
+
+            synchronized (contexts) {
+                contexts.put(principalImpl, memberContext);
+            }
+
+            if (principalImpl.getOrganizationId() != null) {
+                Organization organization = organizationService.retrieveById(principalImpl.getOrganizationId(), true);
+                activateOrganization(organization);
+            }
+        }  finally {
+            threadLocalContexts.remove();
+        }
+    }
+
 
     private <M extends Member> M getManaged(final Class<M> memberType) {
         MemberContextImpl current = currentContext();
@@ -390,5 +442,48 @@ public class MemberServiceImpl implements MemberService {
             }
         }
         return memberContext;
+    }
+
+    /**
+     * @param pegasusPrincipal
+     * @param memberContext
+     */
+    private void prepareRestore(final PegasusPrincipalImpl pegasusPrincipal, final Vault vault) {
+        byte[] secret = randomCryptoService.generateBytes(24);
+        ExportedPrincipal exportedPrincipal = phalanxService.exportPrincipal(vault.getAuthenticatedPrincipal(), secret);
+        pegasusPrincipal.initRestore(secret, exportedPrincipal);
+    }
+
+    private static class PegasusPrincipalImpl extends PegasusPrincipal {
+
+        /**
+         * Serial UID
+         */
+        private static final long serialVersionUID = -2443068592543130002L;
+
+        protected ExportedPrincipal exportedPrincipal;
+
+        private UUID organizationId;
+
+        PegasusPrincipalImpl(final AuthenticationToken authenticationToken) {
+            super(authenticationToken);
+        }
+
+        void initRestore(final byte[] secret, final ExportedPrincipal principal) {
+            this.restoreSecret = secret;
+            this.exportedPrincipal = principal;
+        }
+
+        UUID getOrganizationId() {
+            return organizationId;
+        }
+
+        void setOrganizationId(final UUID organizationId) {
+            this.organizationId = organizationId;
+        }
+
+        ExportedPrincipal getExportedPrincipal() {
+            return exportedPrincipal;
+        }
     }
 }
