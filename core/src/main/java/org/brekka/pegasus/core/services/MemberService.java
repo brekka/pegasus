@@ -83,8 +83,8 @@ public interface MemberService {
      */
     void updateStatus(UUID actorId, ActorStatus status);
 
-    MemberContext bind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization);
+    MemberContext loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization);
 
-    void unbind(PegasusPrincipalAware principalSource);
+    void unbind();
 }
 

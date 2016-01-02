@@ -138,6 +138,7 @@ class MemberContextImpl implements MemberContext {
         this.privateKeyCache.put(keyPair.getId(), privateKeyToken);
     }
 
+    @Override
     public void setActiveActor(final Actor activeActor) {
         this.activeActor = activeActor;
     }

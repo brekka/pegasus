@@ -22,7 +22,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -63,6 +66,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Stopwatch;
+
 /**
  * Handle membership
  *
@@ -71,6 +76,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class MemberServiceImpl implements MemberService {
+
+    private static final Log log = LogFactory.getLog(MemberServiceImpl.class);
 
     @Autowired
     private ActorDAO actorDAO;
@@ -101,12 +108,14 @@ public class MemberServiceImpl implements MemberService {
 
     private final WeakHashMap<PegasusPrincipal, MemberContextImpl> contexts = new WeakHashMap<>();
 
+    private final ThreadLocal<MemberContextImpl> threadLocalContexts = new ThreadLocal<>();
+
 
     @Override
     @Transactional()
     public void activateOrganization(final Organization organization) {
-        MemberContextImpl current = currentContext(true);
-        Member member = current.getMember();
+        MemberContext memberContext = retrieveCurrent();
+        Member member = memberContext.getMember();
         Associate associate = this.organizationService.retrieveAssociate(organization, member);
         if (associate == null) {
             throw new PegasusException(PegasusErrorCode.PG904,
@@ -115,7 +124,7 @@ public class MemberServiceImpl implements MemberService {
         Organization managedOrganization = this.organizationService.retrieveById(associate.getOrganization().getId(), true);
         associate.setOrganization(managedOrganization);
         associate.setMember(member);
-        current.setActiveActor(associate);
+        memberContext.setActiveActor(associate);
     }
 
     @SuppressWarnings("unchecked")
@@ -188,16 +197,21 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional()
-    public void logout(final PegasusPrincipal token) {
+    public void logout(final PegasusPrincipal pegasusPrincipal) {
         MemberContextImpl memberContext;
         synchronized (contexts) {
-            memberContext  = contexts.remove(token);
+            memberContext  = contexts.remove(pegasusPrincipal);
         }
+        Stopwatch sw = Stopwatch.createStarted();
         if (memberContext != null) {
             List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
             for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
                 this.phalanxService.logout(authenticatedPrincipal);
             }
+        }
+        if (log.isInfoEnabled()) {
+            log.info(String.format("Pegasus logout for '%s' took %d ms",
+                    pegasusPrincipal.getName(), sw.elapsed(TimeUnit.MILLISECONDS)));
         }
     }
 
@@ -256,28 +270,35 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public MemberContext bind(final PegasusPrincipalAware principalSource, final String password, final Organization organization) {
+    public MemberContext loginAndBind(final PegasusPrincipalAware principalSource, final String password, final Organization organization) {
+        Stopwatch sw = Stopwatch.createStarted();
         PegasusPrincipal pegasusPrincipal = principalSource.getPegasusPrincipal();
         AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(pegasusPrincipal.getAuthenticationTokenId());
         Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
         Vault vault = member.getDefaultVault();
-        vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
         member = narrow(member, Member.class);
-        member.setDefaultVault(vault);
         MemberContextImpl memberContext = new MemberContextImpl(member);
-        memberContext.retainVaultKey(vault);
+        memberContext.setActiveProfile(profileService.retrieveProfile(member));
+        threadLocalContexts.set(memberContext);
+
+        vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
+        member.setDefaultVault(vault);
         synchronized (contexts) {
             contexts.put(pegasusPrincipal, memberContext);
         }
         if (organization != null) {
             activateOrganization(organization);
         }
+        if (log.isInfoEnabled()) {
+            log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
+                    pegasusPrincipal.getName(), organization != null ? organization.getName() : null, sw.elapsed(TimeUnit.MILLISECONDS)));
+        }
         return memberContext;
     }
 
     @Override
-    public void unbind(final PegasusPrincipalAware principalSource) {
-        logout(principalSource.getPegasusPrincipal());
+    public void unbind() {
+        threadLocalContexts.remove();
     }
 
     private <M extends Member> M getManaged(final Class<M> memberType) {
@@ -342,7 +363,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private MemberContextImpl currentContext(final boolean required, final SecurityContext securityContext) {
-        MemberContextImpl memberContext = null;
+        MemberContextImpl memberContext = threadLocalContexts.get();
+        if (memberContext != null) {
+            return memberContext;
+        }
         Authentication authentication = securityContext.getAuthentication();
         if (authentication != null) {
             Object principal = authentication.getPrincipal();

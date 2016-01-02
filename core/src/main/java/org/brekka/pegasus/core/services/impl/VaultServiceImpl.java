@@ -20,7 +20,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.VaultDAO;
@@ -45,6 +48,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Stopwatch;
+
 /**
  * Service for manipulating {@link Vault} instances.
  *
@@ -53,6 +58,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements VaultService {
+
+
+    private static final Log log = LogFactory.getLog(VaultServiceImpl.class);
 
     @Autowired
     private VaultDAO vaultDAO;
@@ -113,6 +121,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Override
     @Transactional()
     public Vault openVault(final UUID vaultId, final String vaultPassword) {
+        Stopwatch sw = Stopwatch.createStarted();
         Vault managed = retrieveById(vaultId);
         UUID principalId = managed.getPrincipalId();
         AuthenticatedPrincipal authenticatedPrincipal;
@@ -126,8 +135,11 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
         MemberContext currentMember = memberService.getCurrent();
         if (currentMember != null) {
             currentMember.retainVaultKey(managed);
-            // Only pulish an open event if it is the current user opening the vault.
+            // Only publish an open event if it is the current user opening the vault.
             applicationEventPublisher.publishEvent(new VaultOpenEvent(managed));
+        }
+        if (log.isInfoEnabled()) {
+            log.info(String.format("Vault '%s' opened in %d ms", vaultId, sw.elapsed(TimeUnit.MILLISECONDS)));
         }
         return managed;
     }
