@@ -47,8 +47,8 @@
 
   <properties>
     <phoenix-version>2.3.0</phoenix-version>
-    <paveway-version>2.1.0</paveway-version>
-    <phalanx-version>2.5.0-SNAPSHOT</phalanx-version>
+    <paveway-version>2.4.2</paveway-version>
+    <phalanx-version>2.5.0</phalanx-version>
     <xmlbeans-version>2.5.0</xmlbeans-version>
     <spring-version>3.1.2.RELEASE</spring-version>
     <spring-security-version>3.1.2.RELEASE</spring-security-version>
