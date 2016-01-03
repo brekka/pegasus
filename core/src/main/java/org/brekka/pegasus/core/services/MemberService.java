@@ -89,6 +89,8 @@ public interface MemberService {
 
     PegasusPrincipal principal(AuthenticationToken token);
 
-    void restore(final PegasusPrincipal principal, final byte[] secret);
+    void restore(PegasusPrincipal principal, String password);
+
+    void restore(PegasusPrincipal principal, byte[] secret);
 }
 

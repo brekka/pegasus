@@ -81,8 +81,6 @@ public class MemberServiceImpl implements MemberService {
 
     private static final Log log = LogFactory.getLog(MemberServiceImpl.class);
 
-    private static final PegasusPrincipal PegasusPrincipalImpl = null;
-
     @Autowired
     private ActorDAO actorDAO;
 
@@ -321,34 +319,55 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void restore(final PegasusPrincipal principal, final String password) {
+        PegasusPrincipalImpl principalImpl = (PegasusPrincipalImpl) principal;
+        AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
+        Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+        Vault vault = member.getDefaultVault();
+        member = narrow(member, Member.class);
+        MemberContextImpl memberContext = new MemberContextImpl(member);
+        memberContext.setActiveProfile(profileService.retrieveProfile(member));
+        try {
+            threadLocalContexts.set(memberContext);
+            vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
+            member.setDefaultVault(vault);
+            restore(principalImpl, memberContext);
+        } finally {
+            threadLocalContexts.remove();
+        }
+    }
+
+    @Override
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void restore(final PegasusPrincipal principal, final byte[] secret) {
         PegasusPrincipalImpl principalImpl = (PegasusPrincipalImpl) principal;
         AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(principalImpl.getExportedPrincipal(), secret);
         AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
         Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
         Vault vault = member.getDefaultVault();
-
         member = narrow(member, Member.class);
         MemberContextImpl memberContext = new MemberContextImpl(member);
         memberContext.setActiveProfile(profileService.retrieveProfile(member));
+        vault = narrow(vault, Vault.class);
+        member.setDefaultVault(vault);
+        vault.setAuthenticatedPrincipal(importedPrincipal);
+        memberContext.retainVaultKey(vault);
         try {
             threadLocalContexts.set(memberContext);
-
-            vault = narrow(vault, Vault.class);
-            member.setDefaultVault(vault);
-            vault.setAuthenticatedPrincipal(importedPrincipal);
-            memberContext.retainVaultKey(vault);
-
-            synchronized (contexts) {
-                contexts.put(principalImpl, memberContext);
-            }
-
-            if (principalImpl.getOrganizationId() != null) {
-                Organization organization = organizationService.retrieveById(principalImpl.getOrganizationId(), true);
-                activateOrganization(organization);
-            }
-        }  finally {
+            restore(principalImpl, memberContext);
+        } finally {
             threadLocalContexts.remove();
+        }
+    }
+
+    private void restore(final PegasusPrincipalImpl principalImpl, final MemberContextImpl memberContext) {
+        synchronized (contexts) {
+            contexts.put(principalImpl, memberContext);
+        }
+
+        if (principalImpl.getOrganizationId() != null) {
+            Organization organization = organizationService.retrieveById(principalImpl.getOrganizationId(), true);
+            activateOrganization(organization);
         }
     }
 
