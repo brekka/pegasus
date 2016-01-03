@@ -11,8 +11,6 @@ import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
-import org.brekka.pegasus.core.security.PegasusPrincipal;
-import org.brekka.pegasus.core.security.PegasusPrincipalAware;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -34,8 +32,6 @@ public interface MemberService {
     MemberContext getCurrent();
 
     MemberContext retrieveCurrent();
-
-    void logout(PegasusPrincipal principal);
 
     /**
      * @param organization
@@ -82,15 +78,5 @@ public interface MemberService {
      * @param status
      */
     void updateStatus(UUID actorId, ActorStatus status);
-
-    MemberContext loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization);
-
-    void unbind();
-
-    PegasusPrincipal principal(AuthenticationToken token);
-
-    void restore(PegasusPrincipal principal, String password);
-
-    void restore(PegasusPrincipal principal, byte[] secret);
 }
 

@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.brekka.pegasus.core.model.AuthenticationToken;
+import org.brekka.pegasus.core.model.MemberContext;
 
 
 /**
@@ -40,6 +41,8 @@ public abstract class PegasusPrincipal implements Principal, Serializable {
     private final String username;
 
     protected transient byte[] restoreSecret;
+
+    protected transient MemberContext memberContext;
 
 
 
@@ -63,6 +66,10 @@ public abstract class PegasusPrincipal implements Principal, Serializable {
     @Override
     public String getName() {
         return username;
+    }
+
+    public MemberContext getMemberContext() {
+        return memberContext;
     }
 
     @Override
