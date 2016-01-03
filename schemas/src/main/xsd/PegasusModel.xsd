@@ -199,8 +199,9 @@
     <xsd:complexType name="TemplateType">
         <xsd:sequence>
             <xsd:element name="Label"         type="xsd:string"    />
-            <xsd:element name="Documentation" type="xsd:string"    minOccurs="0" />
+            <xsd:element name="Documentation" type="xsd:string" minOccurs="0" />
             <xsd:element name="Content"       type="xsd:string"    />
+            <xsd:element name="ContentType"   type="xsd:string" minOccurs="0" />
             <xsd:element name="ExampleVariables" type="xsd:string" />
         </xsd:sequence>
     </xsd:complexType>

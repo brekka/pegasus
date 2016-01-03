@@ -164,7 +164,9 @@ public class EventServiceImpl implements EventService {
             remoteUserEvent.setRemoteAddress(wad.getRemoteAddress());
             remoteUserEvent.setUserAgent(wad.getUserAgent());
         } else {
-            throw new IllegalStateException("No web authentication details found.");
+            throw new IllegalStateException(String.format(
+                    "No web authentication details found in authentication %s, principal: %s",
+                    authentication.getClass().getName(), authentication.getPrincipal()));
         }
 
         MemberContext current = memberService.getCurrent();

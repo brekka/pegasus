@@ -32,8 +32,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.model.OrderByPart;
 import org.brekka.commons.persistence.model.OrderByProperty;
@@ -68,8 +66,6 @@ import org.springframework.util.ClassUtils;
 @Transactional
 public class TemplateServiceImpl implements TemplateService {
 
-    private static final Log log = LogFactory.getLog(TemplateServiceImpl.class);
-
     @Autowired
     private TemplateDAO templateDAO;
 
@@ -85,19 +81,16 @@ public class TemplateServiceImpl implements TemplateService {
             // externally configured
             return;
         }
-        Map<TemplateEngine, TemplateEngineAdapter> adapters = new LinkedHashMap<>();
+        Map<TemplateEngine, TemplateEngineAdapter> templateAdapters = new LinkedHashMap<>();
         if (ClassUtils.isPresent("org.apache.velocity.app.VelocityEngine", getClass().getClassLoader())) {
             // Velocity is present, add it
             TemplateEngineAdapter templateEngineAdapter = new org.brekka.pegasus.core.services.impl.VelocityTemplateEngine();
             templateEngineAdapter.init(this.templateDAO, this.xmlEntityService);
-            adapters.put(TemplateEngine.VELOCITY, templateEngineAdapter);
+            templateAdapters.put(TemplateEngine.VELOCITY, templateEngineAdapter);
         }
-        this.adapters = adapters;
+        this.adapters = templateAdapters;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#merge(org.brekka.pegasus.core.model.Template, java.util.Map)
-     */
     @Override
     @Nullable
     public String merge(@Nonnull final Template template, @Nonnull final Map<String, Object> context) {
@@ -106,9 +99,6 @@ public class TemplateServiceImpl implements TemplateService {
         return writer.toString();
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#merge(org.brekka.pegasus.core.model.Template, java.util.Map, java.io.Writer)
-     */
     @Override
     public void merge(final Template template, final Map<String, Object> context, final Writer out) {
         TemplateEngineAdapter templateEngineAdapter = this.adapters.get(template.getEngine());
@@ -120,9 +110,6 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#preview(java.lang.String, org.brekka.pegasus.core.model.TemplateEngine, java.util.Map)
-     */
     @Override
     @Nullable
     public String preview(final String templateContent, final TemplateEngine templateEngine, final Map<String, Object> context) {
@@ -131,9 +118,6 @@ public class TemplateServiceImpl implements TemplateService {
         return writer.toString();
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#preview(java.lang.String, org.brekka.pegasus.core.model.TemplateEngine, java.util.Map, java.io.Writer)
-     */
     @Override
     public void preview(final String templateContent, final TemplateEngine templateEngine, final Map<String, Object> context, final Writer out) {
         TemplateEngineAdapter templateEngineAdapter = this.adapters.get(templateEngine);
@@ -145,9 +129,6 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#retrieveByToken(org.brekka.pegasus.core.model.Token)
-     */
     @Override
     @Nullable
     @Transactional(readOnly=true)
@@ -155,9 +136,6 @@ public class TemplateServiceImpl implements TemplateService {
         return this.templateDAO.retrieveByToken(token);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#retrieveBySlug(java.lang.String)
-     */
     @Override
     @Nullable
     @Transactional(readOnly=true)
@@ -165,9 +143,6 @@ public class TemplateServiceImpl implements TemplateService {
         return this.templateDAO.retrieveBySlug(slug);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#retrieveById(java.util.UUID)
-     */
     @Override
     @Nullable
     @Transactional(readOnly=true)
@@ -175,9 +150,6 @@ public class TemplateServiceImpl implements TemplateService {
         return this.templateDAO.retrieveById(templateId);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#create(org.brekka.xml.pegasus.v2.model.TemplateType, java.lang.String, org.brekka.pegasus.core.model.Token)
-     */
     @Override
     @Nonnull
     @Transactional()
@@ -186,9 +158,6 @@ public class TemplateServiceImpl implements TemplateService {
         return create(details, engine, keySafe, slug, token, label, false);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#update(org.brekka.pegasus.core.model.Template)
-     */
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
     public void update(@Nonnull final Template template) {
@@ -209,36 +178,24 @@ public class TemplateServiceImpl implements TemplateService {
         template.setXml(xml);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#delete(java.util.UUID)
-     */
     @Override
     @Transactional()
     public void delete(final UUID templateId) {
         this.templateDAO.delete(templateId);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#retrieveListing(org.brekka.commons.persistence.model.ListingCriteria)
-     */
     @Override
     @Transactional(readOnly=true)
     public List<Template> retrieveListing(final ListingCriteria listingCriteria) {
         return this.templateDAO.retrieveListing(null, listingCriteria);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#retrieveListingRowCount()
-     */
     @Override
     @Transactional(readOnly=true)
     public int retrieveListingRowCount() {
         return this.templateDAO.retrieveListingRowCount();
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#exportAll()
-     */
     @Override
     @Transactional(readOnly=true)
     public ExportedTemplatesDocument exportAll(final DateTime changedSince) {
@@ -254,6 +211,7 @@ public class TemplateServiceImpl implements TemplateService {
             exportedTemplate.setPlainLabel(template.getLabel());
             exportedTemplate.setLabel(templateXml.getLabel());
             exportedTemplate.setContent(templateXml.getContent());
+            exportedTemplate.setContentType(templateXml.getContentType());
             exportedTemplate.setDocumentation(templateXml.getDocumentation());
             exportedTemplate.setEngine(template.getEngine().toString());
             exportedTemplate.setExampleVariables(templateXml.getExampleVariables());
@@ -262,9 +220,6 @@ public class TemplateServiceImpl implements TemplateService {
         return doc;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#importFrom(org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument)
-     */
     @Override
     @Transactional()
     public int importFrom(final ExportedTemplatesDocument exportedTemplatesDocument, final KeySafe<?> keySafe, final boolean forceUpdate) {
@@ -312,9 +267,6 @@ public class TemplateServiceImpl implements TemplateService {
         return count;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#getAvailableEngines()
-     */
     @Override
     public Set<TemplateEngine> getAvailableEngines() {
         Set<TemplateEngine> engines = EnumSet.copyOf(this.adapters.keySet());
@@ -345,9 +297,6 @@ public class TemplateServiceImpl implements TemplateService {
         return template;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#applyEncryption(java.util.UUID, org.brekka.pegasus.core.model.KeySafe)
-     */
     @Override
     @Transactional
     public void applyEncryption(final UUID templateId, final KeySafe<?> keySafe) {
@@ -361,9 +310,6 @@ public class TemplateServiceImpl implements TemplateService {
         this.templateDAO.update(managed);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.TemplateService#removeEncryption(java.util.UUID)
-     */
     @Override
     @Transactional
     public void removeEncryption(final UUID templateId) {
@@ -377,9 +323,6 @@ public class TemplateServiceImpl implements TemplateService {
         this.templateDAO.update(managed);
     }
 
-    /**
-     * @param details
-     */
     protected void fixDetails(final TemplateType details) {
         if (details == null) {
             return;
