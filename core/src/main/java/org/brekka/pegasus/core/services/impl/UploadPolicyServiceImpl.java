@@ -1,8 +1,9 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services.impl;
 
+import org.brekka.paveway.core.model.BasicUploadPolicy;
 import org.brekka.paveway.core.model.UploadPolicy;
 import org.brekka.paveway.core.services.UploadPolicyService;
 import org.brekka.pegasus.core.services.MemberService;
@@ -18,7 +19,7 @@ public class UploadPolicyServiceImpl implements UploadPolicyService {
 
     @Autowired
     private MemberService memberService;
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.services.UploadPolicyService#identifyPolicy()
      */
@@ -33,7 +34,7 @@ public class UploadPolicyServiceImpl implements UploadPolicyService {
 //            return new BasicUploadPolicy(200, 1_000_000_000, 2_000_000_000);
 //        }
         // Same policy for all - for now
-        return new UploadPolicyImpl(200, 1_000_000_000, 2_000_000_000, 1_000_000);
+        return new BasicUploadPolicy(200, 1_000_000_000, 2_000_000_000, 1_000_000);
     }
 
 }
