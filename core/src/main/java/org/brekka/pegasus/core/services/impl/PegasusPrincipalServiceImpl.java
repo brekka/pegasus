@@ -28,6 +28,7 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AuthenticationTokenDAO;
 import org.brekka.pegasus.core.dao.MemberDAO;
+import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.MemberContext;
@@ -44,6 +45,7 @@ import org.brekka.phalanx.api.model.ExportedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -123,11 +125,15 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
 
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void loginAndBind(final PegasusPrincipalAware principalSource, final String password, final Organization organization, final boolean restoreRequired) {
+    public void loginAndBind(final PegasusPrincipalAware principalSource, final String password, final Organization organization,
+            final boolean restoreRequired) {
         Stopwatch sw = Stopwatch.createStarted();
         PegasusPrincipalImpl pegasusPrincipal = (PegasusPrincipalImpl) principalSource.getPegasusPrincipal();
         AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(pegasusPrincipal.getAuthenticationTokenId());
         Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+        if (member.getStatus() != ActorStatus.ACTIVE) {
+            throw new DisabledException(String.format("Member '%s' account is disabled", member.getId()));
+        }
         Vault vault = member.getDefaultVault();
         member = narrow(member, Member.class);
         MemberContextImpl memberContext = new MemberContextImpl(member);
