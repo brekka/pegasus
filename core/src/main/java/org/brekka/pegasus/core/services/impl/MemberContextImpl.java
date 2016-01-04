@@ -56,7 +56,7 @@ class MemberContextImpl implements MemberContext {
     /**
      * Essentially a cache of expensive to generate values (non-serializable).
      */
-    private final AccessorContext context = new AccessorContextImpl();
+    private final AccessorContext accessorContext = new AccessorContextImpl();
 
     /**
      * Will always be the member instance that corresponds to the login.
@@ -153,8 +153,8 @@ class MemberContextImpl implements MemberContext {
     }
 
     @Override
-    public AccessorContext getContext() {
-        return this.context;
+    public AccessorContext getAccessorContext() {
+        return this.accessorContext;
     }
 
     @Override

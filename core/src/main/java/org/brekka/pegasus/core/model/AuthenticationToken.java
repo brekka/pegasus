@@ -18,6 +18,8 @@ package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -41,9 +43,9 @@ import org.hibernate.annotations.Type;
 @Table(name="`AuthenticationToken`", schema=PegasusConstants.SCHEMA)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-        name="`Type`", length=12,
-        discriminatorType=DiscriminatorType.STRING
-        )
+    name="`Type`", length=12,
+    discriminatorType=DiscriminatorType.STRING
+)
 @DiscriminatorValue("Base")
 public abstract class AuthenticationToken extends LongevousEntity<UUID> {
 
@@ -56,6 +58,7 @@ public abstract class AuthenticationToken extends LongevousEntity<UUID> {
      * Unique id
      */
     @Id
+    @Access(AccessType.PROPERTY)
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;

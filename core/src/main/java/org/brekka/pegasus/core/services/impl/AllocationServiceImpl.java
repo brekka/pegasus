@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.commons.persistence.support.EntityUtils;
-import org.brekka.paveway.core.dao.CryptedFileDAO;
 import org.brekka.paveway.core.model.CryptedFile;
 import org.brekka.pegasus.core.dao.AllocationDAO;
 import org.brekka.pegasus.core.dao.AllocationFileDAO;
@@ -35,7 +34,6 @@ import org.brekka.pegasus.core.model.FileDownloadEvent;
 import org.brekka.pegasus.core.model.KeySafeAware;
 import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.services.AllocationService;
-import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.xml.pegasus.v2.model.AllocationDocument;
 import org.brekka.xml.pegasus.v2.model.BundleType;
 import org.brekka.xml.pegasus.v2.model.FileType;
@@ -64,18 +62,9 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
     private AllocationDAO allocationDAO;
 
     @Autowired
-    private KeySafeService keySafeService;
-
-    @Autowired
-    private CryptedFileDAO cryptedFileDAO;
-
-    @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.BundleService#incrementDownloadCounter(org.brekka.pegasus.core.model.BundleFile)
-     */
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ)
     public void incrementDownloadCounter(final AllocationFile allocationFile) {
@@ -96,9 +85,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         this.allocationFileDAO.update(managed);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrieveFile(java.util.UUID)
-     */
     @Override
     @Transactional(readOnly=true)
     public AllocationFile retrieveFile(final UUID allocationFileId) {
@@ -138,9 +124,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         return allocationFile;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#deallocateAllocation(org.brekka.pegasus.core.model.Allocation)
-     */
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
     public void clearAllocation(final Allocation allocation) {
@@ -158,9 +141,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         this.xmlEntityService.delete(xml.getId());
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#releaseDetails(java.util.List)
-     */
     @Override
     @Transactional(readOnly=true)
     public <T extends Allocation & KeySafeAware> void releaseDetails(final List<T> allocationList) {
@@ -172,9 +152,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#forceExpireAllocation(org.brekka.pegasus.core.model.Allocation)
-     */
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ)
     public void forceExpireAllocation(final Allocation allocation) {
@@ -188,18 +165,12 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         this.allocationDAO.update(managed);
     }
 
-    /**
-     * @param file
-     */
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
     public void clearAllocationFile(final AllocationFile file) {
         clearAllocationFile(file, true);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.DispatchService#updateDetails(org.brekka.pegasus.core.model.Dispatch, org.brekka.xml.pegasus.v2.model.DetailsType)
-     */
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
     public void updateDetails(final Allocation allocation) {
@@ -210,9 +181,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         this.allocationDAO.update(latest);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListing(org.brekka.pegasus.core.model.Dispatch, org.brekka.commons.persistence.model.ListingCriteria)
-     */
     @Override
     @Transactional(readOnly=true)
     public List<Allocation> retrieveDerivedFromListing(final Dispatch derivedFrom, final ListingCriteria listingCriteria) {
@@ -220,18 +188,12 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         return listing;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrieveDerivedFromListingRowCount(org.brekka.pegasus.core.model.Dispatch)
-     */
     @Override
     @Transactional(readOnly=true)
     public int retrieveDerivedFromListingRowCount(final Dispatch derivedFrom) {
         return retrieveDerivedFromListingRowCount(derivedFrom);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.AllocationService#retrievePopulatedDownloadEvents(org.brekka.pegasus.core.model.Allocation)
-     */
     @Override
     @Transactional(readOnly=true)
     public List<FileDownloadEvent> retrievePopulatedDownloadEvents(final Allocation allocation) {
@@ -254,11 +216,6 @@ public class AllocationServiceImpl extends AllocationServiceSupport implements A
         return downloads;
     }
 
-    /**
-     *
-     * @param file
-     * @param deleteAllocationIfPossible
-     */
     protected void clearAllocationFile(final AllocationFile file, final boolean deleteAllocationIfPossible) {
         AllocationFile allocationFile = this.allocationFileDAO.retrieveById(file.getId());
         this.applicationEventPublisher.publishEvent(new AllocationFileDeleteEvent(allocationFile));

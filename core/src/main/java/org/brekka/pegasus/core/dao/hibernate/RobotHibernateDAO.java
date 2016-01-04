@@ -37,20 +37,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implements RobotDAO {
 
-    /* (non-Javadoc)
-     * @see org.brekka.commons.persistence.dao.hibernate.AbstractIdentifiableEntityHibernateDAO#type()
-     */
     @Override
     protected Class<Robot> type() {
         return Robot.class;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.RobotDAO#retrieveRobotListing(org.brekka.pegasus.core.model.Actor, org.brekka.commons.persistence.model.ListingCriteria)
-     */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Robot> retrieveListing(Actor owner, ListingCriteria listingCriteria) {
+    public List<Robot> retrieveListing(final Actor owner, final ListingCriteria listingCriteria) {
         Criteria criteria = getCurrentSession().createCriteria(Robot.class);
         if (owner != null) {
             criteria.add(Restrictions.eq("owner", owner));
@@ -59,13 +53,10 @@ public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implem
         HibernateUtils.applyCriteria(criteria, listingCriteria);
         return criteria.list();
     }
-    
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.RobotDAO#retrieveRobotListingRowCount(org.brekka.pegasus.core.model.Actor)
-     */
+
     @Override
-    public int retrieveListingRowCount(Actor owner) {
-        String sql = 
+    public int retrieveListingRowCount(final Actor owner) {
+        String sql =
                 "select count(r) from Robot r" +
                 " where r.status in (:active, :disabled)";
         if (owner != null) {
@@ -79,5 +70,4 @@ public class RobotHibernateDAO extends AbstractPegasusHibernateDAO<Robot> implem
         query.setParameter("disabled", ActorStatus.DISABLED);
         return ((Number) query.uniqueResult()).intValue();
     }
-
 }

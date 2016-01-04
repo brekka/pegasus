@@ -6,7 +6,7 @@ package org.brekka.pegasus.core.security;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.brekka.pegasus.core.model.Accessor;
+import org.brekka.pegasus.core.model.AccessorContextAware;
 import org.brekka.pegasus.core.services.impl.AccessorContextImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.User;
  * @author Andrew Taylor (andrew@brekka.org)
  *
  */
-public class AnonymousTransferUser extends User implements Accessor {
+public class AnonymousTransferUser extends User implements AccessorContextAware {
 
     private static final Collection<GrantedAuthority> AUTHORITIES = Arrays.<GrantedAuthority>asList(PegasusAuthority.ANONYMOUS_TRANSFER);
 
@@ -39,7 +39,7 @@ public class AnonymousTransferUser extends User implements Accessor {
     }
 
     @Override
-    public AccessorContextImpl getContext() {
+    public AccessorContextImpl getAccessorContext() {
         return context;
     }
 

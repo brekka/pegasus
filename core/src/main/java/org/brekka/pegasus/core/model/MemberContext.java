@@ -11,7 +11,7 @@ import org.brekka.xml.pegasus.v2.model.ProfileType;
 /**
  * @author Andrew Taylor
  */
-public interface MemberContext extends Accessor {
+public interface MemberContext extends AccessorContextAware {
 
     Actor getActiveActor();
 

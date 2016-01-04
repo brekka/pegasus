@@ -22,8 +22,10 @@ import java.util.Map;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
-import org.brekka.pegasus.core.model.Accessor;
 import org.brekka.pegasus.core.model.AccessorContext;
+import org.brekka.pegasus.core.model.AccessorContextAware;
+import org.brekka.pegasus.core.security.PegasusPrincipal;
+import org.brekka.pegasus.core.security.PegasusPrincipalAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -116,22 +118,28 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
     }
 
     private static AccessorContext accessorContext(final boolean useStub) {
+        AccessorContext accessorContext = null;
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        if (authentication instanceof Accessor) {
-            return ((Accessor) authentication).getContext();
-        }
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
-            if (principal instanceof Accessor) {
-                return ((Accessor) principal).getContext();
+            if (principal instanceof PegasusPrincipalAware) {
+                PegasusPrincipal pegasusPrincipal = ((PegasusPrincipalAware) principal).getPegasusPrincipal();
+                accessorContext = pegasusPrincipal.getMemberContext().getAccessorContext();
+            }
+            if (principal instanceof AccessorContextAware) {
+                accessorContext = ((AccessorContextAware) principal).getAccessorContext();
             }
         }
-        if (useStub) {
-            return new AccessorContextImpl();
+        if (accessorContext == null) {
+            if (useStub) {
+                accessorContext = new AccessorContextImpl();
+            } else {
+                throw new PegasusException(PegasusErrorCode.PG623,
+                        "No AccessorContext available for the current security context '%s'",
+                        authentication != null ? authentication.getClass().getName() : null);
+            }
         }
-        throw new PegasusException(PegasusErrorCode.PG623,
-                "No AccessorContext available for the current security context '%s'",
-                authentication != null ? authentication.getClass().getName() : null);
+        return accessorContext;
     }
 }
