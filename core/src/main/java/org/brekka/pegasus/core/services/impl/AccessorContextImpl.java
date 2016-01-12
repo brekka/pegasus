@@ -24,6 +24,7 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.model.AccessorContext;
 import org.brekka.pegasus.core.model.AccessorContextAware;
+import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.security.PegasusPrincipal;
 import org.brekka.pegasus.core.security.PegasusPrincipalAware;
 import org.springframework.security.core.Authentication;
@@ -125,7 +126,12 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
             Object principal = authentication.getPrincipal();
             if (principal instanceof PegasusPrincipalAware) {
                 PegasusPrincipal pegasusPrincipal = ((PegasusPrincipalAware) principal).getPegasusPrincipal();
-                accessorContext = pegasusPrincipal.getMemberContext().getAccessorContext();
+                MemberContext memberContext = pegasusPrincipal.getMemberContext();
+                if (memberContext == null) {
+                    throw new PegasusException(PegasusErrorCode.PG623,
+                            "No AccessorContext available for authentication: %s", authentication);
+                }
+                accessorContext = memberContext.getAccessorContext();
             }
             if (principal instanceof AccessorContextAware) {
                 accessorContext = ((AccessorContextAware) principal).getAccessorContext();

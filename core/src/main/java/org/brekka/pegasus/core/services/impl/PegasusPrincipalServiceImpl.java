@@ -28,6 +28,7 @@ import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.AuthenticationTokenDAO;
 import org.brekka.pegasus.core.dao.MemberDAO;
+import org.brekka.pegasus.core.event.VaultOpenEvent;
 import org.brekka.pegasus.core.model.ActorStatus;
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
@@ -45,6 +46,7 @@ import org.brekka.phalanx.api.model.ExportedPrincipal;
 import org.brekka.phalanx.api.services.PhalanxService;
 import org.brekka.phoenix.api.services.RandomCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -82,6 +84,9 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private final ThreadLocal<PegasusPrincipalImpl> threadLocalPrincipals = new ThreadLocal<>();
 
@@ -162,6 +167,17 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     }
 
     @Override
+    public void doWithPrincipal(final PegasusPrincipal principal, final Runnable runnable) {
+        PegasusPrincipalImpl previous = threadLocalPrincipals.get();
+        try {
+            threadLocalPrincipals.set((PegasusPrincipalImpl) principal);
+            runnable.run();
+        } finally {
+            threadLocalPrincipals.set(previous);
+        }
+    }
+
+    @Override
     public PegasusPrincipal principal(final AuthenticationToken token) {
         return new PegasusPrincipalImpl(token);
     }
@@ -182,6 +198,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
             member.setDefaultVault(vault);
             restore(principalImpl, memberContext);
+            applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
 
         } finally {
             threadLocalPrincipals.remove();
@@ -190,14 +207,13 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
 
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void restore(final PegasusPrincipal principal, final byte[] secret) {
+    public boolean restore(final PegasusPrincipal principal, final byte[] secret) {
         PegasusPrincipalImpl principalImpl = (PegasusPrincipalImpl) principal;
         try {
             threadLocalPrincipals.set(principalImpl);
             ExportedPrincipal exportedPrincipal = principalImpl.getExportedPrincipal();
             if (exportedPrincipal == null) {
-                throw new IllegalStateException(String.format(
-                        "Unable to restore %s using secret as there is no exported principal available", principal.getName()));
+                return false;
             }
             AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(exportedPrincipal, secret);
             AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
@@ -211,6 +227,8 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             vault.setAuthenticatedPrincipal(importedPrincipal);
             memberContext.retainVaultKey(vault);
             restore(principalImpl, memberContext);
+            applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
+            return true;
         } finally {
             threadLocalPrincipals.remove();
         }

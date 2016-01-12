@@ -124,11 +124,11 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
 
     @Override
     @Transactional()
-    public AnonymousTransfer unlock(final String token, final String code) {
+    public AnonymousTransfer unlock(final String token, final String code, final boolean external) {
         String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = this.anonymousTransferDAO.retrieveByToken(token);
         try {
-            decryptDocument(transfer, codeClean);
+            decryptDocument(transfer, codeClean, external);
         } catch (PhalanxException e) {
             checkAttempts(e, transfer);
             throw e;

@@ -209,10 +209,10 @@ class AllocationServiceSupport {
     }
 
     protected void decryptDocument(final Allocation allocation) {
-        decryptDocument(allocation, null);
+        decryptDocument(allocation, null, false);
     }
 
-    protected void decryptDocument(final Allocation allocation, final String password) {
+    protected void decryptDocument(final Allocation allocation, final String password, final boolean external) {
         Allocation nAllocation = EntityUtils.narrow(allocation, Allocation.class);
         if (nAllocation == null) {
             return;
@@ -244,7 +244,8 @@ class AllocationServiceSupport {
             bindToContext(nAllocation);
         } finally {
             if (nAllocation instanceof Transfer
-                    && password != null) {
+                    && password != null
+                    && external) {
                 this.eventService.transferUnlock((Transfer) nAllocation, unlockSuccess);
             }
         }

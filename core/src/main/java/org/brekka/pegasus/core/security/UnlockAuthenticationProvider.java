@@ -37,32 +37,32 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class UnlockAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
     @Autowired
     private AnonymousTransferService anonymousService;
-    
+
     @Override
-    protected void additionalAuthenticationChecks(UserDetails userDetails,
-            UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+    protected void additionalAuthenticationChecks(final UserDetails userDetails,
+            final UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         // None required
     }
 
     @Override
-    protected UserDetails retrieveUser(String token, UsernamePasswordAuthenticationToken authentication)
+    protected UserDetails retrieveUser(final String token, final UsernamePasswordAuthenticationToken authentication)
             throws AuthenticationException {
         Object credentials = authentication.getCredentials();
         String password = credentials.toString();
         if (StringUtils.isBlank(password)) {
             throw new BadCredentialsException("A code is required");
         }
-        
+
         AnonymousTransferUser anonymousTransferUser = new AnonymousTransferUser(token);
         SecurityContext context = SecurityContextHolder.getContext();
-        
+
         // Temporarily bind the authentication user to the security context so that we can do the unlock
         // this is primarily for the EventService to capture the IP/remote user.
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(anonymousTransferUser, anonymousTransferUser);
         auth.setDetails(authentication.getDetails());
         try {
             context.setAuthentication(auth);
-            anonymousService.unlock(token, password);
+            anonymousService.unlock(token, password, true);
             context.setAuthentication(null);
             return anonymousTransferUser;
         } catch (PhalanxException e) {

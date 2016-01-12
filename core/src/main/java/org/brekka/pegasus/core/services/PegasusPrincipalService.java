@@ -38,5 +38,7 @@ public interface PegasusPrincipalService {
 
     void restore(PegasusPrincipal principal, String password);
 
-    void restore(PegasusPrincipal principal, byte[] secret);
+    boolean restore(PegasusPrincipal principal, byte[] secret);
+
+    void doWithPrincipal(PegasusPrincipal principal, Runnable runnable);
 }

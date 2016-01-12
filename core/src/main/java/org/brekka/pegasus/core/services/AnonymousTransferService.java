@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services;
 
@@ -12,7 +12,7 @@ import org.joda.time.DateTime;
 
 /**
  * @author Andrew Taylor
- * 
+ *
  */
 public interface AnonymousTransferService {
 
@@ -22,7 +22,15 @@ public interface AnonymousTransferService {
     AnonymousTransfer createTransfer(Token token, DetailsType details, DateTime expires, Integer maxDownloads, Integer maxUnlockAttempts,
             Dispatch dispatch, String code);
 
-    AnonymousTransfer unlock(String token, String code);
+    /**
+     * Unlock a transfer
+     *
+     * @param token the token that identifies the transfer
+     * @param code the secret code
+     * @param external if true then this unlock will count towards the attempts counter.
+     * @return
+     */
+    AnonymousTransfer unlock(String token, String code, boolean external);
 
     /**
      * @param token
@@ -40,7 +48,7 @@ public interface AnonymousTransferService {
      * @return
      */
     AnonymousTransfer retrieveUnlockedTransfer(String token);
-    
+
     /**
      * @param token
      * @return

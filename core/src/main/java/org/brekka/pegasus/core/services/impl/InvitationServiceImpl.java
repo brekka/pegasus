@@ -94,7 +94,8 @@ public class InvitationServiceImpl implements InvitationService {
         if (invitation == null) {
             return null;
         }
-        if (invitation.getStatus() != requiredStatus) {
+        if (requiredStatus != null
+                && invitation.getStatus() != requiredStatus) {
             return null;
         }
         if (password != null) {

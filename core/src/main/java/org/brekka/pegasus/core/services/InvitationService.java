@@ -66,7 +66,7 @@ public interface InvitationService {
     Invitation retrieveByToken(Token token);
 
     /**
-     * Retrieve the invitation by its token and unlock the xml using the specifid password.
+     * Retrieve the invitation by its token and unlock the XML using the specified password.
      *
      * @param token
      * @param string

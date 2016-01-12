@@ -56,14 +56,15 @@ public class Token extends SnapshotEntity<UUID> {
     private TokenType type;
 
 
-    /**
-     *
-     */
     public Token() {
     }
 
     public Token(final String path) {
         this.path = path;
+    }
+
+    public Token(final UUID id) {
+        this.id = id;
     }
 
     /**
