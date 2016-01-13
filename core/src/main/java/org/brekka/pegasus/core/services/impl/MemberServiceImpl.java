@@ -150,9 +150,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional(isolation=Isolation.REPEATABLE_READ)
-    public void setupPerson(final ProfileType profileType, final String vaultPassword, final boolean encryptedProfile) {
-        Person managed = getManaged(Person.class);
-        populatePerson(managed, profileType, vaultPassword, encryptedProfile, false, true);
+    public void setupPerson(final Person person, final ProfileType profileType, final String vaultPassword, final boolean encryptedProfile) {
+        Person managed = EntityUtils.narrow(memberDAO.retrieveById(person.getId()), Person.class);
+        populatePerson(managed, profileType, vaultPassword, encryptedProfile, false);
         this.memberDAO.update(managed);
     }
 
@@ -162,7 +162,7 @@ public class MemberServiceImpl implements MemberService {
             final String vaultPassword, final boolean encryptProfile) {
         Person person = new Person();
         person.setAuthenticationToken(authenticationToken);
-        populatePerson(person, profileType, vaultPassword, encryptProfile, true, false);
+        populatePerson(person, profileType, vaultPassword, encryptProfile, true);
         return person;
     }
 
@@ -231,23 +231,14 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
-
-    private <M extends Member> M getManaged(final Class<M> memberType) {
-        MemberContext current = currentContext();
-        Member member = current.getMember();
-        Member managed = this.memberDAO.retrieveById(member.getId());
-        return EntityUtils.narrow(managed, memberType);
-    }
-
     private void populatePerson(final Person person, final ProfileType profileType, final String vaultPassword,
-            final boolean encryptProfile, final boolean create, final boolean currentUser) {
+            final boolean encryptProfile, final boolean create) {
         person.setFullName(profileType.getFullName());
         person.setStatus(ActorStatus.ACTIVE);
         if (create) {
             // Need to save now, person is reference
             this.memberDAO.create(person);
         }
-
 
         // Vault
         Vault defaultVault = this.vaultService.createVault("Default", vaultPassword, person);
@@ -267,21 +258,10 @@ public class MemberServiceImpl implements MemberService {
             eMailType.setUUID(emailAddress.getId().toString());
             eMailType.setAddress(address); // Now confirmed lowercase.
         }
-
-
-        // Profile
-        Profile profile;
         if (encryptProfile) {
-            profile = this.profileService.createEncryptedProfile(person, profileType, primaryDivision);
+            profileService.createEncryptedProfile(person, profileType, primaryDivision);
         } else {
-            profile = this.profileService.createPlainProfile(person, profileType);
-        }
-
-        if (currentUser) {
-            // Binding to context
-            MemberContextImpl current = currentContext();
-            current.setMember(person);
-            current.setActiveProfile(profile);
+            profileService.createPlainProfile(person, profileType);
         }
     }
 

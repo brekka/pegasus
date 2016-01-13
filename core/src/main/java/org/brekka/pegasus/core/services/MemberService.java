@@ -25,7 +25,7 @@ public interface MemberService {
      */
     boolean isNewMember();
 
-    void setupPerson(ProfileType profileType, String vaultPassword, boolean encryptedProfile);
+    void setupPerson(Person person, ProfileType profileType, String vaultPassword, boolean encryptedProfile);
 
     Person createPerson(AuthenticationToken authenticationToken, ProfileType profileType, String vaultPassword, boolean encryptProfile);
 
