@@ -212,14 +212,6 @@ public class MemberServiceImpl implements MemberService {
 
         // Update
         this.memberDAO.update(managedMember);
-
-        // Update the context user, if appropriate.
-        MemberContextImpl current = currentContext();
-        if (EntityUtils.identityEquals(current.getMember(), managedMember)) {
-            current.setMember(EntityUtils.narrow(managedMember, Member.class));
-            current.setActiveActor(null);
-            current.setActiveProfile(null);
-        }
     }
 
     @Override
