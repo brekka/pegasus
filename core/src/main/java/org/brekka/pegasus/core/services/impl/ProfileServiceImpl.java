@@ -182,7 +182,8 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
     }
 
     protected boolean releaseProfile(final Profile profile, final Vault vault) {
-        if (profile == null) {
+        if (profile == null
+                || profile.getId() == null) {
             return false;
         }
         if (profile.getXml().getBean() != null) {

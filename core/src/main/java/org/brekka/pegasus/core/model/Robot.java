@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.model;
 
@@ -15,8 +15,8 @@ import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.xml.pegasus.v2.model.RobotDocument;
 
 /**
- * An autonomous member of the system that can act on another users behalf. 
- * 
+ * An autonomous member of the system that can act on another users behalf.
+ *
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
@@ -28,21 +28,21 @@ public class Robot extends Member {
      * Serial UID
      */
     private static final long serialVersionUID = 1656293508329918826L;
-    
+
     /**
      * The {@link Organization}, {@link Associate} or {@link Person} that owns this robot.
      */
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`OwnerID`", table="`Robot`", updatable=false, nullable=false)
     private Actor owner;
-    
+
     /**
      * The person that created this robot.
      */
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="`CreatedByID`", table="`Robot`", updatable=false, nullable=false)
-    private Person createdBy;
-    
+    private Member createdBy;
+
     /**
      * Additional organization details that can be encrypted (ie only employees can view/edit the details).
      */
@@ -60,7 +60,7 @@ public class Robot extends Member {
     /**
      * @param owner the owner to set
      */
-    public void setOwner(Actor owner) {
+    public void setOwner(final Actor owner) {
         this.owner = owner;
     }
 
@@ -74,21 +74,21 @@ public class Robot extends Member {
     /**
      * @param xml the xml to set
      */
-    public void setXml(XmlEntity<RobotDocument> xml) {
+    public void setXml(final XmlEntity<RobotDocument> xml) {
         this.xml = xml;
     }
 
     /**
      * @return the createdBy
      */
-    public Person getCreatedBy() {
+    public Member getCreatedBy() {
         return createdBy;
     }
 
     /**
      * @param createdBy the createdBy to set
      */
-    public void setCreatedBy(Person createdBy) {
+    public void setCreatedBy(final Member createdBy) {
         this.createdBy = createdBy;
     }
 }

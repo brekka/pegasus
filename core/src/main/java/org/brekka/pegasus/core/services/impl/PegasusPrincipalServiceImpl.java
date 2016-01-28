@@ -34,6 +34,7 @@ import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.security.PegasusPrincipal;
 import org.brekka.pegasus.core.security.PegasusPrincipalAware;
@@ -143,7 +144,8 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
         member = narrow(member, Member.class);
         MemberContextImpl memberContext = new MemberContextImpl(member);
         pegasusPrincipal.setMemberContext(memberContext);
-        memberContext.setActiveProfile(profileService.retrieveProfile(member));
+        Profile activeProfile = profileService.retrieveProfile(member);
+        memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
         threadLocalPrincipals.set(pegasusPrincipal);
 
         vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);

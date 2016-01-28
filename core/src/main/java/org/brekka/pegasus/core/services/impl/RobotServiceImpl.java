@@ -102,12 +102,12 @@ public class RobotServiceImpl implements RobotService {
 
         Vault defaultVault = vaultService.createVault("Default", code, robot);
         robot.setDefaultVault(defaultVault);
-        defaultVault = this.vaultService.openVault(defaultVault.getId(), code);
-        Division<Member> primaryDivision = this.divisionService.createDivision(defaultVault, null, "Primary");
-        robot.setPrimaryKeySafe(primaryDivision);
 
         robot.setStatus(ActorStatus.ACTIVE);
         robot.setOwner(nOwner);
+
+        MemberContext current = memberService.retrieveCurrent();
+        robot.setCreatedBy(current.getMember());
 
         RobotDocument robotDocument = RobotDocument.Factory.newInstance();
         robotDocument.setRobot(details);
@@ -115,11 +115,13 @@ public class RobotServiceImpl implements RobotService {
         // Robot cannot see its own details, why would it need to?
         XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy, false);
         robot.setXml(encryptedEntity);
-
-        MemberContext current = memberService.retrieveCurrent();
-        robot.setCreatedBy((Person) current.getMember());
-
         robotDAO.create(robot);
+
+        defaultVault = this.vaultService.openVault(defaultVault.getId(), code);
+        Division<Member> primaryDivision = this.divisionService.createDivision(defaultVault, null, "Primary");
+        robot.setPrimaryKeySafe(primaryDivision);
+
+        robotDAO.update(robot);
         return robot;
     }
 
