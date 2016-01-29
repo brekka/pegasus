@@ -89,10 +89,11 @@ class MemberContextImpl implements MemberContext {
 
     @Override
     public ProfileType getProfile() {
-        if (this.activeProfile == null) {
+        if (activeProfile == null
+                || activeProfile.getId() == null) {
             return null;
         }
-        XmlEntity<ProfileDocument> xmlEntity = this.activeProfile.getXml();
+        XmlEntity<ProfileDocument> xmlEntity = activeProfile.getXml();
         ProfileDocument bean = xmlEntity.getBean();
         if (bean == null) {
             return null;

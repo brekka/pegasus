@@ -151,7 +151,9 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
         }
         MemberContext current = memberService.retrieveCurrent();
         Profile activeProfile = current.getActiveProfile();
-        TransactionSynchronizationManager.registerSynchronization(new ProfileSynchronization(activeProfile));
+        if (activeProfile.getId() != null) {
+            TransactionSynchronizationManager.registerSynchronization(new ProfileSynchronization(activeProfile));
+        }
     }
 
     @Override
