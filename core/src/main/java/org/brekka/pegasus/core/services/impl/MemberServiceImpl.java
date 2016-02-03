@@ -16,6 +16,8 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import static java.lang.String.format;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -263,8 +265,10 @@ public class MemberServiceImpl implements MemberService {
 
     private MemberContextImpl currentContext(final boolean required) {
         MemberContextImpl memberContext = null;
+        String userName = null;
         PegasusPrincipal currentPrincipal = pegasusPrincipalService.currentPrincipal(required);
         if (currentPrincipal != null) {
+            userName = currentPrincipal.getName();
             memberContext = (MemberContextImpl) currentPrincipal.getMemberContext();
             if (memberContext != null) {
                 Member member = memberContext.getMember();
@@ -275,6 +279,10 @@ public class MemberServiceImpl implements MemberService {
                     memberContext.setActiveProfile(profile);
                 }
             }
+        }
+        if (memberContext == null && required) {
+            throw new PegasusException(PegasusErrorCode.PG902, format(
+                    "No member context could be found for '%s' in the current security context", userName));
         }
         return memberContext;
     }

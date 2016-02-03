@@ -42,7 +42,7 @@ public abstract class PegasusPrincipal implements Principal, Serializable {
 
     protected transient byte[] restoreSecret;
 
-    protected transient MemberContext memberContext;
+    protected transient volatile MemberContext memberContext;
 
 
 
