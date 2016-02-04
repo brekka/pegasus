@@ -199,6 +199,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             memberContext.setActiveProfile(profileService.retrieveProfile(member));
             vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
             member.setDefaultVault(vault);
+            memberContext.retainVaultKey(vault);
             restore(principalImpl, memberContext);
             applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
 
