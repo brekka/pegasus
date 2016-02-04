@@ -37,7 +37,6 @@ import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.MemberContext;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Person;
-import org.brekka.pegasus.core.model.Profile;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.security.PegasusPrincipal;
 import org.brekka.pegasus.core.services.DivisionService;
@@ -270,15 +269,6 @@ public class MemberServiceImpl implements MemberService {
         if (currentPrincipal != null) {
             userName = currentPrincipal.getName();
             memberContext = (MemberContextImpl) currentPrincipal.getMemberContext();
-            if (memberContext != null) {
-                Member member = memberContext.getMember();
-                // Attempt to locate the user profile
-                if (member.getStatus() == ActorStatus.ACTIVE
-                        && memberContext.getActiveProfile() == null) {
-                    Profile profile = profileService.retrieveProfile(member);
-                    memberContext.setActiveProfile(profile);
-                }
-            }
         }
         if (memberContext == null && required) {
             throw new PegasusException(PegasusErrorCode.PG902, format(

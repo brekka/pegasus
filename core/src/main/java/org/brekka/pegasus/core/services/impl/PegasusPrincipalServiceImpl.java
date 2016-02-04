@@ -114,18 +114,20 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     @Override
     @Transactional()
     public void logout(final PegasusPrincipal pegasusPrincipal) {
-        MemberContextImpl memberContext = (MemberContextImpl) pegasusPrincipal.getMemberContext();
-        Stopwatch sw = Stopwatch.createStarted();
-        if (memberContext != null) {
-            List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
-            for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
-                this.phalanxService.logout(authenticatedPrincipal);
+        synchronized (pegasusPrincipal) {
+            MemberContextImpl memberContext = (MemberContextImpl) pegasusPrincipal.getMemberContext();
+            Stopwatch sw = Stopwatch.createStarted();
+            if (memberContext != null) {
+                List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
+                for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
+                    this.phalanxService.logout(authenticatedPrincipal);
+                }
             }
-        }
-        ((PegasusPrincipalImpl) pegasusPrincipal).setMemberContext(null);
-        if (log.isInfoEnabled()) {
-            log.info(String.format("Pegasus logout for '%s' took %d ms",
-                    pegasusPrincipal.getName(), sw.elapsed(TimeUnit.MILLISECONDS)));
+            ((PegasusPrincipalImpl) pegasusPrincipal).setMemberContext(null);
+            if (log.isInfoEnabled()) {
+                log.info(String.format("Pegasus logout for '%s' took %d ms",
+                        pegasusPrincipal.getName(), sw.elapsed(TimeUnit.MILLISECONDS)));
+            }
         }
     }
 
@@ -135,31 +137,43 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             final boolean restoreRequired) {
         Stopwatch sw = Stopwatch.createStarted();
         PegasusPrincipalImpl pegasusPrincipal = (PegasusPrincipalImpl) principalSource.getPegasusPrincipal();
-        AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(pegasusPrincipal.getAuthenticationTokenId());
-        Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
-        if (member.getStatus() != ActorStatus.ACTIVE) {
-            throw new DisabledException(String.format("Member '%s' account is disabled", member.getId()));
-        }
-        Vault vault = member.getDefaultVault();
-        member = narrow(member, Member.class);
-        MemberContextImpl memberContext = new MemberContextImpl(member);
-        pegasusPrincipal.setMemberContext(memberContext);
-        Profile activeProfile = profileService.retrieveProfile(member);
-        memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
-        threadLocalPrincipals.set(pegasusPrincipal);
+        synchronized (pegasusPrincipal) {
+            if (pegasusPrincipal.getMemberContext() != null) {
+                return;
+            }
+            try {
+                AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(pegasusPrincipal.getAuthenticationTokenId());
+                Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+                if (member.getStatus() != ActorStatus.ACTIVE) {
+                    throw new DisabledException(String.format("Member '%s' account is disabled", member.getId()));
+                }
+                Vault vault = member.getDefaultVault();
+                member = narrow(member, Member.class);
+                MemberContextImpl memberContext = new MemberContextImpl(member);
+                Profile activeProfile = profileService.retrieveProfile(member);
+                memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
+                // Vault service will use this
+                pegasusPrincipal.setMemberContext(memberContext);
+                threadLocalPrincipals.set(pegasusPrincipal);
 
-        vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
-        member.setDefaultVault(vault);
-        if (organization != null) {
-            memberService.activateOrganization(organization);
-        }
-        if (restoreRequired) {
-            prepareRestore(pegasusPrincipal, vault);
-        }
-        pegasusPrincipal.setOrganizationId(organization != null ? organization.getId() : null);
-        if (log.isInfoEnabled()) {
-            log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
-                    pegasusPrincipal.getName(), organization != null ? organization.getName() : null, sw.elapsed(TimeUnit.MILLISECONDS)));
+                vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
+                member.setDefaultVault(vault);
+                if (organization != null) {
+                    memberService.activateOrganization(organization);
+                }
+                if (restoreRequired) {
+                    prepareRestore(pegasusPrincipal, vault);
+                }
+                pegasusPrincipal.setOrganizationId(organization != null ? organization.getId() : null);
+                if (log.isInfoEnabled()) {
+                    log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
+                            pegasusPrincipal.getName(), organization != null ? organization.getName() : null, sw.elapsed(TimeUnit.MILLISECONDS)));
+                }
+            } catch (RuntimeException e) {
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure to unbind the broken context.
+                pegasusPrincipal.setMemberContext(null);
+                throw e;
+            }
         }
     }
 
@@ -188,23 +202,25 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void restore(final PegasusPrincipal principal, final String password) {
         PegasusPrincipalImpl principalImpl = (PegasusPrincipalImpl) principal;
-        try {
-            threadLocalPrincipals.set(principalImpl);
-
-            AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
-            Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
-            Vault vault = member.getDefaultVault();
-            member = narrow(member, Member.class);
-            MemberContextImpl memberContext = new MemberContextImpl(member);
-            memberContext.setActiveProfile(profileService.retrieveProfile(member));
-            vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
-            member.setDefaultVault(vault);
-            memberContext.retainVaultKey(vault);
-            restore(principalImpl, memberContext);
-            applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
-
-        } finally {
-            threadLocalPrincipals.remove();
+        synchronized (principalImpl) {
+            if (principalImpl.getMemberContext() != null) {
+                return;
+            }
+            try {
+                threadLocalPrincipals.set(principalImpl);
+                AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
+                Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+                Vault vault = member.getDefaultVault();
+                member = narrow(member, Member.class);
+                vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
+                restore(principalImpl, member, vault);
+            } catch (RuntimeException e) {
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure to unbind the broken context.
+                principalImpl.setMemberContext(null);
+                throw e;
+            } finally {
+                threadLocalPrincipals.remove();
+            }
         }
     }
 
@@ -212,38 +228,48 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public boolean restore(final PegasusPrincipal principal, final byte[] secret) {
         PegasusPrincipalImpl principalImpl = (PegasusPrincipalImpl) principal;
-        try {
-            threadLocalPrincipals.set(principalImpl);
-            ExportedPrincipal exportedPrincipal = principalImpl.getExportedPrincipal();
-            if (exportedPrincipal == null) {
+        synchronized (principalImpl) {
+            if (principalImpl.getMemberContext() != null) {
+                // No restore necessary
                 return false;
             }
-            AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(exportedPrincipal, secret);
-            AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
-            Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
-            Vault vault = member.getDefaultVault();
-            member = narrow(member, Member.class);
-            MemberContextImpl memberContext = new MemberContextImpl(member);
-            memberContext.setActiveProfile(profileService.retrieveProfile(member));
-            vault = narrow(vault, Vault.class);
-            member.setDefaultVault(vault);
-            vault.setAuthenticatedPrincipal(importedPrincipal);
-            memberContext.retainVaultKey(vault);
-            restore(principalImpl, memberContext);
-            applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
-            return true;
-        } finally {
-            threadLocalPrincipals.remove();
+            try {
+                threadLocalPrincipals.set(principalImpl);
+                ExportedPrincipal exportedPrincipal = principalImpl.getExportedPrincipal();
+                if (exportedPrincipal == null) {
+                    return false;
+                }
+                AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(exportedPrincipal, secret);
+                AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
+                Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
+                Vault vault = member.getDefaultVault();
+                member = narrow(member, Member.class);
+                vault = narrow(vault, Vault.class);
+                vault.setAuthenticatedPrincipal(importedPrincipal);
+                restore(principalImpl, member, vault);
+                return true;
+            } catch (RuntimeException e) {
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure to unbind the broken context.
+                principalImpl.setMemberContext(null);
+                throw e;
+            } finally {
+                threadLocalPrincipals.remove();
+            }
         }
     }
 
-    private void restore(final PegasusPrincipalImpl principalImpl, final MemberContextImpl memberContext) {
+    private void restore(final PegasusPrincipalImpl principalImpl, final Member member, final Vault vault) {
+        MemberContextImpl memberContext = new MemberContextImpl(member);
+        member.setDefaultVault(vault);
+        memberContext.setActiveProfile(profileService.retrieveProfile(member));
+        memberContext.retainVaultKey(vault);
         principalImpl.setMemberContext(memberContext);
         if (principalImpl.getOrganizationId() != null) {
             Organization organization = new Organization();
             organization.setId(principalImpl.getOrganizationId());
             memberService.activateOrganization(organization);
         }
+        applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));
     }
 
 

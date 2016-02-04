@@ -165,10 +165,15 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             // Check the profile, release it if necessary
             Profile activeProfile = current.getActiveProfile();
             boolean released = releaseProfile(activeProfile, openEvent.getVault());
-            Member nMember = EntityUtils.narrow(current.getMember(), Member.class);
-            if (released && nMember instanceof Person) {
-                String fullName = activeProfile.getXml().getBean().getProfile().getFullName();
-                ((Person) current.getMember()).setFullName(fullName);
+            Member member = EntityUtils.narrow(current.getMember(), Member.class);
+            if (released
+                    && member instanceof Person) {
+                XmlEntity<ProfileDocument> xmlEntity = activeProfile.getXml();
+                ProfileDocument profileDocument = xmlEntity.getBean();
+                ProfileType profile = profileDocument.getProfile();
+                String fullName = profile.getFullName();
+                Person person = (Person) member;
+                person.setFullName(fullName);
             }
         } else if (event instanceof XmlEntityDeleteEvent) {
             XmlEntityDeleteEvent deleteEvent = (XmlEntityDeleteEvent) event;
@@ -186,6 +191,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
     protected boolean releaseProfile(final Profile profile, final Vault vault) {
         if (profile == null
                 || profile.getId() == null) {
+            // There is no profile (could be placeholder)
             return false;
         }
         if (profile.getXml().getBean() != null) {
@@ -193,17 +199,15 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             return false;
         }
         // Need a session attached profile
-        Profile managed = this.profileDAO.retrieveById(profile.getId());
+        Profile managed = profileDAO.retrieveById(profile.getId());
         XmlEntity<ProfileDocument> xmlEntity = managed.getXml();
-        // Apply back to the original profile
-        profile.setXml(xmlEntity);
         KeySafe<?> nKeySafe = xmlEntity.getKeySafe();
         Vault protectedBy = null;
         while (nKeySafe != null) {
             nKeySafe = EntityUtils.narrow(nKeySafe, KeySafe.class);
             if (nKeySafe instanceof Division) {
                 Division<?> division = (Division<?>) nKeySafe;
-                nKeySafe = this.keySafeService.retrieveById(division.getParent().getId());
+                nKeySafe = keySafeService.retrieveById(division.getParent().getId());
             } else if (nKeySafe instanceof Vault) {
                 protectedBy = (Vault) nKeySafe;
                 break;
@@ -217,8 +221,10 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             return false;
         }
         // Unlock it
-        XmlEntity<ProfileDocument> managedXmlEntity = this.xmlEntityService.retrieveEntity(xmlEntity.getId(), ProfileDocument.class);
+        XmlEntity<ProfileDocument> managedXmlEntity = xmlEntityService.retrieveEntity(xmlEntity.getId(), ProfileDocument.class);
         xmlEntity.setBean(managedXmlEntity.getBean());
+        // Apply back to the original profile
+        profile.setXml(xmlEntity);
         return true;
     }
 
@@ -253,5 +259,4 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             return 100;
         }
     }
-
 }
