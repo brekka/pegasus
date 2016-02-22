@@ -6,6 +6,8 @@ package org.brekka.pegasus.core.model;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -21,7 +23,6 @@ import javax.persistence.Transient;
 
 import org.brekka.commons.persistence.model.LongevousEntity;
 import org.brekka.pegasus.core.PegasusConstants;
-import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Type;
 
 /**
@@ -43,7 +44,7 @@ public class Inbox extends LongevousEntity<UUID> {
      * Unique id
      */
     @Id
-    @AccessType("property")
+    @Access(AccessType.PROPERTY)
     @Type(type="pg-uuid")
     @Column(name="`ID`")
     private UUID id;

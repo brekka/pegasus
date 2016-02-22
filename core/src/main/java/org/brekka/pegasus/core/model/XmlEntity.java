@@ -6,6 +6,8 @@ package org.brekka.pegasus.core.model;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -17,8 +19,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import net.iharder.Base64;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.xmlbeans.XmlObject;
@@ -28,9 +28,10 @@ import org.brekka.pegasus.core.PegasusConstants;
 import org.brekka.phoenix.api.CryptoProfile;
 import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
-import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
+
+import net.iharder.Base64;
 
 /**
  * Stores a piece of XML either plain or encrypted. Should only ever be replaced, never updated.
@@ -57,7 +58,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      */
     @Id
     @Type(type="pg-uuid")
-    @AccessType("property")
+    @Access(AccessType.PROPERTY)
     @Column(name="`ID`", updatable=false)
     private UUID id;
 

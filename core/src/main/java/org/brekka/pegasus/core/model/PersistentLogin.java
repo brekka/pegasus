@@ -3,14 +3,14 @@ package org.brekka.pegasus.core.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.AccessType;
 
 /**
  * Recreates the table structure defined by the Spring Security remember-me functionality.
@@ -27,7 +27,7 @@ public class PersistentLogin implements Serializable {
     private static final long serialVersionUID = 374697702088091906L;
 
     @Id
-    @AccessType("property")
+    @Access(AccessType.PROPERTY)
     @Column(length=64)
     private String series;
 

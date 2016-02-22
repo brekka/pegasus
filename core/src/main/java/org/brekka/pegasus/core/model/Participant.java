@@ -18,6 +18,8 @@ package org.brekka.pegasus.core.model;
 
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +33,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
 import org.brekka.pegasus.core.PegasusConstants;
-import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Type;
 
 /**
@@ -55,7 +56,7 @@ public class Participant extends SnapshotEntity<UUID> {
      * The id
      */
     @Id
-    @AccessType("property")
+    @Access(AccessType.PROPERTY)
     @Type(type = "pg-uuid")
     @Column(name = "`ID`")
     private UUID id;
