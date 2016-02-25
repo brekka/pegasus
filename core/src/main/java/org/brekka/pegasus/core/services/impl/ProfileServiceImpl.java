@@ -18,6 +18,8 @@ package org.brekka.pegasus.core.services.impl;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.brekka.commons.persistence.support.EntityUtils;
 import org.brekka.pegasus.core.dao.ProfileDAO;
 import org.brekka.pegasus.core.event.VaultOpenEvent;
@@ -40,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -52,6 +55,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @Service
 public class ProfileServiceImpl implements ProfileService, ApplicationListener<ApplicationEvent> {
+    
+    
+    private static final Log log = LogFactory.getLog(ProfileServiceImpl.class);
 
     @Autowired
     private ProfileDAO profileDAO;
@@ -141,6 +147,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
     }
 
     @Override
+    @Transactional(propagation=Propagation.MANDATORY)
     public void currentUserProfileUpdated() {
         List<TransactionSynchronization> synchronizations = TransactionSynchronizationManager.getSynchronizations();
         for (TransactionSynchronization transactionSynchronization : synchronizations) {
@@ -238,19 +245,27 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
 
         @Override
         public void beforeCommit(final boolean readOnly) {
-            ProfileDocument profileDocument = this.activeProfile.getXml().getBean();
-            XmlEntity<ProfileDocument> currentXml = this.activeProfile.getXml();
+            ProfileDocument profileDocument = activeProfile.getXml().getBean();
+            XmlEntity<ProfileDocument> currentXml = activeProfile.getXml();
             XmlEntity<ProfileDocument> replacementXml;
             if (currentXml.getCryptedDataId() == null) {
                 // Plain
-                replacementXml = ProfileServiceImpl.this.xmlEntityService.persistPlainEntity(profileDocument, false);
+                replacementXml = xmlEntityService.persistPlainEntity(profileDocument, false);
             } else {
                 KeySafe<?> keySafe = currentXml.getKeySafe();
-                replacementXml = ProfileServiceImpl.this.xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
+                replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
             }
-            ProfileServiceImpl.this.xmlEntityService.delete(currentXml.getId());
-            this.activeProfile.setXml(replacementXml);
-            ProfileServiceImpl.this.profileDAO.update(this.activeProfile);
+            // Session managed instance
+            Profile managed = profileDAO.retrieveById(activeProfile.getId());
+            managed.setXml(replacementXml);
+            if (log.isInfoEnabled()) {
+                log.info(String.format("Updating profile '%s' XML entity '%s' (v %d)", 
+                        managed.getId(), replacementXml.getId(), replacementXml.getVersion()));
+            }
+            profileDAO.update(managed);
+            // Update the reference bound to the member context
+            activeProfile.setXml(replacementXml);
+            xmlEntityService.delete(currentXml.getId());
         }
 
         @Override
