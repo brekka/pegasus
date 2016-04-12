@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationEvent;
 /**
  * Event issued when an allocation file is deleted.
  *
- * @author Andrew Taylor (andy@digitalshadows.com)
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public class AllocationFileDeleteEvent extends ApplicationEvent {
     /**

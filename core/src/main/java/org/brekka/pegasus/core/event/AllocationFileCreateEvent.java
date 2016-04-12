@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationEvent;
 /**
  * Event issued when a new allocation file is created.
  *
- * @author Andrew Taylor (andy@digitalshadows.com)
+ * @author Andrew Taylor (andrew@brekka.org)
  */
 public class AllocationFileCreateEvent extends ApplicationEvent {
     /**

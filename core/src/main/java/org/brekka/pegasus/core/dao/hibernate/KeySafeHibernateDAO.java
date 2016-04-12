@@ -22,7 +22,7 @@ import org.brekka.pegasus.core.model.KeySafe;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author Andrew Taylor (andy@digitalshadows.com)
+ * @author Andrew Taylor (andrew@brekka.org)
  *
  */
 @Repository

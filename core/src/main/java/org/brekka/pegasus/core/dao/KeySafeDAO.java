@@ -23,7 +23,7 @@ import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.KeySafe;
 
 /**
- * @author Andrew Taylor (andy@digitalshadows.com)
+ * @author Andrew Taylor (andrew@brekka.org)
  *
  */
 public interface KeySafeDAO extends EntityDAO<UUID, KeySafe<? extends Actor>> {
