@@ -255,6 +255,7 @@ public class TemplateServiceImpl implements TemplateService {
                 XmlEntity<TemplateDocument> xml = existing.getXml();
                 TemplateType newXml = xml.getBean().getTemplate();
                 newXml.setContent(exportedTemplateType.getContent());
+                newXml.setContentType(exportedTemplateType.getContentType());
                 newXml.setDocumentation(exportedTemplateType.getDocumentation());
                 newXml.setExampleVariables(exportedTemplateType.getExampleVariables());
                 newXml.setLabel(exportedTemplateType.getLabel());
