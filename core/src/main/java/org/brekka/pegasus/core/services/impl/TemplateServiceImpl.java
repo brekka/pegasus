@@ -228,15 +228,18 @@ public class TemplateServiceImpl implements TemplateService {
         List<ExportedTemplateType> exportedTemplateList = exportedTemplates.getExportedTemplateList();
         for (ExportedTemplateType exportedTemplateType : exportedTemplateList) {
             String slug = exportedTemplateType.getSlug();
-            TemplateType template = TemplateType.Factory.newInstance();
-            template.setLabel(exportedTemplateType.getLabel());
-            template.setContent(exportedTemplateType.getContent());
-            template.setDocumentation(exportedTemplateType.getDocumentation());
-            template.setExampleVariables(exportedTemplateType.getExampleVariables());
             TemplateEngine templateEngine = TemplateEngine.valueOf(exportedTemplateType.getEngine());
             Template existing = this.templateDAO.retrieveBySlug(slug);
             if (existing == null) {
                 KeySafe<?> keySafeForCreate = (exportedTemplateType.getEncrypt() ? keySafe : null);
+                TemplateType template = TemplateType.Factory.newInstance();
+                template.setLabel(exportedTemplateType.getLabel());
+                template.setContent(exportedTemplateType.getContent());
+                template.setDocumentation(exportedTemplateType.getDocumentation());
+                template.setExampleVariables(exportedTemplateType.getExampleVariables());
+                if (exportedTemplateType.isSetContentType()) {
+                    template.setContentType(exportedTemplateType.getContentType());
+                }
                 create(template, templateEngine, keySafeForCreate, slug, null, exportedTemplateType.getPlainLabel(), true);
                 count++;
             } else if (BooleanUtils.isTrue(existing.getImported()) || forceUpdate) {
