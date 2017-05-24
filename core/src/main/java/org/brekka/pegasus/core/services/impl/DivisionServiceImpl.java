@@ -86,6 +86,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(newKeyPair);
         Division<Target> division = createDivision(target, null, newKeyPair, slug, name);
         Partnership<Owner, Target> partnership = new Partnership<>();
+        
         partnership = createConnection(partnership, owner, source, division, newKeyPair);
         division.setKeyPairId(publicOnlyKeyPair.getId());
         return partnership;
@@ -96,6 +97,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     public <Owner extends Actor, Target extends Actor> Partnership<Owner, Target> createPartnership(final Owner owner,
             final Division<Owner> source, final Division<Target> target) {
         Partnership<Owner, Target> partnership = new Partnership<>();
+
         return createConnection(partnership, owner, source, target);
     }
 
@@ -221,6 +223,10 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         if (privateKeyToken == null) {
             MemberContext memberContext = memberService.getCurrent();
             privateKeyToken = resolvePrivateKeyFor(target, memberContext);
+        }
+        Connection<?,?,?> existing = connectionDAO.retrieveBySurrogate(owner, source, target);
+        if (existing != null) {
+            return (T) existing;
         }
         IdentityKeyPair sourceKeyPair = new IdentityKeyPair(source.getKeyPairId());
         KeyPair connectionKeyPair = phalanxService.assignKeyPair(privateKeyToken, sourceKeyPair);

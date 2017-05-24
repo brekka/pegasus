@@ -43,11 +43,11 @@ public class ConnectionHibernateDAO extends AbstractPegasusHibernateDAO<Connecti
     }
 
     /**
-     * 
+     *
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Connection<?, ?, ?>> identifyConnectionsBetween(KeySafe<?> keySafe, Actor contextMember) {
+    public List<Connection<?, ?, ?>> identifyConnectionsBetween(final KeySafe<?> keySafe, final Actor contextMember) {
         return getCurrentSession().createQuery(
             "select conn " +
             "  from Connection as conn " +
@@ -61,34 +61,43 @@ public class ConnectionHibernateDAO extends AbstractPegasusHibernateDAO<Connecti
             .setEntity("member", contextMember)
             .list();
     }
-    
+
+    @Override
+    public Connection<?, ?, ?> retrieveBySurrogate(final Actor owner, final KeySafe<?> source, final KeySafe<?> target) {
+        return (Connection<?, ?, ?>) getCurrentSession().createCriteria(type())
+                .add(Restrictions.eq("owner", owner))
+                .add(Restrictions.eq("source", source))
+                .add(Restrictions.eq("target", target))
+                .uniqueResult();
+    }
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.ConnectionDAO#retrieveConnectionsByTarget(org.brekka.pegasus.core.model.KeySafe, java.lang.Class)
      */
     @SuppressWarnings("unchecked")
     @Override
     public <Target extends KeySafe<?>, T extends Connection<Actor, KeySafe<? extends Actor>, Target>> List<T> retrieveConnectionsByTarget(
-            Target target, Class<T> expected) {
+            final Target target, final Class<T> expected) {
         return getCurrentSession().createCriteria(expected)
             .add(Restrictions.eq("target", target))
             .list();
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.ConnectionDAO#deleteForKeySafe(org.brekka.pegasus.core.model.KeySafe)
      */
     @Override
-    public void deleteWithSourceKeySafe(KeySafe<?> keySafe) {
+    public void deleteWithSourceKeySafe(final KeySafe<?> keySafe) {
         getCurrentSession().createQuery("delete from Connection where source=:source")
             .setEntity("source", keySafe)
             .executeUpdate();
     }
-    
+
     /* (non-Javadoc)
      * @see org.brekka.pegasus.core.dao.ConnectionDAO#deleteWithOwner(org.brekka.pegasus.core.model.Actor)
      */
     @Override
-    public void deleteWithOwner(Actor owner) {
+    public void deleteWithOwner(final Actor owner) {
         getCurrentSession().createQuery("delete from Connection where owner=:owner")
             .setEntity("owner", owner)
             .executeUpdate();

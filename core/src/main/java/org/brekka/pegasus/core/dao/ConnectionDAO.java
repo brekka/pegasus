@@ -21,7 +21,6 @@ import java.util.UUID;
 
 import org.brekka.commons.persistence.dao.EntityDAO;
 import org.brekka.pegasus.core.model.Actor;
-import org.brekka.pegasus.core.model.Associate;
 import org.brekka.pegasus.core.model.Connection;
 import org.brekka.pegasus.core.model.KeySafe;
 
@@ -39,9 +38,9 @@ public interface ConnectionDAO extends EntityDAO<UUID, Connection<?, ?, ?>>  {
      */
     List<Connection<?, ?, ?>> identifyConnectionsBetween(KeySafe<?> keySafe, Actor contextMember);
 
-    <Target extends KeySafe<?>, T extends Connection<Actor, KeySafe<? extends Actor>, Target>> List<T> 
+    <Target extends KeySafe<?>, T extends Connection<Actor, KeySafe<? extends Actor>, Target>> List<T>
             retrieveConnectionsByTarget(Target target, Class<T> expected);
-    
+
     /**
      * @param vault
      */
@@ -51,5 +50,7 @@ public interface ConnectionDAO extends EntityDAO<UUID, Connection<?, ?, ?>>  {
      * @param associate
      */
     void deleteWithOwner(Actor owner);
-    
+
+    Connection<?, ?, ?> retrieveBySurrogate(Actor owner, KeySafe<?> source, KeySafe<?> target);
+
 }
