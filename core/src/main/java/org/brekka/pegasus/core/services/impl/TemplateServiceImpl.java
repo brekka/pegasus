@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +50,7 @@ import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument.ExportedTemplat
 import org.brekka.xml.pegasus.v2.model.TemplateDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -64,7 +64,7 @@ import org.springframework.util.ClassUtils;
  */
 @Service
 @Transactional
-public class TemplateServiceImpl implements TemplateService {
+public class TemplateServiceImpl implements TemplateService, InitializingBean {
 
     @Autowired
     private TemplateDAO templateDAO;
@@ -75,8 +75,8 @@ public class TemplateServiceImpl implements TemplateService {
 
     public Map<TemplateEngine, TemplateEngineAdapter> adapters;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         if (this.adapters != null) {
             // externally configured
             return;
