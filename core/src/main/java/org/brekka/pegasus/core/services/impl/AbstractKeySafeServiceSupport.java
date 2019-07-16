@@ -179,15 +179,13 @@ abstract class AbstractKeySafeServiceSupport {
      */
     private PrivateKeyToken traverseChain(final KeySafe<?> keySafe, final MemberContext currentMember) {
         KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
-        PrivateKeyToken privateKeyToken;
+        PrivateKeyToken privateKeyToken = null;
         if (nKeySafe instanceof Vault) {
             Vault vault = (Vault) nKeySafe;
             AuthenticatedPrincipal vaultKey = currentMember.getVaultKey(vault);
-            if (vaultKey == null) {
-                throw new PegasusException(PegasusErrorCode.PG704,
-                        "Vault '%s' is not currently available. Most likely it needs to be unlocked.", vault.getId());
+            if (vaultKey != null) {
+                privateKeyToken = vaultKey.getDefaultPrivateKey();
             }
-            privateKeyToken = vaultKey.getDefaultPrivateKey();
         } else if (nKeySafe instanceof Division) {
             Division<?> division = (Division<?>) nKeySafe;
 
@@ -198,8 +196,10 @@ abstract class AbstractKeySafeServiceSupport {
                 PrivateKeyToken parentPrivateKey = currentMember.getPrivateKey(keyPair);
                 if (parentPrivateKey == null) {
                     parentPrivateKey = traverseChain(parent, currentMember);
-                    privateKeyToken = this.phalanxService.decryptKeyPair(keyPair, parentPrivateKey);
-                    currentMember.retainPrivateKey(keyPair, privateKeyToken);
+                    if (parentPrivateKey != null) {
+                        privateKeyToken = this.phalanxService.decryptKeyPair(keyPair, parentPrivateKey);
+                        currentMember.retainPrivateKey(keyPair, privateKeyToken);
+                    }
                 } else {
                     privateKeyToken = parentPrivateKey;
                 }

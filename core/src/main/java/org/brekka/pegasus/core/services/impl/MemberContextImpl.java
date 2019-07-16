@@ -59,6 +59,11 @@ class MemberContextImpl implements MemberContext {
     private final AccessorContext accessorContext = new AccessorContextImpl();
 
     /**
+     * Which vault is currently active (unlocked)
+     */
+    private Vault activeVault;
+
+    /**
      * Will always be the member instance that corresponds to the login.
      */
     private Member member;
@@ -69,14 +74,12 @@ class MemberContextImpl implements MemberContext {
      */
     private Actor activeActor;
 
+
     /**
      * The user-selected active profile
      */
     private Profile activeProfile;
 
-    /**
-     *
-     */
     public MemberContextImpl(final Member member) {
         this.member = member;
         setActiveActor(member);
@@ -85,6 +88,11 @@ class MemberContextImpl implements MemberContext {
     @Override
     public Actor getActiveActor() {
         return this.activeActor;
+    }
+
+    @Override
+    public Vault getActiveVault() {
+        return activeVault;
     }
 
     @Override
@@ -107,6 +115,10 @@ class MemberContextImpl implements MemberContext {
 
     void setActiveProfile(final Profile activeProfile) {
         this.activeProfile = activeProfile;
+    }
+
+    void setActiveVault(final Vault activeVault) {
+        this.activeVault = activeVault;
     }
 
     @Override

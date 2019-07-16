@@ -17,7 +17,9 @@
 package org.brekka.pegasus.core.services;
 
 import org.brekka.pegasus.core.model.AuthenticationToken;
+import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
+import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.security.PegasusPrincipal;
 import org.brekka.pegasus.core.security.PegasusPrincipalAware;
 
@@ -30,7 +32,11 @@ public interface PegasusPrincipalService {
 
     PegasusPrincipal principal(AuthenticationToken token);
 
-    void loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization, boolean restoreRequired);
+    void loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization,
+            boolean restoreRequired);
+
+    void loginAndBind(PegasusPrincipalAware principalSource, String password, Organization organization,
+            Member member, Vault vault);
 
     void logout(PegasusPrincipal principal);
 
