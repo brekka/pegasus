@@ -54,8 +54,17 @@ abstract class AbstractKeySafeServiceSupport {
     protected MemberService memberService;
 
     protected PrivateKeyToken resolvePrivateKeyFor(final KeySafe<?> keySafe, final MemberContext currentMember) {
+        PrivateKeyToken privateKeyToken = resolvePrivateKeyForInternal(keySafe, currentMember);
+        if (privateKeyToken == null) {
+            throw new PegasusException(PegasusErrorCode.PG700,
+                    "Unable to locate a chain of keys that will unlock the keySafe '%s'", keySafe.getId());
+        }
+        return privateKeyToken;
+    }
+
+    private PrivateKeyToken resolvePrivateKeyForInternal(final KeySafe<?> keySafe, final MemberContext currentMember) {
         KeySafe<?> nKeySafe = EntityUtils.narrow(keySafe, KeySafe.class);
-        PrivateKeyToken privateKeyToken;
+        PrivateKeyToken privateKeyToken = null;
         if (currentMember == null) {
             throw new PegasusException(PegasusErrorCode.PG106, "The is currently no member bound to the thread context, "
                     + "so nowhere to look for private keys to unlock this keysafe.");
@@ -69,12 +78,13 @@ abstract class AbstractKeySafeServiceSupport {
              * vault.
              */
             privateKeyToken = traverseChain(nKeySafe, currentMember);
-        } else {
+        }
+        if (privateKeyToken == null){
             /*
              * Not a personal chain. Check to see if there are any connections from this keysafe to the current user or
              * to organizations they are members of
              */
-            List<Connection<?, ?, ?>> connectionList = this.connectionDAO.identifyConnectionsBetween(nKeySafe, contextMember);
+            List<Connection<?, ?, ?>> connectionList = connectionDAO.identifyConnectionsBetween(nKeySafe, contextMember);
             PrivateKeyToken found = null;
             for (Connection<?, ?, ?> connection : connectionList) {
                 KeySafe<?> source = connection.getSource();
@@ -96,16 +106,9 @@ abstract class AbstractKeySafeServiceSupport {
                     if (parent != null) {
                         found = resolveAndUnlock(parent, division.getKeyPairId(), currentMember);
                     }
-                } else {
-                    throw new PegasusException(PegasusErrorCode.PG701,
-                            "Unable to handle keySafe type '%s' at this location", nKeySafe.getClass().getName());
                 }
             }
 
-            if (found == null) {
-                throw new PegasusException(PegasusErrorCode.PG700,
-                        "Unable to locate a chain of keys that will unlock the keySafe '%s'", nKeySafe.getId());
-            }
             privateKeyToken = found;
         }
         return privateKeyToken;
@@ -162,9 +165,9 @@ abstract class AbstractKeySafeServiceSupport {
             /*
              * Need to continue the hunt for the key
              */
-            PrivateKeyToken foundPrivateKeyToken = resolvePrivateKeyFor(parent, currentMember);
+            PrivateKeyToken foundPrivateKeyToken = resolvePrivateKeyForInternal(parent, currentMember);
             if (foundPrivateKeyToken != null) {
-                privateKeyToken = this.phalanxService.decryptKeyPair(keyPair, foundPrivateKeyToken);
+                privateKeyToken = phalanxService.decryptKeyPair(keyPair, foundPrivateKeyToken);
                 currentMember.retainPrivateKey(keyPair, privateKeyToken);
             }
         }

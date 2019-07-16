@@ -86,7 +86,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
         KeyPair publicOnlyKeyPair = phalanxService.cloneKeyPairPublic(newKeyPair);
         Division<Target> division = createDivision(target, null, newKeyPair, slug, name);
         Partnership<Owner, Target> partnership = new Partnership<>();
-        
+
         partnership = createConnection(partnership, owner, source, division, newKeyPair);
         division.setKeyPairId(publicOnlyKeyPair.getId());
         return partnership;
