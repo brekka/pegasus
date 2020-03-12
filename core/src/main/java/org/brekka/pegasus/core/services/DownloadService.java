@@ -15,7 +15,7 @@ public interface DownloadService {
 
     InputStream download(AllocationFile file, ProgressCallback progressCallback);
     
-    InputStream download(AllocationFile file, ProgressCallback progressCallback, boolean noEvents, boolean noCounter);
+    InputStream download(AllocationFile file, ProgressCallback progressCallback, boolean captureDownloadEvent, boolean incrementCounter);
     
     interface ProgressCallback {
         void update(long current, long total);
