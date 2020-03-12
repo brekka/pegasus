@@ -20,7 +20,6 @@
     <url>https://github.com/brekka/pegasus.git</url>
     <connection>https://github.com/brekka/pegasus.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/brekka/pegasus.git</developerConnection>
-    <tag>HEAD</tag>
   </scm>
 
   <licenses>
