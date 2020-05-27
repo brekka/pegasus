@@ -81,7 +81,7 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
         if (this.cache == null) {
             this.cache = Caffeine.newBuilder()
                 .expireAfterAccess(Duration.ofMinutes(10))
-                .maximumSize(200)
+                .maximumSize(50)
                 .build();
         }
         return this.cache;
@@ -90,7 +90,7 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
     /**
      * Retrieve the current {@link AccessorContext} from the security context user (assuming there is one). If no user
      * is present then a {@link PegasusException} will be thrown.
-     *
+
      * @return the {@link AccessorContext} bound to the current security context.
      * @throws PegasusException
      *             if there is no {@link AccessorContext} available.
