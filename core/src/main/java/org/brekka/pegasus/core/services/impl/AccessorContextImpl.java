@@ -71,6 +71,9 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
 
     @Override
     public synchronized void remove(final Serializable key) {
+        if (cache == null) {
+            return;
+        }
         cache().invalidate(key);
     }
 
@@ -78,13 +81,13 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
      * Map is lazy initialised so all operations should obtain a reference using this method.
      */
     private synchronized Cache<Serializable, Object> cache() {
-        if (this.cache == null) {
-            this.cache = Caffeine.newBuilder()
+        if (cache == null) {
+            cache = Caffeine.newBuilder()
                 .expireAfterAccess(Duration.ofMinutes(10))
                 .maximumSize(50)
                 .build();
         }
-        return this.cache;
+        return cache;
     }
 
     /**

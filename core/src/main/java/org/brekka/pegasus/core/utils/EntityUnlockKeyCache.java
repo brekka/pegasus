@@ -6,6 +6,7 @@ package org.brekka.pegasus.core.utils;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,31 +36,36 @@ public class EntityUnlockKeyCache<T> implements Serializable {
     }
 
     public synchronized void remove(final UUID uuid) {
+        if (entities == null) {
+            return;
+        }
         cache().invalidate(uuid);
     }
 
     public synchronized List<T> clear() {
-        List<T> values = new ArrayList<>(cache().asMap().values());
-        entities.invalidateAll();
-        entities = null;
-        return values;
+        if (entities != null) {
+            List<T> values = new ArrayList<>(entities.asMap().values());
+            entities.invalidateAll();
+            entities = null;
+            return values;
+        }
+        return Collections.emptyList();
     }
 
     private Cache<UUID, T> cache() {
-        Cache<UUID, T> cache = this.entities;
-        if (cache == null) {
-            cache = Caffeine.newBuilder()
+        if (entities == null) {
+            entities = Caffeine.newBuilder()
                 .expireAfterAccess(Duration.ofMinutes(10))
                 .maximumSize(100)
                 .build();
         }
-        return this.entities;
+        return entities;
     }
 
-    /**
-     * @param privateKeyCache
-     */
     public void putAll(final EntityUnlockKeyCache<T> privateKeyCache) {
-        cache().putAll(privateKeyCache.entities.asMap());
+        Cache<UUID, T> otherCache = privateKeyCache.entities;
+        if (otherCache != null) {
+            cache().putAll(otherCache.asMap());
+        }
     }
 }
