@@ -195,7 +195,7 @@ public class DivisionServiceImpl extends AbstractKeySafeServiceSupport implement
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Actor> void restoreDivision(final Division<T> division, final KeySafe<?> protectWith) {
-        List<Fallback<?>> fallbacks = connectionDAO.retrieveConnectionsByTarget(division, Fallback.class);
+        List<Fallback> fallbacks = connectionDAO.retrieveConnectionsByTarget(division, Fallback.class);
 
         if (fallbacks.size() != 1) {
             throw new PegasusException(PegasusErrorCode.PG723,
