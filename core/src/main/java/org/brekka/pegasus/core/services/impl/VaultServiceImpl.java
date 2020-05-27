@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -47,8 +47,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Stopwatch;
 
 /**
  * Service for manipulating {@link Vault} instances.
@@ -121,7 +119,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
     @Override
     @Transactional()
     public Vault openVault(final UUID vaultId, final String vaultPassword) {
-        Stopwatch sw = Stopwatch.createStarted();
+        StopWatch sw = new StopWatch();
         Vault managed = retrieveById(vaultId);
         UUID principalId = managed.getPrincipalId();
         AuthenticatedPrincipal authenticatedPrincipal;
@@ -139,7 +137,7 @@ public class VaultServiceImpl extends AbstractKeySafeServiceSupport implements V
             applicationEventPublisher.publishEvent(new VaultOpenEvent(managed));
         }
         if (log.isInfoEnabled()) {
-            log.info(String.format("Vault '%s' opened in %d ms", vaultId, sw.elapsed(TimeUnit.MILLISECONDS)));
+            log.info(String.format("Vault '%s' opened in %d ms", vaultId, sw.getTime()));
         }
         return managed;
     }

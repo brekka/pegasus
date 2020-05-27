@@ -20,8 +20,8 @@ import static org.brekka.commons.persistence.support.EntityUtils.narrow;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -54,8 +54,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Stopwatch;
 
 /**
  *
@@ -117,7 +115,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     public void logout(final PegasusPrincipal pegasusPrincipal) {
         synchronized (pegasusPrincipal) {
             MemberContextImpl memberContext = (MemberContextImpl) pegasusPrincipal.getMemberContext();
-            Stopwatch sw = Stopwatch.createStarted();
+            StopWatch sw = new StopWatch();
             if (memberContext != null) {
                 List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
                 for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
@@ -127,7 +125,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             ((PegasusPrincipalImpl) pegasusPrincipal).setMemberContext(null);
             if (log.isInfoEnabled()) {
                 log.info(String.format("Pegasus logout for '%s' took %d ms",
-                        pegasusPrincipal.getName(), sw.elapsed(TimeUnit.MILLISECONDS)));
+                        pegasusPrincipal.getName(), sw.getTime()));
             }
         }
     }
@@ -136,7 +134,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void loginAndBind(final PegasusPrincipalAware principalSource, final String password,
             final Organization organization, final boolean restoreRequired) {
-        Stopwatch sw = Stopwatch.createStarted();
+        StopWatch sw = new StopWatch();
         PegasusPrincipalImpl pegasusPrincipal = (PegasusPrincipalImpl) principalSource.getPegasusPrincipal();
         synchronized (pegasusPrincipal) {
             if (pegasusPrincipal.getMemberContext() != null) {
@@ -171,7 +169,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 if (log.isInfoEnabled()) {
                     log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
                             pegasusPrincipal.getName(), organization != null ? organization.getName() : null,
-                            sw.elapsed(TimeUnit.MILLISECONDS)));
+                            sw.getTime()));
                 }
             } catch (RuntimeException e) {
                 // We need to bind early to support the latter restore operations, however if an error occurs, make sure
@@ -186,7 +184,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void loginAndBind(final PegasusPrincipalAware principalSource, final String password,
             final Organization organization, final Member memberIn, final Vault vaultIn) {
-        Stopwatch sw = Stopwatch.createStarted();
+        StopWatch sw = new StopWatch();
         PegasusPrincipalImpl pegasusPrincipal = (PegasusPrincipalImpl) principalSource.getPegasusPrincipal();
         synchronized (pegasusPrincipal) {
             if (pegasusPrincipal.getMemberContext() != null) {
@@ -215,7 +213,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 if (log.isInfoEnabled()) {
                     log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
                             pegasusPrincipal.getName(), organization != null ? organization.getName() : null,
-                            sw.elapsed(TimeUnit.MILLISECONDS)));
+                            sw.getTime()));
                 }
             } catch (RuntimeException e) {
                 // We need to bind early to support the latter restore operations, however if an error occurs, make sure

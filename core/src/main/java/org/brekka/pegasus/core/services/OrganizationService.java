@@ -1,13 +1,10 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.services;
 
 import java.util.List;
 import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Associate;
@@ -29,7 +26,7 @@ public interface OrganizationService {
 
     /**
      * Create a new organization, and it's root division, then assigning the specified member as the first associate.
-     * 
+     *
      * @param idToAssign
      *            optionally specify the UUID to use for the organization. If null then one will be assigned.
      * @param name
@@ -50,13 +47,13 @@ public interface OrganizationService {
      *            organization.
      * @return the enlistment between the owner as an associate and the root division.
      */
-    Enlistment createOrganization(@Nullable UUID idToAssign, @Nullable String name, @Nullable String tokenStr,
-            @Nullable String domainNameStr, @Nullable OrganizationType details, @Nonnull Member owner,
-            @Nullable String associateEMailStr, @Nonnull KeySafe<? extends Member> protectWith);
+    Enlistment createOrganization(UUID idToAssign, String name, String tokenStr,
+            String domainNameStr, OrganizationType details, Member owner,
+            String associateEMailStr, KeySafe<? extends Member> protectWith);
 
     /**
-     * Create a new organization, as a partner of some other actor. 
-     * 
+     * Create a new organization, as a partner of some other actor.
+     *
      * @param idToAssign
      *            optionally specify the UUID to use for the organization. If null then one will be assigned.
      * @param name
@@ -75,17 +72,17 @@ public interface OrganizationService {
      *            organization.
      * @return a new partnership that will contain a connection between the owner and the newly created organization.
      */
-    <Owner extends Actor> Partnership<Owner, Organization> createOrganization(@Nullable UUID idToAssign,
-            @Nullable String name, @Nullable String tokenStr, @Nullable String domainNameStr,
-            @Nullable OrganizationType details, @Nonnull Owner owner, @Nonnull Division<Owner> owningDivision);
+    <Owner extends Actor> Partnership<Owner, Organization> createOrganization(UUID idToAssign,
+            String name, String tokenStr, String domainNameStr,
+            OrganizationType details, Owner owner, Division<Owner> owningDivision);
 
     Associate createAssociate(Organization organization, Member owner, EMailAddress eMailAddress);
-    
+
     XmlEntity<OrganizationDocument> updateOrganizationDetails(UUID orgId, XmlEntity<OrganizationDocument> orgXml);
-    
+
     XmlEntity<OrganizationDocument> createOrganizationDetails(UUID orgId, OrganizationType organizationDocument);
-    
-    
+
+
     /**
      * Retrieve the list of associates for the current user which are stored in the key safe.
      * @param loopVault
@@ -130,5 +127,5 @@ public interface OrganizationService {
      * @param member
      */
     void deleteAssociates(Member member);
-    
+
 }

@@ -17,8 +17,7 @@
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -30,6 +29,9 @@ import org.brekka.pegasus.core.security.PegasusPrincipalAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * A non-serializable context for retaining expensive-to-calculate values for a session user.
@@ -46,27 +48,17 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
     /**
      * Map that holds the objects.
      */
-    private transient Map<Serializable, Object> map;
+    private transient Cache<Serializable, Object> cache;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.brekka.pegasus.core.model.AccessorContext#retain(java.io.Serializable, java.lang.Object)
-     */
     @Override
     public synchronized void retain(final Serializable key, final Object value) {
-        map().put(key, value);
+        cache().put(key, value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.brekka.pegasus.core.model.AccessorContext#retrieve(java.io.Serializable, java.lang.Class)
-     */
     @Override
     @SuppressWarnings("unchecked")
     public synchronized <V> V retrieve(final Serializable key, final Class<V> expectedType) {
-        Object object = map().get(key);
+        Object object = cache().getIfPresent(key);
         if (object == null) {
             return null;
         }
@@ -77,24 +69,22 @@ public class AccessorContextImpl implements Serializable, AccessorContext {
         return (V) object;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.brekka.pegasus.core.model.AccessorContext#remove(java.io.Serializable)
-     */
     @Override
     public synchronized void remove(final Serializable key) {
-        map().remove(key);
+        cache().invalidate(key);
     }
 
     /**
      * Map is lazy initialised so all operations should obtain a reference using this method.
      */
-    private synchronized Map<Serializable, Object> map() {
-        if (this.map == null) {
-            this.map = new HashMap<>();
+    private synchronized Cache<Serializable, Object> cache() {
+        if (this.cache == null) {
+            this.cache = Caffeine.newBuilder()
+                .expireAfterAccess(Duration.ofMinutes(10))
+                .maximumSize(200)
+                .build();
         }
-        return this.map;
+        return this.cache;
     }
 
     /**

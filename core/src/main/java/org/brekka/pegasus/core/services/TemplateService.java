@@ -22,9 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.brekka.commons.persistence.model.ListingCriteria;
 import org.brekka.pegasus.core.model.KeySafe;
 import org.brekka.pegasus.core.model.Template;
@@ -51,8 +48,7 @@ public interface TemplateService {
      * @return the result of substituting the variables into the template. If the template is blank, null will be
      *         returned
      */
-    @Nullable
-    String merge(@Nonnull Template template, @Nonnull Map<String, Object> context);
+    String merge(Template template, Map<String, Object> context);
 
     /**
      * Merge the variables in the specified context into the template to produce the resulting string.
@@ -64,8 +60,7 @@ public interface TemplateService {
      * @param out
      *            the merged template will be written to this writer.
      */
-    @Nullable
-    void merge(@Nonnull Template template, @Nonnull Map<String, Object> context, Writer out);
+    void merge(Template template, Map<String, Object> context, Writer out);
 
     /**
      * Perform a dynamic render of the specified template string for the purpose of previewing. Naturally this will be quite
@@ -77,8 +72,7 @@ public interface TemplateService {
      *            contains the variables to merge into the template.
      * @return
      */
-    @Nullable
-    String preview(@Nonnull String templateContent, @Nonnull TemplateEngine templateEngine, @Nonnull Map<String, Object> context);
+    String preview(String templateContent, TemplateEngine templateEngine, Map<String, Object> context);
 
     /**
      * Perform a dynamic render of the specified template string for the purpose of previewing. Naturally this will be quite
@@ -92,8 +86,7 @@ public interface TemplateService {
      *            the merged template will be written to this writer.
      * @return
      */
-    @Nullable
-    void preview(@Nonnull String templateContent, @Nonnull TemplateEngine templateEngine, @Nonnull Map<String, Object> context, Writer out);
+    void preview(String templateContent, TemplateEngine templateEngine, Map<String, Object> context, Writer out);
 
     /**
      * Retrieve a template by token
@@ -101,8 +94,7 @@ public interface TemplateService {
      * @param token
      * @return the template or null if it cannot be found
      */
-    @Nullable
-    Template retrieveByToken(@Nonnull Token token);
+    Template retrieveByToken(Token token);
 
     /**
      * Retrieve a template by its slug.
@@ -110,8 +102,7 @@ public interface TemplateService {
      * @param slug
      * @return the template or null if it cannot be found
      */
-    @Nullable
-    Template retrieveBySlug(@Nonnull String slug);
+    Template retrieveBySlug(String slug);
 
     /**
      * Retrieve a template via its unique id.
@@ -119,8 +110,7 @@ public interface TemplateService {
      * @param templateId
      * @return the template or null if it cannot be found
      */
-    @Nullable
-    Template retrieveById(@Nonnull UUID templateId);
+    Template retrieveById(UUID templateId);
 
     /**
      * Create a template with the specified details and optionally a slug and/or token.
@@ -140,9 +130,8 @@ public interface TemplateService {
      *
      * @return the newly created template
      */
-    @Nonnull
-    Template create(@Nonnull TemplateType details, @Nonnull TemplateEngine engine, @Nullable KeySafe<?> keySafe, @Nullable String slug,
-            @Nullable Token token, @Nullable String label);
+    Template create(TemplateType details, TemplateEngine engine, KeySafe<?> keySafe, String slug,
+            Token token, String label);
 
     /**
      * Update the specified template. Changes to the XML should be sure to include the version number.
@@ -150,7 +139,7 @@ public interface TemplateService {
      * @param template
      *            the template to update
      */
-    void update(@Nonnull Template template);
+    void update(Template template);
 
     /**
      * Delete the template with the specified id.
@@ -181,7 +170,7 @@ public interface TemplateService {
      * Export all templates.
      * @return
      */
-    ExportedTemplatesDocument exportAll(@Nullable DateTime changedSince);
+    ExportedTemplatesDocument exportAll(DateTime changedSince);
 
     /**
      * Import from exported templates
@@ -189,19 +178,19 @@ public interface TemplateService {
      * @param keySafe
      * @return the number of templates imported.
      */
-    int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, @Nullable KeySafe<?> keySafe, boolean forceUpdate);
+    int importFrom(ExportedTemplatesDocument exportedTemplatesDocument, KeySafe<?> keySafe, boolean forceUpdate);
 
     /**
      * If the specified template is encrypted, remove the encryption so that it becomes available to all.
      *
      * @param templateId
      */
-    void removeEncryption(@Nonnull UUID templateId);
+    void removeEncryption(UUID templateId);
 
     /**
      * If the specified template is plain, apply encryption using the specified keySafe.
      *
      * @param templateId
      */
-    void applyEncryption(@Nonnull UUID templateId, @Nonnull KeySafe<?> keySafe);
+    void applyEncryption(UUID templateId, KeySafe<?> keySafe);
 }
