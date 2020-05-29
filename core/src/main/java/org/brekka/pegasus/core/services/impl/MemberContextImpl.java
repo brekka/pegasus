@@ -53,7 +53,7 @@ class MemberContextImpl implements MemberContext {
      *
      * A non-expiring 'cache' of the unlocked vault keys in memory.
      */
-    private final EntityUnlockKeyCache<AuthenticatedPrincipal> vaultKeyCache = new EntityUnlockKeyCache<>(HashMap::new);
+    private final EntityUnlockKeyCache<AuthenticatedPrincipal> vaultKeyCache = new EntityUnlockKeyCache<>(() -> new HashMap<>());
 
     /**
      * Collection of unlocked Phalanx private key references.
