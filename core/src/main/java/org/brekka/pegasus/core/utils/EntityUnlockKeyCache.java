@@ -4,14 +4,12 @@
 package org.brekka.pegasus.core.utils;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.function.Supplier;
 
 /**
  * Caches the phalanx key that is used by the entity.
@@ -25,47 +23,50 @@ public class EntityUnlockKeyCache<T> implements Serializable {
      */
     private static final long serialVersionUID = 5415576494466862394L;
 
-    private transient Cache<UUID, T> entities;
+    private final Supplier<Map<UUID, T>> mapSupplier;
+
+    private transient Map<UUID, T> entities;
+
+    public EntityUnlockKeyCache(final Supplier<Map<UUID, T>> mapSupplier) {
+        this.mapSupplier = mapSupplier;
+    }
 
     public synchronized void put(final UUID key, final T value) {
         cache().put(key, value);
     }
 
     public synchronized T get(final UUID uuid) {
-        return cache().getIfPresent(uuid);
+        return cache().get(uuid);
     }
 
     public synchronized void remove(final UUID uuid) {
         if (entities == null) {
             return;
         }
-        cache().invalidate(uuid);
+        cache().remove(uuid);
     }
 
     public synchronized List<T> clear() {
         if (entities != null) {
-            List<T> values = new ArrayList<>(entities.asMap().values());
-            entities.invalidateAll();
+            List<T> values = new ArrayList<>(entities.values());
+            entities.clear();
             entities = null;
             return values;
         }
         return Collections.emptyList();
     }
 
-    private Cache<UUID, T> cache() {
+    private Map<UUID, T> cache() {
         if (entities == null) {
-            entities = Caffeine.newBuilder()
-                .expireAfterAccess(Duration.ofMinutes(10))
-                .maximumSize(100)
-                .build();
+            entities = mapSupplier.get();
         }
         return entities;
     }
 
     public void putAll(final EntityUnlockKeyCache<T> privateKeyCache) {
-        Cache<UUID, T> otherCache = privateKeyCache.entities;
-        if (otherCache != null) {
-            cache().putAll(otherCache.asMap());
+        Map<UUID, T> otherMap = privateKeyCache.entities;
+        if (otherMap != null) {
+            cache().putAll(otherMap);
         }
     }
 }

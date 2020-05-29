@@ -19,6 +19,8 @@ package org.brekka.pegasus.core.services.impl;
 import java.util.UUID;
 
 import org.brekka.commons.persistence.support.EntityUtils;
+import org.brekka.pegasus.core.PegasusErrorCode;
+import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.KeySafeDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Division;
@@ -103,6 +105,11 @@ public class KeySafeServiceImpl extends AbstractKeySafeServiceSupport implements
         KeyPair keyPair;
         MemberContext memberContext = memberService.retrieveCurrent();
         PrivateKeyToken privateKeyToken = resolveAndUnlock(protectingKeySafe, keyPairToAssign, memberContext);
+
+        if (privateKeyToken == null) {
+            throw new PegasusException(PegasusErrorCode.PG108,
+                    "Failed to obtain private key for key pair '%s' using key safe '%s'", keyPairToAssign.getId(), protectingKeySafe.getId());
+        }
 
         if (nAssignToKeySafe instanceof Vault) {
             Vault vault = (Vault) nAssignToKeySafe;

@@ -16,7 +16,10 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
@@ -35,6 +38,8 @@ import org.brekka.xml.pegasus.v2.model.ProfileDocument;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 /**
  * Retains the details for a logged-in member. It forms the basis of the {@link UserDetails} that is bound to the security
  * context for a given user.
@@ -45,13 +50,20 @@ class MemberContextImpl implements MemberContext {
 
     /**
      * The collection of Phalanx vault key references that are currently unlocked.
+     *
+     * A non-expiring 'cache' of the unlocked vault keys in memory.
      */
-    private final EntityUnlockKeyCache<AuthenticatedPrincipal> vaultKeyCache = new EntityUnlockKeyCache<>();
+    private final EntityUnlockKeyCache<AuthenticatedPrincipal> vaultKeyCache = new EntityUnlockKeyCache<>(HashMap::new);
 
     /**
      * Collection of unlocked Phalanx private key references.
      */
-    private final EntityUnlockKeyCache<PrivateKeyToken> privateKeyCache = new EntityUnlockKeyCache<>();
+    private final EntityUnlockKeyCache<PrivateKeyToken> privateKeyCache = new EntityUnlockKeyCache<>(() -> Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .maximumSize(200)
+            .<UUID, PrivateKeyToken>build()
+            .asMap());
+
 
     /**
      * Essentially a cache of expensive to generate values (non-serializable).
