@@ -3,6 +3,7 @@
  */
 package org.brekka.pegasus.core.model;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
@@ -30,8 +31,6 @@ import org.brekka.phoenix.api.SecretKey;
 import org.brekka.phoenix.api.SymmetricCryptoSpec;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
-
-import net.iharder.Base64;
 
 /**
  * Stores a piece of XML either plain or encrypted. Should only ever be replaced, never updated.
@@ -173,6 +172,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
         this.keySafe = keySafe;
     }
 
+    @Override
     public byte[] getIv() {
         return this.iv;
     }
@@ -301,9 +301,6 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     }
 
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -313,7 +310,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
         .append("external", this.externalData)
         .append("cryptedDataId", this.cryptedDataId)
         .append("keySafe", (this.keySafe != null ? this.keySafe.getId() : null))
-        .append("iv", Base64.encodeBytes(this.iv))
+        .append("iv", Base64.getEncoder().encodeToString(this.iv))
         .toString();
     }
 }
