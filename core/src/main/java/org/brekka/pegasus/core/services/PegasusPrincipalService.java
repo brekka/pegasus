@@ -16,35 +16,54 @@
 
 package org.brekka.pegasus.core.services;
 
+import java.util.function.Supplier;
+
 import org.brekka.pegasus.core.model.AuthenticationToken;
 import org.brekka.pegasus.core.model.Member;
 import org.brekka.pegasus.core.model.Organization;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.security.PegasusPrincipal;
 import org.brekka.pegasus.core.security.PegasusPrincipalAware;
+import org.brekka.phalanx.api.model.ExportedPrincipal;
 
-/**
- *
- */
 public interface PegasusPrincipalService {
 
     PegasusPrincipal currentPrincipal(boolean required);
 
-    PegasusPrincipal principal(AuthenticationToken token);
+    PegasusPrincipal login(Member member, Organization organization, Vault vault, String vaultPassword);
 
-    void loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization,
-            boolean restoreRequired);
+    PegasusPrincipal login(Member member, Organization organization, String vaultPassword);
 
-    void loginAndBind(PegasusPrincipalAware principalSource, String password, Organization organization,
-            Member member, Vault vault);
+    ExportedPrincipal exportPrincipal(PegasusPrincipal principal, byte[] restoreSecret);
+
+    PegasusPrincipal restorePrincipal(Member member, Organization organization, ExportedPrincipal restore,
+            byte[] restoreSecret);
+
+    void doWithPrincipal(PegasusPrincipal principal, Runnable runnable);
+
+    <T> T doWithPrincipal(PegasusPrincipal principal, Supplier<T> supplier);
 
     void logout(PegasusPrincipal principal);
 
+    @Deprecated
+    PegasusPrincipal principal(AuthenticationToken token);
+
+    @Deprecated
+    void loginAndBind(PegasusPrincipalAware principalSource, String vaultPassword, Organization organization,
+            boolean restoreRequired);
+
+    @Deprecated
+    void loginAndBind(PegasusPrincipalAware principalSource, String password, Organization organization,
+            Member member, Vault vault);
+
+    @Deprecated
     void unbind();
 
+    @Deprecated
     void restore(PegasusPrincipal principal, String password);
 
+    @Deprecated
     boolean restore(PegasusPrincipal principal, byte[] secret);
 
-    void doWithPrincipal(PegasusPrincipal principal, Runnable runnable);
+
 }
