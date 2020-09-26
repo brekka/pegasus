@@ -143,11 +143,13 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             final ExportedPrincipal exportedPrincipal, final byte[] restoreSecret) {
 
         AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(exportedPrincipal, restoreSecret);
-        Vault vault = member.getDefaultVault();
-        vault = narrow(vault, Vault.class);
-        vault.setAuthenticatedPrincipal(importedPrincipal);
         PegasusPrincipalImpl pegasusPrincipal = new PegasusPrincipalImpl(member.getAuthenticationToken());
-        restore(pegasusPrincipal, member, vault);
+        doWithPrincipal(pegasusPrincipal, () -> {
+            Vault vault = member.getDefaultVault();
+            vault = narrow(vault, Vault.class);
+            vault.setAuthenticatedPrincipal(importedPrincipal);
+            restore(pegasusPrincipal, member, vault);
+        });
         MemberContextImpl memberContext = new MemberContextImpl(member);
         Profile activeProfile = profileService.retrieveProfile(member);
         memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
@@ -195,6 +197,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
         loginInternal(pegasusPrincipal, password, organization, member, vault, false, true);
     }
 
+
     private void loginInternal(final PegasusPrincipalImpl pegasusPrincipal, final String password,
             final Organization organization, final Member memberIn, final Vault vaultIn, final boolean restoreRequired,
             final boolean bind) {
@@ -231,7 +234,9 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                     threadLocalPrincipals.set(pegasusPrincipal);
                 }
 
-                vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
+                UUID vaultId = vault.getId();
+                vault = doWithPrincipal(pegasusPrincipal, () -> vaultService.openVault(vaultId, password));
+                vault = narrow(vault, Vault.class);
                 member.setDefaultVault(vault);
                 if (organization != null) {
                     doWithPrincipal(pegasusPrincipal, () -> memberService.activateOrganization(organization));
