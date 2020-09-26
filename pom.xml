@@ -3,16 +3,16 @@
   <parent>
     <groupId>org.brekka</groupId>
     <artifactId>root</artifactId>
-    <version>1.1</version>
+    <version>2.0</version>
   </parent>
   <groupId>org.brekka.pegasus</groupId>
   <artifactId>pegasus</artifactId>
-  <version>2.18.19-SNAPSHOT</version>
+  <version>2.19.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>
-        Pegasus secure file relay service
-    </description>
+      Pegasus secure file relay service
+  </description>
 
   <inceptionYear>2012</inceptionYear>
 
@@ -20,7 +20,7 @@
     <url>https://github.com/brekka/pegasus.git</url>
     <connection>https://github.com/brekka/pegasus.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/brekka/pegasus.git</developerConnection>
-    <tag>1.11</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <licenses>
@@ -53,6 +53,6 @@
     <spring-security-version>3.1.2.RELEASE</spring-security-version>
     <hibernate-version>4.1.7.Final</hibernate-version>
     <servlet-api-release-version>2.5</servlet-api-release-version>
-    <stillingar-version>1.2.0</stillingar-version>
+    <stillingar-version>1.2.3</stillingar-version>
   </properties>
 </project>

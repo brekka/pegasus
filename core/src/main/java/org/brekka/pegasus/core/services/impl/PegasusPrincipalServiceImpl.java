@@ -20,8 +20,8 @@ import static org.brekka.commons.persistence.support.EntityUtils.narrow;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.brekka.pegasus.core.PegasusErrorCode;
@@ -54,8 +54,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Stopwatch;
 
 /**
  *
@@ -106,7 +104,8 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             }
         }
         if (pegasusPrincipal == null && required) {
-            throw new PegasusException(PegasusErrorCode.PG902, "No pegasus principal could be found in the current security context");
+            throw new PegasusException(PegasusErrorCode.PG902,
+                    "No pegasus principal could be found in the current security context");
         }
         return pegasusPrincipal;
     }
@@ -116,7 +115,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
     public void logout(final PegasusPrincipal pegasusPrincipal) {
         synchronized (pegasusPrincipal) {
             MemberContextImpl memberContext = (MemberContextImpl) pegasusPrincipal.getMemberContext();
-            Stopwatch sw = Stopwatch.createStarted();
+            StopWatch sw = new StopWatch();
             if (memberContext != null) {
                 List<AuthenticatedPrincipal> authenticatedPrincipals = memberContext.clearVaults();
                 for (AuthenticatedPrincipal authenticatedPrincipal : authenticatedPrincipals) {
@@ -126,23 +125,24 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             ((PegasusPrincipalImpl) pegasusPrincipal).setMemberContext(null);
             if (log.isInfoEnabled()) {
                 log.info(String.format("Pegasus logout for '%s' took %d ms",
-                        pegasusPrincipal.getName(), sw.elapsed(TimeUnit.MILLISECONDS)));
+                        pegasusPrincipal.getName(), sw.getTime()));
             }
         }
     }
 
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void loginAndBind(final PegasusPrincipalAware principalSource, final String password, final Organization organization,
-            final boolean restoreRequired) {
-        Stopwatch sw = Stopwatch.createStarted();
+    public void loginAndBind(final PegasusPrincipalAware principalSource, final String password,
+            final Organization organization, final boolean restoreRequired) {
+        StopWatch sw = new StopWatch();
         PegasusPrincipalImpl pegasusPrincipal = (PegasusPrincipalImpl) principalSource.getPegasusPrincipal();
         synchronized (pegasusPrincipal) {
             if (pegasusPrincipal.getMemberContext() != null) {
                 return;
             }
             try {
-                AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(pegasusPrincipal.getAuthenticationTokenId());
+                AuthenticationToken authenticationToken = authenticationTokenDAO
+                        .retrieveById(pegasusPrincipal.getAuthenticationTokenId());
                 Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
                 if (member.getStatus() != ActorStatus.ACTIVE) {
                     throw new DisabledException(String.format("Member '%s' account is disabled", member.getId()));
@@ -152,6 +152,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 MemberContextImpl memberContext = new MemberContextImpl(member);
                 Profile activeProfile = profileService.retrieveProfile(member);
                 memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
+                memberContext.setActiveVault(vault);
                 // Vault service will use this
                 pegasusPrincipal.setMemberContext(memberContext);
                 threadLocalPrincipals.set(pegasusPrincipal);
@@ -167,10 +168,56 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 pegasusPrincipal.setOrganizationId(organization != null ? organization.getId() : null);
                 if (log.isInfoEnabled()) {
                     log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
-                            pegasusPrincipal.getName(), organization != null ? organization.getName() : null, sw.elapsed(TimeUnit.MILLISECONDS)));
+                            pegasusPrincipal.getName(), organization != null ? organization.getName() : null,
+                            sw.getTime()));
                 }
             } catch (RuntimeException e) {
-                // We need to bind early to support the latter restore operations, however if an error occurs, make sure to unbind the broken context.
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure
+                // to unbind the broken context.
+                pegasusPrincipal.setMemberContext(null);
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void loginAndBind(final PegasusPrincipalAware principalSource, final String password,
+            final Organization organization, final Member memberIn, final Vault vaultIn) {
+        StopWatch sw = new StopWatch();
+        PegasusPrincipalImpl pegasusPrincipal = (PegasusPrincipalImpl) principalSource.getPegasusPrincipal();
+        synchronized (pegasusPrincipal) {
+            if (pegasusPrincipal.getMemberContext() != null) {
+                return;
+            }
+            try {
+                Member member = memberDAO.retrieveById(memberIn.getId());
+                if (member.getStatus() != ActorStatus.ACTIVE) {
+                    throw new DisabledException(String.format("Member '%s' account is disabled", member.getId()));
+                }
+                member = narrow(member, Member.class);
+                MemberContextImpl memberContext = new MemberContextImpl(member);
+                Profile activeProfile = profileService.retrieveProfile(member);
+                memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
+                // Vault service will use this
+                pegasusPrincipal.setMemberContext(memberContext);
+                threadLocalPrincipals.set(pegasusPrincipal);
+
+                Vault vault = narrow(vaultService.openVault(vaultIn.getId(), password), Vault.class);
+                memberContext.setActiveVault(vault);
+
+                if (organization != null) {
+                    memberService.activateOrganization(organization);
+                }
+                pegasusPrincipal.setOrganizationId(organization != null ? organization.getId() : null);
+                if (log.isInfoEnabled()) {
+                    log.info(String.format("Pegasus login for '%s' with organization '%s', took %d ms",
+                            pegasusPrincipal.getName(), organization != null ? organization.getName() : null,
+                            sw.getTime()));
+                }
+            } catch (RuntimeException e) {
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure
+                // to unbind the broken context.
                 pegasusPrincipal.setMemberContext(null);
                 throw e;
             }
@@ -208,14 +255,16 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             }
             try {
                 threadLocalPrincipals.set(principalImpl);
-                AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
+                AuthenticationToken authenticationToken = authenticationTokenDAO
+                        .retrieveById(principalImpl.getAuthenticationTokenId());
                 Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
                 Vault vault = member.getDefaultVault();
                 member = narrow(member, Member.class);
                 vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
                 restore(principalImpl, member, vault);
             } catch (RuntimeException e) {
-                // We need to bind early to support the latter restore operations, however if an error occurs, make sure to unbind the broken context.
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure
+                // to unbind the broken context.
                 principalImpl.setMemberContext(null);
                 throw e;
             } finally {
@@ -240,7 +289,8 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                     return false;
                 }
                 AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(exportedPrincipal, secret);
-                AuthenticationToken authenticationToken = authenticationTokenDAO.retrieveById(principalImpl.getAuthenticationTokenId());
+                AuthenticationToken authenticationToken = authenticationTokenDAO
+                        .retrieveById(principalImpl.getAuthenticationTokenId());
                 Member member = memberDAO.retrieveByAuthenticationToken(authenticationToken);
                 Vault vault = member.getDefaultVault();
                 member = narrow(member, Member.class);
@@ -249,7 +299,8 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 restore(principalImpl, member, vault);
                 return true;
             } catch (RuntimeException e) {
-                // We need to bind early to support the latter restore operations, however if an error occurs, make sure to unbind the broken context.
+                // We need to bind early to support the latter restore operations, however if an error occurs, make sure
+                // to unbind the broken context.
                 principalImpl.setMemberContext(null);
                 throw e;
             } finally {

@@ -23,6 +23,10 @@ public enum PegasusErrorCode implements ErrorCode {
      * Template not found
      */
     PG107,
+    /**
+     * Failed to obtain private key for keypair from keysafe
+     */
+    PG108,
 
     PG200,
     PG265,

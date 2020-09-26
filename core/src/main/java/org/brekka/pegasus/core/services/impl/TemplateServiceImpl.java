@@ -26,10 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.brekka.commons.persistence.model.ListingCriteria;
@@ -51,6 +47,7 @@ import org.brekka.xml.pegasus.v2.model.ExportedTemplatesDocument.ExportedTemplat
 import org.brekka.xml.pegasus.v2.model.TemplateDocument;
 import org.brekka.xml.pegasus.v2.model.TemplateType;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -64,7 +61,7 @@ import org.springframework.util.ClassUtils;
  */
 @Service
 @Transactional
-public class TemplateServiceImpl implements TemplateService {
+public class TemplateServiceImpl implements TemplateService, InitializingBean {
 
     @Autowired
     private TemplateDAO templateDAO;
@@ -75,8 +72,8 @@ public class TemplateServiceImpl implements TemplateService {
 
     public Map<TemplateEngine, TemplateEngineAdapter> adapters;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         if (this.adapters != null) {
             // externally configured
             return;
@@ -92,8 +89,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    @Nullable
-    public String merge(@Nonnull final Template template, @Nonnull final Map<String, Object> context) {
+    public String merge(final Template template, final Map<String, Object> context) {
         StringWriter writer = new StringWriter();
         merge(template, context, writer);
         return writer.toString();
@@ -111,7 +107,6 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    @Nullable
     public String preview(final String templateContent, final TemplateEngine templateEngine, final Map<String, Object> context) {
         StringWriter writer = new StringWriter();
         preview(templateContent, templateEngine, context, writer);
@@ -130,37 +125,33 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    @Nullable
     @Transactional(readOnly=true)
-    public Template retrieveByToken(@Nonnull final Token token) {
+    public Template retrieveByToken(final Token token) {
         return this.templateDAO.retrieveByToken(token);
     }
 
     @Override
-    @Nullable
     @Transactional(readOnly=true)
-    public Template retrieveBySlug(@Nonnull final String slug) {
+    public Template retrieveBySlug(final String slug) {
         return this.templateDAO.retrieveBySlug(slug);
     }
 
     @Override
-    @Nullable
     @Transactional(readOnly=true)
-    public Template retrieveById(@Nonnull final UUID templateId) {
+    public Template retrieveById(final UUID templateId) {
         return this.templateDAO.retrieveById(templateId);
     }
 
     @Override
-    @Nonnull
     @Transactional()
-    public Template create(@Nonnull final TemplateType details, @Nonnull final TemplateEngine engine, @Nullable final KeySafe<?> keySafe,
-            @Nullable final String slug, @Nullable final Token token, @Nullable final String label) {
+    public Template create(final TemplateType details, final TemplateEngine engine, final KeySafe<?> keySafe,
+            final String slug, final Token token, final String label) {
         return create(details, engine, keySafe, slug, token, label, false);
     }
 
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
-    public void update(@Nonnull final Template template) {
+    public void update(final Template template) {
         Template managed = this.templateDAO.retrieveById(template.getId());
         fixDetails(template.getXml().getBean().getTemplate());
         XmlEntity<TemplateDocument> incoming = template.getXml();
@@ -281,8 +272,8 @@ public class TemplateServiceImpl implements TemplateService {
         return engines;
     }
 
-    protected Template create(@Nonnull final TemplateType details, @Nonnull final TemplateEngine engine, @Nullable final KeySafe<?> keySafe,
-            @Nullable final String slug, @Nullable final Token token, @Nullable final String label, final boolean imported) {
+    protected Template create(final TemplateType details, final TemplateEngine engine, final KeySafe<?> keySafe,
+            final String slug, final Token token, final String label, final boolean imported) {
         Template template = new Template();
 
         fixDetails(details);

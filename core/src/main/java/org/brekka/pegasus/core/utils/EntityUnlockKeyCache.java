@@ -5,10 +5,11 @@ package org.brekka.pegasus.core.utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * Caches the phalanx key that is used by the entity.
@@ -22,7 +23,13 @@ public class EntityUnlockKeyCache<T> implements Serializable {
      */
     private static final long serialVersionUID = 5415576494466862394L;
 
+    private final Supplier<Map<UUID, T>> mapSupplier;
+
     private transient Map<UUID, T> entities;
+
+    public EntityUnlockKeyCache(final Supplier<Map<UUID, T>> mapSupplier) {
+        this.mapSupplier = mapSupplier;
+    }
 
     public synchronized void put(final UUID key, final T value) {
         cache().put(key, value);
@@ -33,28 +40,33 @@ public class EntityUnlockKeyCache<T> implements Serializable {
     }
 
     public synchronized void remove(final UUID uuid) {
+        if (entities == null) {
+            return;
+        }
         cache().remove(uuid);
     }
 
     public synchronized List<T> clear() {
-        List<T> values = new ArrayList<>(cache().values());
-        entities.clear();
-        entities = null;
-        return values;
+        if (entities != null) {
+            List<T> values = new ArrayList<>(entities.values());
+            entities.clear();
+            entities = null;
+            return values;
+        }
+        return Collections.emptyList();
     }
 
     private Map<UUID, T> cache() {
-        Map<UUID, T> map = this.entities;
-        if (map == null) {
-            this.entities = new HashMap<>();
+        if (entities == null) {
+            entities = mapSupplier.get();
         }
-        return this.entities;
+        return entities;
     }
 
-    /**
-     * @param privateKeyCache
-     */
     public void putAll(final EntityUnlockKeyCache<T> privateKeyCache) {
-        cache().putAll(privateKeyCache.entities);
+        Map<UUID, T> otherMap = privateKeyCache.entities;
+        if (otherMap != null) {
+            cache().putAll(otherMap);
+        }
     }
 }

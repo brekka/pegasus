@@ -8,9 +8,6 @@ import org.brekka.phalanx.api.model.KeyPair;
 import org.brekka.phalanx.api.model.PrivateKeyToken;
 import org.brekka.xml.pegasus.v2.model.ProfileType;
 
-/**
- * @author Andrew Taylor
- */
 public interface MemberContext extends AccessorContextAware {
 
     Actor getActiveActor();
@@ -18,6 +15,8 @@ public interface MemberContext extends AccessorContextAware {
     void setActiveActor(Actor actor);
 
     Member getMember();
+
+    Vault getActiveVault();
 
     ProfileType getProfile();
 

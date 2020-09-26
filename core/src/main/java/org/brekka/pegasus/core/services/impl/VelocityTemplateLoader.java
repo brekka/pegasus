@@ -16,15 +16,14 @@
 
 package org.brekka.pegasus.core.services.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.UUID;
 
-import org.apache.commons.collections.ExtendedProperties;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
+import org.apache.velocity.util.ExtProperties;
 import org.brekka.pegasus.core.PegasusErrorCode;
 import org.brekka.pegasus.core.PegasusException;
 import org.brekka.pegasus.core.dao.TemplateDAO;
@@ -45,32 +44,22 @@ public class VelocityTemplateLoader extends ResourceLoader {
     private XmlEntityService xmlEntityService;
 
 
-    /* (non-Javadoc)
-     * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#init(org.apache.commons.collections.ExtendedProperties)
-     */
     @Override
-    public void init(final ExtendedProperties configuration) {
+    public void init(final ExtProperties configuration) {
         this.templateDAO = (TemplateDAO) this.rsvc.getApplicationAttribute(TemplateDAO.class.getName());
         this.xmlEntityService = (XmlEntityService) this.rsvc.getApplicationAttribute(XmlEntityService.class.getName());
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#getResourceStream(java.lang.String)
-     */
     @Override
-    public InputStream getResourceStream(final String tempateIdStr) throws ResourceNotFoundException {
+    public Reader getResourceReader(final String tempateIdStr, final String encoding) throws ResourceNotFoundException {
         Template template = findTemplate(tempateIdStr);
         this.xmlEntityService.release(template, TemplateDocument.class);
         TemplateDocument templateDocument = template.getXml().getBean();
         TemplateType templateType = templateDocument.getTemplate();
         String content = templateType.getContent();
-        // TODO perhaps a less memory intensive way of doing this.
-        return new ByteArrayInputStream(content.getBytes(Charset.forName("UTF-8")));
+        return new StringReader(content);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#isSourceModified(org.apache.velocity.runtime.resource.Resource)
-     */
     @Override
     public boolean isSourceModified(final Resource resource) {
         long cachedLastModified = resource.getLastModified();
@@ -79,9 +68,6 @@ public class VelocityTemplateLoader extends ResourceLoader {
         return modified;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.velocity.runtime.resource.loader.ResourceLoader#getLastModified(org.apache.velocity.runtime.resource.Resource)
-     */
     @Override
     public long getLastModified(final Resource resource) {
         Template template = findTemplate(resource.getName());
