@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -379,7 +378,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         ResourceEncryptor encryptor = this.resourceCryptoService.encryptor(secretKey, Compression.GZIP);
         XmlEntity<T> entity = new XmlEntity<>();
         entity.setId(UUID.randomUUID());
-        entity.setIv(encryptor.getSpec().getIV());
+        entity.setIv(encryptor.getSpec().getIv());
         entity.setCryptedDataId(cryptedDataId);
         entity.setKeySafe(keySafe);
         entity.setProfile(cryptoProfile.getNumber());
