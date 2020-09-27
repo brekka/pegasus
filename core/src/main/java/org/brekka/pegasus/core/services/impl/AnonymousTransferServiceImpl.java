@@ -96,9 +96,10 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
         AccessorContext accessorContext = AccessorContextImpl.getCurrent();
         AnonymousTransfer transfer = accessorContext.retrieve(token, AnonymousTransfer.class);
         if (transfer != null) {
-            refreshAllocation(transfer);
+            if (transfer.getExpires() == null || transfer.getExpires().after(new Date())) {
+                refreshAllocation(transfer);
+            }
         }
-        // If the transfer is not unlocked, null will be returned.
         return transfer;
     }
 
@@ -123,17 +124,19 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
     }
 
     @Override
-    @Transactional()
+    @Transactional
     public AnonymousTransfer unlock(final String token, final String code, final boolean external) {
         String codeClean = CODE_CLEAN_PATTERN.matcher(code).replaceAll("");
         AnonymousTransfer transfer = this.anonymousTransferDAO.retrieveByToken(token);
-        try {
-            decryptDocument(transfer, codeClean, external);
-        } catch (PhalanxException e) {
-            checkAttempts(e, transfer);
-            throw e;
+        if (transfer != null) {
+            try {
+                decryptDocument(transfer, codeClean, external);
+            } catch (PhalanxException e) {
+                checkAttempts(e, transfer);
+                throw e;
+            }
+            bindToContext(token, transfer);
         }
-        bindToContext(token, transfer);
         return transfer;
     }
 
