@@ -143,14 +143,15 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             final ExportedPrincipal exportedPrincipal, final byte[] restoreSecret) {
 
         AuthenticatedPrincipal importedPrincipal = phalanxService.importPrincipal(exportedPrincipal, restoreSecret);
+        MemberContextImpl memberContext = new MemberContextImpl(member);
         PegasusPrincipalImpl pegasusPrincipal = new PegasusPrincipalImpl(member.getAuthenticationToken());
+        pegasusPrincipal.setMemberContext(memberContext);
         doWithPrincipal(pegasusPrincipal, () -> {
             Vault vault = member.getDefaultVault();
             vault = narrow(vault, Vault.class);
             vault.setAuthenticatedPrincipal(importedPrincipal);
             restore(pegasusPrincipal, member, vault);
         });
-        MemberContextImpl memberContext = new MemberContextImpl(member);
         Profile activeProfile = profileService.retrieveProfile(member);
         memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
         // Vault service will use this
