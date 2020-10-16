@@ -229,7 +229,6 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 UUID vaultId = vault.getId();
                 vault = doWithPrincipal(pegasusPrincipal, () -> vaultService.openVault(vaultId, password));
                 vault = narrow(vault, Vault.class);
-                member.setDefaultVault(vault);
                 if (organization != null) {
                     doWithPrincipal(pegasusPrincipal, () -> memberService.activateOrganization(organization));
                 }
@@ -359,7 +358,7 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
 
     private void restore(final PegasusPrincipalImpl principalImpl, final Member member, final Organization organization, final Vault vault) {
         MemberContextImpl memberContext = new MemberContextImpl(member);
-        member.setDefaultVault(vault);
+        memberContext.setActiveVault(vault);
         memberContext.setActiveProfile(profileService.retrieveProfile(member));
         memberContext.retainVaultKey(vault);
         principalImpl.setMemberContext(memberContext);
