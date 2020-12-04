@@ -26,7 +26,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 /**
  * @author Andrew Taylor
  */
-public class WebAuthenticationDetails implements Serializable {
+public class WebAuthenticationDetails implements Serializable, OtherAuthenticationDetails {
 
     private static final long serialVersionUID = -3611150592320259896L;
 
