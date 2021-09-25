@@ -394,6 +394,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         for (XmlEntity<?> entity : results) {
             lastId = entity.getId();
             ByteSequence sequence = resourceStorageService.retrieve(entity.getId());
+            if (sequence == null) {
+                log.warn(format("Failed to locate resource file for XmlEntity '%s'", entity.getId()));
+                continue;
+            }
             @SuppressWarnings("resource")
             CountingOutputStream cos = new CountingOutputStream(NullOutputStream.NULL_OUTPUT_STREAM);
             DelayedOutputStream dos = new DelayedOutputStream(smallContentLimit, () -> cos);
@@ -404,7 +408,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 IOUtils.copy(is, os);
             } catch (IOException e) {
                 log.warn(format("Problem reading external content for XmlEntity '%s'", entity.getId()), e);
-                break;
+                continue;
             }
             if (dos.isInMemory()) {
                 // Just moving the resource bytes onto the record, no need to change it in any way

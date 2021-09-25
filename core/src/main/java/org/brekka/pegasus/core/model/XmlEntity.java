@@ -103,7 +103,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     /**
      * Is the data external or local?
      */
-    @Column(name="`ExternalData`", updatable=false)
+    @Column(name="`ExternalData`")
     private boolean externalData;
 
     /**
@@ -112,7 +112,7 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
      * blobs seems to be a bit variable, or at least their handling via JDBC. Give the size restrictions placed on this
      * column, we'll go for speed of retrieval over the slight memory impact it will have.
      */
-    @Column(name="`Data`", length=MAX_DATA_LENGTH, updatable=false)
+    @Column(name="`Data`", length=MAX_DATA_LENGTH)
     private byte[] data;
 
     /**
