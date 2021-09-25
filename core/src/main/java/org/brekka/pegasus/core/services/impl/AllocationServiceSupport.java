@@ -317,10 +317,13 @@ class AllocationServiceSupport {
         for (FileType fileType : fileList) {
             UUID cryptedFileID = UUID.fromString(fileType.getUUID());
             for (AllocationFile allocationFile : files) {
-                UUID id = allocationFile.getCryptedFile().getId();
-                if (id.equals(cryptedFileID)) {
-                    allocationFile.setXml(fileType);
-                    break; // Break out of this loop
+                // Deleted files will not have a CryptedFile set
+                if (allocationFile.getDeleted() == null) {
+                    UUID id = allocationFile.getCryptedFile().getId();
+                    if (id.equals(cryptedFileID)) {
+                        allocationFile.setXml(fileType);
+                        break; // Break out of this loop
+                    }
                 }
             }
         }

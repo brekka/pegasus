@@ -148,16 +148,8 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
             Vault vault = member.getDefaultVault();
             vault = narrow(vault, Vault.class);
             vault.setAuthenticatedPrincipal(importedPrincipal);
-            restore(pegasusPrincipal, member, vault);
+            restore(pegasusPrincipal, member, organization, vault);
         });
-        MemberContextImpl memberContext = new MemberContextImpl(member);
-        Profile activeProfile = profileService.retrieveProfile(member);
-        memberContext.setActiveProfile(activeProfile != null ? activeProfile : new Profile());
-        // Vault service will use this
-        pegasusPrincipal.setMemberContext(memberContext);
-        if (organization != null) {
-            pegasusPrincipal.setOrganizationId(organization.getId());
-        }
         return pegasusPrincipal;
     }
 
@@ -237,7 +229,6 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 UUID vaultId = vault.getId();
                 vault = doWithPrincipal(pegasusPrincipal, () -> vaultService.openVault(vaultId, password));
                 vault = narrow(vault, Vault.class);
-                member.setDefaultVault(vault);
                 if (organization != null) {
                     doWithPrincipal(pegasusPrincipal, () -> memberService.activateOrganization(organization));
                 }
@@ -307,7 +298,12 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 Vault vault = member.getDefaultVault();
                 member = narrow(member, Member.class);
                 vault = narrow(vaultService.openVault(vault.getId(), password), Vault.class);
-                restore(principalImpl, member, vault);
+                Organization organization = null;
+                if (principalImpl.getOrganizationId() != null) {
+                    organization = new Organization();
+                    organization.setId(principalImpl.getOrganizationId());
+                }
+                restore(principalImpl, member, organization, vault);
             } catch (RuntimeException e) {
                 // We need to bind early to support the latter restore operations, however if an error occurs, make sure
                 // to unbind the broken context.
@@ -342,7 +338,12 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
                 member = narrow(member, Member.class);
                 vault = narrow(vault, Vault.class);
                 vault.setAuthenticatedPrincipal(importedPrincipal);
-                restore(principalImpl, member, vault);
+                Organization organization = null;
+                if (principalImpl.getOrganizationId() != null) {
+                    organization = new Organization();
+                    organization.setId(principalImpl.getOrganizationId());
+                }
+                restore(principalImpl, member, organization, vault);
                 return true;
             } catch (RuntimeException e) {
                 // We need to bind early to support the latter restore operations, however if an error occurs, make sure
@@ -355,15 +356,13 @@ public class PegasusPrincipalServiceImpl implements PegasusPrincipalService {
         }
     }
 
-    private void restore(final PegasusPrincipalImpl principalImpl, final Member member, final Vault vault) {
+    private void restore(final PegasusPrincipalImpl principalImpl, final Member member, final Organization organization, final Vault vault) {
         MemberContextImpl memberContext = new MemberContextImpl(member);
-        member.setDefaultVault(vault);
+        memberContext.setActiveVault(vault);
         memberContext.setActiveProfile(profileService.retrieveProfile(member));
         memberContext.retainVaultKey(vault);
         principalImpl.setMemberContext(memberContext);
-        if (principalImpl.getOrganizationId() != null) {
-            Organization organization = new Organization();
-            organization.setId(principalImpl.getOrganizationId());
+        if (organization != null) {
             memberService.activateOrganization(organization);
         }
         applicationEventPublisher.publishEvent(new VaultOpenEvent(vault));

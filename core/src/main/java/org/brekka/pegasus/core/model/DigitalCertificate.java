@@ -33,6 +33,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.brekka.commons.persistence.model.SnapshotEntity;
+import org.brekka.pegasus.core.PegasusConstants;
 import org.hibernate.annotations.Type;
 
 /**
@@ -41,9 +42,9 @@ import org.hibernate.annotations.Type;
  * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
-@Table(name="`DigitalCertificate`", uniqueConstraints=
-@UniqueConstraint(columnNames={"`CertificateSubjectID`", "`Signature`"})
-        )
+@Table(name="`DigitalCertificate`", schema=PegasusConstants.SCHEMA, uniqueConstraints=
+    @UniqueConstraint(columnNames={"`CertificateSubjectID`", "`Signature`"})
+)
 public class DigitalCertificate extends SnapshotEntity<UUID> {
     /**
      * Serial UID

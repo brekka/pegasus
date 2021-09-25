@@ -33,7 +33,7 @@ import org.brekka.pegasus.core.model.Transfer;
 import org.brekka.pegasus.core.model.TransferCreatedEvent;
 import org.brekka.pegasus.core.model.TransferUnlockEvent;
 import org.brekka.pegasus.core.model.XmlEntity;
-import org.brekka.pegasus.core.security.WebAuthenticationDetails;
+import org.brekka.pegasus.core.security.OtherAuthenticationDetails;
 import org.brekka.pegasus.core.services.EventService;
 import org.brekka.pegasus.core.services.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,14 +158,13 @@ public class EventServiceImpl implements EventService {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         Object details = authentication.getDetails();
-        if (details instanceof WebAuthenticationDetails) {
-            WebAuthenticationDetails wad = (WebAuthenticationDetails) details;
-            remoteUserEvent.setOnBehalfOfAddress(wad.getOnBehalfOfAddress());
+        if (details instanceof OtherAuthenticationDetails) {
+            OtherAuthenticationDetails wad = (OtherAuthenticationDetails) details;
             remoteUserEvent.setRemoteAddress(wad.getRemoteAddress());
             remoteUserEvent.setUserAgent(wad.getUserAgent());
         } else {
             throw new IllegalStateException(String.format(
-                    "No web authentication details found in authentication %s, principal: %s",
+                    "No authentication details found in authentication %s, principal: %s",
                     authentication.getClass().getName(), authentication.getPrincipal()));
         }
 

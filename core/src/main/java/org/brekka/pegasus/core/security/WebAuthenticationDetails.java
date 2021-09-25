@@ -17,12 +17,16 @@
 package org.brekka.pegasus.core.security;
 
 import java.io.Serializable;
+import java.util.Objects;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 
 /**
  * @author Andrew Taylor
  */
-public class WebAuthenticationDetails implements Serializable {
+public class WebAuthenticationDetails implements Serializable, OtherAuthenticationDetails {
 
     private static final long serialVersionUID = -3611150592320259896L;
 
@@ -66,5 +70,16 @@ public class WebAuthenticationDetails implements Serializable {
     @Deprecated
     public String getOneTimeCode() {
         return oneTimeCode;
+    }
+
+    @Override
+    public String toString() {
+        ToStringBuilder sb = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        sb.append("remoteAddress", remoteAddress);
+        if (!Objects.equals(remoteAddress, onBehalfOfAddress)) {
+            sb.append("onBehalfOfAddress", onBehalfOfAddress);
+        }
+        sb.append("userAgent", userAgent);
+        return sb.toString();
     }
 }
