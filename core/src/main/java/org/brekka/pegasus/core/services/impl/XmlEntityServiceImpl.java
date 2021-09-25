@@ -347,11 +347,18 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     @Override
     @Transactional()
     public void delete(final UUID xmlEntityId) {
-        XmlEntity<?> entity = this.xmlEntityDAO.retrieveById(xmlEntityId);
+        XmlEntity<?> entity = xmlEntityDAO.retrieveById(xmlEntityId);
         if (entity.isExternalData()) {
-            this.resourceStorageService.remove(entity.getId());
+            // Make sure the resource is only removed when actually committed.
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    log.info(format("Permanently removing resource for deleted XmlEntity '%s'", entity.getId()));
+                    resourceStorageService.remove(entity.getId());
+                }
+            });
         }
-        this.xmlEntityDAO.delete(xmlEntityId);
+        xmlEntityDAO.delete(xmlEntityId);
     }
 
     @Override
