@@ -182,7 +182,7 @@ public class AnonymousTransferServiceImpl extends AllocationServiceSupport imple
 
         AllocationDocument document = AllocationDocument.Factory.newInstance();
         document.setAllocation(allocationType);
-        XmlEntity<AllocationDocument> xmlEntity = this.xmlEntityService.persistEncryptedEntity(document, code, true);
+        XmlEntity<AllocationDocument> xmlEntity = this.xmlEntityService.persistEncryptedEntity(document, code);
         anonTransfer.setXml(xmlEntity);
 
         MemberContext current = this.memberService.getCurrent();

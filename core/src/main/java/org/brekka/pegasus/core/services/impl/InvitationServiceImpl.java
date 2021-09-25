@@ -139,9 +139,9 @@ public class InvitationServiceImpl implements InvitationService {
         XmlEntity<InvitationDocument> xmlEntity;
         if (recipient != null) {
             Vault defaultVault = recipient.getDefaultVault();
-            xmlEntity = this.xmlEntityService.persistEncryptedEntity(invitationDocument, defaultVault, false);
+            xmlEntity = this.xmlEntityService.persistEncryptedEntity(invitationDocument, defaultVault);
         } else {
-            xmlEntity = this.xmlEntityService.persistEncryptedEntity(invitationDocument, password, false);
+            xmlEntity = this.xmlEntityService.persistEncryptedEntity(invitationDocument, password);
         }
 
         invitation.setXml(xmlEntity);

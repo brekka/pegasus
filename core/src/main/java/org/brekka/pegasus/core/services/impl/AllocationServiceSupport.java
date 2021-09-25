@@ -256,10 +256,9 @@ class AllocationServiceSupport {
         allocationDocument.setAllocation(allocationType);
         XmlEntity<AllocationDocument> xmlEntity;
         if (keySafe == null) {
-            // This XML will be retained in the database rather than on the filesystem (since it is unencrypted).
-            xmlEntity = this.xmlEntityService.persistPlainEntity(allocationDocument, false);
+            xmlEntity = this.xmlEntityService.persistPlainEntity(allocationDocument);
         } else {
-            xmlEntity = this.xmlEntityService.persistEncryptedEntity(allocationDocument, keySafe, true);
+            xmlEntity = this.xmlEntityService.persistEncryptedEntity(allocationDocument, keySafe);
         }
         allocation.setXml(xmlEntity);
     }

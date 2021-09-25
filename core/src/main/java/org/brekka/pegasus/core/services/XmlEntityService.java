@@ -23,7 +23,13 @@ public interface XmlEntityService {
      * @param xml
      * @return
      */
-    <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml, boolean useResourceStorageService);
+    <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml);
+    /**
+     * @deprecated 'externalData' no longer does anything. Whether to store the data in the DB or externally is now
+     * determined based on the content size
+     */
+    @Deprecated
+    <T extends XmlObject> XmlEntity<T> persistPlainEntity(T xml, boolean externalData);
 
     /**
      * Store the specified XML in the database, making sure to encrypt it and protect the key with
@@ -32,8 +38,21 @@ public interface XmlEntityService {
      * @param keySafe
      * @return
      */
-    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe, boolean useResourceStorageService);
+    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe);
+    /**
+     * @deprecated 'externalData' no longer does anything. Whether to store the data in the DB or externally is now
+     * determined based on the content size
+     */
+    @Deprecated
+    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, KeySafe<?> keySafe, boolean externalData);
 
+    <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, String password);
+
+    /**
+     * @deprecated 'externalData' no longer does anything. Whether to store the data in the DB or externally is now
+     * determined based on the content size
+     */
+    @Deprecated
     <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(T xml, String password, boolean externalData);
 
     <T extends XmlObject> XmlEntity<T> updateEntity(XmlEntity<T> updated, XmlEntity<T> lockedCurrent, Class<T> xmlType);

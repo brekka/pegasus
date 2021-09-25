@@ -271,7 +271,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationDocument.setOrganization(organizationType);
         }
         Organization organization = globalDivision.getOwner();
-        XmlEntity<OrganizationDocument> entity = this.xmlEntityService.persistEncryptedEntity(organizationDocument, globalDivision, false);
+        XmlEntity<OrganizationDocument> entity = this.xmlEntityService.persistEncryptedEntity(organizationDocument, globalDivision);
         organization.setXml(entity);
         return entity;
     }

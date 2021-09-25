@@ -156,9 +156,9 @@ public abstract class AbstractEMailSendingService implements EMailSendingService
 
         XmlEntity<EMailMessageDocument> xml;
         if (keySafe == null) {
-            xml = this.xmlEntityService.persistPlainEntity(document, false);
+            xml = this.xmlEntityService.persistPlainEntity(document);
         } else {
-            xml = this.xmlEntityService.persistEncryptedEntity(document, keySafe, false);
+            xml = this.xmlEntityService.persistEncryptedEntity(document, keySafe);
         }
 
         message.setXml(xml);

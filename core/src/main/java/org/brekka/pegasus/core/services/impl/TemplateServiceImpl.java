@@ -282,9 +282,9 @@ public class TemplateServiceImpl implements TemplateService, InitializingBean {
 
         XmlEntity<TemplateDocument> xml;
         if (keySafe == null) {
-            xml = this.xmlEntityService.persistPlainEntity(templateDocument, false);
+            xml = this.xmlEntityService.persistPlainEntity(templateDocument);
         } else {
-            xml = this.xmlEntityService.persistEncryptedEntity(templateDocument, keySafe, false);
+            xml = this.xmlEntityService.persistEncryptedEntity(templateDocument, keySafe);
         }
         template.setEngine(engine);
         template.setSlug(slug);

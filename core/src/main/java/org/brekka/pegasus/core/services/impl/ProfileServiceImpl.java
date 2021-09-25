@@ -55,8 +55,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @Service
 public class ProfileServiceImpl implements ProfileService, ApplicationListener<ApplicationEvent> {
-    
-    
+
+
     private static final Log log = LogFactory.getLog(ProfileServiceImpl.class);
 
     @Autowired
@@ -79,7 +79,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
 
         ProfileDocument profileDocument = prepareProfileDocument(profileType);
 
-        XmlEntity<ProfileDocument> xmlEntity = this.xmlEntityService.persistPlainEntity(profileDocument, false);
+        XmlEntity<ProfileDocument> xmlEntity = this.xmlEntityService.persistPlainEntity(profileDocument);
         profile.setXml(xmlEntity);
 
         this.profileDAO.create(profile);
@@ -94,7 +94,7 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
 
         ProfileDocument profileDocument = prepareProfileDocument(profileType);
 
-        XmlEntity<ProfileDocument> xmlEntity = this.xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
+        XmlEntity<ProfileDocument> xmlEntity = this.xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
         profile.setXml(xmlEntity);
 
         this.profileDAO.create(profile);
@@ -250,16 +250,16 @@ public class ProfileServiceImpl implements ProfileService, ApplicationListener<A
             XmlEntity<ProfileDocument> replacementXml;
             if (currentXml.getCryptedDataId() == null) {
                 // Plain
-                replacementXml = xmlEntityService.persistPlainEntity(profileDocument, false);
+                replacementXml = xmlEntityService.persistPlainEntity(profileDocument);
             } else {
                 KeySafe<?> keySafe = currentXml.getKeySafe();
-                replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe, false);
+                replacementXml = xmlEntityService.persistEncryptedEntity(profileDocument, keySafe);
             }
             // Session managed instance
             Profile managed = profileDAO.retrieveById(activeProfile.getId());
             managed.setXml(replacementXml);
             if (log.isInfoEnabled()) {
-                log.info(String.format("Updating profile '%s' XML entity '%s' (v %d)", 
+                log.info(String.format("Updating profile '%s' XML entity '%s' (v %d)",
                         managed.getId(), replacementXml.getId(), replacementXml.getVersion()));
             }
             profileDAO.update(managed);

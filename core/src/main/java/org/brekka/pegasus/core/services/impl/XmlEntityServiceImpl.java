@@ -1,10 +1,22 @@
-/**
+/*
+ * Copyright 2012 the original author or authors.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.brekka.pegasus.core.services.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,6 +59,7 @@ import org.brekka.pegasus.core.model.XmlEntity;
 import org.brekka.pegasus.core.model.XmlEntityAware;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.XmlEntityService;
+import org.brekka.pegasus.core.utils.DelayedOutputStream;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
@@ -72,13 +85,17 @@ import difflib.PatchFailedException;
 
 /**
  * @author Andrew Taylor (andrew@brekka.org)
- *
  */
 @Service
 @Configured
 public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListener<ApplicationEvent>  {
 
     private static final Log log = LogFactory.getLog(XmlEntityServiceImpl.class);
+
+    /**
+     * If the compressed payload is less than this size, store in the database, otherwise use the ResourceStorageService
+     */
+    private static final int DEFAULT_SMALL_CONTENT_LIMIT = 32768;
 
     @Autowired
     private XmlEntityDAO xmlEntityDAO;
@@ -106,6 +123,10 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
 
     private XmlOptions xmlWriteOptions;
 
+    /**
+     * The threshold (in number of bytes) at which content should be written to ResourceStorageService.
+     */
+    private int smallContentLimit = DEFAULT_SMALL_CONTENT_LIMIT;
 
 
     @Override
@@ -120,7 +141,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
 
     @Override
     @Transactional(readOnly=true)
-    public <T extends XmlObject> XmlEntity<T> release(final XmlEntity<T> theEntity, final String password, final Class<T> expectedType) {
+    public <T extends XmlObject> XmlEntity<T> release(final XmlEntity<T> theEntity, final String password,
+            final Class<T> expectedType) {
+
         if (theEntity.getBean() != null) {
             return theEntity;
         }
@@ -130,16 +153,15 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
 
     @Override
     @Transactional(readOnly=true)
-    public <T extends XmlObject> void releaseAll(final List<? extends XmlEntityAware<T>> list, final Class<T> expectedType) {
+    public <T extends XmlObject> void releaseAll(final List<? extends XmlEntityAware<T>> list,
+            final Class<T> expectedType) {
+
         for (XmlEntityAware<T> xmlEntityAware : list) {
             // TODO parallel
             release(xmlEntityAware, expectedType);
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#release(org.brekka.pegasus.core.model.XmlEntityAware, java.lang.Class)
-     */
     @Override
     @Transactional(readOnly=true)
     public <T extends XmlObject> void release(final XmlEntityAware<T> entity, final Class<T> expectedType) {
@@ -158,50 +180,67 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#persistPlainEntity(org.apache.xmlbeans.XmlObject)
-     */
+    @Deprecated
     @Override
     @Transactional()
     public <T extends XmlObject> XmlEntity<T> persistPlainEntity(final T xml, final boolean externalData) {
-        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID(), externalData);
+        return persistPlainEntity(xml);
+    }
+
+    @Override
+    @Transactional()
+    public <T extends XmlObject> XmlEntity<T> persistPlainEntity(final T xml) {
+        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID());
         return entity;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#persistEncryptedEntity(org.apache.xmlbeans.XmlObject, org.brekka.pegasus.core.model.KeySafe)
-     */
+    @Deprecated
     @Override
     @Transactional()
-    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(final T xml, final KeySafe<?> keySafe, final boolean externalData) {
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(final T xml, final KeySafe<?> keySafe,
+            final boolean externalData) {
+
+        return persistEncryptedEntity(xml, keySafe);
+    }
+
+    @Override
+    @Transactional()
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(final T xml, final KeySafe<?> keySafe) {
         CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveDefault();
         SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
         CryptedData cryptedData = this.keySafeService.protect(secretKey.getEncoded(), keySafe);
-        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), keySafe, cryptedData.getId(), cryptoProfile, secretKey, externalData);
+        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), keySafe, cryptedData.getId(), cryptoProfile,
+                secretKey);
+
         return entity;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#persistEncryptedEntity(org.apache.xmlbeans.XmlObject, org.brekka.pegasus.core.model.KeySafe)
-     */
+    @Deprecated
     @Override
     @Transactional()
-    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(final T xml, final String password, final boolean externalData) {
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(final T xml, final String password,
+            final boolean externalData) {
+
+        return persistEncryptedEntity(xml, password);
+    }
+
+    @Override
+    @Transactional()
+    public <T extends XmlObject> XmlEntity<T> persistEncryptedEntity(final T xml, final String password) {
         CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveDefault();
         SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
         CryptedData cryptedData = this.phalanxService.pbeEncrypt(secretKey.getEncoded(), password);
-        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), null, cryptedData.getId(), cryptoProfile, secretKey, externalData);
+        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), null, cryptedData.getId(), cryptoProfile,
+                secretKey);
+
         return entity;
     }
 
-
-
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#updateEntity(org.brekka.pegasus.core.model.XmlEntity, org.brekka.pegasus.core.model.XmlEntity, java.lang.Class)
-     */
     @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
-    public <T extends XmlObject> XmlEntity<T> updateEntity(final XmlEntity<T> updated, final XmlEntity<T> lockedCurrent, final Class<T> xmlType) {
+    public <T extends XmlObject> XmlEntity<T> updateEntity(final XmlEntity<T> updated, final XmlEntity<T> lockedCurrent,
+            final Class<T> xmlType) {
+
         if (updated == null) {
             // Request to remove the XML. Delete the series
             List<XmlEntity<?>> series = this.xmlEntityDAO.retrieveBySerial(lockedCurrent.getSerial());
@@ -225,7 +264,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
             current = base;
         } else {
             // Retrieve the version we expected to be the last, to generate a diff from
-            XmlEntity<T> updatedFrom = this.xmlEntityDAO.retrieveBySerialVersion(updated.getSerial(), updated.getVersion(), xmlType);
+            XmlEntity<T> updatedFrom = this.xmlEntityDAO.retrieveBySerialVersion(updated.getSerial(),
+                    updated.getVersion(), xmlType);
+
             // Passworded entity xml should never be updated.
             base = extractXml(updatedFrom, xmlType, null);
             current = extractXml(lockedCurrent, xmlType, null);
@@ -240,27 +281,25 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         UUID serial = lockedCurrent.getSerial();
         int newVersion = lockedCurrent.getVersion() + 1;
         KeySafe<?> keySafe = lockedCurrent.getKeySafe();
-        boolean externalData = lockedCurrent.isExternalData();
 
         if (keySafe == null) {
-            newEntity = createPlainEntity(patched, newVersion, serial, externalData);
+            newEntity = createPlainEntity(patched, newVersion, serial);
         } else {
             UUID cryptedDataId = lockedCurrent.getCryptedDataId();
             CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveProfile(lockedCurrent.getProfile());
             byte[] secretKeyBytes = this.keySafeService.release(cryptedDataId, lockedCurrent.getKeySafe());
             SecretKey secretKey = this.symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
             // Currently using the same crypted Id.
-            newEntity = createEncrypted(patched, newVersion, serial, keySafe, cryptedDataId, cryptoProfile, secretKey, externalData);
+            newEntity = createEncrypted(patched, newVersion, serial, keySafe, cryptedDataId, cryptoProfile, secretKey);
         }
         return newEntity;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#applyEncryption(org.brekka.pegasus.core.model.XmlEntity, org.brekka.pegasus.core.model.KeySafe)
-     */
     @Override
     @Transactional
-    public <T extends XmlObject>  XmlEntity<T> applyEncryption(final XmlEntity<T> xml, final KeySafe<?> keySafe, final Class<T> xmlType) {
+    public <T extends XmlObject>  XmlEntity<T> applyEncryption(final XmlEntity<T> xml, final KeySafe<?> keySafe,
+            final Class<T> xmlType) {
+
         XmlEntity<T> managed = retrieveEntity(xml.getId(), xmlType);
         CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveDefault();
         SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
@@ -268,27 +307,20 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
 
         UUID serial = managed.getSerial();
         int newVersion = managed.getVersion() + 1;
-        boolean externalData = managed.isExternalData();
 
-        return createEncrypted(managed.getBean(), newVersion, serial, keySafe, cryptedData.getId(), cryptoProfile, secretKey, externalData);
+        return createEncrypted(managed.getBean(), newVersion, serial, keySafe, cryptedData.getId(), cryptoProfile,
+                secretKey);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#removeEncryption(org.brekka.pegasus.core.model.XmlEntity)
-     */
     @Override
     @Transactional
     public <T extends XmlObject>  XmlEntity<T> removeEncryption(final XmlEntity<T> xml, final Class<T> xmlType) {
         XmlEntity<T> managed = release(xml, xmlType);
         UUID serial = managed.getSerial();
         int newVersion = managed.getVersion() + 1;
-        boolean externalData = managed.isExternalData();
-        return createPlainEntity(managed.getBean(), newVersion, serial, externalData);
+        return createPlainEntity(managed.getBean(), newVersion, serial);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#isEncrypted(java.util.UUID)
-     */
     @Override
     @Transactional()
     public boolean isEncrypted(final UUID xmlEntityId) {
@@ -297,18 +329,12 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
              && xmlEntity.getCryptedDataId() != null;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#retrieveEntity(java.util.UUID)
-     */
     @Override
     @Transactional()
     public <T extends XmlObject> XmlEntity<T> retrieveEntity(final UUID xmlEntityId, final Class<T> expectedType) {
         return retrieveEntity(xmlEntityId, expectedType, null);
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#delete(java.util.UUID)
-     */
     @Override
     @Transactional()
     public void delete(final UUID xmlEntityId) {
@@ -319,11 +345,6 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         this.xmlEntityDAO.delete(xmlEntityId);
     }
 
-
-
-    /* (non-Javadoc)
-     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
-     */
     @Override
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof VaultDeleteEvent) {
@@ -352,113 +373,85 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         this.xmlWriteOptions = opts;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.services.XmlEntityService#retrieveEntity(java.util.UUID)
-     */
     @SuppressWarnings("unchecked")
-    protected <T extends XmlObject> XmlEntity<T> retrieveEntity(final UUID xmlEntityId, final Class<T> expectedType, final String password) {
+    private <T extends XmlObject> XmlEntity<T> retrieveEntity(final UUID xmlEntityId, final Class<T> expectedType,
+            final String password) {
+
         XmlEntity<T> xmlEntity = (XmlEntity<T>) this.xmlEntityDAO.retrieveById(xmlEntityId);
         T xmlBean = extractXml(xmlEntity, expectedType, password);
         xmlEntity.setBean(xmlBean);
         return xmlEntity;
     }
 
-    /**
-     * @param xml
-     * @param keySafe
-     * @param entity
-     * @param cryptoProfile
-     * @param secretKey
-     */
-    protected <T extends XmlObject> XmlEntity<T> createEncrypted(final T xml, final int version, final UUID serial, final KeySafe<?> keySafe, final UUID cryptedDataId,
-            final CryptoProfile cryptoProfile, final SecretKey secretKey, final boolean externalData) {
+    private <T extends XmlObject> XmlEntity<T> createEncrypted(final T xml, final int version, final UUID serial,
+            final KeySafe<?> keySafe, final UUID cryptedDataId, final CryptoProfile cryptoProfile,
+            final SecretKey secretKey) {
 
         validate(xml);
 
-        ResourceEncryptor encryptor = this.resourceCryptoService.encryptor(secretKey, Compression.GZIP);
+        ResourceEncryptor encryptor = resourceCryptoService.encryptor(secretKey, Compression.GZIP);
         XmlEntity<T> entity = new XmlEntity<>();
         entity.setId(UUID.randomUUID());
         entity.setIv(encryptor.getSpec().getIv());
         entity.setCryptedDataId(cryptedDataId);
         entity.setKeySafe(keySafe);
         entity.setProfile(cryptoProfile.getNumber());
-        entity.setExternalData(externalData);
         populate(entity, xml, version, serial);
-        if (externalData) {
-            ByteSequence allocate = this.resourceStorageService.allocate(entity.getId());
-            try ( OutputStream os = allocate.getOutputStream(); OutputStream saveOs = encryptor.encrypt(os)) {
-                xml.save(saveOs, this.xmlWriteOptions);
-                saveOs.close();
-            } catch (IOException e) {
-                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
-            }
-            this.xmlEntityDAO.create(entity);
-        } else {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try (OutputStream saveOs = encryptor.encrypt(baos)) {
-                xml.save(saveOs, this.xmlWriteOptions);
-                saveOs.close();
-            } catch (IOException e) {
-                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
-            }
-            byte[] data = baos.toByteArray();
-            entity.setData(data);
-            this.xmlEntityDAO.create(entity);
+        DelayedOutputStream os = new DelayedOutputStream(smallContentLimit,
+            () -> resourceStorageService.allocate(entity.getId()).getOutputStream());
+
+        try (OutputStream saveOs = encryptor.encrypt(os)) {
+            xml.save(saveOs, xmlWriteOptions);
+        } catch (IOException e) {
+            throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
         }
+        if (os.isInMemory()) {
+            entity.setData(os.getInMemoryBytes());
+            entity.setExternalData(false);
+        } else {
+            entity.setExternalData(true);
+        }
+        xmlEntityDAO.create(entity);
         return entity;
     }
 
-    /**
-     * @param xml
-     * @param entity
-     */
-    protected <T extends XmlObject> XmlEntity<T> createPlainEntity(final T xml, final int version, final UUID serial, final boolean externalData) {
+    private <T extends XmlObject> XmlEntity<T> createPlainEntity(final T xml, final int version, final UUID serial) {
+
         validate(xml);
 
         XmlEntity<T> entity = new XmlEntity<>();
         entity.setId(UUID.randomUUID());
         populate(entity, xml, version, serial);
-        entity.setExternalData(externalData);
-        if (externalData) {
-            ByteSequence allocate = this.resourceStorageService.allocate(entity.getId());
-            try ( OutputStream os = allocate.getOutputStream();
-                    GZIPOutputStream gos = new GZIPOutputStream(os) ) {
-                xml.save(gos, this.xmlWriteOptions);
-                gos.close();
-            } catch (IOException e) {
-                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
-            }
-            this.xmlEntityDAO.create(entity);
-        } else {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try ( GZIPOutputStream gos = new GZIPOutputStream(baos) ) {
-                xml.save(gos, this.xmlWriteOptions);
-                gos.close();
-            } catch (IOException e) {
-                throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
-            }
-            byte[] data = baos.toByteArray();
-            entity.setData(data);
-            this.xmlEntityDAO.create(entity);
-        }
+        DelayedOutputStream os = new DelayedOutputStream(smallContentLimit,
+                () -> resourceStorageService.allocate(entity.getId()).getOutputStream());
 
+        try (GZIPOutputStream gos = new GZIPOutputStream(os) ) {
+            xml.save(gos, xmlWriteOptions);
+        } catch (IOException e) {
+            throw new PegasusException(PegasusErrorCode.PG400, e, "Failed to persist XML");
+        }
+        if (os.isInMemory()) {
+            entity.setData(os.getInMemoryBytes());
+            entity.setExternalData(false);
+        } else {
+            entity.setExternalData(true);
+        }
+        xmlEntityDAO.create(entity);
         return entity;
     }
 
-    protected <T extends XmlObject> void populate(final XmlEntity<T> entity, final T xml, final int version, final UUID serial) {
+    private <T extends XmlObject> void populate(final XmlEntity<T> entity, final T xml, final int version,
+            final UUID serial) {
+
         entity.setVersion(version);
         entity.setSerial(serial);
         entity.setBean(xml);
     }
 
-
-    /**
-     * @param xmlEntity
-     * @param expectedType
-     * @return
-     */
     @SuppressWarnings("unchecked")
-    protected <T extends XmlObject> T extractXml(final XmlEntity<T> xmlEntity, final Class<T> expectedType, final String password) {
+    private <T extends XmlObject> T extractXml(final XmlEntity<T> xmlEntity, final Class<T> expectedType,
+            final String password) {
+
         T xmlBean;
         InputStream is = null;
         try {
@@ -480,7 +473,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 if (xmlEntity.getKeySafe() == null) {
                     // Expect password
                     if (password != null) {
-                        secretKeyBytes = this.phalanxService.pbeDecrypt(new IdentityCryptedData(xmlEntity.getCryptedDataId()), password);
+                        secretKeyBytes = this.phalanxService.pbeDecrypt(
+                                new IdentityCryptedData(xmlEntity.getCryptedDataId()), password);
                     } else {
                         throw new PegasusException(PegasusErrorCode.PG423,
                                 "The XML entity '%s' must be unlocked using a password, which was not specified.",
@@ -491,7 +485,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 }
                 SecretKey secretKey = this.symmetricCryptoService.toSecretKey(secretKeyBytes, cryptoProfile);
                 xmlEntity.setSecretKey(secretKey);
-                StreamCryptor<InputStream, SymmetricCryptoSpec> decryptor = this.resourceCryptoService.decryptor(xmlEntity, Compression.GZIP);
+                StreamCryptor<InputStream, SymmetricCryptoSpec> decryptor =
+                        resourceCryptoService.decryptor(xmlEntity, Compression.GZIP);
+
                 is = decryptor.getStream(is);
             } else {
                 // Plain
@@ -517,7 +513,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
 
 
     @SuppressWarnings("unchecked")
-    protected <T extends XmlObject> T threeWayDiff(final T base, final T current, final T update, final Class<T> type) {
+    private <T extends XmlObject> T threeWayDiff(final T base, final T current, final T update, final Class<T> type) {
 
         T obj;
         List<String> baseStrList = toStringList(base);
@@ -549,7 +545,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         return obj;
     }
 
-    protected List<String> toStringList(final XmlObject obj) {
+    private List<String> toStringList(final XmlObject obj) {
         StringListWriter out = new StringListWriter();
         try {
             obj.save(out, this.xmlWriteOptions);
@@ -560,7 +556,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         return out.toList();
     }
 
-    protected void validate(final XmlObject xml) {
+    private void validate(final XmlObject xml) {
         XmlOptions xo = new XmlOptions();
         List<XmlError> errors = new ArrayList<>();
         xo.setErrorListener(errors);
@@ -575,7 +571,8 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                 out.printf("XML Validation errors (%d)%n", errors.size());
                 int cnt = 1;
                 for (XmlError xmlError : errors) {
-                    out.printf("\t%d) line %d, col %d: %s%n", cnt, xmlError.getLine(), xmlError.getColumn(), xmlError.getMessage());
+                    out.printf("\t%d) line %d, col %d: %s%n", cnt, xmlError.getLine(), xmlError.getColumn(),
+                            xmlError.getMessage());
                     cnt++;
                 }
                 out.println("Content:");
@@ -598,5 +595,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
                     (i + 1), xmlError.getLine(), xmlError.getColumn(), xmlError.getMessage()));
         }
         throw new PegasusException(PegasusErrorCode.PG333, "XML validation errors { %s }", sb);
+    }
+
+    public void setSmallContentLimit(final int smallContentLimit) {
+        this.smallContentLimit = smallContentLimit;
     }
 }

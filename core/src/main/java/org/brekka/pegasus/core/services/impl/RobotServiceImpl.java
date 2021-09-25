@@ -113,7 +113,7 @@ public class RobotServiceImpl implements RobotService {
         robotDocument.setRobot(details);
 
         // Robot cannot see its own details, why would it need to?
-        XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy, false);
+        XmlEntity<RobotDocument> encryptedEntity = xmlEntityService.persistEncryptedEntity(robotDocument, detailsProtectedBy);
         robot.setXml(encryptedEntity);
         robotDAO.create(robot);
 
