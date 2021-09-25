@@ -101,4 +101,15 @@ public interface XmlEntityService {
      * @return
      */
     <T extends XmlObject> XmlEntity<T> applyEncryption(XmlEntity<T> xml, KeySafe<?> keySafe, Class<T> xmlType);
+
+    /**
+     * Iterate though the {@link XmlEntity} records based on UUID id ascending order, looking for any whose
+     * resource is small enough to be moved to the database. When null is returned, there are no more records to
+     * process
+     *
+     * @param afterId consider ids greater (but not equal) to this one.
+     * @param limit the number to process per operation.
+     * @return the id of the last entity to be processed (ready to be passed back), or null if there are no more.
+     */
+    UUID updateStorage(UUID afterId, int limit);
 }

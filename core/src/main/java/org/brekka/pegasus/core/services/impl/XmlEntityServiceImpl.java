@@ -16,6 +16,8 @@
 
 package org.brekka.pegasus.core.services.impl;
 
+import static java.lang.String.format;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,13 +27,17 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +84,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import difflib.DiffUtils;
 import difflib.PatchFailedException;
@@ -371,6 +380,54 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         opts.setSaveSuggestedPrefixes(prefixes);
         opts.setSaveNamespacesFirst();
         this.xmlWriteOptions = opts;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public UUID updateStorage(final UUID afterId, final int limit) {
+        List<XmlEntity<?>> results = xmlEntityDAO.findExternalResourceBased(afterId, limit);
+        log.info(format("Found %d XmlEntity record(s) with external resources and ids after '%s' (limit %d)",
+                results.size(), afterId, limit));
+
+        UUID lastId = null;
+        Set<UUID> resourcesToDelete = new LinkedHashSet<>();
+        for (XmlEntity<?> entity : results) {
+            lastId = entity.getId();
+            ByteSequence sequence = resourceStorageService.retrieve(entity.getId());
+            @SuppressWarnings("resource")
+            CountingOutputStream cos = new CountingOutputStream(NullOutputStream.NULL_OUTPUT_STREAM);
+            DelayedOutputStream dos = new DelayedOutputStream(smallContentLimit, () -> cos);
+
+            try (InputStream is = sequence.getInputStream();
+                    OutputStream os = dos) {
+
+                IOUtils.copy(is, os);
+            } catch (IOException e) {
+                log.warn(format("Problem reading external content for XmlEntity '%s'", entity.getId()), e);
+                break;
+            }
+            if (dos.isInMemory()) {
+                // Just moving the resource bytes onto the record, no need to change it in any way
+                byte[] data = dos.getInMemoryBytes();
+                entity.setData(data);
+                entity.setExternalData(false);
+                xmlEntityDAO.update(entity);
+                resourcesToDelete.add(entity.getId());
+                log.info(format("Moving XmlEntity '%s' content from external resource to database (%d bytes)",
+                        entity.getId(), data.length));
+            } else {
+                log.info(format("Ignoring XmlEntity '%s' as content is %d bytes", entity.getId(), cos.getByteCount()));
+            }
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                log.info(format("Requesting removal of %d resources", resourcesToDelete.size()));
+                // Must ONLY delete these resources after successful commit!!!
+                resourcesToDelete.forEach(resourceStorageService::remove);
+            }
+        });
+        return lastId;
     }
 
     @SuppressWarnings("unchecked")

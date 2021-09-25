@@ -1,9 +1,8 @@
 /**
- * 
+ *
  */
 package org.brekka.pegasus.core.dao;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,4 +35,6 @@ public interface XmlEntityDAO extends EntityDAO<UUID, XmlEntity<?>> {
      * @return
      */
     List<XmlEntity<?>> retrieveBySerial(UUID serial);
+
+    List<XmlEntity<?>> findExternalResourceBased(UUID afterId, int limit);
 }
