@@ -34,8 +34,6 @@ import org.hibernate.annotations.Type;
 
 /**
  * Stores a piece of XML either plain or encrypted. Should only ever be replaced, never updated.
- *
- * @author Andrew Taylor (andrew@brekka.org)
  */
 @Entity
 @Table(name="`XmlEntity`", schema=PegasusConstants.SCHEMA, uniqueConstraints=
@@ -63,10 +61,13 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
 
     /**
      * A common key between versions
+     *
+     * The serial is the byte representation of a type 4 UUID. At the time this was defined, the application relied on
+     * automatic DDL generation and was missing the @Type(type="pg-uuid") annotation so this ended up being a byte array
      */
     @Index(name="IDX_XmlEntity_Serial")
     @Column(name="`SerialID`", updatable=false, nullable=false)
-    private UUID serial;
+    private byte[] serial;
 
     /**
      * Version number
@@ -247,14 +248,14 @@ public class XmlEntity<T extends XmlObject> extends SnapshotEntity<UUID> impleme
     /**
      * @return the serial
      */
-    public UUID getSerial() {
+    public byte[] getSerial() {
         return this.serial;
     }
 
     /**
      * @param serial the serial to set
      */
-    public void setSerial(final UUID serial) {
+    public void setSerial(final byte[] serial) {
         this.serial = serial;
     }
 

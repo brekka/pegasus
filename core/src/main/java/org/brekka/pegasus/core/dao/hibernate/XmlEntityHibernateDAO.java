@@ -14,36 +14,24 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
-/**
- * @author Andrew Taylor (andrew@brekka.org)
- */
 @Repository
 public class XmlEntityHibernateDAO extends AbstractPegasusHibernateDAO<XmlEntity<?>> implements XmlEntityDAO {
 
-    /* (non-Javadoc)
-     * @see org.brekka.commons.persistence.dao.impl.AbstractIdentifiableEntityHibernateDAO#type()
-     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected Class<XmlEntity<?>> type() {
         return (Class) XmlEntity.class;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.XmlEntityDAO#retrieveBySerialVersion(java.util.UUID, int, java.lang.Class, boolean)
-     */
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends XmlObject> XmlEntity<T> retrieveBySerialVersion(final UUID serial, final int version, final Class<T> xmlType) {
+    public <T extends XmlObject> XmlEntity<T> retrieveBySerialVersion(final byte[] serial, final int version, final Class<T> xmlType) {
         return (XmlEntity<T>) getCurrentSession().createCriteria(XmlEntity.class)
                 .add(Restrictions.eq("serial", serial))
                 .add(Restrictions.eq("version", version))
                 .uniqueResult();
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.XmlEntityDAO#retrieveByVault(org.brekka.pegasus.core.model.Vault)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public List<XmlEntity<?>> retrieveByKeySafe(final KeySafe<?> keySafe) {
@@ -52,12 +40,9 @@ public class XmlEntityHibernateDAO extends AbstractPegasusHibernateDAO<XmlEntity
                 .list();
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.pegasus.core.dao.XmlEntityDAO#retrieveBySeries(java.util.UUID)
-     */
     @SuppressWarnings("unchecked")
     @Override
-    public List<XmlEntity<?>> retrieveBySerial(final UUID serial) {
+    public List<XmlEntity<?>> retrieveBySerial(final byte[] serial) {
         return getCurrentSession().createCriteria(XmlEntity.class)
                 .add(Restrictions.eq("serial", serial))
                 .list();

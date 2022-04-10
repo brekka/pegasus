@@ -28,6 +28,7 @@ import org.brekka.pegasus.core.dao.CollectiveDAO;
 import org.brekka.pegasus.core.model.Actor;
 import org.brekka.pegasus.core.model.Collective;
 import org.brekka.pegasus.core.model.Member;
+import org.brekka.pegasus.core.utils.UuidUtils;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -85,7 +86,7 @@ public class CollectiveHibernateDAO extends AbstractPegasusHibernateDAO<Collecti
         }
         hql    += " order by c.name asc";
         Query q = getCurrentSession().createQuery(hql);
-        q.setParameter("entityId", entity.getId());
+        q.setParameter("entityId", UuidUtils.toBytes(entity.getId()));
         if (entityType != null) {
             q.setParameter("entityType", entityType);
         }

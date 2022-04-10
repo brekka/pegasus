@@ -42,7 +42,7 @@ import org.hibernate.annotations.Type;
 @Table(name = "`Assignment`", schema = PegasusConstants.SCHEMA,
         uniqueConstraints=@UniqueConstraint(columnNames={"`EntityID`", "`EntityType`"}))
 public class Assignment extends SnapshotEntity<UUID> {
-    
+
     /**
      * serialVersionUID
      */
@@ -56,20 +56,24 @@ public class Assignment extends SnapshotEntity<UUID> {
     @Type(type = "pg-uuid")
     @Column(name = "`ID`")
     private UUID id;
-    
+
     /**
      * The ID of the entity
+     *
+     * The is the byte representation of an entity id (type 4 UUID). At the time this was defined, the application
+     * relied on automatic DDL generation and was missing the @Type(type="pg-uuid") annotation so this ended up being a
+     * byte array.
      */
     @Column(name = "`EntityID`", nullable=false)
-    private UUID entityId;
-    
+    private byte[] entityId;
+
     /**
      * The entity type (helps to work out where the entity came from). Not strictly necessary given the ID is universally unique.
      */
     @Column(name = "`EntityType`", length=32)
     @Type(type="org.brekka.pegasus.core.support.AllocationDispositionUserType")
     private EntityType entityType;
-    
+
     /**
      * The collective assigned to this entity.
      */
@@ -77,33 +81,28 @@ public class Assignment extends SnapshotEntity<UUID> {
     @JoinColumn(name = "`CollectiveID`", nullable=false)
     private Collective collective;
 
-    /* (non-Javadoc)
-     * @see org.brekka.commons.persistence.model.IdentifiableEntity#getId()
-     */
+
     @Override
     public UUID getId() {
         return id;
     }
 
-    /* (non-Javadoc)
-     * @see org.brekka.commons.persistence.model.IdentifiableEntity#setId(java.io.Serializable)
-     */
     @Override
-    public void setId(UUID id) {
+    public void setId(final UUID id) {
         this.id = id;
     }
 
     /**
      * @return the entityId
      */
-    public UUID getEntityId() {
+    public byte[] getEntityId() {
         return entityId;
     }
 
     /**
      * @param entityId the entityId to set
      */
-    public void setEntityId(UUID entityId) {
+    public void setEntityId(final byte[] entityId) {
         this.entityId = entityId;
     }
 
@@ -117,7 +116,7 @@ public class Assignment extends SnapshotEntity<UUID> {
     /**
      * @param entityType the entityType to set
      */
-    public void setEntityType(EntityType entityType) {
+    public void setEntityType(final EntityType entityType) {
         this.entityType = entityType;
     }
 
@@ -131,7 +130,7 @@ public class Assignment extends SnapshotEntity<UUID> {
     /**
      * @param collective the collective to set
      */
-    public void setCollective(Collective collective) {
+    public void setCollective(final Collective collective) {
         this.collective = collective;
     }
 }

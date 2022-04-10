@@ -66,6 +66,7 @@ import org.brekka.pegasus.core.model.XmlEntityAware;
 import org.brekka.pegasus.core.services.KeySafeService;
 import org.brekka.pegasus.core.services.XmlEntityService;
 import org.brekka.pegasus.core.utils.DelayedOutputStream;
+import org.brekka.pegasus.core.utils.UuidUtils;
 import org.brekka.phalanx.api.beans.IdentityCryptedData;
 import org.brekka.phalanx.api.model.CryptedData;
 import org.brekka.phalanx.api.services.PhalanxService;
@@ -199,7 +200,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     @Override
     @Transactional()
     public <T extends XmlObject> XmlEntity<T> persistPlainEntity(final T xml) {
-        XmlEntity<T> entity = createPlainEntity(xml, 1, UUID.randomUUID());
+        XmlEntity<T> entity = createPlainEntity(xml, 1, newSerialId());
         return entity;
     }
 
@@ -218,7 +219,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveDefault();
         SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
         CryptedData cryptedData = this.keySafeService.protect(secretKey.getEncoded(), keySafe);
-        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), keySafe, cryptedData.getId(), cryptoProfile,
+        XmlEntity<T> entity = createEncrypted(xml, 1, newSerialId(), keySafe, cryptedData.getId(), cryptoProfile,
                 secretKey);
 
         return entity;
@@ -239,7 +240,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         CryptoProfile cryptoProfile = this.cryptoProfileService.retrieveDefault();
         SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
         CryptedData cryptedData = this.phalanxService.pbeEncrypt(secretKey.getEncoded(), password);
-        XmlEntity<T> entity = createEncrypted(xml, 1, UUID.randomUUID(), null, cryptedData.getId(), cryptoProfile,
+        XmlEntity<T> entity = createEncrypted(xml, 1, newSerialId(), null, cryptedData.getId(), cryptoProfile,
                 secretKey);
 
         return entity;
@@ -287,7 +288,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         }
 
         XmlEntity<T> newEntity;
-        UUID serial = lockedCurrent.getSerial();
+        byte[] serial = lockedCurrent.getSerial();
         int newVersion = lockedCurrent.getVersion() + 1;
         KeySafe<?> keySafe = lockedCurrent.getKeySafe();
 
@@ -314,7 +315,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         SecretKey secretKey = this.symmetricCryptoService.createSecretKey(cryptoProfile);
         CryptedData cryptedData = this.keySafeService.protect(secretKey.getEncoded(), keySafe);
 
-        UUID serial = managed.getSerial();
+        byte[] serial = managed.getSerial();
         int newVersion = managed.getVersion() + 1;
 
         return createEncrypted(managed.getBean(), newVersion, serial, keySafe, cryptedData.getId(), cryptoProfile,
@@ -325,7 +326,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     @Transactional
     public <T extends XmlObject>  XmlEntity<T> removeEncryption(final XmlEntity<T> xml, final Class<T> xmlType) {
         XmlEntity<T> managed = release(xml, xmlType);
-        UUID serial = managed.getSerial();
+        byte[] serial = managed.getSerial();
         int newVersion = managed.getVersion() + 1;
         return createPlainEntity(managed.getBean(), newVersion, serial);
     }
@@ -451,7 +452,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         return xmlEntity;
     }
 
-    private <T extends XmlObject> XmlEntity<T> createEncrypted(final T xml, final int version, final UUID serial,
+    private <T extends XmlObject> XmlEntity<T> createEncrypted(final T xml, final int version, final byte[] serial,
             final KeySafe<?> keySafe, final UUID cryptedDataId, final CryptoProfile cryptoProfile,
             final SecretKey secretKey) {
 
@@ -483,7 +484,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
         return entity;
     }
 
-    private <T extends XmlObject> XmlEntity<T> createPlainEntity(final T xml, final int version, final UUID serial) {
+    private <T extends XmlObject> XmlEntity<T> createPlainEntity(final T xml, final int version, final byte[] serial) {
 
         validate(xml);
 
@@ -509,7 +510,7 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
     }
 
     private <T extends XmlObject> void populate(final XmlEntity<T> entity, final T xml, final int version,
-            final UUID serial) {
+            final byte[] serial) {
 
         entity.setVersion(version);
         entity.setSerial(serial);
@@ -667,5 +668,9 @@ public class XmlEntityServiceImpl implements XmlEntityService, ApplicationListen
 
     public void setSmallContentLimit(final int smallContentLimit) {
         this.smallContentLimit = smallContentLimit;
+    }
+
+    private static byte[] newSerialId() {
+        return UuidUtils.toBytes(UUID.randomUUID());
     }
 }

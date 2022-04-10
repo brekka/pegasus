@@ -40,6 +40,7 @@ import org.brekka.pegasus.core.model.Partnership;
 import org.brekka.pegasus.core.model.Vault;
 import org.brekka.pegasus.core.services.CollectiveService;
 import org.brekka.pegasus.core.services.DivisionService;
+import org.brekka.pegasus.core.utils.UuidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -203,7 +204,7 @@ public class CollectiveServiceImpl implements CollectiveService {
     public void assign(final IdentifiableEntity<UUID> entity, final EntityType entityType, final Collective... too) {
         for (Collective collective : too) {
             Assignment assignment = new Assignment();
-            assignment.setEntityId(entity.getId());
+            assignment.setEntityId(UuidUtils.toBytes(entity.getId()));
             assignment.setEntityType(entityType);
             assignment.setCollective(collective);
             this.assignmentDAO.create(assignment);
