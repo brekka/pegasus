@@ -26,8 +26,6 @@ import org.brekka.pegasus.core.model.TokenType;
 
 /**
  * Token User EntityType
- * 
- * @author Andrew Taylor (andrew@brekka.org)
  */
 public class TokenTypeUserType extends AbstractTypeUserType<TokenType> {
 
@@ -35,17 +33,14 @@ public class TokenTypeUserType extends AbstractTypeUserType<TokenType> {
         super(Arrays.asList(PegasusTokenType.class));
     }
 
-    public TokenTypeUserType(Map<String, TokenType> typesMap) {
+    public TokenTypeUserType(final Map<String, TokenType> typesMap) {
         super(typesMap);
     }
 
-    public <Type extends Enum<?> & TokenType> TokenTypeUserType(List<Class<Type>> enumTypesList) {
+    public <Type extends Enum<?> & TokenType> TokenTypeUserType(final List<Class<Type>> enumTypesList) {
         super(enumTypesList);
     }
-    
-    /* (non-Javadoc)
-     * @see org.hibernate.usertype.UserType#returnedClass()
-     */
+
     @Override
     public Class<TokenType> returnedClass() {
         return TokenType.class;

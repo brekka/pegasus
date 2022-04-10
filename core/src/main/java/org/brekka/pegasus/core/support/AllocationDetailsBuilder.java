@@ -26,8 +26,6 @@ import org.brekka.xml.pegasus.v2.model.DetailsType;
 
 /**
  * Build a details object for an allocation
- *
- * @author Andrew Taylor (andrew@brekka.org)
  */
 public class AllocationDetailsBuilder<T extends DetailsType> {
 
@@ -37,7 +35,7 @@ public class AllocationDetailsBuilder<T extends DetailsType> {
      * @param details
      */
     @SuppressWarnings("unchecked")
-    public AllocationDetailsBuilder(Class<T> detailsClass) {
+    public AllocationDetailsBuilder(final Class<T> detailsClass) {
         SchemaType schemaType = XmlBeans.getContextTypeLoader().typeForClassname(detailsClass.getName());
         XmlObject xmlObject = XmlBeans.getContextTypeLoader().newInstance(schemaType, null);
         if (!detailsClass.isAssignableFrom(xmlObject.getClass())) {
@@ -45,49 +43,46 @@ public class AllocationDetailsBuilder<T extends DetailsType> {
         }
         this.details = (T) xmlObject;
     }
-    
-    /**
-     * 
-     */
-    public AllocationDetailsBuilder(T details) {
+
+    public AllocationDetailsBuilder(final T details) {
         this.details = details;
     }
-    
-    public AllocationDetailsBuilder<T> setAgreementText(String agreementText) {
+
+    public AllocationDetailsBuilder<T> setAgreementText(final String agreementText) {
         if (StringUtils.isNotBlank(agreementText)) {
             details.setAgreement(agreementText);
         }
         return this;
     }
-    
-    public AllocationDetailsBuilder<T> setDescription(String description, Object... args) {
+
+    public AllocationDetailsBuilder<T> setDescription(final String description, final Object... args) {
         if (StringUtils.isNotBlank(description)) {
             details.setDescription(String.format(description, args));
         }
         return this;
     }
 
-    public AllocationDetailsBuilder<T> setComment(String comment) {
+    public AllocationDetailsBuilder<T> setComment(final String comment) {
         if (StringUtils.isNotBlank(comment)) {
             details.setComment(comment);
         }
         return this;
     }
-    
-    public AllocationDetailsBuilder<T> setReference(String reference) {
+
+    public AllocationDetailsBuilder<T> setReference(final String reference) {
         if (StringUtils.isNotBlank(reference)) {
             details.setReference(reference);
         }
         return this;
     }
-    
-    public AllocationDetailsBuilder<T> setSubject(String subject) {
+
+    public AllocationDetailsBuilder<T> setSubject(final String subject) {
         if (StringUtils.isNotBlank(subject)) {
             details.setSubject(subject);
         }
         return this;
     }
-    
+
     public T toDetailsType() {
         return details;
     }

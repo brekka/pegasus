@@ -25,19 +25,17 @@ import org.brekka.pegasus.core.model.Allocation;
 
 /**
  * AllocationContext
- *
- * @author Andrew Taylor (andrew@brekka.org)
  */
 public class AllocationContext {
 
     private final Map<String, Allocation> allocations = new HashMap<>();
-    
-    public void register(String key, Allocation allocation) {
+
+    public void register(final String key, final Allocation allocation) {
         allocations.put(key, allocation);
     }
-    
+
     @SuppressWarnings("unchecked")
-    public <T extends Allocation> T get(String key, Class<T> type) {
+    public <T extends Allocation> T get(final String key, final Class<T> type) {
         Allocation allocation = allocations.get(key);
         if (allocation == null) {
             return null;
@@ -45,16 +43,12 @@ public class AllocationContext {
         if (type.isAssignableFrom(allocation.getClass())) {
             return (T) allocation;
         }
-        throw new PegasusException(PegasusErrorCode.PG601, 
-                "Keyed allocation '%s' type '%s' does not match the expected '%s'.", 
+        throw new PegasusException(PegasusErrorCode.PG601,
+                "Keyed allocation '%s' type '%s' does not match the expected '%s'.",
                  key, allocation.getClass().getName(), type.getName());
     }
 
-    /**
-     * @param makeKey
-     * @return
-     */
-    public boolean has(String makeKey) {
+    public boolean has(final String makeKey) {
         return allocations.containsKey(makeKey);
     }
 }

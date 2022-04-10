@@ -26,8 +26,6 @@ import org.brekka.pegasus.core.model.PegasusAllocationDisposition;
 
 /**
  * Allocation EntityType User EntityType
- * 
- * @author Andrew Taylor (andrew@brekka.org)
  */
 public class AllocationDispositionUserType extends AbstractTypeUserType<AllocationDisposition> {
 
@@ -36,17 +34,14 @@ public class AllocationDispositionUserType extends AbstractTypeUserType<Allocati
         super(Arrays.asList(PegasusAllocationDisposition.class));
     }
 
-    public AllocationDispositionUserType(Map<String, AllocationDisposition> typesMap) {
+    public AllocationDispositionUserType(final Map<String, AllocationDisposition> typesMap) {
         super(typesMap);
     }
 
-    public <Type extends Enum<?> & AllocationDisposition> AllocationDispositionUserType(List<Class<Type>> enumTypesList) {
+    public <Type extends Enum<?> & AllocationDisposition> AllocationDispositionUserType(final List<Class<Type>> enumTypesList) {
         super(enumTypesList);
     }
-    
-    /* (non-Javadoc)
-     * @see org.hibernate.usertype.UserType#returnedClass()
-     */
+
     @Override
     public Class<AllocationDisposition> returnedClass() {
         return AllocationDisposition.class;
